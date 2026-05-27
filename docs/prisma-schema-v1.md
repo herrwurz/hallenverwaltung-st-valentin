@@ -3,20 +3,25 @@
 ## Grundlage und Umfang
 
 Dieses Schema basiert verbindlich auf `docs/pflichtenheft-v1.0.md`.
-Es stellt die relationale Grundlage fuer die spaetere Webanwendung bereit.
-Phase 2 umfasst keine UI, keine Kalenderdarstellung, keine Buchungslogik und
-keine Auth.js-Implementierung.
+Phase 3.5 haertet das relationale Grundmodell fuer die naechste
+Implementierungsphase. UI, Kalenderlogik, Buchungslogik und Abrechnung sind
+nicht Bestandteil dieser Phase. Die in Phase 3 vorhandene Authentifizierung
+verwendet `User.passwordHash`.
+
+Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
+umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
+werden.
 
 ## Modelle
 
 | Bereich | Modelle | Zweck |
 | --- | --- | --- |
 | Berechtigungen | `Role`, `Permission`, `RolePermission`, `User`, `UserRole`, `UserPermission` | Rollen plus ergaenzende Einzelrechte |
-| Organisationen | `OrganizationType`, `Organization`, `OrganizationContact` | Buchungsberechtigte Organisationen, Sperrstatus und Ansprechpartner |
+| Organisationen | `OrganizationType`, `Organization`, `OrganizationContact`, `OrganizationMember` | Organisationen, Kontakte und gueltige Benutzerzuordnungen |
 | Hallen | `Building`, `Room`, `RoomComposition`, `Caretaker`, `BuildingCaretaker`, `RoomCaretaker` | Gebaeude, kombinierbare Raeume und Betreuung |
-| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Datenbasis fuer Prioritaet, Antraege, Warteliste und Sperren |
+| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingStatusHistory`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, unveraenderbare Historie, Warteliste und Sperren |
 | Abrechnung | `TariffGroup`, `Tariff`, `BillingEntry` | Flexible Preis- und Abrechnungsgrundlage |
-| Erweiterungen | `Document`, `DamageReport`, `Handover`, `AccessMedium`, `AccessAssignment`, `Notification`, `AuditEntry`, `SystemSetting` | Im Pflichtenheft geforderte Erweiterbarkeit und Nachvollziehbarkeit |
+| Erweiterungen | `Document`, `DamageReport`, `Handover`, `AccessMedium`, `AccessAssignment`, `Notification`, `AuditEntry`, `SystemSetting` | Erweiterbarkeit und Nachvollziehbarkeit |
 
 ## Zentrale Enums
 
@@ -24,29 +29,57 @@ keine Auth.js-Implementierung.
 | --- | --- |
 | `OrganizationStatus` | `ACTIVE`, `BLOCKED`, `INACTIVE` |
 | `RoomStatus` | `ACTIVE`, `RESTRICTED`, `OUT_OF_SERVICE` |
-| `BookingStatus` | `REQUESTED`, `APPROVED`, `REJECTED`, `CANCELLED`, `RESCHEDULED` |
-| `ClosureStatus` | `OPEN`, `RESTRICTED`, `BLOCKED` |
+| `BookingStatus` | `DRAFT`, `REQUESTED`, `IN_REVIEW`, `APPROVED`, `REJECTED`, `CANCELLED`, `MOVED`, `ARCHIVED` |
+| `ClosureStatus` | `OPEN`, `RESTRICTED`, `CLOSED` |
 | `WaitlistStatus` | `WAITING`, `OFFERED`, `ACCEPTED`, `EXPIRED`, `CANCELLED` |
 | `BillingStatus` | `NOT_RELEVANT`, `OPEN`, `EXPORTED`, `BILLED`, `CANCELLED` |
 
+## Harte Invarianten
+
+- `BookingStatusHistory` wird append-only gefuehrt. Ein Datenbank-Trigger
+  verhindert `UPDATE` und `DELETE` an Historieneintraegen.
+- Buchungen werden nicht physisch geloescht; ein Datenbank-Trigger verhindert
+  `DELETE`, und spaetere Services muessen den Statusverlauf schreiben.
+- Eine `Closure` hat exakt eines von `buildingId` und `roomId`. Der
+  Check-Constraint in der Migration und `lib/services/closure-service.ts`
+  sichern diese Regel fuer Datenbank und kuenftige Service-Aufrufe.
+- `OrganizationMember` bereitet organisationsbezogene Rechtepruefungen vor;
+  die bestehende globale RBAC-Pruefung wird in Phase 3.5 nicht erweitert.
+
+## Indizes
+
+Die Abfragepfade fuer spaetere Buchungs- und Verwaltungsfunktionen sind
+vorbereitet:
+
+| Modell | Index |
+| --- | --- |
+| `Booking` | `(status, startsAt)`, `(roomId, startsAt, endsAt)` |
+| `BookingSeries` | `(roomId, startsOn, endsOn)` |
+| `WaitlistEntry` | `(status, placedAt)` |
+| `Tariff` | `(roomId, tariffGroupId, usageTypeId, validFrom)` |
+| `Notification` | `(status, createdAt)` |
+| `DamageReport` | `(roomId, status)` |
+
+`startsAt`/`endsAt`, `startsOn`/`endsOn` und `placedAt` sind die bereits
+bestehenden Schema-Bezeichnungen fuer Beginn/Ende bzw. Erstellzeitpunkt der
+Wartelistenreihenfolge.
+
 ## Seed-Umfang
 
-Phase 2 initialisiert:
+Die Seeds initialisieren Rollen, Rechte, Organisationstypen, Nutzungstypen
+und Tarifgruppen sowie folgende reale Standorte:
 
-- acht Rollen aus Abschnitt 18 des Pflichtenhefts;
-- Rechte aus der Rollenmatrix und den expliziten Einzelrechtsbeispielen;
-- Organisationstypen `Gemeinde`, `Verein`, `VHS`, `Schule`, `Privat`,
-  `Extern` und `Katastrophenschutz`;
-- Nutzungstypen inklusive der festgelegten Prioritaetsreihenfolge;
-- Tarifgruppen als Struktur ohne Tarifbetraege;
-- die im Pflichtenheft erkennbare Beispielstruktur `Sporthalle` mit
-  `Halle A`, `Halle B`, `Halle C` und `Gesamthalle`;
-- `Volksschule Hauptplatz` als weiterer initialer Standort;
-- neutrale Hauswart-Platzhalter, bis reale Kontaktdaten geliefert werden.
+| Gebaeude | Raeume | Hauswart/Schulwart |
+| --- | --- | --- |
+| Volksschule Hauptplatz | Turnsaal | Christian Ömer |
+| Volksschule Langenhart | Turnsaal, Bewegungsraum | Gerald Kugler |
+| NMS Schubertviertel | Turnsaal groß, Turnsaal klein, Sportplatz, Funcourt | Josef Döberl |
+| NMS Langenhart | Sporthalle | Thomas Teichmann |
+| Sozialzentrum | Kellergeschoß | Herbert Brandstätter |
 
-## Noch nicht Bestandteil dieser Phase
+## Nicht Bestandteil von Phase 3.5
 
-- Keine Buchungen oder Serien als Seed-Daten.
-- Keine Preiswerte oder Abrechnungen.
-- Keine Login-Accounts oder Authentifizierung.
-- Keine Migration gegen eine laufende Produktiv- oder Entwicklungsdatenbank.
+- Keine Buchungen, Serien oder Statushistorien als Seed-Daten.
+- Keine Tarifbetraege, Rechnungen oder Abrechnungsablaeufe.
+- Keine Buchungs-, Kalender- oder Genehmigungslogik.
+- Keine Umsetzung der Mandantenfaehigkeit.

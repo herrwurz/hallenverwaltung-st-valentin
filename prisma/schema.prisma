@@ -25,17 +25,20 @@ enum BookingKind {
 }
 
 enum BookingStatus {
+  DRAFT
   REQUESTED
+  IN_REVIEW
   APPROVED
   REJECTED
   CANCELLED
-  RESCHEDULED
+  MOVED
+  ARCHIVED
 }
 
 enum ClosureStatus {
   OPEN
   RESTRICTED
-  BLOCKED
+  CLOSED
 }
 
 enum WaitlistStatus {
@@ -116,22 +119,24 @@ model RolePermission {
 }
 
 model User {
-  id                String           @id @default(cuid())
-  email             String           @unique
-  displayName       String
-  passwordHash      String?
-  isActive          Boolean          @default(true)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  roles             UserRole[]
-  permissions       UserPermission[]
-  requestedBookings Booking[]        @relation("BookingRequestedBy")
-  processedBookings Booking[]        @relation("BookingProcessedBy")
-  waitlistEntries   WaitlistEntry[]  @relation("WaitlistRequestedBy")
-  reportedDamages   DamageReport[]   @relation("DamageReportedBy")
-  processedDamages  DamageReport[]   @relation("DamageProcessedBy")
-  notifications     Notification[]
-  auditEntries      AuditEntry[]
+  id                      String                 @id @default(cuid())
+  email                   String                 @unique
+  displayName             String
+  passwordHash            String?
+  isActive                Boolean                @default(true)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  roles                   UserRole[]
+  permissions             UserPermission[]
+  requestedBookings       Booking[]              @relation("BookingRequestedBy")
+  processedBookings       Booking[]              @relation("BookingProcessedBy")
+  waitlistEntries         WaitlistEntry[]        @relation("WaitlistRequestedBy")
+  reportedDamages         DamageReport[]         @relation("DamageReportedBy")
+  processedDamages        DamageReport[]         @relation("DamageProcessedBy")
+  notifications           Notification[]
+  auditEntries            AuditEntry[]
+  organizationMemberships OrganizationMember[]
+  bookingStatusChanges    BookingStatusHistory[] @relation("BookingStatusActor")
 }
 
 model UserRole {
@@ -181,9 +186,27 @@ model Organization {
   documents          Document[]
   accessAssignments  AccessAssignment[]
   billingEntries     BillingEntry[]
+  members            OrganizationMember[]
 
   @@index([organizationTypeId])
   @@index([status])
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  function       String
+  isPrimary      Boolean      @default(false)
+  activeFrom     DateTime     @default(now())
+  activeUntil    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, activeUntil])
+  @@index([organizationId, activeUntil])
 }
 
 model OrganizationContact {
@@ -310,18 +333,20 @@ model BookingSeries {
   room           Room         @relation(fields: [roomId], references: [id])
   usageType      UsageType    @relation(fields: [usageTypeId], references: [id])
   bookings       Booking[]
+
+  @@index([roomId, startsOn, endsOn])
 }
 
 model Booking {
-  id                String         @id @default(cuid())
+  id                String                 @id @default(cuid())
   organizationId    String
   roomId            String
   usageTypeId       String
   seriesId          String?
   requestedByUserId String?
   processedByUserId String?
-  kind              BookingKind    @default(SINGLE)
-  status            BookingStatus  @default(REQUESTED)
+  kind              BookingKind            @default(SINGLE)
+  status            BookingStatus          @default(DRAFT)
   title             String
   startsAt          DateTime
   endsAt            DateTime
@@ -329,20 +354,41 @@ model Booking {
   blockedUntil      DateTime
   cancellationNote  String?
   decisionNote      String?
-  requestedAt       DateTime       @default(now())
+  requestedAt       DateTime               @default(now())
   processedAt       DateTime?
-  organization      Organization   @relation(fields: [organizationId], references: [id])
-  room              Room           @relation(fields: [roomId], references: [id])
-  usageType         UsageType      @relation(fields: [usageTypeId], references: [id])
-  series            BookingSeries? @relation(fields: [seriesId], references: [id])
-  requestedBy       User?          @relation("BookingRequestedBy", fields: [requestedByUserId], references: [id])
-  processedBy       User?          @relation("BookingProcessedBy", fields: [processedByUserId], references: [id])
+  organization      Organization           @relation(fields: [organizationId], references: [id])
+  room              Room                   @relation(fields: [roomId], references: [id])
+  usageType         UsageType              @relation(fields: [usageTypeId], references: [id])
+  series            BookingSeries?         @relation(fields: [seriesId], references: [id])
+  requestedBy       User?                  @relation("BookingRequestedBy", fields: [requestedByUserId], references: [id])
+  processedBy       User?                  @relation("BookingProcessedBy", fields: [processedByUserId], references: [id])
   billingEntry      BillingEntry?
   handover          Handover?
   notifications     Notification[]
+  statusHistory     BookingStatusHistory[]
 
+  @@index([status, startsAt])
   @@index([roomId, startsAt, endsAt])
   @@index([organizationId, status])
+}
+
+model BookingStatusHistory {
+  id          String        @id @default(cuid())
+  bookingId   String
+  actorUserId String?
+  oldStatus   BookingStatus
+  newStatus   BookingStatus
+  reason      String?
+  oldStartAt  DateTime?
+  oldEndAt    DateTime?
+  newStartAt  DateTime?
+  newEndAt    DateTime?
+  createdAt   DateTime      @default(now())
+  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  actor       User?         @relation("BookingStatusActor", fields: [actorUserId], references: [id])
+
+  @@index([bookingId, createdAt])
+  @@index([actorUserId, createdAt])
 }
 
 model WaitlistEntry {
@@ -364,6 +410,7 @@ model WaitlistEntry {
   requestedBy       User?          @relation("WaitlistRequestedBy", fields: [requestedByUserId], references: [id])
 
   @@index([roomId, startsAt, placedAt])
+  @@index([status, placedAt])
 }
 
 model HolidayPeriod {
@@ -417,6 +464,8 @@ model Tariff {
   organizationType   OrganizationType @relation(fields: [organizationTypeId], references: [id])
   usageType          UsageType        @relation(fields: [usageTypeId], references: [id])
   billingEntries     BillingEntry[]
+
+  @@index([roomId, tariffGroupId, usageTypeId, validFrom])
 }
 
 model BillingEntry {
@@ -460,6 +509,8 @@ model DamageReport {
   room              Room         @relation(fields: [roomId], references: [id])
   reportedBy        User?        @relation("DamageReportedBy", fields: [reportedByUserId], references: [id])
   processedBy       User?        @relation("DamageProcessedBy", fields: [processedByUserId], references: [id])
+
+  @@index([roomId, status])
 }
 
 model Handover {
@@ -508,6 +559,8 @@ model Notification {
   errorMessage    String?
   booking         Booking?            @relation(fields: [bookingId], references: [id])
   recipientUser   User?               @relation(fields: [recipientUserId], references: [id])
+
+  @@index([status, createdAt])
 }
 
 model AuditEntry {
