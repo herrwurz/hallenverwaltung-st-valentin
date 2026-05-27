@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -8,7 +8,7 @@ import {
   type AdminWaitlistFilterStatus,
 } from "@/lib/waitlist-status";
 import { checkBookingConflicts, lockWaitlistContext } from "@/lib/services/booking-conflict-service";
-import { createBookingRequest } from "@/lib/services/booking-request-service";
+import { createBookingRequest, resolveBookingBlockedWindow } from "@/lib/services/booking-request-service";
 import {
   assertBookingRequestPermission,
   assertBookingViewPermission,
@@ -16,6 +16,7 @@ import {
   BookingValidationError,
   validateBookingAvailability,
 } from "@/lib/services/booking-rules";
+import { intervalsOverlap } from "@/lib/services/booking-conflicts";
 
 const waitlistRequestSchema = z.object({
   organizationId: z.string().trim().min(1, "Eine Organisation ist erforderlich."),
@@ -37,8 +38,66 @@ type WaitlistPermissionOverrides = {
   canViewAdmin?: boolean;
 };
 
+type WaitlistRootClient = Pick<PrismaClient, "$transaction" | "waitlistEntry">;
+
+type WaitlistRoomSnapshot = {
+  id: string;
+  status: "ACTIVE" | "RESTRICTED" | "OUT_OF_SERVICE";
+  openingTime: string;
+  closingTime: string;
+  maximumBookingMinutes: number | null;
+  singleBookingLeadDays: number;
+  setupBufferMinutes: number;
+  teardownBufferMinutes: number;
+  building: {
+    id: string;
+    isActive: boolean;
+    name?: string;
+  };
+};
+
+type WaitlistOfferCandidate = {
+  id: string;
+  organizationId: string;
+  roomId: string;
+  usageTypeId: string;
+  requestedByUserId: string | null;
+  title: string;
+  startsAt: Date;
+  endsAt: Date;
+  status: "ACTIVE" | "OFFERED" | "ACCEPTED" | "DECLINED" | "EXPIRED" | "CANCELLED";
+  placedAt: Date;
+  offeredAt: Date | null;
+  offerExpiresAt: Date | null;
+  organization: {
+    id: string;
+    name?: string;
+    status: "ACTIVE" | "BLOCKED" | "INACTIVE";
+    canRequestBookings: boolean;
+  };
+  room: WaitlistRoomSnapshot;
+  usageType: {
+    id: string;
+    name?: string;
+  };
+  requestedBy: {
+    id: string;
+    displayName?: string | null;
+    email: string | null;
+  } | null;
+};
+
 function getOfferExpiry(now: Date) {
   return new Date(now.getTime() + waitlistOfferWindowHours * 60 * 60 * 1000);
+}
+
+function getWaitlistBlockedWindow(entry: Pick<WaitlistOfferCandidate, "startsAt" | "endsAt" | "room">) {
+  return resolveBookingBlockedWindow({
+    startsAt: entry.startsAt,
+    endsAt: entry.endsAt,
+    setupBufferMinutes: entry.room.setupBufferMinutes,
+    teardownBufferMinutes: entry.room.teardownBufferMinutes,
+  });
 }
 
 function resolveAdminWaitlistFilter(filter: AdminWaitlistFilterKey | undefined) {
@@ -133,6 +192,8 @@ async function validateWaitlistSlot(
         closingTime: true,
         maximumBookingMinutes: true,
         singleBookingLeadDays: true,
+        setupBufferMinutes: true,
+        teardownBufferMinutes: true,
         building: {
           select: {
             id: true,
@@ -155,11 +216,18 @@ async function validateWaitlistSlot(
     throw new BookingValidationError("Der ausgewaehlte Nutzungstyp ist nicht gueltig.");
   }
 
+  const { blockedFrom, blockedUntil } = resolveBookingBlockedWindow({
+    startsAt: data.startsAt,
+    endsAt: data.endsAt,
+    setupBufferMinutes: room.setupBufferMinutes,
+    teardownBufferMinutes: room.teardownBufferMinutes,
+  });
+
   validateBookingAvailability({
     startsAt: data.startsAt,
     endsAt: data.endsAt,
-    blockedFrom: data.startsAt,
-    blockedUntil: data.endsAt,
+    blockedFrom,
+    blockedUntil,
     openingTime: room.openingTime,
     closingTime: room.closingTime,
     maximumBookingMinutes: room.maximumBookingMinutes,
@@ -173,11 +241,21 @@ async function validateWaitlistSlot(
 async function prepareWaitlistNotification(
   client: Prisma.TransactionClient,
   {
+    waitlistEntryId,
     recipientUserId,
     recipientEmail,
+    roomId,
+    startsAt,
+    endsAt,
+    offerExpiresAt,
   }: {
+    waitlistEntryId: string;
     recipientUserId: string | null;
     recipientEmail: string | null;
+    roomId: string;
+    startsAt: Date;
+    endsAt: Date;
+    offerExpiresAt: Date;
   },
 ) {
   if (!recipientUserId || !recipientEmail) {
@@ -186,12 +264,29 @@ async function prepareWaitlistNotification(
 
   await client.notification.create({
     data: {
+      waitlistEntryId,
       recipientUserId,
       recipient: recipientEmail,
       eventCode: "WAITLIST_OFFER_CREATED",
       status: "PENDING",
+      payload: {
+        waitlistEntryId,
+        offerExpiresAt: offerExpiresAt.toISOString(),
+        roomId,
+        startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+      },
     },
   });
+}
+
+function overlapsFreedSlot(
+  entry: WaitlistOfferCandidate,
+  blockedFrom: Date,
+  blockedUntil: Date,
+) {
+  const candidateWindow = getWaitlistBlockedWindow(entry);
+  return intervalsOverlap(blockedFrom, blockedUntil, candidateWindow.blockedFrom, candidateWindow.blockedUntil);
 }
 
 async function activateNextWaitlistEntryForSlotWithClient(
@@ -209,27 +304,40 @@ async function activateNextWaitlistEntryForSlotWithClient(
   },
 ) {
   const roomIds = await lockWaitlistContext(roomId, client);
-  const activeOffer = await client.waitlistEntry.findFirst({
+  const offeredEntries = (await client.waitlistEntry.findMany({
     where: {
       status: "OFFERED",
       offerExpiresAt: { gt: now },
       roomId: { in: roomIds },
-      startsAt: { lt: blockedUntil },
-      endsAt: { gt: blockedFrom },
     },
-    select: { id: true },
-  });
+    include: {
+      organization: true,
+      room: {
+        include: {
+          building: true,
+        },
+      },
+      usageType: true,
+      requestedBy: {
+        select: {
+          id: true,
+          displayName: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: [{ placedAt: "asc" }, { startsAt: "asc" }],
+  })) as WaitlistOfferCandidate[];
+  const activeOffer = offeredEntries.find((entry) => overlapsFreedSlot(entry, blockedFrom, blockedUntil));
 
   if (activeOffer) {
-    return null;
+    return activeOffer;
   }
 
-  const candidates = await client.waitlistEntry.findMany({
+  const candidates = (await client.waitlistEntry.findMany({
     where: {
       status: "ACTIVE",
       roomId: { in: roomIds },
-      startsAt: { lt: blockedUntil },
-      endsAt: { gt: blockedFrom },
       organization: {
         status: "ACTIVE",
         canRequestBookings: true,
@@ -255,15 +363,20 @@ async function activateNextWaitlistEntryForSlotWithClient(
       },
     },
     orderBy: [{ placedAt: "asc" }, { startsAt: "asc" }],
-  });
+  })) as WaitlistOfferCandidate[];
 
   for (const candidate of candidates) {
+    if (!overlapsFreedSlot(candidate, blockedFrom, blockedUntil)) {
+      continue;
+    }
+
+    const candidateWindow = getWaitlistBlockedWindow(candidate);
     const bookingConflicts = await checkBookingConflicts(
       {
         roomId: candidate.roomId,
         buildingId: candidate.room.building.id,
-        blockedFrom: candidate.startsAt,
-        blockedUntil: candidate.endsAt,
+        blockedFrom: candidateWindow.blockedFrom,
+        blockedUntil: candidateWindow.blockedUntil,
       },
       client,
     );
@@ -290,8 +403,13 @@ async function activateNextWaitlistEntryForSlotWithClient(
     }
 
     await prepareWaitlistNotification(client, {
+      waitlistEntryId: candidate.id,
       recipientUserId: candidate.requestedBy?.id ?? null,
       recipientEmail: candidate.requestedBy?.email ?? null,
+      roomId: candidate.roomId,
+      startsAt: candidate.startsAt,
+      endsAt: candidate.endsAt,
+      offerExpiresAt,
     });
 
     return client.waitlistEntry.findUnique({
@@ -318,13 +436,14 @@ export async function createWaitlistEntry(
   input: unknown,
   actorUserId: string,
   overrides: WaitlistPermissionOverrides = {},
+  rootClient: WaitlistRootClient = prisma,
 ) {
   const data = waitlistRequestSchema.parse(input);
   const now = new Date();
   const permissions = await resolveWaitlistPermissions(actorUserId, overrides);
   assertBookingRequestPermission(permissions.hasRequestBookingPermission);
 
-  return prisma.$transaction(async (transaction) => {
+  return rootClient.$transaction(async (transaction) => {
     await assertWaitlistActorAccess(transaction, {
       actorUserId,
       organizationId: data.organizationId,
@@ -333,23 +452,33 @@ export async function createWaitlistEntry(
     });
     await validateWaitlistSlot(transaction, data, now);
 
-    return transaction.waitlistEntry.create({
-      data: {
-        organizationId: data.organizationId,
-        roomId: data.roomId,
-        usageTypeId: data.usageTypeId,
-        requestedByUserId: actorUserId,
-        title: data.title,
-        startsAt: data.startsAt,
-        endsAt: data.endsAt,
-        status: "ACTIVE",
-      },
-      include: {
-        organization: true,
-        room: { include: { building: true } },
-        usageType: true,
-      },
-    });
+    try {
+      return await transaction.waitlistEntry.create({
+        data: {
+          organizationId: data.organizationId,
+          roomId: data.roomId,
+          usageTypeId: data.usageTypeId,
+          requestedByUserId: actorUserId,
+          title: data.title,
+          startsAt: data.startsAt,
+          endsAt: data.endsAt,
+          status: "ACTIVE",
+        },
+        include: {
+          organization: true,
+          room: { include: { building: true } },
+          usageType: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new BookingValidationError(
+          "Fuer diese Organisation existiert bereits ein aktiver Wartelistenplatz fuer denselben Slot.",
+        );
+      }
+
+      throw error;
+    }
   });
 }
 
@@ -426,6 +555,7 @@ export async function activateNextWaitlistEntryForSlot(
   options: {
     client?: Prisma.TransactionClient;
     now?: Date;
+    rootClient?: WaitlistRootClient;
   } = {},
 ) {
   const now = options.now ?? new Date();
@@ -439,7 +569,7 @@ export async function activateNextWaitlistEntryForSlot(
     });
   }
 
-  return prisma.$transaction((transaction) =>
+  return (options.rootClient ?? prisma).$transaction((transaction) =>
     activateNextWaitlistEntryForSlotWithClient(transaction, {
       roomId,
       blockedFrom,
@@ -453,12 +583,13 @@ export async function acceptWaitlistOffer(
   waitlistEntryId: string,
   actorUserId: string,
   overrides: WaitlistPermissionOverrides = {},
+  rootClient: WaitlistRootClient = prisma,
 ) {
   const now = new Date();
   const permissions = await resolveWaitlistPermissions(actorUserId, overrides);
   assertBookingRequestPermission(permissions.hasRequestBookingPermission);
 
-  return prisma.$transaction(async (transaction) => {
+  return rootClient.$transaction(async (transaction) => {
     const entry = await transaction.waitlistEntry.findUnique({
       where: { id: waitlistEntryId },
       include: {
@@ -473,6 +604,8 @@ export async function acceptWaitlistOffer(
     if (!entry) {
       throw new BookingValidationError("Der Wartelistenplatz wurde nicht gefunden.");
     }
+
+    await lockWaitlistContext(entry.roomId, transaction);
 
     await assertWaitlistActorAccess(transaction, {
       actorUserId,
@@ -538,12 +671,13 @@ export async function declineWaitlistOffer(
   waitlistEntryId: string,
   actorUserId: string,
   overrides: WaitlistPermissionOverrides = {},
+  rootClient: WaitlistRootClient = prisma,
 ) {
   const now = new Date();
   const permissions = await resolveWaitlistPermissions(actorUserId, overrides);
   assertBookingRequestPermission(permissions.hasRequestBookingPermission);
 
-  return prisma.$transaction(async (transaction) => {
+  return rootClient.$transaction(async (transaction) => {
     const entry = await transaction.waitlistEntry.findUnique({
       where: { id: waitlistEntryId },
       select: {
@@ -560,6 +694,8 @@ export async function declineWaitlistOffer(
     if (!entry) {
       throw new BookingValidationError("Der Wartelistenplatz wurde nicht gefunden.");
     }
+
+    await lockWaitlistContext(entry.roomId, transaction);
 
     await assertWaitlistActorAccess(transaction, {
       actorUserId,
@@ -605,8 +741,11 @@ export async function declineWaitlistOffer(
   });
 }
 
-export async function expireWaitlistOffers(now = new Date()) {
-  const expiredOffers = await prisma.waitlistEntry.findMany({
+export async function expireWaitlistOffers(
+  now = new Date(),
+  rootClient: WaitlistRootClient = prisma,
+) {
+  const expiredOffers = await rootClient.waitlistEntry.findMany({
     where: {
       status: "OFFERED",
       offerExpiresAt: { lte: now },
@@ -623,7 +762,9 @@ export async function expireWaitlistOffers(now = new Date()) {
   const expiredIds: string[] = [];
 
   for (const offer of expiredOffers) {
-    const expired = await prisma.$transaction(async (transaction) => {
+    const expired = await rootClient.$transaction(async (transaction) => {
+      await lockWaitlistContext(offer.roomId, transaction);
+
       const updated = await transaction.waitlistEntry.updateMany({
         where: {
           id: offer.id,

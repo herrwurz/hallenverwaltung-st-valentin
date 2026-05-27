@@ -98,9 +98,14 @@ erDiagram
   `OFFERED`, `ACCEPTED`, `DECLINED`, `EXPIRED` und `CANCELLED`. Die Reihung
   erfolgt nach `placedAt`; gleichzeitig darf pro passendem Slot-Kontext nur
   ein aktives Angebot bestehen.
+- Die Slotbewertung der Warteliste nutzt dieselben effektiven Blockzeiten wie
+  Buchungsantraege, also inklusive Aufbau- und Abbaupuffer des Raums.
 - Wird ein gueltiges Angebot angenommen, entsteht daraus ein neuer
   Buchungsantrag im Status `REQUESTED`. Die Gemeinde prueft diesen Antrag
   anschliessend erneut ueber den normalen Genehmigungsworkflow.
+- Wartelistenangebote, Annahme, Ablehnung und Ablauf serialisieren denselben
+  Parent-/Teilraum-Kontext ueber Advisory-Locks, damit ein frei gewordener Slot
+  nicht doppelt verarbeitet wird.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -118,3 +123,8 @@ erDiagram
 - `VIEW_BOOKINGS` ist auch Voraussetzung fuer die Admin-Wartelistenuebersicht.
 - `APPROVE_BOOKING` erlaubt das Uebernehmen in Pruefung und die Genehmigung.
 - `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
+- Offensichtliche Dubletten derselben Organisation fuer denselben Raum und
+  denselben Slot werden in Phase 7.5 zusaetzlich per partiellem Unique-Index
+  fuer `ACTIVE`/`OFFERED` abgefangen. Uebergreifende Parent-/Teilraum-Dubletten
+  bleiben bewusst Service-seitig, weil sie relational nicht kompakt
+  ausdrueckbar sind.
