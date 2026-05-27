@@ -39,6 +39,8 @@ werden.
 
 - `BookingStatusHistory` wird append-only gefuehrt. Ein Datenbank-Trigger
   verhindert `UPDATE` und `DELETE` an Historieneintraegen.
+- Bei der Erstanlage eines Buchungsantrags ist `BookingStatusHistory.oldStatus`
+  bewusst `null`; erst danach werden echte Statusuebergaenge historisiert.
 - Buchungen werden nicht physisch geloescht; ein Datenbank-Trigger verhindert
   `DELETE`, und spaetere Services muessen den Statusverlauf schreiben.
 - `Booking` speichert fuer Buchungsantraege neben dem Titel eine optionale
@@ -49,6 +51,8 @@ werden.
 - `OrganizationMember` wird fuer organisationsbezogene Buchungsantraege
   ausgewertet; nur aktuell gueltige Mitgliedschaften berechtigen zur
   Antragstellung, sofern kein Verwaltungsrecht vorliegt.
+- Fuer die kuenftige Buchungsverwaltung steht das Recht `VIEW_BOOKINGS`
+  bereit; Genehmigungs- und Ablehnungsrechte bleiben davon getrennt.
 
 ## Indizes
 

@@ -7,7 +7,7 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
 });
 
 export default async function AdminBookingsPage() {
-  await requirePermission("MANAGE_USERS");
+  await requirePermission("VIEW_BOOKINGS");
   const bookings = await getBookingsForAdmin();
 
   return (
