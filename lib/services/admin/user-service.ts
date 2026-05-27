@@ -36,7 +36,7 @@ export async function getUserAdministrationData() {
   return { users, roles, organizations };
 }
 
-export async function saveUser(input: unknown) {
+export async function saveUser(input: unknown, actorUserId: string) {
   const data = userSchema.parse(input);
   const password = data.password?.trim() || undefined;
 
@@ -55,6 +55,43 @@ export async function saveUser(input: unknown) {
   const passwordHash = password ? await hash(password, 12) : undefined;
 
   await prisma.$transaction(async (transaction) => {
+    const superAdminRole = await transaction.role.findUnique({
+      where: { code: "SUPER_ADMIN" },
+      select: { id: true },
+    });
+    const assignsSuperAdmin = Boolean(superAdminRole && data.roleIds.includes(superAdminRole.id));
+    const targetIsSuperAdmin = data.id && superAdminRole
+      ? Boolean(
+          await transaction.userRole.findUnique({
+            where: { userId_roleId: { userId: data.id, roleId: superAdminRole.id } },
+            select: { userId: true },
+          }),
+        )
+      : false;
+
+    if (assignsSuperAdmin || targetIsSuperAdmin) {
+      const actorIsSuperAdmin = superAdminRole
+        ? Boolean(
+            await transaction.user.findFirst({
+              where: {
+                id: actorUserId,
+                isActive: true,
+                roles: {
+                  some: {
+                    roleId: superAdminRole.id,
+                  },
+                },
+              },
+              select: { id: true },
+            }),
+          )
+        : false;
+
+      if (!actorIsSuperAdmin) {
+        throw new Error("Nur Super-Admins duerfen Super-Admin-Benutzer verwalten.");
+      }
+    }
+
     const user = data.id
       ? await transaction.user.update({
           where: { id: data.id },
@@ -84,12 +121,13 @@ export async function saveUser(input: unknown) {
     const currentMemberships = await transaction.organizationMember.findMany({
       where: { userId: user.id, activeUntil: null },
     });
+    const changedAt = new Date();
 
     for (const membership of currentMemberships) {
       if (!data.organizationIds.includes(membership.organizationId)) {
         await transaction.organizationMember.update({
           where: { id: membership.id },
-          data: { activeUntil: new Date(), isPrimary: false },
+          data: { activeUntil: changedAt },
         });
       }
     }
@@ -101,12 +139,18 @@ export async function saveUser(input: unknown) {
         isPrimary: organizationId === data.primaryOrganizationId,
       };
 
-      if (membership) {
+      if (
+        membership &&
+        (membership.function !== membershipData.function || membership.isPrimary !== membershipData.isPrimary)
+      ) {
         await transaction.organizationMember.update({
           where: { id: membership.id },
-          data: membershipData,
+          data: { activeUntil: changedAt },
         });
-      } else {
+        await transaction.organizationMember.create({
+          data: { userId: user.id, organizationId, activeFrom: changedAt, ...membershipData },
+        });
+      } else if (!membership) {
         await transaction.organizationMember.create({
           data: { userId: user.id, organizationId, ...membershipData },
         });

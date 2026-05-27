@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { validateRoomCompositionChain } from "@/lib/services/admin/room-composition";
 
 const roomStatusSchema = z.enum(["ACTIVE", "RESTRICTED", "OUT_OF_SERVICE"]);
 
@@ -100,6 +101,11 @@ export async function saveRoom(input: unknown) {
       if (!parentRoom || parentRoom.buildingId !== room.buildingId) {
         throw new Error("Parent-Room und Teilbereich muessen demselben Gebaeude zugeordnet sein.");
       }
+
+      const compositionLinks = await transaction.roomComposition.findMany({
+        select: { parentRoomId: true, childRoomId: true },
+      });
+      validateRoomCompositionChain(room.id, parentRoomId, compositionLinks);
 
       await transaction.roomComposition.create({
         data: { parentRoomId, childRoomId: room.id },

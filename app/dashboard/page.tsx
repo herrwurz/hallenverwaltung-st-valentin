@@ -1,13 +1,8 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { getDashboardRoute } from "@/lib/dashboard-route";
+import { requireActiveSession } from "@/lib/permissions";
 
 export default async function DashboardPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  redirect(getDashboardRoute(session.user.roles));
+  const user = await requireActiveSession();
+  redirect(getDashboardRoute(user.roles));
 }
