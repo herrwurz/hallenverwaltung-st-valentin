@@ -42,9 +42,10 @@ enum ClosureStatus {
 }
 
 enum WaitlistStatus {
-  WAITING
+  ACTIVE
   OFFERED
   ACCEPTED
+  DECLINED
   EXPIRED
   CANCELLED
 }
@@ -401,7 +402,7 @@ model WaitlistEntry {
   title             String
   startsAt          DateTime
   endsAt            DateTime
-  status            WaitlistStatus @default(WAITING)
+  status            WaitlistStatus @default(ACTIVE)
   placedAt          DateTime       @default(now())
   offeredAt         DateTime?
   offerExpiresAt    DateTime?

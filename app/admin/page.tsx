@@ -6,6 +6,8 @@ export default async function AdminPage() {
   await requirePermission("MANAGE_USERS");
   const summary = await getAdminDashboardData();
   const cards = [
+    { href: "/admin/bookings", label: "Buchungsantraege", value: "Workflow" },
+    { href: "/admin/waitlist", label: "Warteliste", value: "Queue" },
     { href: "/admin/buildings", label: "Gebaeude", value: summary.buildingCount },
     { href: "/admin/rooms", label: "Raeume", value: summary.roomCount },
     { href: "/admin/organizations", label: "Organisationen", value: summary.organizationCount },
@@ -33,8 +35,8 @@ export default async function AdminPage() {
         ))}
       </div>
       <p className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-300">
-        Buchungsantraege koennen nun lesend eingesehen werden. Kalender, Genehmigungen,
-        Wartelisten und Abrechnung sind noch nicht enthalten.
+        Buchungsantraege und Warteliste sind nun angebunden. Kalender, Mailversand und Abrechnung sind weiterhin
+        noch nicht enthalten.
       </p>
     </>
   );
