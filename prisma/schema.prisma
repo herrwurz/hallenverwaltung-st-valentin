@@ -348,6 +348,7 @@ model Booking {
   kind              BookingKind            @default(SINGLE)
   status            BookingStatus          @default(DRAFT)
   title             String
+  description       String?
   startsAt          DateTime
   endsAt            DateTime
   blockedFrom       DateTime

@@ -3,10 +3,11 @@
 ## Grundlage und Umfang
 
 Dieses Schema basiert verbindlich auf `docs/pflichtenheft-v1.0.md`.
-Phase 3.5 haertet das relationale Grundmodell fuer die naechste
-Implementierungsphase. UI, Kalenderlogik, Buchungslogik und Abrechnung sind
-nicht Bestandteil dieser Phase. Die in Phase 3 vorhandene Authentifizierung
-verwendet `User.passwordHash`.
+Phase 3.5 haertet das relationale Grundmodell fuer die folgenden
+Implementierungsphasen. Phase 5 nutzt dieses Modell fuer einzelne
+Buchungsantraege mit Statushistorie; Kalender, Warteliste,
+Genehmigungsoberflaeche und Abrechnung sind weiterhin nicht umgesetzt. Die in
+Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -40,11 +41,14 @@ werden.
   verhindert `UPDATE` und `DELETE` an Historieneintraegen.
 - Buchungen werden nicht physisch geloescht; ein Datenbank-Trigger verhindert
   `DELETE`, und spaetere Services muessen den Statusverlauf schreiben.
+- `Booking` speichert fuer Buchungsantraege neben dem Titel eine optionale
+  Beschreibung (`description`).
 - Eine `Closure` hat exakt eines von `buildingId` und `roomId`. Der
   Check-Constraint in der Migration und `lib/services/closure-service.ts`
   sichern diese Regel fuer Datenbank und kuenftige Service-Aufrufe.
-- `OrganizationMember` bereitet organisationsbezogene Rechtepruefungen vor;
-  die bestehende globale RBAC-Pruefung wird in Phase 3.5 nicht erweitert.
+- `OrganizationMember` wird fuer organisationsbezogene Buchungsantraege
+  ausgewertet; nur aktuell gueltige Mitgliedschaften berechtigen zur
+  Antragstellung, sofern kein Verwaltungsrecht vorliegt.
 
 ## Indizes
 
@@ -77,9 +81,9 @@ und Tarifgruppen sowie folgende reale Standorte:
 | NMS Langenhart | Sporthalle | Thomas Teichmann |
 | Sozialzentrum | Kellergeschoß | Herbert Brandstätter |
 
-## Nicht Bestandteil von Phase 3.5
+## Nicht Bestandteil von Phase 5
 
 - Keine Buchungen, Serien oder Statushistorien als Seed-Daten.
 - Keine Tarifbetraege, Rechnungen oder Abrechnungsablaeufe.
-- Keine Buchungs-, Kalender- oder Genehmigungslogik.
+- Keine Kalender-, Wartelisten- oder Genehmigungslogik.
 - Keine Umsetzung der Mandantenfaehigkeit.

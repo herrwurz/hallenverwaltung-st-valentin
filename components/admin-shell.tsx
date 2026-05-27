@@ -4,6 +4,7 @@ import { LogoutButton } from "@/components/logout-button";
 
 const navigation = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/bookings", label: "Buchungsantraege" },
   { href: "/admin/buildings", label: "Gebaeude" },
   { href: "/admin/rooms", label: "Raeume" },
   { href: "/admin/organizations", label: "Organisationen" },
@@ -22,7 +23,7 @@ export function AdminShell({ children, userName }: AdminShellProps) {
       <div className="mx-auto flex min-h-screen max-w-7xl">
         <aside className="w-64 shrink-0 border-r border-slate-800 px-5 py-8">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-sky-400">Verwaltung</p>
-          <h1 className="mt-3 text-xl font-semibold">Stammdaten</h1>
+          <h1 className="mt-3 text-xl font-semibold">Verwaltungsportal</h1>
           <nav className="mt-10 space-y-1" aria-label="Admin-Navigation">
             {navigation.map((item) => (
               <Link
