@@ -20,6 +20,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       : []),
     ...(canManageUsers
       ? [
+          { href: "/admin/settings/calendar", label: "Einstellungen" },
           { href: "/admin/buildings", label: "Gebaeude" },
           { href: "/admin/rooms", label: "Raeume" },
           { href: "/admin/organizations", label: "Organisationen" },

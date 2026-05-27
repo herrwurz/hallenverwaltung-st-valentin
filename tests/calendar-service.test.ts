@@ -399,6 +399,57 @@ test("public calendar falls back to occupied or free when details are not allowe
   assert.equal(calendar.events[0]?.visibility, "occupied_only");
 });
 
+test("public calendar uses occupied or free when the privacy mode is set accordingly", async () => {
+  const client = createCalendarClient({
+    bookings: [makeBooking({ title: "Sommerfest" })],
+    visibilityMode: "occupied_only",
+  });
+
+  const calendar = await getPublicCalendarEvents({ date: calendarDate }, client as never);
+
+  assert.equal(calendar.events[0]?.title, "Belegt");
+  assert.equal(calendar.events[0]?.organizationName, null);
+});
+
+test("public calendar can show the organization name", async () => {
+  const client = createCalendarClient({
+    bookings: [makeBooking()],
+    visibilityMode: "organization",
+  });
+
+  const calendar = await getPublicCalendarEvents({ date: calendarDate }, client as never);
+
+  assert.equal(calendar.events[0]?.title, "Verein Blau");
+  assert.equal(calendar.events[0]?.organizationName, "Verein Blau");
+});
+
+test("public calendar can show the event title", async () => {
+  const client = createCalendarClient({
+    bookings: [makeBooking({ title: "Sommerfest" })],
+    visibilityMode: "event",
+  });
+
+  const calendar = await getPublicCalendarEvents({ date: calendarDate }, client as never);
+
+  assert.equal(calendar.events[0]?.title, "Sommerfest");
+});
+
+test("public calendar does not include cancelled bookings", async () => {
+  const client = createCalendarClient({
+    bookings: [
+      makeBooking({
+        id: "cancelled-public",
+        status: "CANCELLED",
+      }),
+    ],
+    visibilityMode: "organization",
+  });
+
+  const calendar = await getPublicCalendarEvents({ date: calendarDate }, client as never);
+
+  assert.equal(calendar.events.length, 0);
+});
+
 test("cancelled bookings do not block free slots", async () => {
   const client = createCalendarClient({
     bookings: [
