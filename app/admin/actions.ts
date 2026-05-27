@@ -22,9 +22,11 @@ function getErrorMessage(error: unknown) {
   const expectedMessages = new Set([
     "Ein Raum kann nicht sein eigener Teilbereich sein.",
     "Parent-Room und Teilbereich muessen demselben Gebaeude zugeordnet sein.",
+    "Die Parent-Room-Zuordnung darf keinen Zyklus bilden.",
     "Neue Benutzer benoetigen ein Passwort.",
     "Das Passwort muss mindestens 12 Zeichen enthalten.",
     "Die primaere Organisation muss dem Benutzer zugewiesen sein.",
+    "Nur Super-Admins duerfen Super-Admin-Benutzer verwalten.",
   ]);
 
   if (error instanceof Error && expectedMessages.has(error.message)) {
@@ -34,12 +36,12 @@ function getErrorMessage(error: unknown) {
   return "Die Stammdaten konnten nicht gespeichert werden.";
 }
 
-async function executeAdminMutation(path: string, operation: () => Promise<void>) {
-  await requirePermission("MANAGE_USERS");
+async function executeAdminMutation(path: string, operation: (actorUserId: string) => Promise<void>) {
+  const actor = await requirePermission("MANAGE_USERS");
 
   let errorMessage: string | undefined;
   try {
-    await operation();
+    await operation(actor.id);
   } catch (error) {
     errorMessage = getErrorMessage(error);
   }
@@ -93,7 +95,7 @@ export async function saveOrganizationAction(formData: FormData) {
 }
 
 export async function saveUserAction(formData: FormData) {
-  await executeAdminMutation("/admin/users", () =>
+  await executeAdminMutation("/admin/users", (actorUserId) =>
     saveUser({
       id: optionalValue(formData, "id"),
       displayName: formData.get("displayName"),
@@ -104,6 +106,6 @@ export async function saveUserAction(formData: FormData) {
       organizationIds: formData.getAll("organizationIds").map(String),
       membershipFunction: optionalValue(formData, "membershipFunction") ?? "Mitglied",
       primaryOrganizationId: optionalValue(formData, "primaryOrganizationId"),
-    }),
+    }, actorUserId),
   );
 }

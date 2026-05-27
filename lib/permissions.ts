@@ -3,6 +3,15 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function hasPermission(userId: string, permissionKey: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { isActive: true },
+  });
+
+  if (!user?.isActive) {
+    return false;
+  }
+
   const explicitPermission = await prisma.userPermission.findFirst({
     where: {
       userId,
@@ -26,16 +35,39 @@ export async function hasPermission(userId: string, permissionKey: string) {
   return Boolean(rolePermission);
 }
 
-export async function requirePermission(permissionKey: string) {
+export async function requireActiveSession() {
   const session = await auth();
 
   if (!session?.user?.id) {
     redirect("/login");
   }
 
-  if (!(await hasPermission(session.user.id, permissionKey))) {
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      isActive: true,
+      roles: {
+        select: { role: { select: { code: true } } },
+      },
+    },
+  });
+
+  if (!currentUser?.isActive) {
     redirect("/unauthorized");
   }
 
-  return session.user;
+  return {
+    ...session.user,
+    roles: currentUser.roles.map(({ role }) => role.code),
+  };
+}
+
+export async function requirePermission(permissionKey: string) {
+  const user = await requireActiveSession();
+
+  if (!(await hasPermission(user.id, permissionKey))) {
+    redirect("/unauthorized");
+  }
+
+  return user;
 }
