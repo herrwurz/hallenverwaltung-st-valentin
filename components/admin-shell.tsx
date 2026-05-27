@@ -5,6 +5,7 @@ import { LogoutButton } from "@/components/logout-button";
 const navigation = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/bookings", label: "Buchungsantraege" },
+  { href: "/admin/calendar", label: "Kalender" },
   { href: "/admin/waitlist", label: "Warteliste" },
   { href: "/admin/buildings", label: "Gebaeude" },
   { href: "/admin/rooms", label: "Raeume" },
