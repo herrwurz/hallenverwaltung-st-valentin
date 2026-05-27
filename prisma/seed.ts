@@ -198,110 +198,131 @@ async function seedCatalogs() {
 }
 
 async function seedFacilities() {
-  const sporthalle = await prisma.building.upsert({
-    where: { code: "SPORTHALLE" },
-    update: { name: "Sporthalle" },
-    create: { code: "SPORTHALLE", name: "Sporthalle" },
-  });
+  const obsoleteRoomCodes = [
+    "SPORTHALLE_A",
+    "SPORTHALLE_B",
+    "SPORTHALLE_C",
+    "SPORTHALLE_GESAMT",
+  ];
+  const obsoleteCaretakerCodes = [
+    "CARETAKER_SPORTHALLE_PLACEHOLDER",
+    "CARETAKER_VS_HAUPTPLATZ_PLACEHOLDER",
+  ];
 
-  const volksschule = await prisma.building.upsert({
-    where: { code: "VS_HAUPTPLATZ" },
-    update: { name: "Volksschule Hauptplatz" },
-    create: { code: "VS_HAUPTPLATZ", name: "Volksschule Hauptplatz" },
-  });
-
-  const roomDefinitions = [
-    ["SPORTHALLE_A", "Halle A", sporthalle.id, false],
-    ["SPORTHALLE_B", "Halle B", sporthalle.id, false],
-    ["SPORTHALLE_C", "Halle C", sporthalle.id, false],
-    ["SPORTHALLE_GESAMT", "Gesamthalle", sporthalle.id, true],
-    ["VS_HAUPTPLATZ_TURNSAAL", "Turnsaal", volksschule.id, false],
-  ] as const;
-  const roomByCode = new Map<string, string>();
-
-  for (const [code, name, buildingId, isCombinable] of roomDefinitions) {
-    const room = await prisma.room.upsert({
-      where: { code },
-      update: { name, buildingId, isCombinable },
-      create: {
-        code,
-        name,
-        buildingId,
-        isCombinable,
-        setupBufferMinutes: 15,
-        teardownBufferMinutes: 15,
-      },
-    });
-    roomByCode.set(code, room.id);
-  }
-
-  for (const childCode of ["SPORTHALLE_A", "SPORTHALLE_B", "SPORTHALLE_C"]) {
-    await prisma.roomComposition.upsert({
-      where: {
-        parentRoomId_childRoomId: {
-          parentRoomId: roomByCode.get("SPORTHALLE_GESAMT")!,
-          childRoomId: roomByCode.get(childCode)!,
-        },
-      },
-      update: {},
-      create: {
-        parentRoomId: roomByCode.get("SPORTHALLE_GESAMT")!,
-        childRoomId: roomByCode.get(childCode)!,
-      },
-    });
-  }
-
-  const sportCaretaker = await prisma.caretaker.upsert({
-    where: { code: "CARETAKER_SPORTHALLE_PLACEHOLDER" },
-    update: { name: "Hallenwart Sporthalle (Platzhalter)" },
-    create: {
-      code: "CARETAKER_SPORTHALLE_PLACEHOLDER",
-      name: "Hallenwart Sporthalle (Platzhalter)",
-    },
-  });
-
-  const schoolCaretaker = await prisma.caretaker.upsert({
-    where: { code: "CARETAKER_VS_HAUPTPLATZ_PLACEHOLDER" },
-    update: { name: "Hallenwart Volksschule Hauptplatz (Platzhalter)" },
-    create: {
-      code: "CARETAKER_VS_HAUPTPLATZ_PLACEHOLDER",
-      name: "Hallenwart Volksschule Hauptplatz (Platzhalter)",
-    },
-  });
-
-  await prisma.buildingCaretaker.upsert({
-    where: { buildingId_caretakerId: { buildingId: sporthalle.id, caretakerId: sportCaretaker.id } },
-    update: { isPrimary: true },
-    create: { buildingId: sporthalle.id, caretakerId: sportCaretaker.id, isPrimary: true },
-  });
-
-  await prisma.buildingCaretaker.upsert({
-    where: { buildingId_caretakerId: { buildingId: volksschule.id, caretakerId: schoolCaretaker.id } },
-    update: { isPrimary: true },
-    create: { buildingId: volksschule.id, caretakerId: schoolCaretaker.id, isPrimary: true },
-  });
-
-  for (const roomCode of ["SPORTHALLE_A", "SPORTHALLE_B", "SPORTHALLE_C", "SPORTHALLE_GESAMT"]) {
-    await prisma.roomCaretaker.upsert({
-      where: { roomId_caretakerId: { roomId: roomByCode.get(roomCode)!, caretakerId: sportCaretaker.id } },
-      update: {},
-      create: { roomId: roomByCode.get(roomCode)!, caretakerId: sportCaretaker.id },
-    });
-  }
-
-  await prisma.roomCaretaker.upsert({
+  await prisma.roomComposition.deleteMany({
     where: {
-      roomId_caretakerId: {
-        roomId: roomByCode.get("VS_HAUPTPLATZ_TURNSAAL")!,
-        caretakerId: schoolCaretaker.id,
-      },
-    },
-    update: {},
-    create: {
-      roomId: roomByCode.get("VS_HAUPTPLATZ_TURNSAAL")!,
-      caretakerId: schoolCaretaker.id,
+      OR: [
+        { parentRoom: { code: { in: obsoleteRoomCodes } } },
+        { childRoom: { code: { in: obsoleteRoomCodes } } },
+      ],
     },
   });
+  await prisma.roomCaretaker.deleteMany({
+    where: {
+      OR: [
+        { room: { code: { in: obsoleteRoomCodes } } },
+        { caretaker: { code: { in: obsoleteCaretakerCodes } } },
+      ],
+    },
+  });
+  await prisma.buildingCaretaker.deleteMany({
+    where: {
+      OR: [
+        { building: { code: "SPORTHALLE" } },
+        { caretaker: { code: { in: obsoleteCaretakerCodes } } },
+      ],
+    },
+  });
+  await prisma.room.deleteMany({ where: { code: { in: obsoleteRoomCodes } } });
+  await prisma.building.deleteMany({ where: { code: "SPORTHALLE" } });
+  await prisma.caretaker.deleteMany({ where: { code: { in: obsoleteCaretakerCodes } } });
+
+  const facilityDefinitions = [
+    {
+      buildingCode: "VS_HAUPTPLATZ",
+      buildingName: "Volksschule Hauptplatz",
+      caretakerCode: "CHRISTIAN_OEMER",
+      caretakerName: "Christian Ömer",
+      rooms: [["VS_HAUPTPLATZ_TURNSAAL", "Turnsaal"]],
+    },
+    {
+      buildingCode: "VS_LANGENHART",
+      buildingName: "Volksschule Langenhart",
+      caretakerCode: "GERALD_KUGLER",
+      caretakerName: "Gerald Kugler",
+      rooms: [
+        ["VS_LANGENHART_TURNSAAL", "Turnsaal"],
+        ["VS_LANGENHART_BEWEGUNGSRAUM", "Bewegungsraum"],
+      ],
+    },
+    {
+      buildingCode: "NMS_SCHUBERTVIERTEL",
+      buildingName: "NMS Schubertviertel",
+      caretakerCode: "JOSEF_DOEBERL",
+      caretakerName: "Josef Döberl",
+      rooms: [
+        ["NMS_SCHUBERTVIERTEL_TURNSAAL_GROSS", "Turnsaal groß"],
+        ["NMS_SCHUBERTVIERTEL_TURNSAAL_KLEIN", "Turnsaal klein"],
+        ["NMS_SCHUBERTVIERTEL_SPORTPLATZ", "Sportplatz"],
+        ["NMS_SCHUBERTVIERTEL_FUNCOURT", "Funcourt"],
+      ],
+    },
+    {
+      buildingCode: "NMS_LANGENHART",
+      buildingName: "NMS Langenhart",
+      caretakerCode: "THOMAS_TEICHMANN",
+      caretakerName: "Thomas Teichmann",
+      rooms: [["NMS_LANGENHART_SPORTHALLE", "Sporthalle"]],
+    },
+    {
+      buildingCode: "SOZIALZENTRUM",
+      buildingName: "Sozialzentrum",
+      caretakerCode: "HERBERT_BRANDSTAETTER",
+      caretakerName: "Herbert Brandstätter",
+      rooms: [["SOZIALZENTRUM_KELLERGESCHOSS", "Kellergeschoß"]],
+    },
+  ] as const;
+
+  for (const facility of facilityDefinitions) {
+    const building = await prisma.building.upsert({
+      where: { code: facility.buildingCode },
+      update: { name: facility.buildingName },
+      create: { code: facility.buildingCode, name: facility.buildingName },
+    });
+
+    const caretaker = await prisma.caretaker.upsert({
+      where: { code: facility.caretakerCode },
+      update: { name: facility.caretakerName },
+      create: { code: facility.caretakerCode, name: facility.caretakerName },
+    });
+
+    await prisma.buildingCaretaker.upsert({
+      where: { buildingId_caretakerId: { buildingId: building.id, caretakerId: caretaker.id } },
+      update: { isPrimary: true },
+      create: { buildingId: building.id, caretakerId: caretaker.id, isPrimary: true },
+    });
+
+    for (const [code, name] of facility.rooms) {
+      const room = await prisma.room.upsert({
+        where: { code },
+        update: { name, buildingId: building.id, isCombinable: false },
+        create: {
+          code,
+          name,
+          buildingId: building.id,
+          isCombinable: false,
+          setupBufferMinutes: 15,
+          teardownBufferMinutes: 15,
+        },
+      });
+
+      await prisma.roomCaretaker.upsert({
+        where: { roomId_caretakerId: { roomId: room.id, caretakerId: caretaker.id } },
+        update: {},
+        create: { roomId: room.id, caretakerId: caretaker.id },
+      });
+    }
+  }
 }
 
 async function main() {
