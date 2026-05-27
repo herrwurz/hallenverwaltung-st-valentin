@@ -7,4 +7,524 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Domain models are intentionally deferred until a later project phase.
+enum OrganizationStatus {
+  ACTIVE
+  BLOCKED
+  INACTIVE
+}
+
+enum RoomStatus {
+  ACTIVE
+  RESTRICTED
+  OUT_OF_SERVICE
+}
+
+enum BookingKind {
+  SINGLE
+  SERIES_OCCURRENCE
+}
+
+enum BookingStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum ClosureStatus {
+  OPEN
+  RESTRICTED
+  BLOCKED
+}
+
+enum WaitlistStatus {
+  WAITING
+  OFFERED
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+enum BillingStatus {
+  NOT_RELEVANT
+  OPEN
+  EXPORTED
+  BILLED
+  CANCELLED
+}
+
+enum DamageStatus {
+  REPORTED
+  IN_REVIEW
+  RESOLVED
+}
+
+enum DocumentType {
+  HOUSE_RULES
+  USAGE_CONTRACT
+  INSURANCE_CERTIFICATE
+  EVENT_PERMIT
+  OTHER
+}
+
+enum AccessMediumType {
+  KEY
+  RFID_CARD
+  ELECTRONIC_ACCESS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum NotificationChannel {
+  EMAIL
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  name        String
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  name        String
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+  users       UserPermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model User {
+  id                String           @id @default(cuid())
+  email             String           @unique
+  displayName       String
+  isActive          Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  roles             UserRole[]
+  permissions       UserPermission[]
+  requestedBookings Booking[]        @relation("BookingRequestedBy")
+  processedBookings Booking[]        @relation("BookingProcessedBy")
+  waitlistEntries   WaitlistEntry[]  @relation("WaitlistRequestedBy")
+  reportedDamages   DamageReport[]   @relation("DamageReportedBy")
+  processedDamages  DamageReport[]   @relation("DamageProcessedBy")
+  notifications     Notification[]
+  auditEntries      AuditEntry[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model UserPermission {
+  userId       String
+  permissionId String
+  granted      Boolean    @default(true)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+}
+
+model OrganizationType {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  name          String
+  description   String?
+  organizations Organization[]
+  tariffs       Tariff[]
+}
+
+model Organization {
+  id                 String                @id @default(cuid())
+  name               String
+  organizationTypeId String
+  tariffGroupId      String?
+  status             OrganizationStatus    @default(ACTIVE)
+  blockedReason      String?
+  canRequestBookings Boolean               @default(true)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  organizationType   OrganizationType      @relation(fields: [organizationTypeId], references: [id])
+  tariffGroup        TariffGroup?          @relation(fields: [tariffGroupId], references: [id])
+  contacts           OrganizationContact[]
+  bookings           Booking[]
+  series             BookingSeries[]
+  waitlistEntries    WaitlistEntry[]
+  documents          Document[]
+  accessAssignments  AccessAssignment[]
+  billingEntries     BillingEntry[]
+
+  @@index([organizationTypeId])
+  @@index([status])
+}
+
+model OrganizationContact {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  function       String
+  email          String?
+  phone          String?
+  isPrimary      Boolean      @default(false)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Building {
+  id          String              @id @default(cuid())
+  code        String              @unique
+  name        String
+  address     String?
+  isActive    Boolean             @default(true)
+  rooms       Room[]
+  caretakers  BuildingCaretaker[]
+  closures    Closure[]
+  documents   Document[]
+  accessMedia AccessMedium[]
+}
+
+model Room {
+  id                     String            @id @default(cuid())
+  buildingId             String
+  code                   String            @unique
+  name                   String
+  description            String?
+  status                 RoomStatus        @default(ACTIVE)
+  isCombinable           Boolean           @default(false)
+  openingTime            String            @default("06:00")
+  closingTime            String            @default("23:00")
+  setupBufferMinutes     Int               @default(0)
+  teardownBufferMinutes  Int               @default(0)
+  maximumBookingMinutes  Int?
+  singleBookingLeadDays  Int               @default(180)
+  costCenter             String?
+  publicShowOrganization Boolean           @default(true)
+  publicShowEventName    Boolean           @default(true)
+  building               Building          @relation(fields: [buildingId], references: [id])
+  componentParents       RoomComposition[] @relation("ComponentParent")
+  componentChildren      RoomComposition[] @relation("ComponentChild")
+  caretakers             RoomCaretaker[]
+  bookings               Booking[]
+  series                 BookingSeries[]
+  waitlistEntries        WaitlistEntry[]
+  closures               Closure[]
+  tariffs                Tariff[]
+  documents              Document[]
+  damageReports          DamageReport[]
+  accessMedia            AccessMedium[]
+
+  @@index([buildingId])
+}
+
+model RoomComposition {
+  parentRoomId String
+  childRoomId  String
+  parentRoom   Room   @relation("ComponentParent", fields: [parentRoomId], references: [id], onDelete: Cascade)
+  childRoom    Room   @relation("ComponentChild", fields: [childRoomId], references: [id], onDelete: Cascade)
+
+  @@id([parentRoomId, childRoomId])
+}
+
+model Caretaker {
+  id        String              @id @default(cuid())
+  code      String              @unique
+  name      String
+  email     String?
+  phone     String?
+  isActive  Boolean             @default(true)
+  buildings BuildingCaretaker[]
+  rooms     RoomCaretaker[]
+}
+
+model BuildingCaretaker {
+  buildingId  String
+  caretakerId String
+  isPrimary   Boolean   @default(false)
+  building    Building  @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  caretaker   Caretaker @relation(fields: [caretakerId], references: [id], onDelete: Cascade)
+
+  @@id([buildingId, caretakerId])
+}
+
+model RoomCaretaker {
+  roomId      String
+  caretakerId String
+  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  caretaker   Caretaker @relation(fields: [caretakerId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, caretakerId])
+}
+
+model UsageType {
+  id                       String          @id @default(cuid())
+  code                     String          @unique
+  name                     String
+  priority                 Int
+  requiresApproval         Boolean         @default(true)
+  mayDisplaceLowerPriority Boolean         @default(false)
+  bookings                 Booking[]
+  series                   BookingSeries[]
+  waitlistEntries          WaitlistEntry[]
+  tariffs                  Tariff[]
+
+  @@index([priority])
+}
+
+model BookingSeries {
+  id             String       @id @default(cuid())
+  organizationId String
+  roomId         String
+  usageTypeId    String
+  title          String
+  startsOn       DateTime
+  endsOn         DateTime
+  recurrenceRule String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  room           Room         @relation(fields: [roomId], references: [id])
+  usageType      UsageType    @relation(fields: [usageTypeId], references: [id])
+  bookings       Booking[]
+}
+
+model Booking {
+  id                String         @id @default(cuid())
+  organizationId    String
+  roomId            String
+  usageTypeId       String
+  seriesId          String?
+  requestedByUserId String?
+  processedByUserId String?
+  kind              BookingKind    @default(SINGLE)
+  status            BookingStatus  @default(REQUESTED)
+  title             String
+  startsAt          DateTime
+  endsAt            DateTime
+  blockedFrom       DateTime
+  blockedUntil      DateTime
+  cancellationNote  String?
+  decisionNote      String?
+  requestedAt       DateTime       @default(now())
+  processedAt       DateTime?
+  organization      Organization   @relation(fields: [organizationId], references: [id])
+  room              Room           @relation(fields: [roomId], references: [id])
+  usageType         UsageType      @relation(fields: [usageTypeId], references: [id])
+  series            BookingSeries? @relation(fields: [seriesId], references: [id])
+  requestedBy       User?          @relation("BookingRequestedBy", fields: [requestedByUserId], references: [id])
+  processedBy       User?          @relation("BookingProcessedBy", fields: [processedByUserId], references: [id])
+  billingEntry      BillingEntry?
+  handover          Handover?
+  notifications     Notification[]
+
+  @@index([roomId, startsAt, endsAt])
+  @@index([organizationId, status])
+}
+
+model WaitlistEntry {
+  id                String         @id @default(cuid())
+  organizationId    String
+  roomId            String
+  usageTypeId       String
+  requestedByUserId String?
+  title             String
+  startsAt          DateTime
+  endsAt            DateTime
+  status            WaitlistStatus @default(WAITING)
+  placedAt          DateTime       @default(now())
+  offeredAt         DateTime?
+  offerExpiresAt    DateTime?
+  organization      Organization   @relation(fields: [organizationId], references: [id])
+  room              Room           @relation(fields: [roomId], references: [id])
+  usageType         UsageType      @relation(fields: [usageTypeId], references: [id])
+  requestedBy       User?          @relation("WaitlistRequestedBy", fields: [requestedByUserId], references: [id])
+
+  @@index([roomId, startsAt, placedAt])
+}
+
+model HolidayPeriod {
+  id            String        @id @default(cuid())
+  name          String
+  startsOn      DateTime
+  endsOn        DateTime
+  defaultStatus ClosureStatus
+  reason        String
+  isPublic      Boolean       @default(true)
+}
+
+model Closure {
+  id         String        @id @default(cuid())
+  buildingId String?
+  roomId     String?
+  status     ClosureStatus
+  reason     String
+  startsAt   DateTime
+  endsAt     DateTime
+  isPublic   Boolean       @default(true)
+  building   Building?     @relation(fields: [buildingId], references: [id])
+  room       Room?         @relation(fields: [roomId], references: [id])
+
+  @@index([buildingId, startsAt, endsAt])
+  @@index([roomId, startsAt, endsAt])
+}
+
+model TariffGroup {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  name          String
+  description   String?
+  organizations Organization[]
+  tariffs       Tariff[]
+}
+
+model Tariff {
+  id                 String           @id @default(cuid())
+  tariffGroupId      String
+  roomId             String
+  organizationTypeId String
+  usageTypeId        String
+  name               String
+  hourlyRate         Decimal?         @db.Decimal(10, 2)
+  flatRate           Decimal?         @db.Decimal(10, 2)
+  validFrom          DateTime
+  validUntil         DateTime?
+  tariffGroup        TariffGroup      @relation(fields: [tariffGroupId], references: [id])
+  room               Room             @relation(fields: [roomId], references: [id])
+  organizationType   OrganizationType @relation(fields: [organizationTypeId], references: [id])
+  usageType          UsageType        @relation(fields: [usageTypeId], references: [id])
+  billingEntries     BillingEntry[]
+}
+
+model BillingEntry {
+  id             String        @id @default(cuid())
+  bookingId      String        @unique
+  organizationId String
+  tariffId       String?
+  status         BillingStatus @default(OPEN)
+  amount         Decimal?      @db.Decimal(10, 2)
+  exportedAt     DateTime?
+  billedAt       DateTime?
+  booking        Booking       @relation(fields: [bookingId], references: [id])
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  tariff         Tariff?       @relation(fields: [tariffId], references: [id])
+}
+
+model Document {
+  id             String        @id @default(cuid())
+  organizationId String?
+  buildingId     String?
+  roomId         String?
+  type           DocumentType
+  fileName       String
+  storageKey     String
+  uploadedAt     DateTime      @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  building       Building?     @relation(fields: [buildingId], references: [id])
+  room           Room?         @relation(fields: [roomId], references: [id])
+}
+
+model DamageReport {
+  id                String       @id @default(cuid())
+  roomId            String
+  reportedByUserId  String?
+  processedByUserId String?
+  description       String
+  photoStorageKey   String?
+  status            DamageStatus @default(REPORTED)
+  reportedAt        DateTime     @default(now())
+  resolvedAt        DateTime?
+  room              Room         @relation(fields: [roomId], references: [id])
+  reportedBy        User?        @relation("DamageReportedBy", fields: [reportedByUserId], references: [id])
+  processedBy       User?        @relation("DamageProcessedBy", fields: [processedByUserId], references: [id])
+}
+
+model Handover {
+  id             String    @id @default(cuid())
+  bookingId      String    @unique
+  keyReceivedAt  DateTime?
+  roomAcceptedAt DateTime?
+  roomReturnedAt DateTime?
+  notes          String?
+  booking        Booking   @relation(fields: [bookingId], references: [id])
+}
+
+model AccessMedium {
+  id          String             @id @default(cuid())
+  buildingId  String
+  roomId      String?
+  type        AccessMediumType
+  identifier  String             @unique
+  isActive    Boolean            @default(true)
+  building    Building           @relation(fields: [buildingId], references: [id])
+  room        Room?              @relation(fields: [roomId], references: [id])
+  assignments AccessAssignment[]
+}
+
+model AccessAssignment {
+  id             String        @id @default(cuid())
+  accessMediumId String
+  organizationId String?
+  issuedToName   String
+  issuedAt       DateTime
+  returnedAt     DateTime?
+  accessMedium   AccessMedium  @relation(fields: [accessMediumId], references: [id])
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+}
+
+model Notification {
+  id              String              @id @default(cuid())
+  bookingId       String?
+  recipientUserId String?
+  eventCode       String
+  channel         NotificationChannel @default(EMAIL)
+  recipient       String
+  status          NotificationStatus  @default(PENDING)
+  createdAt       DateTime            @default(now())
+  sentAt          DateTime?
+  errorMessage    String?
+  booking         Booking?            @relation(fields: [bookingId], references: [id])
+  recipientUser   User?               @relation(fields: [recipientUserId], references: [id])
+}
+
+model AuditEntry {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  entityType  String
+  entityId    String
+  action      String
+  payload     Json?
+  createdAt   DateTime @default(now())
+  actor       User?    @relation(fields: [actorUserId], references: [id])
+
+  @@index([entityType, entityId, createdAt])
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
