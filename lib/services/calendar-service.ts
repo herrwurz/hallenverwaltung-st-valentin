@@ -1,10 +1,13 @@
 import type { BookingStatus, ClosureStatus, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  getPublicCalendarVisibilityMode,
+  type PublicCalendarVisibilityMode,
+} from "@/lib/services/calendar-settings-service";
 import { getBookingConflictRoomIds } from "@/lib/services/booking-conflict-service";
 import type { CalendarEventStatus } from "@/lib/calendar-status";
 
 export type CalendarView = "day" | "week";
-type PublicVisibilityMode = "occupied_only" | "organization" | "event";
 
 export type CalendarQuery = {
   date?: string | Date;
@@ -139,6 +142,7 @@ export type FreeSlotResult = {
 };
 
 const bookingStatusesForCalendar: BookingStatus[] = ["REQUESTED", "IN_REVIEW", "APPROVED", "CANCELLED"];
+const publicBookingStatusesForCalendar: BookingStatus[] = ["REQUESTED", "IN_REVIEW", "APPROVED"];
 const bookingStatusesBlockingFreeSlots: BookingStatus[] = ["APPROVED"];
 const closureStatusesBlocking: ClosureStatus[] = ["RESTRICTED", "CLOSED"];
 const dayFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -554,7 +558,7 @@ function toAdminBookingEvent(booking: CalendarBooking): CalendarEvent | null {
   };
 }
 
-function resolvePublicTitle(booking: CalendarBooking, visibilityMode: PublicVisibilityMode) {
+function resolvePublicTitle(booking: CalendarBooking, visibilityMode: PublicCalendarVisibilityMode) {
   if (visibilityMode === "event" && booking.room.publicShowEventName) {
     return booking.title;
   }
@@ -566,7 +570,10 @@ function resolvePublicTitle(booking: CalendarBooking, visibilityMode: PublicVisi
   return "Belegt";
 }
 
-function toPublicBookingEvent(booking: CalendarBooking, visibilityMode: PublicVisibilityMode): CalendarEvent | null {
+function toPublicBookingEvent(
+  booking: CalendarBooking,
+  visibilityMode: PublicCalendarVisibilityMode,
+): CalendarEvent | null {
   const status = mapBookingStatus(booking.status);
   if (!status) {
     return null;
@@ -639,23 +646,6 @@ async function getPortalOrganizationIds(actorUserId: string, client: CalendarSer
   });
 
   return new Set(memberships.map((membership) => membership.organizationId));
-}
-
-async function getPublicVisibilityMode(client: CalendarServiceClient): Promise<PublicVisibilityMode> {
-  const setting = await client.systemSetting.findUnique({
-    where: { key: "public.calendar.visibility.default" },
-    select: { value: true },
-  });
-
-  const mode = setting?.value;
-  if (mode && typeof mode === "object" && "mode" in mode) {
-    const selectedMode = mode.mode;
-    if (selectedMode === "organization" || selectedMode === "event") {
-      return selectedMode;
-    }
-  }
-
-  return "occupied_only";
 }
 
 async function buildCalendarResult({
@@ -733,11 +723,12 @@ export async function getPublicCalendarEvents(
   query: CalendarQuery,
   client: CalendarServiceClient = prisma,
 ) {
-  const visibilityMode = await getPublicVisibilityMode(client);
+  const visibilityMode = await getPublicCalendarVisibilityMode(client);
   return buildCalendarResult({
     query,
     client,
     eventFactory: (booking) => toPublicBookingEvent(booking, visibilityMode),
+    includeBookingStatuses: publicBookingStatusesForCalendar,
   });
 }
 

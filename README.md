@@ -63,6 +63,25 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
 Die Anwendung ist unter [http://localhost:3000](http://localhost:3000)
 erreichbar.
 
+### Hinweis zu Codex auf Windows
+
+In einzelnen Codex-Windows-Sessions koennen `npm test`, `npm run lint`
+oder `npm run build` mit einem allgemeinen `Zugriff verweigert`
+scheitern, obwohl das Projekt selbst in Ordnung ist. In diesem Fall
+koennen die direkten Node-CLI-Aufrufe verwendet werden:
+
+```powershell
+node ./node_modules/tsx/dist/cli.mjs --test tests/*.test.ts
+node ./node_modules/eslint/bin/eslint.js .
+node ./node_modules/next/dist/bin/next build --webpack
+node ./node_modules/prisma/build/index.js validate
+node ./node_modules/prisma/build/index.js generate
+node ./node_modules/typescript/bin/tsc --noEmit
+```
+
+Der Webpack-Buildpfad ist fuer dieses Projekt bewusst als robuster
+Produktionsbuild hinterlegt.
+
 ## Start mit Docker Compose
 
 Nach dem Anlegen einer `.env`-Datei kann die gesamte Anwendung gestartet

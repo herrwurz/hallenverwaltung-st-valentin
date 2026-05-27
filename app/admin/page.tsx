@@ -8,6 +8,7 @@ export default async function AdminPage() {
   const cards = [
     { href: "/admin/bookings", label: "Buchungsantraege", value: "Workflow" },
     { href: "/admin/calendar", label: "Kalender", value: "Tag/Woche" },
+    { href: "/admin/settings/calendar", label: "Einstellungen", value: "Datenschutz" },
     { href: "/admin/waitlist", label: "Warteliste", value: "Queue" },
     { href: "/admin/buildings", label: "Gebaeude", value: summary.buildingCount },
     { href: "/admin/rooms", label: "Raeume", value: summary.roomCount },

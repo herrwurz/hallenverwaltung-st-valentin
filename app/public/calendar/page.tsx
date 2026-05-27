@@ -1,5 +1,6 @@
 import { CalendarView } from "@/components/calendar-view";
 import { AreaShell } from "@/components/area-shell";
+import { getPublicCalendarVisibilityMode } from "@/lib/services/calendar-settings-service";
 import { getFreeSlots, getPublicCalendarEvents, type CalendarQuery } from "@/lib/services/calendar-service";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -25,10 +26,17 @@ function toCalendarQuery(params: Awaited<SearchParams>): CalendarQuery {
 export default async function PublicCalendarPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const query = toCalendarQuery(params);
-  const [calendar, freeSlots] = await Promise.all([
+  const [calendar, freeSlots, visibilityMode] = await Promise.all([
     getPublicCalendarEvents(query),
     getFreeSlots({ roomId: query.roomId, date: query.date }),
+    getPublicCalendarVisibilityMode(),
   ]);
+  const detailHint =
+    visibilityMode === "event"
+      ? "Aktive Oeffentlichkeitsstufe: Veranstaltungsname, sofern der Raum dies erlaubt."
+      : visibilityMode === "organization"
+        ? "Aktive Oeffentlichkeitsstufe: Vereinsname, sofern der Raum dies erlaubt."
+        : "Aktive Oeffentlichkeitsstufe: nur belegt oder frei.";
 
   return (
     <AreaShell
@@ -41,7 +49,7 @@ export default async function PublicCalendarPage({ searchParams }: { searchParam
         basePath="/public/calendar"
         calendar={calendar}
         freeSlots={freeSlots}
-        detailHint="Sichere Standardeinstellung: nur belegt oder frei."
+        detailHint={detailHint}
         backHref="/public"
         backLabel="Zurueck zur Oeffentlichkeit"
       />
