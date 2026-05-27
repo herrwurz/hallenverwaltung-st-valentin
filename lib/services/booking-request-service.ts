@@ -34,6 +34,23 @@ type CreateBookingRequestOptions = {
   permissions?: BookingRequestPermissionOverrides;
 };
 
+export function resolveBookingBlockedWindow({
+  startsAt,
+  endsAt,
+  setupBufferMinutes,
+  teardownBufferMinutes,
+}: {
+  startsAt: Date;
+  endsAt: Date;
+  setupBufferMinutes: number;
+  teardownBufferMinutes: number;
+}) {
+  return {
+    blockedFrom: new Date(startsAt.getTime() - setupBufferMinutes * 60_000),
+    blockedUntil: new Date(endsAt.getTime() + teardownBufferMinutes * 60_000),
+  };
+}
+
 async function resolveBookingRequestPermissions(
   actorUserId: string,
   overrides: BookingRequestPermissionOverrides = {},
@@ -112,8 +129,12 @@ async function createBookingRequestWithClient(
     throw new BookingValidationError("Der ausgewaehlte Nutzungstyp ist nicht gueltig.");
   }
 
-  const blockedFrom = new Date(data.startsAt.getTime() - room.setupBufferMinutes * 60_000);
-  const blockedUntil = new Date(data.endsAt.getTime() + room.teardownBufferMinutes * 60_000);
+  const { blockedFrom, blockedUntil } = resolveBookingBlockedWindow({
+    startsAt: data.startsAt,
+    endsAt: data.endsAt,
+    setupBufferMinutes: room.setupBufferMinutes,
+    teardownBufferMinutes: room.teardownBufferMinutes,
+  });
 
   validateBookingAvailability({
     startsAt: data.startsAt,

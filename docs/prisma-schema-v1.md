@@ -67,9 +67,15 @@ werden.
 - Wartelistenplaetze werden nach `placedAt` gereiht. Wenn ein passender Slot
   frei wird, erhaelt genau ein Eintrag gleichzeitig den Status `OFFERED` mit
   einer Frist von 48 Stunden (`offerExpiresAt`).
+- Die Wartelistenbewertung verwendet dieselben effektiven Blockzeiten wie
+  Buchungsantraege, inklusive `setupBufferMinutes` und `teardownBufferMinutes`.
 - Die Annahme eines gueltigen Wartelistenangebots fuehrt zu einem neuen
   Buchungsantrag im Status `REQUESTED`; eine fixe Genehmigung erfolgt dadurch
   nicht.
+- `acceptWaitlistOffer()`, `declineWaitlistOffer()`, `expireWaitlistOffers()`
+  und `activateNextWaitlistEntryForSlot()` serialisieren denselben
+  Raum-/Teilraum-Kontext per Advisory-Lock, damit ein Slot nicht parallel
+  mehrfach verarbeitet werden kann.
 
 ## Indizes
 
@@ -88,6 +94,15 @@ vorbereitet:
 `startsAt`/`endsAt`, `startsOn`/`endsOn` und `placedAt` sind die bereits
 bestehenden Schema-Bezeichnungen fuer Beginn/Ende bzw. Erstellzeitpunkt der
 Wartelistenreihenfolge.
+
+Zusatz fuer Phase 7.5:
+
+- Partieller Unique-Index auf `WaitlistEntry(organizationId, roomId, startsAt, endsAt)`
+  fuer Status `ACTIVE` und `OFFERED`, damit offensichtliche Doppelanmeldungen
+  derselben Organisation fuer denselben Slot nicht parallel bestehen koennen.
+- `Notification` speichert fuer Wartelistenangebote zusaetzlich
+  `waitlistEntryId` und ein JSON-Payload mit `offerExpiresAt`, `roomId`,
+  `startsAt` und `endsAt`.
 
 ## Seed-Umfang
 

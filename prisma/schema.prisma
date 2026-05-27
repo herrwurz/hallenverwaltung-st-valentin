@@ -410,6 +410,7 @@ model WaitlistEntry {
   room              Room           @relation(fields: [roomId], references: [id])
   usageType         UsageType      @relation(fields: [usageTypeId], references: [id])
   requestedBy       User?          @relation("WaitlistRequestedBy", fields: [requestedByUserId], references: [id])
+  notifications     Notification[]
 
   @@index([roomId, startsAt, placedAt])
   @@index([status, placedAt])
@@ -551,18 +552,22 @@ model AccessAssignment {
 model Notification {
   id              String              @id @default(cuid())
   bookingId       String?
+  waitlistEntryId String?
   recipientUserId String?
   eventCode       String
   channel         NotificationChannel @default(EMAIL)
   recipient       String
   status          NotificationStatus  @default(PENDING)
+  payload         Json?
   createdAt       DateTime            @default(now())
   sentAt          DateTime?
   errorMessage    String?
   booking         Booking?            @relation(fields: [bookingId], references: [id])
+  waitlistEntry   WaitlistEntry?      @relation(fields: [waitlistEntryId], references: [id])
   recipientUser   User?               @relation(fields: [recipientUserId], references: [id])
 
   @@index([status, createdAt])
+  @@index([waitlistEntryId, createdAt])
 }
 
 model AuditEntry {
