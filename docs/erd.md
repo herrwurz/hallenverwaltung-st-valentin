@@ -4,8 +4,10 @@
 
 Verbindliche Fachgrundlage ist `docs/pflichtenheft-v1.0.md`. Das Datenmodell
 bildet die dort genannten Fachobjekte fuer die spaetere Implementierung ab.
-Bis Phase 3.5 sind Datenmodell, Seed-Daten und Auth/RBAC vorbereitet; es gibt
-keine Buchungs-, Kalender-, UI- oder Abrechnungslogik.
+Bis Phase 3.5 wurden Datenmodell, Seed-Daten und Auth/RBAC vorbereitet.
+Phase 5 implementiert die Basis fuer einzelne Buchungsantraege und deren
+Statushistorie; Kalender, Warteliste, Genehmigungsoberflaeche und Abrechnung
+bleiben ausserhalb dieses Umfangs.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -74,23 +76,25 @@ erDiagram
 
 - `OrganizationMember` bildet mehrere Benutzer je Organisation und mehrere
   Organisationen je Benutzer ab. Die Felder zur Gueltigkeit bereiten
-  organisationsbezogene Rechtepruefungen vor.
+  organisationsbezogene Rechtepruefungen vor und begrenzen in Phase 5 die
+  Antragstellung auf aktive Mitgliedschaften.
 - Der `BookingStatus` ist einheitlich: `DRAFT`, `REQUESTED`, `IN_REVIEW`,
   `APPROVED`, `REJECTED`, `CANCELLED`, `MOVED`, `ARCHIVED`.
 - `BookingStatusHistory` ist ein append-only Verlauf. Buchungen werden nicht
   physisch geloescht; beide Regeln werden durch Datenbank-Trigger abgesichert.
 - Eine Gesamthalle wird durch `RoomComposition` aus Teilraeumen
-  zusammengesetzt; Konfliktpruefungen sind erst Gegenstand spaeterer Phasen.
+  zusammengesetzt; die Basiskonfliktpruefung in Phase 5 beachtet
+  Parent-Room-/Teilraum-Beziehungen.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
   kuenftige Service-Schreibpfade vor.
-- Buchungen und Serien bleiben in Phase 3.5 reine Datenmodellgrundlage.
+- Serien bleiben in Phase 5 reine Datenmodellgrundlage; umgesetzt werden
+  einzelne Buchungsantraege im Status `REQUESTED`.
 
 ## Offene fachliche Konkretisierungen
 
 - Konkrete Tarifbetraege und Tarifkombinationen sind noch nicht festgelegt.
-- Organisationsbezogene Rechtepruefung muss in einer spaeteren
-  Implementierungsphase auf `OrganizationMember` aufsetzen.
-- Konflikt-, Genehmigungs- und Wartelistenablaeufe werden erst mit der
-  Buchungslogik umgesetzt.
+- Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
+  umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
+- Genehmigungs- und Wartelistenablaeufe sind noch nicht umgesetzt.

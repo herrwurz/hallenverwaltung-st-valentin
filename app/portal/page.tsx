@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
 import { requirePermission } from "@/lib/permissions";
 
@@ -11,9 +12,13 @@ export default async function PortalPage() {
       description="Geschuetzter Bereich fuer Vereine, VHS und Schulen."
       userName={user.name}
     >
-      <p className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-6 text-slate-300">
-        Der Portalzugang ist eingerichtet. Buchungsfunktionen sind ausdruecklich noch nicht enthalten.
-      </p>
+      <Link
+        href="/portal/bookings"
+        className="mt-10 block rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-sky-700"
+      >
+        <h2 className="text-lg font-medium">Buchungsantraege</h2>
+        <p className="mt-2 text-slate-300">Einzeltermine beantragen und bestehende Antraege einsehen.</p>
+      </Link>
     </AreaShell>
   );
 }

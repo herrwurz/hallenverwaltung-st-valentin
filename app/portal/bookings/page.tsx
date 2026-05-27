@@ -1,0 +1,169 @@
+import Link from "next/link";
+import { AreaShell } from "@/components/area-shell";
+import { requirePermission } from "@/lib/permissions";
+import { getBookingRequestOptions, getBookingsForOrganization } from "@/lib/services/booking-service";
+import { cancelOwnBookingRequestAction, createBookingRequestAction } from "@/app/portal/bookings/actions";
+
+const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const dateFormatter = new Intl.DateTimeFormat("de-AT", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+type PageProps = {
+  searchParams: Promise<{ saved?: string; cancelled?: string; warning?: string; error?: string }>;
+};
+
+export default async function PortalBookingsPage({ searchParams }: PageProps) {
+  const user = await requirePermission("REQUEST_BOOKING");
+  const [params, options, bookings] = await Promise.all([
+    searchParams,
+    getBookingRequestOptions(user.id),
+    getBookingsForOrganization(user.id),
+  ]);
+
+  return (
+    <AreaShell
+      eyebrow="Portal"
+      title="Buchungsantraege"
+      description="Neue Einzeltermine beantragen und Antraege Ihrer Organisationen einsehen."
+      userName={user.name}
+    >
+      <div className="mt-8 flex items-center justify-between">
+        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
+          Zurueck zum Portal
+        </Link>
+      </div>
+
+      {params.error ? (
+        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
+      ) : null}
+      {params.saved ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Der Buchungsantrag wurde gespeichert.
+        </p>
+      ) : null}
+      {params.cancelled ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Der Buchungsantrag wurde storniert.
+        </p>
+      ) : null}
+      {params.warning ? (
+        <p className="mt-4 rounded-lg border border-amber-700 bg-amber-950/40 p-4 text-sm text-amber-200">
+          {params.warning}
+        </p>
+      ) : null}
+
+      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
+        <h2 className="text-xl font-medium">Neuer Buchungsantrag</h2>
+        {options.organizations.length === 0 ? (
+          <p className="mt-4 text-sm text-amber-200">
+            Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
+          </p>
+        ) : (
+          <form action={createBookingRequestAction} className="mt-5 grid gap-4 lg:grid-cols-2">
+            <label className="text-sm text-slate-300">
+              Organisation
+              <select name="organizationId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte waehlen
+                </option>
+                {options.organizations.map((organization) => (
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-slate-300">
+              Raum
+              <select name="roomId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte waehlen
+                </option>
+                {options.buildings.flatMap((building) =>
+                  building.rooms.map((room) => (
+                    <option key={room.id} value={room.id}>
+                      {building.name} - {room.name}
+                    </option>
+                  )),
+                )}
+              </select>
+            </label>
+            <label className="text-sm text-slate-300">
+              Titel
+              <input name="title" required maxLength={160} className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300">
+              Nutzungstyp
+              <select name="usageTypeId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte waehlen
+                </option>
+                {options.usageTypes.map((usageType) => (
+                  <option key={usageType.id} value={usageType.id}>
+                    {usageType.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-slate-300">
+              Beginn
+              <input name="startsAt" type="datetime-local" required className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300">
+              Ende
+              <input name="endsAt" type="datetime-local" required className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300 lg:col-span-2">
+              Beschreibung (optional)
+              <textarea name="description" rows={3} maxLength={1000} className={inputClass} />
+            </label>
+            <div className="lg:col-span-2 lg:text-right">
+              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+                Antrag absenden
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-xl font-medium">Antraege Ihrer Organisationen</h2>
+        <div className="mt-4 space-y-3">
+          {bookings.length === 0 ? (
+            <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+              Noch keine Buchungsantraege vorhanden.
+            </p>
+          ) : (
+            bookings.map((booking) => (
+              <article key={booking.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                <div className="flex flex-wrap justify-between gap-4">
+                  <div>
+                    <h3 className="font-medium">{booking.title}</h3>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {booking.organization.name} | {booking.room.building.name} - {booking.room.name}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {dateFormatter.format(booking.startsAt)} bis {dateFormatter.format(booking.endsAt)} |{" "}
+                      {booking.usageType.name}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-sky-300">{booking.status}</p>
+                    {booking.status === "REQUESTED" && booking.requestedByUserId === user.id ? (
+                      <form action={cancelOwnBookingRequestAction} className="mt-3">
+                        <input type="hidden" name="bookingId" value={booking.id} />
+                        <button className="text-sm text-red-300 hover:text-red-200">Antrag stornieren</button>
+                      </form>
+                    ) : null}
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+    </AreaShell>
+  );
+}

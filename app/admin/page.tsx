@@ -31,8 +31,8 @@ export default async function AdminPage() {
         ))}
       </div>
       <p className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-300">
-        Diese Phase umfasst ausschliesslich Stammdaten. Buchungen, Kalender, Genehmigungen,
-        Wartelisten und Abrechnung sind nicht enthalten.
+        Buchungsantraege koennen nun lesend eingesehen werden. Kalender, Genehmigungen,
+        Wartelisten und Abrechnung sind noch nicht enthalten.
       </p>
     </>
   );
