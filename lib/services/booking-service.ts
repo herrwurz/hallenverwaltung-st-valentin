@@ -183,18 +183,6 @@ export async function getBookingsForOrganization(userId: string) {
   });
 }
 
-export async function getBookingsForAdmin() {
-  return prisma.booking.findMany({
-    include: {
-      organization: true,
-      room: { include: { building: true } },
-      usageType: true,
-      requestedBy: true,
-    },
-    orderBy: [{ requestedAt: "desc" }, { startsAt: "asc" }],
-  });
-}
-
 export async function cancelOwnBookingRequest(bookingId: string, actorUserId: string) {
   return cancelBooking({
     bookingId,

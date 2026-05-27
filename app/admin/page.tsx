@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { requirePermission } from "@/lib/permissions";
 import { getAdminDashboardData } from "@/lib/services/admin/dashboard-service";
 
 export default async function AdminPage() {
+  await requirePermission("MANAGE_USERS");
   const summary = await getAdminDashboardData();
   const cards = [
     { href: "/admin/buildings", label: "Gebaeude", value: summary.buildingCount },

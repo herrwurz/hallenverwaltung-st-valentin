@@ -71,3 +71,14 @@ export async function requirePermission(permissionKey: string) {
 
   return user;
 }
+
+export async function requireAnyPermission(permissionKeys: string[]) {
+  const user = await requireActiveSession();
+  const permissionResults = await Promise.all(permissionKeys.map((permissionKey) => hasPermission(user.id, permissionKey)));
+
+  if (!permissionResults.some(Boolean)) {
+    redirect("/unauthorized");
+  }
+
+  return user;
+}

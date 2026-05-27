@@ -1,6 +1,8 @@
+import { requirePermission } from "@/lib/permissions";
 import { getRoleAdministrationData } from "@/lib/services/admin/role-service";
 
 export default async function RolesPage() {
+  await requirePermission("MANAGE_USERS");
   const data = await getRoleAdministrationData();
 
   return (

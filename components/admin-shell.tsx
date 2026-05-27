@@ -14,10 +14,11 @@ const navigation = [
 
 type AdminShellProps = {
   children: ReactNode;
+  navigationItems?: typeof navigation;
   userName?: string | null;
 };
 
-export function AdminShell({ children, userName }: AdminShellProps) {
+export function AdminShell({ children, navigationItems = navigation, userName }: AdminShellProps) {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto flex min-h-screen max-w-7xl">
@@ -25,7 +26,7 @@ export function AdminShell({ children, userName }: AdminShellProps) {
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-sky-400">Verwaltung</p>
           <h1 className="mt-3 text-xl font-semibold">Verwaltungsportal</h1>
           <nav className="mt-10 space-y-1" aria-label="Admin-Navigation">
-            {navigation.map((item) => (
+            {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

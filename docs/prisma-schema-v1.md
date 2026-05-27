@@ -5,9 +5,11 @@
 Dieses Schema basiert verbindlich auf `docs/pflichtenheft-v1.0.md`.
 Phase 3.5 haertet das relationale Grundmodell fuer die folgenden
 Implementierungsphasen. Phase 5 nutzt dieses Modell fuer einzelne
-Buchungsantraege mit Statushistorie; Kalender, Warteliste,
-Genehmigungsoberflaeche und Abrechnung sind weiterhin nicht umgesetzt. Die in
-Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
+Buchungsantraege mit Statushistorie; Phase 6 setzt darauf den
+Genehmigungsworkflow fuer `REQUESTED`, `IN_REVIEW`, `APPROVED` und `REJECTED`
+im Verwaltungsportal um. Kalender, Warteliste und Abrechnung sind weiterhin
+nicht umgesetzt. Die in Phase 3 vorhandene Authentifizierung verwendet
+`User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -41,6 +43,9 @@ werden.
   verhindert `UPDATE` und `DELETE` an Historieneintraegen.
 - Bei der Erstanlage eines Buchungsantrags ist `BookingStatusHistory.oldStatus`
   bewusst `null`; erst danach werden echte Statusuebergaenge historisiert.
+- Die Verwaltungsfreigabe folgt in Version 1 dem Weg `REQUESTED ->
+  IN_REVIEW -> APPROVED/REJECTED`; direkte Genehmigung oder Ablehnung aus
+  `REQUESTED` ist nicht vorgesehen.
 - Buchungen werden nicht physisch geloescht; ein Datenbank-Trigger verhindert
   `DELETE`, und spaetere Services muessen den Statusverlauf schreiben.
 - `Booking` speichert fuer Buchungsantraege neben dem Titel eine optionale
