@@ -3,18 +3,22 @@
 ## Grundlage
 
 Verbindliche Fachgrundlage ist `docs/pflichtenheft-v1.0.md`. Das Datenmodell
-bildet die dort genannten Fachobjekte fuer eine spaetere Implementierung ab.
-In Phase 2 werden nur Schema und Stammdaten erstellt; es gibt keine Buchungs-,
-Kalender-, UI- oder Authentifizierungsimplementierung.
+bildet die dort genannten Fachobjekte fuer die spaetere Implementierung ab.
+Bis Phase 3.5 sind Datenmodell, Seed-Daten und Auth/RBAC vorbereitet; es gibt
+keine Buchungs-, Kalender-, UI- oder Abrechnungslogik.
+
+Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
+umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
+absichtlich verhindert werden.
 
 ## Fachliche Bereiche
 
 - Berechtigungen: Rollen, Rechte und optionale Einzelrechte je Benutzer.
-- Organisationen: Typ, Sperrstatus und mehrere Ansprechpartner.
+- Organisationen: Typ, Sperrstatus, Ansprechpartner und Benutzerzuordnungen.
 - Infrastruktur: Gebaeude, Raeume, Teil-/Gesamthallen und Hauswarte.
-- Nutzung: Nutzungstypen mit Prioritaet und Genehmigungspflicht.
-- Reservierungsgrundlage: Antraege, Serien, Warteliste und Sperrzeiträume.
-- Abrechnung: Tarifgruppen, Tarife und Abrechnungseintraege.
+- Nutzung: Nutzungstypen, Buchungsgrundmodell, Warteliste und Sperren.
+- Historisierung: Append-only Statusverlauf einer Buchung.
+- Abrechnung: Tarifgruppen, Tarife und Abrechnungseintraege als Datenbasis.
 - Erweiterbarkeit: Dokumente, Schaeden, Uebergaben, Zutritte,
   Benachrichtigungen und Audit-Historie.
 
@@ -32,6 +36,8 @@ erDiagram
   ORGANIZATION_TYPE ||--o{ ORGANIZATION : classifies
   TARIFF_GROUP ||--o{ ORGANIZATION : groups
   ORGANIZATION ||--o{ ORGANIZATION_CONTACT : has
+  USER ||--o{ ORGANIZATION_MEMBER : belongs_to
+  ORGANIZATION ||--o{ ORGANIZATION_MEMBER : includes
 
   BUILDING ||--o{ ROOM : contains
   ROOM ||--o{ ROOM_COMPOSITION : combined_room
@@ -45,6 +51,8 @@ erDiagram
   ROOM ||--o{ BOOKING : reserved_for
   USAGE_TYPE ||--o{ BOOKING : describes
   BOOKING_SERIES ||--o{ BOOKING : generates
+  BOOKING ||--o{ BOOKING_STATUS_HISTORY : records
+  USER ||--o{ BOOKING_STATUS_HISTORY : acts
   ORGANIZATION ||--o{ WAITLIST_ENTRY : registers
   ROOM ||--o{ WAITLIST_ENTRY : concerns
 
@@ -64,21 +72,25 @@ erDiagram
 
 ## Modellentscheidungen
 
+- `OrganizationMember` bildet mehrere Benutzer je Organisation und mehrere
+  Organisationen je Benutzer ab. Die Felder zur Gueltigkeit bereiten
+  organisationsbezogene Rechtepruefungen vor.
+- Der `BookingStatus` ist einheitlich: `DRAFT`, `REQUESTED`, `IN_REVIEW`,
+  `APPROVED`, `REJECTED`, `CANCELLED`, `MOVED`, `ARCHIVED`.
+- `BookingStatusHistory` ist ein append-only Verlauf. Buchungen werden nicht
+  physisch geloescht; beide Regeln werden durch Datenbank-Trigger abgesichert.
 - Eine Gesamthalle wird durch `RoomComposition` aus Teilraeumen
-  zusammengesetzt; Konfliktpruefungen werden erst in spaeterer Logik gebaut.
-- Buchungen und Buchungsserien sind bereits als persistierbare Vorgaben
-  modelliert, werden in Phase 2 aber weder erzeugt noch verarbeitet.
-- Sperrungen koennen ein Gebaeude oder einen Raum betreffen; Ferienzeiten
-  erhalten ein eigenes Grundmodell.
-- Organisationen koennen ueber `BLOCKED` spaeter wegen Nichtbezahlung fuer
-  neue Antraege gesperrt werden.
-- Personenbezogene Login-Funktionen sind nicht implementiert. `User` ist nur
-  die Datenmodell-Voraussetzung fuer Rollen, Bearbeiter und Historisierung.
+  zusammengesetzt; Konfliktpruefungen sind erst Gegenstand spaeterer Phasen.
+- Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
+  niemals beide oder keines. Die Migration sichert dies durch einen
+  Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
+  kuenftige Service-Schreibpfade vor.
+- Buchungen und Serien bleiben in Phase 3.5 reine Datenmodellgrundlage.
 
 ## Offene fachliche Konkretisierungen
 
-- Reale Gebaeude-, Raum- und Hauswartstammdaten muessen durch die Gemeinde
-  bestaetigt werden; die Seeds verwenden initiale Arbeitsdaten.
 - Konkrete Tarifbetraege und Tarifkombinationen sind noch nicht festgelegt.
-- Die optionalen Rechte des Hallenverwalters fuer Genehmigung und Export
-  muessen fachlich entschieden werden.
+- Organisationsbezogene Rechtepruefung muss in einer spaeteren
+  Implementierungsphase auf `OrganizationMember` aufsetzen.
+- Konflikt-, Genehmigungs- und Wartelistenablaeufe werden erst mit der
+  Buchungslogik umgesetzt.

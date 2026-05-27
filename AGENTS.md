@@ -48,6 +48,14 @@ Diese Dokumente gelten als fachliche Wahrheit.
 
 ---
 
+# Mandantenfaehigkeit
+
+- Version 1 ist Single-Tenant fuer St. Valentin.
+- Mandantenfaehigkeit wird in Version 1 nicht umgesetzt.
+- Die Architektur soll eine spaetere Erweiterung um Mandanten nicht absichtlich verhindern.
+
+---
+
 # Fachliche Kernregeln
 
 ## Buchungen
@@ -58,6 +66,7 @@ Diese Dokumente gelten als fachliche Wahrheit.
 
 Status:
 
+- DRAFT
 - REQUESTED
 - IN_REVIEW
 - APPROVED
@@ -98,6 +107,7 @@ Zustände:
 
 - Hallensperren haben Vorrang vor Buchungen.
 - Jede Sperre benötigt Grund, Beginn, Ende und Sichtbarkeit.
+- Jede Sperre referenziert genau ein Gebaeude oder genau einen Raum, niemals beides oder keines.
 
 ## Abrechnung
 

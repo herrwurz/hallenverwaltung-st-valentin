@@ -353,13 +353,16 @@ Jede Rolle soll zusätzlich durch Einzelrechte ergänzt werden können, z. B.:
 
 Festlegen: Reservierungen niemals löschen.
 
-Nur Statusänderungen:
+Technische Statusdefinition fuer Buchungen:
 
-- beantragt
-- genehmigt
-- storniert
-- abgelehnt
-- verschoben
+- DRAFT (Entwurf)
+- REQUESTED (beantragt)
+- IN_REVIEW (in Pruefung)
+- APPROVED (genehmigt)
+- REJECTED (abgelehnt)
+- CANCELLED (storniert)
+- MOVED (verschoben)
+- ARCHIVED (archiviert)
 
 Dadurch bleiben alle Vorgänge nachvollziehbar.
 
