@@ -1,16 +1,14 @@
-import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import {
-  evaluateBookingConflicts,
-  getConflictingRoomIds,
-} from "@/lib/services/booking-conflicts";
-import {
+  assertBookingRequestPermission,
   assertOrganizationBookingAccess,
   BookingValidationError,
+  validateBookingAvailability,
 } from "@/lib/services/booking-rules";
-import { persistBookingRequest } from "@/lib/services/booking-write";
+import { checkBookingConflicts } from "@/lib/services/booking-conflict-service";
+import { cancelBooking, requestBooking } from "@/lib/services/booking-transition-service";
 
 const bookingRequestSchema = z.object({
   organizationId: z.string().trim().min(1, "Eine Organisation ist erforderlich."),
@@ -22,83 +20,16 @@ const bookingRequestSchema = z.object({
   endsAt: z.coerce.date(),
 });
 
-type BookingConflictClient = Pick<Prisma.TransactionClient, "roomComposition" | "booking" | "closure">;
-
-export async function checkBookingConflicts(
-  {
-    roomId,
-    buildingId,
-    blockedFrom,
-    blockedUntil,
-  }: {
-    roomId: string;
-    buildingId: string;
-    blockedFrom: Date;
-    blockedUntil: Date;
-  },
-  client: BookingConflictClient = prisma,
-) {
-  const links = await client.roomComposition.findMany({
-    select: { parentRoomId: true, childRoomId: true },
-  });
-  const roomIds = [...getConflictingRoomIds(roomId, links)];
-  const [bookings, closures] = await Promise.all([
-    client.booking.findMany({
-      where: {
-        roomId: { in: roomIds },
-        status: { in: ["APPROVED", "REQUESTED", "IN_REVIEW"] },
-        blockedFrom: { lt: blockedUntil },
-        blockedUntil: { gt: blockedFrom },
-      },
-      select: {
-        id: true,
-        roomId: true,
-        title: true,
-        status: true,
-        blockedFrom: true,
-        blockedUntil: true,
-      },
-    }),
-    client.closure.findMany({
-      where: {
-        status: { in: ["RESTRICTED", "CLOSED"] },
-        startsAt: { lt: blockedUntil },
-        endsAt: { gt: blockedFrom },
-        OR: [{ buildingId }, { roomId: { in: roomIds } }],
-      },
-      select: {
-        id: true,
-        buildingId: true,
-        roomId: true,
-        reason: true,
-        status: true,
-        startsAt: true,
-        endsAt: true,
-      },
-    }),
-  ]);
-
-  return evaluateBookingConflicts({
-    roomId,
-    buildingId,
-    blockedFrom,
-    blockedUntil,
-    links,
-    bookings,
-    closures,
-  });
-}
-
 export async function createBookingRequest(input: unknown, actorUserId: string) {
   const data = bookingRequestSchema.parse(input);
-
-  if (!(data.startsAt < data.endsAt)) {
-    throw new BookingValidationError("Der Beginn muss vor dem Ende liegen.");
-  }
-
-  const isAdmin = await hasPermission(actorUserId, "APPROVE_BOOKING");
+  const [hasRequestBookingPermission, isAdmin] = await Promise.all([
+    hasPermission(actorUserId, "REQUEST_BOOKING"),
+    hasPermission(actorUserId, "APPROVE_BOOKING"),
+  ]);
+  assertBookingRequestPermission(hasRequestBookingPermission);
 
   return prisma.$transaction(async (transaction) => {
+    const now = new Date();
     const [organization, room, usageType, membership] = await Promise.all([
       transaction.organization.findUnique({
         where: { id: data.organizationId },
@@ -108,6 +39,10 @@ export async function createBookingRequest(input: unknown, actorUserId: string) 
         where: { id: data.roomId },
         select: {
           status: true,
+          openingTime: true,
+          closingTime: true,
+          maximumBookingMinutes: true,
+          singleBookingLeadDays: true,
           setupBufferMinutes: true,
           teardownBufferMinutes: true,
           building: { select: { id: true, isActive: true } },
@@ -121,8 +56,8 @@ export async function createBookingRequest(input: unknown, actorUserId: string) 
         where: {
           organizationId: data.organizationId,
           userId: actorUserId,
-          activeFrom: { lte: new Date() },
-          OR: [{ activeUntil: null }, { activeUntil: { gt: new Date() } }],
+          activeFrom: { lte: now },
+          OR: [{ activeUntil: null }, { activeUntil: { gt: now } }],
         },
         select: { id: true },
       }),
@@ -144,6 +79,18 @@ export async function createBookingRequest(input: unknown, actorUserId: string) 
 
     const blockedFrom = new Date(data.startsAt.getTime() - room.setupBufferMinutes * 60_000);
     const blockedUntil = new Date(data.endsAt.getTime() + room.teardownBufferMinutes * 60_000);
+    validateBookingAvailability({
+      startsAt: data.startsAt,
+      endsAt: data.endsAt,
+      blockedFrom,
+      blockedUntil,
+      openingTime: room.openingTime,
+      closingTime: room.closingTime,
+      maximumBookingMinutes: room.maximumBookingMinutes,
+      singleBookingLeadDays: room.singleBookingLeadDays,
+      now,
+    });
+
     const conflicts = await checkBookingConflicts(
       {
         roomId: data.roomId,
@@ -159,20 +106,18 @@ export async function createBookingRequest(input: unknown, actorUserId: string) 
       throw new BookingValidationError(blockingConflicts.map((conflict) => conflict.message).join(" "), conflicts);
     }
 
-    const booking = await persistBookingRequest(transaction, {
+    const booking = await requestBooking({
+      actorUserId,
       organizationId: data.organizationId,
       roomId: data.roomId,
       usageTypeId: data.usageTypeId,
-      requestedByUserId: actorUserId,
-      kind: "SINGLE",
-      status: "REQUESTED",
       title: data.title,
       description: data.description || null,
       startsAt: data.startsAt,
       endsAt: data.endsAt,
       blockedFrom,
       blockedUntil,
-    });
+    }, transaction);
 
     return { booking, conflicts };
   });
@@ -251,39 +196,9 @@ export async function getBookingsForAdmin() {
 }
 
 export async function cancelOwnBookingRequest(bookingId: string, actorUserId: string) {
-  return prisma.$transaction(async (transaction) => {
-    const booking = await transaction.booking.findFirst({
-      where: { id: bookingId, requestedByUserId: actorUserId },
-      select: { id: true, status: true, startsAt: true, endsAt: true },
-    });
-
-    if (!booking) {
-      throw new BookingValidationError("Der Buchungsantrag wurde nicht gefunden.");
-    }
-
-    if (booking.status !== "REQUESTED") {
-      throw new BookingValidationError("Nur beantragte Buchungen koennen storniert werden.");
-    }
-
-    const cancelled = await transaction.booking.update({
-      where: { id: booking.id },
-      data: { status: "CANCELLED", cancellationNote: "Vom Antragsteller storniert." },
-    });
-
-    await transaction.bookingStatusHistory.create({
-      data: {
-        bookingId: booking.id,
-        actorUserId,
-        oldStatus: "REQUESTED",
-        newStatus: "CANCELLED",
-        reason: "Vom Antragsteller storniert.",
-        oldStartAt: booking.startsAt,
-        oldEndAt: booking.endsAt,
-        newStartAt: booking.startsAt,
-        newEndAt: booking.endsAt,
-      },
-    });
-
-    return cancelled;
+  return cancelBooking({
+    bookingId,
+    actorUserId,
+    scope: { requestedByUserId: actorUserId },
   });
 }

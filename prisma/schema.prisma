@@ -377,7 +377,7 @@ model BookingStatusHistory {
   id          String        @id @default(cuid())
   bookingId   String
   actorUserId String?
-  oldStatus   BookingStatus
+  oldStatus   BookingStatus?
   newStatus   BookingStatus
   reason      String?
   oldStartAt  DateTime?

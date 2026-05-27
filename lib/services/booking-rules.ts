@@ -22,13 +22,74 @@ export function assertOrganizationBookingAccess({
   }
 }
 
-export function buildRequestHistoryData(actorUserId: string, startsAt: Date, endsAt: Date) {
-  return {
-    actorUserId,
-    oldStatus: "REQUESTED" as const,
-    newStatus: "REQUESTED" as const,
-    reason: "Buchungsantrag erstellt.",
-    newStartAt: startsAt,
-    newEndAt: endsAt,
-  };
+export function assertBookingRequestPermission(hasRequestBookingPermission: boolean) {
+  if (!hasRequestBookingPermission) {
+    throw new BookingValidationError("Sie duerfen keine Buchungen beantragen.");
+  }
+}
+
+function parseClockTime(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function getLocalDayKey(value: Date) {
+  return `${value.getFullYear()}-${value.getMonth()}-${value.getDate()}`;
+}
+
+function getLocalMinutes(value: Date) {
+  return value.getHours() * 60 + value.getMinutes();
+}
+
+export function validateBookingAvailability({
+  startsAt,
+  endsAt,
+  blockedFrom,
+  blockedUntil,
+  openingTime,
+  closingTime,
+  maximumBookingMinutes,
+  singleBookingLeadDays,
+  now = new Date(),
+}: {
+  startsAt: Date;
+  endsAt: Date;
+  blockedFrom: Date;
+  blockedUntil: Date;
+  openingTime: string;
+  closingTime: string;
+  maximumBookingMinutes: number | null;
+  singleBookingLeadDays: number;
+  now?: Date;
+}) {
+  if (!(startsAt < endsAt)) {
+    throw new BookingValidationError("Der Beginn muss vor dem Ende liegen.");
+  }
+
+  if (getLocalDayKey(blockedFrom) !== getLocalDayKey(blockedUntil)) {
+    throw new BookingValidationError("Der Zeitraum muss innerhalb eines Kalendertags liegen.");
+  }
+
+  const openingMinutes = parseClockTime(openingTime);
+  const closingMinutes = parseClockTime(closingTime);
+  const blockedFromMinutes = getLocalMinutes(blockedFrom);
+  const blockedUntilMinutes = getLocalMinutes(blockedUntil);
+
+  if (blockedFromMinutes < openingMinutes) {
+    throw new BookingValidationError("Der Zeitraum liegt vor der Oeffnungszeit des Raums.");
+  }
+
+  if (blockedUntilMinutes > closingMinutes) {
+    throw new BookingValidationError("Der Zeitraum liegt nach der Schliesszeit des Raums.");
+  }
+
+  const bookingDurationMinutes = (endsAt.getTime() - startsAt.getTime()) / 60_000;
+  if (maximumBookingMinutes !== null && bookingDurationMinutes > maximumBookingMinutes) {
+    throw new BookingValidationError("Die maximale Buchungsdauer des Raums wurde ueberschritten.");
+  }
+
+  const latestAllowedStart = new Date(now.getTime() + singleBookingLeadDays * 24 * 60 * 60 * 1000);
+  if (startsAt > latestAllowedStart) {
+    throw new BookingValidationError("Der Termin liegt ausserhalb des zulassigen Buchungsvorlaufs.");
+  }
 }

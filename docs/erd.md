@@ -82,6 +82,9 @@ erDiagram
   `APPROVED`, `REJECTED`, `CANCELLED`, `MOVED`, `ARCHIVED`.
 - `BookingStatusHistory` ist ein append-only Verlauf. Buchungen werden nicht
   physisch geloescht; beide Regeln werden durch Datenbank-Trigger abgesichert.
+- Die initiale Historie eines neuen Buchungsantrags verwendet `oldStatus = null`
+  und `newStatus = REQUESTED`; spaetere Uebergaenge werden als echte
+  Statuswechsel protokolliert.
 - Eine Gesamthalle wird durch `RoomComposition` aus Teilraeumen
   zusammengesetzt; die Basiskonfliktpruefung in Phase 5 beachtet
   Parent-Room-/Teilraum-Beziehungen.
@@ -98,3 +101,6 @@ erDiagram
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - Genehmigungs- und Wartelistenablaeufe sind noch nicht umgesetzt.
+- Die lesende Verwaltungsansicht fuer Buchungen ist fuer ein eigenes Recht
+  `VIEW_BOOKINGS` vorbereitet; die umfassende Rechteentkopplung im Adminbereich
+  folgt mit dem Genehmigungsworkflow.
