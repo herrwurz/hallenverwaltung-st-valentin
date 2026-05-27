@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hallenverwaltung}
+      POSTGRES_USER: ${POSTGRES_USER:-hallenverwaltung}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: builder
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hallenverwaltung}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-hallenverwaltung}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["npm", "run", "db:deploy"]
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hallenverwaltung}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-hallenverwaltung}?schema=public
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:

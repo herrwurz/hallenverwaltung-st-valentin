@@ -1,0 +1,2 @@
+-- Initial project migration.
+-- Application tables are intentionally deferred until a later phase.

@@ -1,0 +1,99 @@
+# Hallenverwaltung St. Valentin
+
+Technisches Grundgeruest fuer eine Hallenverwaltungssoftware auf Basis von
+Next.js, TypeScript, Tailwind CSS, Prisma und PostgreSQL.
+
+## Stand: Phase 1
+
+Enthalten sind:
+
+- Next.js mit App Router und TypeScript
+- Tailwind CSS fuer das UI-Grundgeruest
+- Prisma mit PostgreSQL-Anbindung
+- Docker-Setup fuer Webanwendung, Migrationen und PostgreSQL
+- Initialmigration und Seed-Entry-Point ohne fachliche Daten
+
+Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
+
+## Voraussetzungen
+
+- Node.js 22 oder neuer und npm fuer die lokale Entwicklung
+- Docker Desktop mit Docker Compose fuer den containerisierten Start
+
+## Lokale Entwicklung
+
+1. Umgebungsdatei erstellen:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Unter Windows PowerShell:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+2. PostgreSQL starten:
+
+   ```bash
+   docker compose up -d db
+   ```
+
+3. Abhaengigkeiten installieren und Prisma vorbereiten:
+
+   ```bash
+   npm install
+   npm run db:generate
+   npm run db:deploy
+   npm run db:seed
+   ```
+
+4. Entwicklungsserver starten:
+
+   ```bash
+   npm run dev
+   ```
+
+Die Anwendung ist unter [http://localhost:3000](http://localhost:3000)
+erreichbar.
+
+## Start mit Docker Compose
+
+Nach dem Anlegen einer `.env`-Datei kann die gesamte Anwendung gestartet
+werden:
+
+```bash
+docker compose up --build
+```
+
+Der Dienst `migrate` fuehrt die vorhandenen Prisma-Migrationen aus, bevor
+der Webcontainer startet. PostgreSQL-Daten werden im Volume `postgres_data`
+gespeichert.
+
+## Datenbank
+
+Das Prisma-Schema befindet sich in `prisma/schema.prisma`. In Phase 1
+enthaelt es bewusst noch keine fachlichen Tabellen. Die Initialmigration
+stellt nur den Migrationsstand des Projekts her.
+
+Wichtige Befehle:
+
+```bash
+npm run db:generate
+npm run db:migrate -- --name beschreibung
+npm run db:deploy
+npm run db:seed
+```
+
+## Projektstruktur
+
+```text
+app/                    Next.js App Router und globale Styles
+prisma/                 Prisma-Schema, Migrationen und Seed-Script
+prisma.config.ts        Prisma-CLI- und Seed-Konfiguration
+public/                 Statische Dateien
+Dockerfile              Produktions-Build der Webanwendung
+docker-compose.yml      Web, Migrationen und PostgreSQL
+.env.example            Beispielkonfiguration
+```
