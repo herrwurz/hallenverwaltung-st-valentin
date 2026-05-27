@@ -46,6 +46,9 @@ werden.
 - Die Verwaltungsfreigabe folgt in Version 1 dem Weg `REQUESTED ->
   IN_REVIEW -> APPROVED/REJECTED`; direkte Genehmigung oder Ablehnung aus
   `REQUESTED` ist nicht vorgesehen.
+- Vor `APPROVED` wird der konfliktrelevante Raumkontext per transaktionalem
+  PostgreSQL-Advisory-Lock serialisiert. Der Lock umfasst den angefragten Raum
+  sowie alle ueber `RoomComposition` verbundenen Parent- und Teilraeume.
 - Buchungen werden nicht physisch geloescht; ein Datenbank-Trigger verhindert
   `DELETE`, und spaetere Services muessen den Statusverlauf schreiben.
 - `Booking` speichert fuer Buchungsantraege neben dem Titel eine optionale
@@ -56,8 +59,9 @@ werden.
 - `OrganizationMember` wird fuer organisationsbezogene Buchungsantraege
   ausgewertet; nur aktuell gueltige Mitgliedschaften berechtigen zur
   Antragstellung, sofern kein Verwaltungsrecht vorliegt.
-- Fuer die kuenftige Buchungsverwaltung steht das Recht `VIEW_BOOKINGS`
-  bereit; Genehmigungs- und Ablehnungsrechte bleiben davon getrennt.
+- `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
+- `APPROVE_BOOKING` erlaubt die Genehmigung eines Antrags in Pruefung.
+- `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
 
 ## Indizes
 

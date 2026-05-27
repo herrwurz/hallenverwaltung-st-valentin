@@ -1,6 +1,11 @@
 import type { BookingStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { checkBookingConflicts, type BookingConflictClient } from "@/lib/services/booking-conflict-service";
+import {
+  checkBookingConflicts,
+  lockBookingApprovalContext,
+  type BookingApprovalLockClient,
+  type BookingConflictClient,
+} from "@/lib/services/booking-conflict-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
 const transitionBookingSelect = {
@@ -47,6 +52,8 @@ type TransitionClient = {
     }): Promise<unknown>;
   };
 };
+
+type ApprovalTransitionClient = TransitionClient & BookingConflictClient & BookingApprovalLockClient;
 
 type CreateBookingTransitionInput = {
   actorUserId: string;
@@ -299,9 +306,11 @@ export async function approveBooking(
     blockedFrom: Date;
     blockedUntil: Date;
   },
-  client?: TransitionClient,
+  client?: ApprovalTransitionClient,
 ) {
-  const execute = async (transaction: TransitionClient) => {
+  const execute = async (transaction: ApprovalTransitionClient) => {
+    await lockBookingApprovalContext(input.roomId, transaction);
+
     const conflicts = await checkBookingConflicts(
       {
         roomId: input.roomId,
@@ -310,7 +319,7 @@ export async function approveBooking(
         blockedUntil: input.blockedUntil,
         excludeBookingId: input.bookingId,
       },
-      transaction as unknown as BookingConflictClient,
+      transaction,
     );
     const blockingConflicts = conflicts.filter((conflict) => conflict.severity === "blocking");
 
