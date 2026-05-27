@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node ./node_modules/next/dist/bin/next build --webpack",
     "start": "next start",
-    "lint": "eslint .",
-    "test": "tsx --test tests/*.test.ts",
+    "lint": "node ./node_modules/eslint/bin/eslint.js .",
+    "test": "node ./node_modules/tsx/dist/cli.mjs --test tests/*.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

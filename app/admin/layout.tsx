@@ -13,7 +13,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const navigationItems = [
     ...(canManageUsers ? [{ href: "/admin", label: "Dashboard" }] : []),
     ...(canViewBookings || canApproveBookings || canRejectBookings
-      ? [{ href: "/admin/bookings", label: "Buchungsantraege" }]
+      ? [
+          { href: "/admin/bookings", label: "Buchungsantraege" },
+          { href: "/admin/calendar", label: "Kalender" },
+        ]
       : []),
     ...(canManageUsers
       ? [
