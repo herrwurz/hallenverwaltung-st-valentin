@@ -45,6 +45,8 @@ Diese Dokumente gelten als fachliche Wahrheit.
 - Rollen- und Rechteprüfung serverseitig
 - Keine sicherheitsrelevanten Entscheidungen im Frontend
 - Keine Hardcodierung von Hallen, Vereinen, Rollen oder Tarifen
+- Jede neue `/admin/*`-Seite muss selbst `requirePermission()` oder eine
+  gleichwertige serverseitige PrÃ¼fung ausfÃ¼hren.
 
 ---
 

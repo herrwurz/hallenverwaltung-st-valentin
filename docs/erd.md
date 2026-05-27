@@ -89,6 +89,10 @@ erDiagram
 - Eine Gesamthalle wird durch `RoomComposition` aus Teilraeumen
   zusammengesetzt; die Basiskonfliktpruefung in Phase 5 beachtet
   Parent-Room-/Teilraum-Beziehungen.
+- Genehmigungen verwenden ab Phase 6.5 transaktionale PostgreSQL-Advisory-Locks
+  auf allen konfliktrelevanten Raum-IDs eines Buchungskontexts. Dadurch werden
+  Gesamtbereich und Teilraeume gemeinsam serialisiert, bevor die harte
+  Konfliktpruefung und der Statuswechsel nach `APPROVED` erfolgen.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -103,6 +107,6 @@ erDiagram
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - Wartelistenablaeufe sind noch nicht umgesetzt.
-- Die lesende Verwaltungsansicht fuer Buchungen ist fuer ein eigenes Recht
-  `VIEW_BOOKINGS` vorbereitet; die umfassende Rechteentkopplung im Adminbereich
-  folgt mit dem Genehmigungsworkflow.
+- `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
+- `APPROVE_BOOKING` erlaubt das Uebernehmen in Pruefung und die Genehmigung.
+- `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
