@@ -35,6 +35,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-hallenverwaltung}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-hallenverwaltung}?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:-replace-with-a-long-random-secret}
+      AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
     ports:
       - "3000:3000"
     depends_on:
