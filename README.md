@@ -34,6 +34,11 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    Copy-Item .env.example .env
    ```
 
+   Vor gemeinsam genutzten oder bereitgestellten Umgebungen muss
+   `AUTH_SECRET` durch ein langes zufaelliges Secret ersetzt werden.
+   `AUTH_TRUST_HOST=true` erlaubt Auth.js den konfigurierten lokalen bzw.
+   Docker-Host.
+
 2. PostgreSQL starten:
 
    ```bash
