@@ -1,3 +1,4 @@
+import { hash } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -142,6 +143,44 @@ async function seedRolesAndPermissions() {
       })),
     });
   }
+}
+
+async function seedInitialAdmin() {
+  const email = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!email || !password || password === "replace-before-seeding") {
+    console.log("Skipping initial admin seed: configure a non-placeholder email and password first.");
+    return;
+  }
+
+  if (password.length < 12) {
+    throw new Error("SEED_ADMIN_PASSWORD must contain at least 12 characters.");
+  }
+
+  const superAdminRole = await prisma.role.findUniqueOrThrow({
+    where: { code: "SUPER_ADMIN" },
+  });
+  const passwordHash = await hash(password, 12);
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {
+      displayName: "Initial Administrator",
+      passwordHash,
+      isActive: true,
+    },
+    create: {
+      email,
+      displayName: "Initial Administrator",
+      passwordHash,
+    },
+  });
+
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: user.id, roleId: superAdminRole.id } },
+    update: {},
+    create: { userId: user.id, roleId: superAdminRole.id },
+  });
 }
 
 async function seedCatalogs() {
@@ -327,6 +366,7 @@ async function seedFacilities() {
 
 async function main() {
   await seedRolesAndPermissions();
+  await seedInitialAdmin();
   await seedCatalogs();
   await seedFacilities();
   console.log("Phase 2 reference and facility seed data inserted.");
