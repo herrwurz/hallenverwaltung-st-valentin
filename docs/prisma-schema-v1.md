@@ -7,9 +7,10 @@ Phase 3.5 haertet das relationale Grundmodell fuer die folgenden
 Implementierungsphasen. Phase 5 nutzt dieses Modell fuer einzelne
 Buchungsantraege mit Statushistorie; Phase 6 setzt darauf den
 Genehmigungsworkflow fuer `REQUESTED`, `IN_REVIEW`, `APPROVED` und `REJECTED`
-im Verwaltungsportal um. Kalender, Warteliste und Abrechnung sind weiterhin
-nicht umgesetzt. Die in Phase 3 vorhandene Authentifizierung verwendet
-`User.passwordHash`.
+im Verwaltungsportal um. Phase 7 ergaenzt die Wartelistenbasis mit
+Angebotsfrist, Angebotsannahme und erneuter Genehmigung ueber neue
+Buchungsantraege. Kalender und Abrechnung sind weiterhin nicht umgesetzt. Die
+in Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -34,7 +35,7 @@ werden.
 | `RoomStatus` | `ACTIVE`, `RESTRICTED`, `OUT_OF_SERVICE` |
 | `BookingStatus` | `DRAFT`, `REQUESTED`, `IN_REVIEW`, `APPROVED`, `REJECTED`, `CANCELLED`, `MOVED`, `ARCHIVED` |
 | `ClosureStatus` | `OPEN`, `RESTRICTED`, `CLOSED` |
-| `WaitlistStatus` | `WAITING`, `OFFERED`, `ACCEPTED`, `EXPIRED`, `CANCELLED` |
+| `WaitlistStatus` | `ACTIVE`, `OFFERED`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED` |
 | `BillingStatus` | `NOT_RELEVANT`, `OPEN`, `EXPORTED`, `BILLED`, `CANCELLED` |
 
 ## Harte Invarianten
@@ -60,8 +61,15 @@ werden.
   ausgewertet; nur aktuell gueltige Mitgliedschaften berechtigen zur
   Antragstellung, sofern kein Verwaltungsrecht vorliegt.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
+- `VIEW_BOOKINGS` ist ebenfalls Voraussetzung fuer die Admin-Wartelistenuebersicht.
 - `APPROVE_BOOKING` erlaubt die Genehmigung eines Antrags in Pruefung.
 - `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
+- Wartelistenplaetze werden nach `placedAt` gereiht. Wenn ein passender Slot
+  frei wird, erhaelt genau ein Eintrag gleichzeitig den Status `OFFERED` mit
+  einer Frist von 48 Stunden (`offerExpiresAt`).
+- Die Annahme eines gueltigen Wartelistenangebots fuehrt zu einem neuen
+  Buchungsantrag im Status `REQUESTED`; eine fixe Genehmigung erfolgt dadurch
+  nicht.
 
 ## Indizes
 
@@ -96,7 +104,7 @@ und Tarifgruppen sowie folgende reale Standorte:
 
 ## Nicht Bestandteil von Phase 5
 
-- Keine Buchungen, Serien oder Statushistorien als Seed-Daten.
+- Keine Buchungen, Serien, Wartelistenplaetze oder Statushistorien als Seed-Daten.
 - Keine Tarifbetraege, Rechnungen oder Abrechnungsablaeufe.
-- Keine Kalender-, Wartelisten- oder Genehmigungslogik.
+- Keine Kalender- oder Abrechnungslogik.
 - Keine Umsetzung der Mandantenfaehigkeit.

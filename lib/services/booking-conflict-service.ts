@@ -64,12 +64,27 @@ export async function lockBookingApprovalContext(
   roomId: string,
   client: BookingApprovalLockClient = prisma,
 ) {
+  return lockConflictRoomContext("booking-approval-room", roomId, client);
+}
+
+export async function lockWaitlistContext(
+  roomId: string,
+  client: BookingApprovalLockClient = prisma,
+) {
+  return lockConflictRoomContext("waitlist-room", roomId, client);
+}
+
+async function lockConflictRoomContext(
+  namespace: string,
+  roomId: string,
+  client: BookingApprovalLockClient,
+) {
   const roomIds = await getBookingConflictRoomIds(roomId, client);
 
   for (const lockedRoomId of roomIds) {
     await client.$queryRawUnsafe(
       "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
-      `booking-approval-room:${lockedRoomId}`,
+      `${namespace}:${lockedRoomId}`,
     );
   }
 

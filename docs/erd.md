@@ -7,8 +7,9 @@ bildet die dort genannten Fachobjekte fuer die spaetere Implementierung ab.
 Bis Phase 3.5 wurden Datenmodell, Seed-Daten und Auth/RBAC vorbereitet.
 Phase 5 implementiert die Basis fuer einzelne Buchungsantraege und deren
 Statushistorie; Phase 6 erweitert dies um den Review- und
-Genehmigungsworkflow im Verwaltungsportal. Kalender, Warteliste und
-Abrechnung bleiben ausserhalb dieses Umfangs.
+Genehmigungsworkflow im Verwaltungsportal. Phase 7 fuegt die
+Wartelistenbasis mit 48-Stunden-Angebotsfrist und erneuter Antragserzeugung
+im Portal hinzu. Kalender und Abrechnung bleiben ausserhalb dieses Umfangs.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -93,6 +94,13 @@ erDiagram
   auf allen konfliktrelevanten Raum-IDs eines Buchungskontexts. Dadurch werden
   Gesamtbereich und Teilraeume gemeinsam serialisiert, bevor die harte
   Konfliktpruefung und der Statuswechsel nach `APPROVED` erfolgen.
+- Wartelistenplaetze nutzen `WaitlistEntry` mit den Status `ACTIVE`,
+  `OFFERED`, `ACCEPTED`, `DECLINED`, `EXPIRED` und `CANCELLED`. Die Reihung
+  erfolgt nach `placedAt`; gleichzeitig darf pro passendem Slot-Kontext nur
+  ein aktives Angebot bestehen.
+- Wird ein gueltiges Angebot angenommen, entsteht daraus ein neuer
+  Buchungsantrag im Status `REQUESTED`. Die Gemeinde prueft diesen Antrag
+  anschliessend erneut ueber den normalen Genehmigungsworkflow.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -106,7 +114,7 @@ erDiagram
 - Konkrete Tarifbetraege und Tarifkombinationen sind noch nicht festgelegt.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
-- Wartelistenablaeufe sind noch nicht umgesetzt.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
+- `VIEW_BOOKINGS` ist auch Voraussetzung fuer die Admin-Wartelistenuebersicht.
 - `APPROVE_BOOKING` erlaubt das Uebernehmen in Pruefung und die Genehmigung.
 - `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
