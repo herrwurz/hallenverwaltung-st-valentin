@@ -1,5 +1,6 @@
 import { saveRoomAction } from "@/app/admin/actions";
 import { AdminFeedback } from "@/components/admin-feedback";
+import { requirePermission } from "@/lib/permissions";
 import { getRoomAdministrationData } from "@/lib/services/admin/room-service";
 
 const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
@@ -9,6 +10,7 @@ type PageProps = {
 };
 
 export default async function RoomsPage({ searchParams }: PageProps) {
+  await requirePermission("MANAGE_USERS");
   const [params, data] = await Promise.all([searchParams, getRoomAdministrationData()]);
 
   return (

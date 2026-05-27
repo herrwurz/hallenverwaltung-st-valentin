@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
+import { getBookingStatusBadgeClass, getBookingStatusLabel } from "@/lib/booking-status";
 import { requirePermission } from "@/lib/permissions";
 import { getBookingRequestOptions, getBookingsForOrganization } from "@/lib/services/booking-service";
 import { cancelOwnBookingRequestAction, createBookingRequestAction } from "@/app/portal/bookings/actions";
@@ -150,7 +151,9 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-sky-300">{booking.status}</p>
+                    <p className={`inline-flex rounded-full px-3 py-1 text-sm ${getBookingStatusBadgeClass(booking.status)}`}>
+                      {getBookingStatusLabel(booking.status)}
+                    </p>
                     {booking.status === "REQUESTED" && booking.requestedByUserId === user.id ? (
                       <form action={cancelOwnBookingRequestAction} className="mt-3">
                         <input type="hidden" name="bookingId" value={booking.id} />

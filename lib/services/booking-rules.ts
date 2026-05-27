@@ -28,6 +28,30 @@ export function assertBookingRequestPermission(hasRequestBookingPermission: bool
   }
 }
 
+export function assertBookingViewPermission(hasViewBookingPermission: boolean) {
+  if (!hasViewBookingPermission) {
+    throw new BookingValidationError("Sie duerfen Buchungsantraege nicht einsehen.");
+  }
+}
+
+export function assertBookingApprovalPermission(hasApprovalPermission: boolean) {
+  if (!hasApprovalPermission) {
+    throw new BookingValidationError("Sie duerfen Buchungsantraege nicht genehmigen.");
+  }
+}
+
+export function assertBookingRejectionPermission(hasRejectionPermission: boolean) {
+  if (!hasRejectionPermission) {
+    throw new BookingValidationError("Sie duerfen Buchungsantraege nicht ablehnen.");
+  }
+}
+
+export function assertBookingDecisionNote(value: string | undefined | null) {
+  if (!value?.trim()) {
+    throw new BookingValidationError("Bitte geben Sie eine Begruendung oder einen Kommentar an.");
+  }
+}
+
 function parseClockTime(value: string) {
   const [hours, minutes] = value.split(":").map(Number);
   return hours * 60 + minutes;

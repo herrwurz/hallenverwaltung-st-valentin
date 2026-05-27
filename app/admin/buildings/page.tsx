@@ -1,5 +1,6 @@
 import { AdminFeedback } from "@/components/admin-feedback";
 import { saveBuildingAction } from "@/app/admin/actions";
+import { requirePermission } from "@/lib/permissions";
 import { getBuildingAdministrationData } from "@/lib/services/admin/building-service";
 
 const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
@@ -9,6 +10,7 @@ type PageProps = {
 };
 
 export default async function BuildingsPage({ searchParams }: PageProps) {
+  await requirePermission("MANAGE_USERS");
   const [params, data] = await Promise.all([searchParams, getBuildingAdministrationData()]);
 
   return (

@@ -228,6 +228,32 @@ export async function cancelBooking(
   return client ? execute(client) : prisma.$transaction((transaction) => execute(transaction));
 }
 
+export async function markBookingInReview(
+  input: {
+    bookingId: string;
+    actorUserId: string;
+  },
+  client?: TransitionClient,
+) {
+  const execute = async (transaction: TransitionClient) =>
+    applyExistingBookingTransition(transaction, {
+      bookingId: input.bookingId,
+      actorUserId: input.actorUserId,
+      expectedStatuses: ["REQUESTED"],
+      nextStatus: "IN_REVIEW",
+      reason: "Zur Pruefung uebernommen.",
+      updateData: {
+        processedByUserId: input.actorUserId,
+        processedAt: new Date(),
+      },
+      notFoundMessage: "Die Buchung wurde nicht gefunden.",
+      invalidStatusMessage: "Nur beantragte Buchungen koennen in Pruefung gesetzt werden.",
+      parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geaendert. Bitte neu laden.",
+    });
+
+  return client ? execute(client) : prisma.$transaction((transaction) => execute(transaction));
+}
+
 export async function moveBooking(
   input: {
     bookingId: string;
@@ -295,7 +321,7 @@ export async function approveBooking(
     return applyExistingBookingTransition(transaction, {
       bookingId: input.bookingId,
       actorUserId: input.actorUserId,
-      expectedStatuses: ["REQUESTED", "IN_REVIEW"],
+      expectedStatuses: ["IN_REVIEW"],
       nextStatus: "APPROVED",
       reason: input.decisionNote?.trim() || "Buchung genehmigt.",
       updateData: {
@@ -304,7 +330,7 @@ export async function approveBooking(
         decisionNote: input.decisionNote?.trim() || null,
       },
       notFoundMessage: "Die Buchung wurde nicht gefunden.",
-      invalidStatusMessage: "Nur beantragte oder in Pruefung befindliche Buchungen koennen genehmigt werden.",
+      invalidStatusMessage: "Nur Buchungen in Pruefung koennen genehmigt werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geaendert. Bitte neu laden.",
     });
   };
@@ -324,7 +350,7 @@ export async function rejectBooking(
     applyExistingBookingTransition(transaction, {
       bookingId: input.bookingId,
       actorUserId: input.actorUserId,
-      expectedStatuses: ["REQUESTED", "IN_REVIEW"],
+      expectedStatuses: ["IN_REVIEW"],
       nextStatus: "REJECTED",
       reason: input.decisionNote?.trim() || "Buchung abgelehnt.",
       updateData: {
@@ -333,7 +359,7 @@ export async function rejectBooking(
         decisionNote: input.decisionNote?.trim() || null,
       },
       notFoundMessage: "Die Buchung wurde nicht gefunden.",
-      invalidStatusMessage: "Nur beantragte oder in Pruefung befindliche Buchungen koennen abgelehnt werden.",
+      invalidStatusMessage: "Nur Buchungen in Pruefung koennen abgelehnt werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geaendert. Bitte neu laden.",
     });
 

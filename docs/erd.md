@@ -6,8 +6,9 @@ Verbindliche Fachgrundlage ist `docs/pflichtenheft-v1.0.md`. Das Datenmodell
 bildet die dort genannten Fachobjekte fuer die spaetere Implementierung ab.
 Bis Phase 3.5 wurden Datenmodell, Seed-Daten und Auth/RBAC vorbereitet.
 Phase 5 implementiert die Basis fuer einzelne Buchungsantraege und deren
-Statushistorie; Kalender, Warteliste, Genehmigungsoberflaeche und Abrechnung
-bleiben ausserhalb dieses Umfangs.
+Statushistorie; Phase 6 erweitert dies um den Review- und
+Genehmigungsworkflow im Verwaltungsportal. Kalender, Warteliste und
+Abrechnung bleiben ausserhalb dieses Umfangs.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -92,15 +93,16 @@ erDiagram
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
   kuenftige Service-Schreibpfade vor.
-- Serien bleiben in Phase 5 reine Datenmodellgrundlage; umgesetzt werden
-  einzelne Buchungsantraege im Status `REQUESTED`.
+- Serien bleiben weiterhin reine Datenmodellgrundlage; umgesetzt werden
+  einzelne Buchungsantraege mit dem Workflow `REQUESTED -> IN_REVIEW ->
+  APPROVED/REJECTED`.
 
 ## Offene fachliche Konkretisierungen
 
 - Konkrete Tarifbetraege und Tarifkombinationen sind noch nicht festgelegt.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
-- Genehmigungs- und Wartelistenablaeufe sind noch nicht umgesetzt.
+- Wartelistenablaeufe sind noch nicht umgesetzt.
 - Die lesende Verwaltungsansicht fuer Buchungen ist fuer ein eigenes Recht
   `VIEW_BOOKINGS` vorbereitet; die umfassende Rechteentkopplung im Adminbereich
   folgt mit dem Genehmigungsworkflow.
