@@ -59,6 +59,8 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    der Benachrichtigungsqueue kann ueber `/admin/notifications` manuell
    angestossen werden; Event-Schalter werden dort als `SystemSetting`
    gespeichert.
+   Die Abrechnungsvorbereitung ist unter `/admin/billing` verfuegbar und
+   erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen.
 
 4. Entwicklungsserver starten:
 

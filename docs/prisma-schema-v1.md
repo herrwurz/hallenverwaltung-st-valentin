@@ -9,8 +9,9 @@ Buchungsantraege mit Statushistorie; Phase 6 setzt darauf den
 Genehmigungsworkflow fuer `REQUESTED`, `IN_REVIEW`, `APPROVED` und `REJECTED`
 im Verwaltungsportal um. Phase 7 ergaenzt die Wartelistenbasis mit
 Angebotsfrist, Angebotsannahme und erneuter Genehmigung ueber neue
-Buchungsantraege. Kalender und Abrechnung sind weiterhin nicht umgesetzt. Die
-in Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
+Buchungsantraege. Phase 10 ergaenzt die Abrechnungsvorbereitung fuer
+genehmigte Buchungen. Die in Phase 3 vorhandene Authentifizierung verwendet
+`User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -37,6 +38,8 @@ werden.
 | `ClosureStatus` | `OPEN`, `RESTRICTED`, `CLOSED` |
 | `WaitlistStatus` | `ACTIVE`, `OFFERED`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED` |
 | `BillingStatus` | `NOT_RELEVANT`, `OPEN`, `EXPORTED`, `BILLED`, `CANCELLED` |
+| `TariffDayType` | `ALL`, `WEEKDAY`, `WEEKEND`, `HOLIDAY` |
+| `BillingCalculationType` | `HOURLY`, `FLAT`, `ZERO` |
 
 ## Harte Invarianten
 
@@ -114,6 +117,17 @@ Zusatz fuer Phase 9.5:
   Key `notifications.events.enabled` gespeichert. Fehlende oder unvollstaendige
   Werte fallen sicher auf aktivierte Standardwerte zurueck.
 
+Zusatz fuer Phase 10:
+
+- `Organization.isBillingRelevant` steuert, ob genehmigte Buchungen einer
+  Organisation in die Abrechnungsvorbereitung aufgenommen werden.
+- `Tariff.dayType` unterscheidet allgemeine, Wochentags-, Wochenend- und
+  Feiertagstarife. Die Tarifaufloesung verwendet Raum, Tarifgruppe,
+  Organisationstyp, Nutzungstyp, Tagesart und Gueltigkeitszeitraum.
+- `BillingEntry` speichert `periodStart`, `periodEnd`, `durationMinutes`,
+  `unitPrice` und `calculationType`, damit die Berechnung fuer einen spaeteren
+  Excel-/PDF-Export nachvollziehbar bleibt.
+
 ## Seed-Umfang
 
 Die Seeds initialisieren Rollen, Rechte, Organisationstypen, Nutzungstypen
@@ -130,6 +144,7 @@ und Tarifgruppen sowie folgende reale Standorte:
 ## Nicht Bestandteil von Phase 5
 
 - Keine Buchungen, Serien, Wartelistenplaetze oder Statushistorien als Seed-Daten.
-- Keine Tarifbetraege, Rechnungen oder Abrechnungsablaeufe.
-- Keine Kalender- oder Abrechnungslogik.
+- Keine Tarifbetraege oder Rechnungen als Seed-Daten.
+- Keine automatische Rechnungslegung, keine Zahlungsabwicklung und noch kein
+  echter Excel-/PDF-Export.
 - Keine Umsetzung der Mandantenfaehigkeit.
