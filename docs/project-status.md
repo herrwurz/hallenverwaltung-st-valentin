@@ -108,6 +108,14 @@ Billing Hardening
 
 Export & Reporting
 
+## Phase 11
+
+Oeffentliche Ansicht
+
+## Phase 12
+
+Scheduler / Worker
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -206,6 +214,7 @@ Version 1:
 
 * calendar-service.ts
 * calendar-settings-service.ts
+* public-service.ts
 
 ## Benachrichtigungen
 
@@ -213,6 +222,7 @@ Version 1:
 * notification-template-service.ts
 * notification-settings-service.ts
 * mail-service.ts
+* worker-service.ts
 
 ## Abrechnung
 
@@ -255,6 +265,7 @@ Version 1:
 * MANAGE_USERS
 * BILLING_EXPORT
 * CREATE_EXPORTS
+* MANAGE_SYSTEM_JOBS
 
 ---
 
@@ -282,12 +293,6 @@ Version 1:
 * Hallenordnungen
 * Schadensfotos
 
-### Scheduler / Worker
-
-* processNotificationQueue()
-* processExpiredWaitlistOffers()
-* Cron-/Workerbetrieb
-
 ### Deployment
 
 * Produktions-Docker
@@ -308,9 +313,13 @@ Version 1:
 
 # Aktuelle Produktionsrisiken
 
-## Kein echter Hintergrund-Worker
+## Kein Deployment-Scheduler
 
-Notification Queue und Wartelistenabläufe laufen derzeit nicht automatisch.
+Der Worker ist vorbereitet, muss im Betrieb aber per Cron, separatem Worker-
+Container oder vergleichbarer Infrastruktur gestartet werden.
+
+Ohne diese Betriebsintegration laufen Notification Queue und Wartelistenabläufe
+nicht automatisch.
 
 ---
 
@@ -339,15 +348,6 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 ---
 
 # Empfohlene nächste Phasen
-
-## Phase 12
-
-Scheduler / Worker
-
-* Notification Queue automatisch
-* Wartelistenabläufe automatisch
-* Maintenance Jobs
-* Cron-/Workerintegration
 
 ## Phase 13
 

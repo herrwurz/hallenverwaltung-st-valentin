@@ -23,6 +23,7 @@ const permissions = [
   ["BILLING_EXPORT", "Abrechnung exportieren"],
   ["CREATE_EXPORTS", "Exporte erstellen"],
   ["MANAGE_DOCUMENTS", "Dokumente verwalten"],
+  ["MANAGE_SYSTEM_JOBS", "System-Jobs verwalten"],
   ["MANAGE_SYSTEM", "Systemeinstellungen aendern"],
 ] as const;
 
@@ -51,6 +52,7 @@ const roles = [
       "BILLING_EXPORT",
       "CREATE_EXPORTS",
       "MANAGE_DOCUMENTS",
+      "MANAGE_SYSTEM_JOBS",
     ],
   ],
   [

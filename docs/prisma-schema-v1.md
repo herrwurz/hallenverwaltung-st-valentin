@@ -13,7 +13,8 @@ Buchungsantraege. Phase 10 ergaenzt die Abrechnungsvorbereitung fuer
 genehmigte Buchungen. Phase 10.5 ergaenzt Reportingdaten sowie CSV-, XLSX-
 und PDF-Exporte ohne automatische Rechnungslegung. Phase 11 nutzt das Modell
 fuer die oeffentliche Ansicht mit Kalender, freien Zeiten und iCal-Export. Die
-in Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
+Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
+Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -151,6 +152,11 @@ Zusatz fuer Phase 10:
 - `Closure.isPublic` steuert, ob eine Sperre oeffentlich als Detail sichtbar
   ist. Nicht-oeffentliche Sperren blockieren freie Zeitfenster weiterhin, ohne
   ihren Grund im oeffentlichen Kalender zu zeigen.
+- `AuditEntry` protokolliert Worker-Laeufe mit `entityType = WorkerJob`,
+  `entityId = Jobname`, `action = SUCCESS/FAILED` und Payload fuer Startzeit,
+  Endzeit, verarbeitete Anzahl und Fehlermeldung.
+- Das Recht `MANAGE_SYSTEM_JOBS` erlaubt die manuelle Ausfuehrung von
+  Hintergrundjobs im Verwaltungsportal.
 
 ## Seed-Umfang
 
@@ -172,4 +178,5 @@ und Tarifgruppen sowie folgende reale Standorte:
 - Keine automatische Rechnungslegung und keine Zahlungsabwicklung.
 - Keine oeffentlichen Schreibfunktionen fuer Buchungen, Warteliste oder
   Verwaltung.
+- Kein externer Scheduler-Dienst und kein Deployment-spezifischer Cron-Zwang.
 - Keine Umsetzung der Mandantenfaehigkeit.

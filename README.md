@@ -66,6 +66,22 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    Die oeffentliche Ansicht unter `/public` zeigt Standortuebersicht,
    datenschutzkonforme Kalenderdaten, freie Zeiten und einen iCal-Export unter
    `/public/calendar/ical`.
+   Hintergrundjobs fuer Benachrichtigungen und Wartelistenablauf koennen unter
+   `/admin/system/jobs` manuell gestartet oder per CLI ausgefuehrt werden:
+
+   ```bash
+   npm run worker:run
+   ```
+
+   Beispiel fuer Cron im Serverbetrieb:
+
+   ```cron
+   */5 * * * * cd /srv/hallenverwaltung && npm run worker:run
+   ```
+
+   Im Docker-Betrieb sollte derselbe Befehl in einem separaten Cron-/Worker-
+   Container oder ueber den Host-Cron gegen das laufende App-Image gestartet
+   werden. Es wird kein externer Scheduler-Dienst vorausgesetzt.
 
 4. Entwicklungsserver starten:
 
