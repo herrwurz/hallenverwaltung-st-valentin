@@ -243,6 +243,53 @@ Spätere Phasen nicht vorziehen.
 
 ---
 
+# Credit-/Sparmodus
+
+Ziel: Credits und Laufzeit schonen, ohne Sicherheit, Architekturregeln oder
+Commit-Qualität zu gefährden.
+
+Standardverhalten ab sofort:
+
+1. Aufgaben klein schneiden
+   - Große Phasen möglichst in kleine Arbeitspakete aufteilen.
+   - Beispiele: Analyse, Service, UI, Tests, Doku, Prüfungen getrennt
+     bearbeiten, wenn der Nutzer keinen Komplettdurchlauf verlangt.
+
+2. Prüfungen gezielt einsetzen
+   - Während der Entwicklung bevorzugt gezielte Tests und `npx tsc --noEmit`
+     verwenden.
+   - Die volle Prüfmatrix erst vor Commit/Push ausführen oder wenn der Nutzer
+     sie ausdrücklich verlangt.
+   - Vor jedem Commit bleiben die unter "Qualitätsprüfungen" genannten
+     Prüfungen verpflichtend.
+
+3. Doppelarbeit vermeiden
+   - Keine breite Architekturprüfung wiederholen, wenn unmittelbar danach nur
+     konkrete bekannte Befunde umgesetzt werden sollen.
+   - Bei Folgeaufgaben auf den letzten Review oder die letzte Zusammenfassung
+     Bezug nehmen und nur betroffene Dateien erneut lesen.
+
+4. Git sparsam verwenden
+   - Nicht automatisch committen oder pushen, wenn der Nutzer nur Analyse,
+     Entwurf oder lokale Änderungen verlangt.
+   - Commit/Push erst nach erfolgreicher Abschlussprüfung und nur auf dem
+     passenden Feature-Branch.
+
+5. Sparmodus respektieren
+   - Wenn der Nutzer "Sparmodus" nennt, nur notwendige Dateien lesen, keine
+     breite Codebase-Analyse starten und keine vollen Tests ausführen, solange
+     sie nicht für die Aufgabe oder einen Commit notwendig sind.
+   - Sicherheits- und Datenintegritätsregeln dürfen dadurch nicht umgangen
+     werden.
+
+6. Phasen in Teilschritte planen
+   - Bei großen Phasen zuerst eine knappe sinnvolle Zerlegung wählen.
+   - Beispiel: Export-Service, Admin-UI, Tests, Doku, Abschlussprüfung.
+   - Umsetzung dann Schritt für Schritt, statt alles gleichzeitig zu laden und
+     zu prüfen.
+
+---
+
 # Antwortstruktur für Codex
 
 Nach jeder Aufgabe ausgeben:
