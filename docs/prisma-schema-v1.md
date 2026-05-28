@@ -88,7 +88,7 @@ vorbereitet:
 | `BookingSeries` | `(roomId, startsOn, endsOn)` |
 | `WaitlistEntry` | `(status, placedAt)` |
 | `Tariff` | `(roomId, tariffGroupId, usageTypeId, validFrom)` |
-| `Notification` | `(status, createdAt)` |
+| `Notification` | `(status, createdAt)`, `(status, nextAttemptAt)` |
 | `DamageReport` | `(roomId, status)` |
 
 `startsAt`/`endsAt`, `startsOn`/`endsOn` und `placedAt` sind die bereits
@@ -103,6 +103,16 @@ Zusatz fuer Phase 7.5:
 - `Notification` speichert fuer Wartelistenangebote zusaetzlich
   `waitlistEntryId` und ein JSON-Payload mit `offerExpiresAt`, `roomId`,
   `startsAt` und `endsAt`.
+
+Zusatz fuer Phase 9.5:
+
+- `Notification` speichert Retry-Metadaten: `attemptCount`, `maxAttempts`,
+  `nextAttemptAt` und `lastError`. Automatische Queue-Verarbeitung
+  beruecksichtigt `nextAttemptAt` und beendet automatische Dauerschleifen,
+  sobald `attemptCount >= maxAttempts` erreicht ist.
+- Event-Schalter fuer die E-Mail-Ereignisse werden als `SystemSetting` mit dem
+  Key `notifications.events.enabled` gespeichert. Fehlende oder unvollstaendige
+  Werte fallen sicher auf aktivierte Standardwerte zurueck.
 
 ## Seed-Umfang
 

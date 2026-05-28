@@ -559,6 +559,10 @@ model Notification {
   recipient       String
   status          NotificationStatus  @default(PENDING)
   payload         Json?
+  attemptCount    Int                 @default(0)
+  maxAttempts     Int                 @default(5)
+  nextAttemptAt   DateTime?
+  lastError       String?
   createdAt       DateTime            @default(now())
   sentAt          DateTime?
   errorMessage    String?
@@ -567,6 +571,7 @@ model Notification {
   recipientUser   User?               @relation(fields: [recipientUserId], references: [id])
 
   @@index([status, createdAt])
+  @@index([status, nextAttemptAt])
   @@index([waitlistEntryId, createdAt])
 }
 

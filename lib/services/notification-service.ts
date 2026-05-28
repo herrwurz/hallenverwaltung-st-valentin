@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { MailDeliveryError, sendEmail, type MailPayload } from "@/lib/services/mail-service";
+import { isNotificationEventEnabled } from "@/lib/services/notification-settings-service";
 import { renderNotificationTemplate } from "@/lib/services/notification-template-service";
 import type {
   BookingNotificationPayload,
@@ -13,14 +14,18 @@ type NotificationEventStatusFilter = "ALL" | "PENDING" | "SENT" | "FAILED";
 
 type NotificationClient = Pick<
   PrismaClient,
-  "notification" | "booking" | "waitlistEntry" | "user"
+  "notification" | "booking" | "waitlistEntry" | "user" | "systemSetting"
 >;
 
 type MailSender = (payload: MailPayload) => Promise<unknown>;
 
 type NotificationDeliveryDependencies = {
   sendMail?: MailSender;
+  now?: () => Date;
 };
+
+const baseRetryDelayMinutes = 15;
+const maxRetryDelayMinutes = 24 * 60;
 
 const notificationListSelect = {
   id: true,
@@ -32,6 +37,10 @@ const notificationListSelect = {
   recipient: true,
   status: true,
   payload: true,
+  attemptCount: true,
+  maxAttempts: true,
+  nextAttemptAt: true,
+  lastError: true,
   createdAt: true,
   sentAt: true,
   errorMessage: true,
@@ -162,8 +171,18 @@ async function queueNotificationRows(
   client: NotificationClient = prisma,
 ) {
   const createdIds: string[] = [];
+  const enabledCache = new Map<NotificationEventCode, boolean>();
 
   for (const row of rows) {
+    let enabled = enabledCache.get(row.eventCode);
+    if (typeof enabled !== "boolean") {
+      enabled = "systemSetting" in client ? await isNotificationEventEnabled(row.eventCode, client) : true;
+    }
+    enabledCache.set(row.eventCode, enabled);
+    if (!enabled) {
+      continue;
+    }
+
     const notification = await client.notification.create({
       data: {
         bookingId: row.bookingId ?? null,
@@ -503,11 +522,21 @@ export async function queueWaitlistExpiredNotification(
   );
 }
 
+function calculateNextAttemptAt(attemptCount: number, now: Date) {
+  const delayMinutes = Math.min(
+    baseRetryDelayMinutes * 2 ** Math.max(attemptCount - 1, 0),
+    maxRetryDelayMinutes,
+  );
+  return new Date(now.getTime() + delayMinutes * 60 * 1000);
+}
+
 async function sendNotificationRecord(
   notificationId: string,
   client: NotificationClient,
   dependencies: NotificationDeliveryDependencies = {},
+  options: { force?: boolean } = {},
 ) {
+  const now = dependencies.now?.() ?? new Date();
   const notification = await client.notification.findUnique({
     where: { id: notificationId },
     select: {
@@ -516,6 +545,9 @@ async function sendNotificationRecord(
       recipient: true,
       payload: true,
       status: true,
+      attemptCount: true,
+      maxAttempts: true,
+      nextAttemptAt: true,
     },
   });
 
@@ -530,12 +562,27 @@ async function sendNotificationRecord(
     });
   }
 
+  if (!options.force && notification.nextAttemptAt && notification.nextAttemptAt > now) {
+    return client.notification.findUnique({
+      where: { id: notificationId },
+      select: notificationListSelect,
+    });
+  }
+
+  if (!options.force && notification.attemptCount >= notification.maxAttempts) {
+    return client.notification.findUnique({
+      where: { id: notificationId },
+      select: notificationListSelect,
+    });
+  }
+
   const template = renderNotificationTemplate({
     eventCode: notification.eventCode,
     payload: notification.payload,
   });
 
   const sendMail = dependencies.sendMail ?? sendEmail;
+  const nextAttemptCount = notification.attemptCount + 1;
 
   try {
     await sendMail({
@@ -549,7 +596,10 @@ async function sendNotificationRecord(
       where: { id: notificationId },
       data: {
         status: "SENT",
-        sentAt: new Date(),
+        sentAt: now,
+        attemptCount: nextAttemptCount,
+        nextAttemptAt: null,
+        lastError: null,
         errorMessage: null,
       },
     });
@@ -563,6 +613,12 @@ async function sendNotificationRecord(
       where: { id: notificationId },
       data: {
         status: "FAILED",
+        attemptCount: nextAttemptCount,
+        nextAttemptAt:
+          nextAttemptCount >= notification.maxAttempts
+            ? null
+            : calculateNextAttemptAt(nextAttemptCount, now),
+        lastError: errorMessage,
         errorMessage,
       },
     });
@@ -574,15 +630,25 @@ async function sendNotificationRecord(
   });
 }
 
+export async function sendPendingNotification(
+  notificationId: string,
+  client: NotificationClient = prisma,
+  dependencies: NotificationDeliveryDependencies = {},
+) {
+  return sendNotificationRecord(notificationId, client, dependencies);
+}
+
 export async function processPendingNotifications(
   limit = 25,
   client: NotificationClient = prisma,
   dependencies: NotificationDeliveryDependencies = {},
 ) {
+  const now = dependencies.now?.() ?? new Date();
   const pending = await client.notification.findMany({
     where: {
       status: { in: ["PENDING", "FAILED"] },
       channel: "EMAIL",
+      OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }],
     },
     orderBy: { createdAt: "asc" },
     take: limit,
@@ -597,7 +663,7 @@ export async function processPendingNotifications(
   return results;
 }
 
-export async function retryNotification(
+export async function retryFailedNotification(
   notificationId: string,
   actorUserId: string,
   dependencies: NotificationDeliveryDependencies = {},
@@ -612,7 +678,17 @@ export async function retryNotification(
     throw new Error("Sie duerfen Benachrichtigungen nicht erneut versenden.");
   }
 
-  return sendNotificationRecord(notificationId, client, dependencies);
+  return sendNotificationRecord(notificationId, client, dependencies, { force: true });
+}
+
+export async function retryNotification(
+  notificationId: string,
+  actorUserId: string,
+  dependencies: NotificationDeliveryDependencies = {},
+  client: NotificationClient = prisma,
+  permissions: { canView?: boolean } = {},
+) {
+  return retryFailedNotification(notificationId, actorUserId, dependencies, client, permissions);
 }
 
 export async function getNotificationsForAdmin(
