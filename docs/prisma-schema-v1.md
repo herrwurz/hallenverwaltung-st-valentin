@@ -11,8 +11,9 @@ im Verwaltungsportal um. Phase 7 ergaenzt die Wartelistenbasis mit
 Angebotsfrist, Angebotsannahme und erneuter Genehmigung ueber neue
 Buchungsantraege. Phase 10 ergaenzt die Abrechnungsvorbereitung fuer
 genehmigte Buchungen. Phase 10.5 ergaenzt Reportingdaten sowie CSV-, XLSX-
-und PDF-Exporte ohne automatische Rechnungslegung. Die in Phase 3 vorhandene
-Authentifizierung verwendet `User.passwordHash`.
+und PDF-Exporte ohne automatische Rechnungslegung. Phase 11 nutzt das Modell
+fuer die oeffentliche Ansicht mit Kalender, freien Zeiten und iCal-Export. Die
+in Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -144,6 +145,12 @@ Zusatz fuer Phase 10:
   `ReportingService`.
 - Exportvorgaenge werden in `AuditEntry` mit Exporttyp, Zeitraum, Filterwerten
   und Anzahl der exportierten Zeilen protokolliert.
+- Die oeffentliche Kalenderansicht und der iCal-Export verwenden
+  `public.calendar.visibility.default` sowie die raumbezogenen Felder
+  `publicShowOrganization` und `publicShowEventName`.
+- `Closure.isPublic` steuert, ob eine Sperre oeffentlich als Detail sichtbar
+  ist. Nicht-oeffentliche Sperren blockieren freie Zeitfenster weiterhin, ohne
+  ihren Grund im oeffentlichen Kalender zu zeigen.
 
 ## Seed-Umfang
 
@@ -163,4 +170,6 @@ und Tarifgruppen sowie folgende reale Standorte:
 - Keine Buchungen, Serien, Wartelistenplaetze oder Statushistorien als Seed-Daten.
 - Keine Tarifbetraege oder Rechnungen als Seed-Daten.
 - Keine automatische Rechnungslegung und keine Zahlungsabwicklung.
+- Keine oeffentlichen Schreibfunktionen fuer Buchungen, Warteliste oder
+  Verwaltung.
 - Keine Umsetzung der Mandantenfaehigkeit.

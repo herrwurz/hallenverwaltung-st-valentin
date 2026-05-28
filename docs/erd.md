@@ -15,6 +15,8 @@ Event-Schaltern. Phase 10 fuegt die Abrechnungsvorbereitung fuer genehmigte
 Buchungen hinzu, ohne automatische Rechnungslegung oder Zahlungsabwicklung.
 Phase 10.5 ergaenzt CSV-, XLSX- und PDF-Exporte sowie strukturierte
 Reportingdaten fuer Abrechnung, Vereinsuebersichten und Raumbelegung.
+Phase 11 rundet die oeffentliche Ansicht mit Standortuebersicht,
+datenschutzkonformem Kalender, freien Zeiten und iCal-Export ab.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -141,6 +143,12 @@ erDiagram
 - Exportvorgaenge werden ueber `AuditEntry` mit Zeitpunkt, Benutzer, Exporttyp,
   Zeitraum und Filterparametern protokolliert. Optional koennen offene
   `BillingEntry`-Datensaetze beim Export zentral auf `EXPORTED` gesetzt werden.
+- Die oeffentliche Ansicht nutzt ausschliesslich datenschutzkonforme
+  Kalenderdaten. Nicht-oeffentliche Sperren werden nicht als Detail angezeigt,
+  blockieren freie Zeitfenster aber weiterhin.
+- Der oeffentliche iCal-Export verwendet dieselben Sichtbarkeitsregeln wie der
+  oeffentliche Kalender. Er enthaelt keine Buchungsdetails, die laut
+  Datenschutzmodus verborgen sind.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -155,6 +163,8 @@ erDiagram
 - Phase 10.5 erzeugt einfache CSV-/Excel-/PDF-Dateien. Eine automatische
   Rechnungslegung, Zahlungsabwicklung oder komplexe Druckengine bleibt
   ausgeschlossen.
+- Phase 11 enthaelt keine oeffentliche Suche und keine oeffentlichen
+  Schreibfunktionen fuer Buchungen oder Warteliste.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
