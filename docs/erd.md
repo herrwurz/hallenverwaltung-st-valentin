@@ -119,11 +119,17 @@ erDiagram
 - Abrechnungseintraege entstehen ausschliesslich aus `APPROVED`-Buchungen.
   Stornierte, abgelehnte, beantragte oder in Pruefung befindliche Buchungen
   werden nicht automatisch abgerechnet. Organisationen koennen ueber
-  `isBillingRelevant` von der Abrechnungsvorbereitung ausgenommen werden.
+  `isBillingRelevant` von der Abrechnungsvorbereitung ausgenommen werden; in
+  Version 1 wird dafuer kein `BillingEntry` erzeugt.
 - Tarife werden nach Raum, Tarifgruppe, Organisationstyp, Nutzungstyp,
   Gueltigkeitszeitraum und Tagesart (`ALL`, `WEEKDAY`, `WEEKEND`, `HOLIDAY`)
   aufgeloest. Pauschalen haben Vorrang vor Stundensaetzen; 0-Euro-Tarife sind
   ausdruecklich erlaubt.
+- Das Recht `BILLING_EXPORT` schuetzt Abrechnungsvorbereitung und kuenftige
+  Abrechnungsexporte. Das allgemeinere `CREATE_EXPORTS` bleibt fuer sonstige
+  Exporte reserviert.
+- Billing-Statusaenderungen laufen zentral ueber den Billing-Transition-Service;
+  Phase 10.1 erlaubt nur `OPEN -> EXPORTED`.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer

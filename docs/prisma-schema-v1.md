@@ -127,6 +127,15 @@ Zusatz fuer Phase 10:
 - `BillingEntry` speichert `periodStart`, `periodEnd`, `durationMinutes`,
   `unitPrice` und `calculationType`, damit die Berechnung fuer einen spaeteren
   Excel-/PDF-Export nachvollziehbar bleibt.
+- Phase 10.1 ergaenzt Indizes auf `BillingEntry(status, periodStart)`,
+  `BillingEntry(organizationId, periodStart)` und `BillingEntry(exportedAt)`.
+- Nicht abrechnungsrelevante Organisationen erzeugen in Version 1 keinen
+  `BillingEntry`; die Buchung bleibt lediglich von der Abrechnungsvorbereitung
+  ausgeschlossen.
+- Abrechnungsexporte verwenden das eigene Recht `BILLING_EXPORT`. `CREATE_EXPORTS`
+  bleibt fuer sonstige Exporte reserviert.
+- Statusaenderungen fuer `BillingEntry` laufen zentral; aktuell ist nur
+  `OPEN -> EXPORTED` vorgesehen.
 
 ## Seed-Umfang
 

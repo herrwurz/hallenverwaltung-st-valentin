@@ -66,7 +66,7 @@ function money(value: { toString(): string } | null) {
 }
 
 export default async function AdminBillingPage({ searchParams }: { searchParams: SearchParams }) {
-  await requirePermission("CREATE_EXPORTS");
+  await requirePermission("BILLING_EXPORT");
   const params = await searchParams;
   const now = new Date();
   const defaultStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));

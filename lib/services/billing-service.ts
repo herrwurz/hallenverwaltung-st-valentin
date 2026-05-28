@@ -2,6 +2,7 @@ import type { BillingCalculationType, BillingStatus, Prisma, PrismaClient, Tarif
 import { Prisma as PrismaNamespace } from "@prisma/client";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { markOpenBillingEntriesExported } from "@/lib/services/billing-transition-service";
 
 type BillingClient = Pick<PrismaClient, "booking" | "billingEntry" | "tariff" | "holidayPeriod">;
 
@@ -137,7 +138,7 @@ async function assertBillingPermission(actorUserId: string, permissions: Billing
   const canExport =
     typeof permissions.canExport === "boolean"
       ? permissions.canExport
-      : await hasPermission(actorUserId, "CREATE_EXPORTS");
+      : await hasPermission(actorUserId, "BILLING_EXPORT");
 
   if (!canExport) {
     throw new BillingValidationError("Sie duerfen Abrechnungsdaten nicht bearbeiten.");
@@ -185,6 +186,45 @@ function tariffSpecificity(dayType: TariffDayType, targetDayType: TariffDayType)
   return 99;
 }
 
+function intervalsOverlap(
+  left: { validFrom: Date; validUntil: Date | null },
+  right: { validFrom: Date; validUntil: Date | null },
+) {
+  const leftEnd = left.validUntil?.getTime() ?? Number.POSITIVE_INFINITY;
+  const rightEnd = right.validUntil?.getTime() ?? Number.POSITIVE_INFINITY;
+
+  return left.validFrom.getTime() <= rightEnd && right.validFrom.getTime() <= leftEnd;
+}
+
+function assertNoConflictingTariffs(
+  tariffs: Array<{
+    id: string;
+    validFrom: Date;
+    validUntil: Date | null;
+    dayType: TariffDayType;
+  }>,
+) {
+  const byDayType = new Map<TariffDayType, typeof tariffs>();
+
+  for (const tariff of tariffs) {
+    const group = byDayType.get(tariff.dayType) ?? [];
+    group.push(tariff);
+    byDayType.set(tariff.dayType, group);
+  }
+
+  for (const group of byDayType.values()) {
+    for (let index = 0; index < group.length; index += 1) {
+      for (let nextIndex = index + 1; nextIndex < group.length; nextIndex += 1) {
+        const left = group[index]!;
+        const right = group[nextIndex]!;
+        if (intervalsOverlap(left, right)) {
+          throw new BillingValidationError("Es gibt widerspruechliche Tarife fuer diese Kombination.");
+        }
+      }
+    }
+  }
+}
+
 async function resolveTariff(booking: BillableBooking, client: BillingClient) {
   if (!booking.organization.tariffGroupId) {
     throw new BillingValidationError("Fuer die Organisation ist keine Tarifgruppe hinterlegt.");
@@ -203,6 +243,8 @@ async function resolveTariff(booking: BillableBooking, client: BillingClient) {
     },
     orderBy: [{ validFrom: "desc" }],
   });
+
+  assertNoConflictingTariffs(tariffs);
 
   const tariff = tariffs
     .sort((left, right) => tariffSpecificity(left.dayType, dayType) - tariffSpecificity(right.dayType, dayType))[0];
@@ -381,20 +423,5 @@ export async function markBillingEntriesExported(
   permissions: BillingPermissions = {},
 ) {
   await assertBillingPermission(input.actorUserId, permissions);
-  const ids = [...new Set(input.entryIds.map((id) => id.trim()).filter(Boolean))];
-
-  if (ids.length === 0) {
-    throw new BillingValidationError("Es wurden keine Abrechnungseintraege ausgewaehlt.");
-  }
-
-  return client.billingEntry.updateMany({
-    where: {
-      id: { in: ids },
-      status: "OPEN",
-    },
-    data: {
-      status: "EXPORTED",
-      exportedAt: input.exportedAt ?? new Date(),
-    },
-  });
+  return markOpenBillingEntriesExported(input, client);
 }

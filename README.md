@@ -60,7 +60,8 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    angestossen werden; Event-Schalter werden dort als `SystemSetting`
    gespeichert.
    Die Abrechnungsvorbereitung ist unter `/admin/billing` verfuegbar und
-   erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen.
+   erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen. Der Zugriff
+   ist ueber das Recht `BILLING_EXPORT` geschuetzt.
 
 4. Entwicklungsserver starten:
 

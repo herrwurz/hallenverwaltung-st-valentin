@@ -51,7 +51,7 @@ function addDays(date: Date, days: number) {
 }
 
 export async function createBillingEntriesAction(formData: FormData) {
-  const user = await requirePermission("CREATE_EXPORTS");
+  const user = await requirePermission("BILLING_EXPORT");
   const periodStart = String(formData.get("periodStart") ?? "");
   const periodEnd = String(formData.get("periodEnd") ?? "");
 
@@ -80,7 +80,7 @@ export async function createBillingEntriesAction(formData: FormData) {
 }
 
 export async function markBillingEntriesExportedAction(formData: FormData) {
-  const user = await requirePermission("CREATE_EXPORTS");
+  const user = await requirePermission("BILLING_EXPORT");
   const periodStart = String(formData.get("periodStart") ?? "");
   const periodEnd = String(formData.get("periodEnd") ?? "");
 
