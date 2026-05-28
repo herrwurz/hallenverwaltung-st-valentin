@@ -22,6 +22,8 @@ Vor jeder Änderung lesen:
 
 Diese Dokumente gelten als fachliche Wahrheit.
 
+- docs/project-status.md  (nur kontextabhängig verpflichtend lesen; nicht bei jeder Änderung als Standarddokument)
+
 ---
 
 # Technologie
