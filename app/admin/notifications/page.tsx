@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { requirePermission } from "@/lib/permissions";
 import { getNotificationsForAdmin } from "@/lib/services/notification-service";
-import { retryNotificationAction } from "@/app/admin/notifications/actions";
+import {
+  getNotificationEventSettings,
+  notificationEventLabels,
+} from "@/lib/services/notification-settings-service";
+import {
+  processNotificationQueueAction,
+  retryNotificationAction,
+  updateNotificationEventSettingsAction,
+} from "@/app/admin/notifications/actions";
+import { notificationEventCodes } from "@/lib/services/notification-types";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
@@ -15,7 +24,7 @@ const statusLabels = {
   FAILED: "Fehlgeschlagen",
 } as const;
 
-const statusBadgeClass: Record<keyof typeof statusLabels extends infer K ? Exclude<K, "ALL"> : never, string> = {
+const statusBadgeClass: Record<"PENDING" | "SENT" | "FAILED", string> = {
   PENDING: "bg-amber-500/20 text-amber-200",
   SENT: "bg-emerald-500/20 text-emerald-200",
   FAILED: "bg-rose-500/20 text-rose-200",
@@ -24,6 +33,8 @@ const statusBadgeClass: Record<keyof typeof statusLabels extends infer K ? Exclu
 type SearchParams = Promise<{
   status?: "ALL" | "PENDING" | "SENT" | "FAILED";
   retried?: string;
+  processed?: string;
+  settingsSaved?: string;
   error?: string;
 }>;
 
@@ -34,7 +45,10 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
     params.status === "PENDING" || params.status === "SENT" || params.status === "FAILED" || params.status === "ALL"
       ? params.status
       : "ALL";
-  const notifications = await getNotificationsForAdmin(user.id, selectedStatus);
+  const [notifications, eventSettings] = await Promise.all([
+    getNotificationsForAdmin(user.id, selectedStatus),
+    getNotificationEventSettings(),
+  ]);
 
   return (
     <>
@@ -47,6 +61,11 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
             Retry.
           </p>
         </div>
+        <form action={processNotificationQueueAction}>
+          <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+            Queue verarbeiten
+          </button>
+        </form>
         <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
           Zurueck zum Dashboard
         </Link>
@@ -57,9 +76,47 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
           Die Benachrichtigung wurde erneut verarbeitet.
         </p>
       ) : null}
+      {params.processed ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Die Queue wurde verarbeitet.
+        </p>
+      ) : null}
+      {params.settingsSaved ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Die Event-Schalter wurden gespeichert.
+        </p>
+      ) : null}
       {params.error ? (
         <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">{params.error}</p>
       ) : null}
+
+      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
+        <h3 className="text-xl font-medium">Event-Schalter</h3>
+        <form action={updateNotificationEventSettingsAction} className="mt-5 space-y-3">
+          {notificationEventCodes.map((eventCode) => (
+            <label
+              key={eventCode}
+              className="flex items-center justify-between gap-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4"
+            >
+              <span>
+                <span className="block font-medium">{notificationEventLabels[eventCode]}</span>
+                <span className="mt-1 block text-sm text-slate-400">{eventCode}</span>
+              </span>
+              <input
+                type="checkbox"
+                name={eventCode}
+                defaultChecked={eventSettings[eventCode]}
+                className="h-5 w-5 rounded border-slate-600 bg-slate-900 text-sky-500"
+              />
+            </label>
+          ))}
+          <div className="flex justify-end">
+            <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+              Schalter speichern
+            </button>
+          </div>
+        </form>
+      </section>
 
       <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
         {Object.entries(statusLabels).map(([status, label]) => {
@@ -96,6 +153,10 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
                     Erstellt am {dateFormatter.format(notification.createdAt)}
                     {notification.sentAt ? ` | Gesendet am ${dateFormatter.format(notification.sentAt)}` : ""}
                   </p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Versuche: {notification.attemptCount}/{notification.maxAttempts}
+                    {notification.nextAttemptAt ? ` | Naechster Versuch ab ${dateFormatter.format(notification.nextAttemptAt)}` : ""}
+                  </p>
                   {notification.booking ? (
                     <p className="mt-1 text-sm text-slate-400">
                       Buchung: {notification.booking.title} | {notification.booking.organization.name} |{" "}
@@ -108,9 +169,9 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
                       {notification.waitlistEntry.room.building.name} - {notification.waitlistEntry.room.name}
                     </p>
                   ) : null}
-                  {notification.errorMessage ? (
+                  {notification.lastError ?? notification.errorMessage ? (
                     <p className="mt-3 rounded-lg border border-rose-900 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
-                      {notification.errorMessage}
+                      {notification.lastError ?? notification.errorMessage}
                     </p>
                   ) : null}
                 </div>

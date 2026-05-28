@@ -55,7 +55,10 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    ```
 
    Fuer Benachrichtigungen per SMTP muessen zusaetzlich die
-   `SMTP_*`-Variablen in der `.env` gepflegt werden.
+   `SMTP_*`-Variablen in der `.env` gepflegt werden. Die Verarbeitung
+   der Benachrichtigungsqueue kann ueber `/admin/notifications` manuell
+   angestossen werden; Event-Schalter werden dort als `SystemSetting`
+   gespeichert.
 
 4. Entwicklungsserver starten:
 

@@ -9,7 +9,9 @@ Phase 5 implementiert die Basis fuer einzelne Buchungsantraege und deren
 Statushistorie; Phase 6 erweitert dies um den Review- und
 Genehmigungsworkflow im Verwaltungsportal. Phase 7 fuegt die
 Wartelistenbasis mit 48-Stunden-Angebotsfrist und erneuter Antragserzeugung
-im Portal hinzu. Kalender und Abrechnung bleiben ausserhalb dieses Umfangs.
+im Portal hinzu. Phase 9 ergaenzt E-Mail-Benachrichtigungen; Phase 9.5
+haertet die Queue mit Retry-/Backoff-Feldern und administrierbaren
+Event-Schaltern. Abrechnung bleibt ausserhalb dieses Umfangs.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -106,6 +108,13 @@ erDiagram
 - Wartelistenangebote, Annahme, Ablehnung und Ablauf serialisieren denselben
   Parent-/Teilraum-Kontext ueber Advisory-Locks, damit ein frei gewordener Slot
   nicht doppelt verarbeitet wird.
+- `Notification` ist die persistente E-Mail-Queue. Versandversuche werden ueber
+  `attemptCount`, `maxAttempts`, `nextAttemptAt` und `lastError`
+  nachvollziehbar gemacht; fehlgeschlagene Eintraege bleiben fuer spaetere
+  automatische oder manuelle Verarbeitung erhalten.
+- Administrierbare Event-Schalter werden als typisierte `SystemSetting`
+  unter `notifications.events.enabled` gespeichert. Ohne gespeicherte
+  Einstellung sind alle definierten E-Mail-Ereignisse aktiv.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
