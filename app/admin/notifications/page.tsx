@@ -1,0 +1,140 @@
+import Link from "next/link";
+import { requirePermission } from "@/lib/permissions";
+import { getNotificationsForAdmin } from "@/lib/services/notification-service";
+import { retryNotificationAction } from "@/app/admin/notifications/actions";
+
+const dateFormatter = new Intl.DateTimeFormat("de-AT", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+const statusLabels = {
+  ALL: "Alle",
+  PENDING: "Wartend",
+  SENT: "Gesendet",
+  FAILED: "Fehlgeschlagen",
+} as const;
+
+const statusBadgeClass: Record<keyof typeof statusLabels extends infer K ? Exclude<K, "ALL"> : never, string> = {
+  PENDING: "bg-amber-500/20 text-amber-200",
+  SENT: "bg-emerald-500/20 text-emerald-200",
+  FAILED: "bg-rose-500/20 text-rose-200",
+};
+
+type SearchParams = Promise<{
+  status?: "ALL" | "PENDING" | "SENT" | "FAILED";
+  retried?: string;
+  error?: string;
+}>;
+
+export default async function AdminNotificationsPage({ searchParams }: { searchParams: SearchParams }) {
+  const user = await requirePermission("VIEW_BOOKINGS");
+  const params = await searchParams;
+  const selectedStatus =
+    params.status === "PENDING" || params.status === "SENT" || params.status === "FAILED" || params.status === "ALL"
+      ? params.status
+      : "ALL";
+  const notifications = await getNotificationsForAdmin(user.id, selectedStatus);
+
+  return (
+    <>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Benachrichtigungen</p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-semibold">Notification Queue</h2>
+          <p className="mt-3 max-w-3xl text-slate-300">
+            Versandprotokoll fuer zentrale Buchungs- und Wartelistenereignisse inklusive Fehlerstatus und manuellem
+            Retry.
+          </p>
+        </div>
+        <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
+          Zurueck zum Dashboard
+        </Link>
+      </div>
+
+      {params.retried ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Die Benachrichtigung wurde erneut verarbeitet.
+        </p>
+      ) : null}
+      {params.error ? (
+        <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">{params.error}</p>
+      ) : null}
+
+      <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
+        {Object.entries(statusLabels).map(([status, label]) => {
+          const active = selectedStatus === status;
+          return (
+            <Link
+              key={status}
+              href={status === "ALL" ? "/admin/notifications" : `/admin/notifications?status=${status}`}
+              className={`rounded-full px-4 py-2 text-sm transition ${
+                active ? "bg-sky-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
+              }`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <section className="mt-8 space-y-3">
+        {notifications.length === 0 ? (
+          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+            Keine Benachrichtigungen fuer den gewaehlten Filter vorhanden.
+          </p>
+        ) : (
+          notifications.map((notification) => (
+            <article key={notification.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-medium">{notification.eventCode}</h3>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Empfaenger: {notification.recipientUser?.displayName ?? notification.recipient} ({notification.recipient})
+                  </p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Erstellt am {dateFormatter.format(notification.createdAt)}
+                    {notification.sentAt ? ` | Gesendet am ${dateFormatter.format(notification.sentAt)}` : ""}
+                  </p>
+                  {notification.booking ? (
+                    <p className="mt-1 text-sm text-slate-400">
+                      Buchung: {notification.booking.title} | {notification.booking.organization.name} |{" "}
+                      {notification.booking.room.building.name} - {notification.booking.room.name}
+                    </p>
+                  ) : null}
+                  {notification.waitlistEntry ? (
+                    <p className="mt-1 text-sm text-slate-400">
+                      Warteliste: {notification.waitlistEntry.title} | {notification.waitlistEntry.organization.name} |{" "}
+                      {notification.waitlistEntry.room.building.name} - {notification.waitlistEntry.room.name}
+                    </p>
+                  ) : null}
+                  {notification.errorMessage ? (
+                    <p className="mt-3 rounded-lg border border-rose-900 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
+                      {notification.errorMessage}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="text-right">
+                  {notification.status === "PENDING" || notification.status === "SENT" || notification.status === "FAILED" ? (
+                    <span className={`rounded-full px-3 py-1 text-sm ${statusBadgeClass[notification.status]}`}>
+                      {statusLabels[notification.status]}
+                    </span>
+                  ) : null}
+                  {notification.status === "FAILED" ? (
+                    <form action={retryNotificationAction} className="mt-3">
+                      <input type="hidden" name="notificationId" value={notification.id} />
+                      <input type="hidden" name="status" value={selectedStatus} />
+                      <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+                        Erneut senden
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+              </div>
+            </article>
+          ))
+        )}
+      </section>
+    </>
+  );
+}

@@ -1,9 +1,30 @@
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import {
+  processPendingNotifications,
+  queueBookingNotifications,
+} from "@/lib/services/notification-service";
 import { cancelBooking } from "@/lib/services/booking-transition-service";
 import { activateNextWaitlistEntryForSlot } from "@/lib/services/waitlist-service";
 
-export { createBookingRequest } from "@/lib/services/booking-request-service";
+import { createBookingRequest as createBookingRequestBase } from "@/lib/services/booking-request-service";
+
+async function dispatchNotifications(work: () => Promise<void>) {
+  try {
+    await work();
+  } catch (error) {
+    console.error("Notification dispatch failed after booking operation.", error);
+  }
+}
+
+export async function createBookingRequest(input: unknown, actorUserId: string) {
+  const result = await createBookingRequestBase(input, actorUserId);
+  await dispatchNotifications(async () => {
+    await queueBookingNotifications(result.booking.id, "BOOKING_REQUESTED");
+    await processPendingNotifications();
+  });
+  return result;
+}
 
 export async function getBookingRequestOptions(userId: string) {
   const isAdmin = await hasPermission(userId, "APPROVE_BOOKING");
@@ -88,6 +109,11 @@ export async function cancelOwnBookingRequest(bookingId: string, actorUserId: st
       blockedUntil: bookingSlot.blockedUntil,
     });
   }
+
+  await dispatchNotifications(async () => {
+    await queueBookingNotifications(cancelledBooking.id, "BOOKING_CANCELLED");
+    await processPendingNotifications();
+  });
 
   return cancelledBooking;
 }

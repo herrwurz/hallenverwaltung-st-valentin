@@ -54,6 +54,9 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    npm run db:seed
    ```
 
+   Fuer Benachrichtigungen per SMTP muessen zusaetzlich die
+   `SMTP_*`-Variablen in der `.env` gepflegt werden.
+
 4. Entwicklungsserver starten:
 
    ```bash

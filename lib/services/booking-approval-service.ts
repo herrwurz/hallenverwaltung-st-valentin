@@ -8,6 +8,10 @@ import {
 import { prisma } from "@/lib/prisma";
 import { checkBookingConflicts } from "@/lib/services/booking-conflict-service";
 import {
+  processPendingNotifications,
+  queueBookingNotifications,
+} from "@/lib/services/notification-service";
+import {
   approveBooking,
   markBookingInReview,
   rejectBooking,
@@ -22,6 +26,14 @@ import {
 
 const defaultAdminStatuses: AdminBookingFilterStatus[] = ["REQUESTED", "IN_REVIEW"];
 const conflictRelevantStatuses = new Set<BookingStatus>(["REQUESTED", "IN_REVIEW", "APPROVED"]);
+
+async function dispatchNotifications(work: () => Promise<void>) {
+  try {
+    await work();
+  } catch (error) {
+    console.error("Notification dispatch failed after booking approval workflow.", error);
+  }
+}
 
 type AdminWorkflowPermissions = {
   canView?: boolean;
@@ -124,10 +136,15 @@ export async function markBookingInReviewForAdmin(
   const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
   assertBookingApprovalPermission(canApprove);
 
-  return markBookingInReview({
+  const booking = await markBookingInReview({
     bookingId,
     actorUserId,
   });
+  await dispatchNotifications(async () => {
+    await queueBookingNotifications(booking.id, "BOOKING_IN_REVIEW");
+    await processPendingNotifications();
+  });
+  return booking;
 }
 
 export async function approveBookingForAdmin(
@@ -144,7 +161,7 @@ export async function approveBookingForAdmin(
   const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
   assertBookingApprovalPermission(canApprove);
 
-  return prisma.$transaction(async (transaction) => {
+  const approved = await prisma.$transaction(async (transaction) => {
     const booking = await transaction.booking.findUnique({
       where: { id: bookingId },
       select: {
@@ -173,6 +190,11 @@ export async function approveBookingForAdmin(
       transaction,
     );
   });
+  await dispatchNotifications(async () => {
+    await queueBookingNotifications(approved.id, "BOOKING_APPROVED");
+    await processPendingNotifications();
+  });
+  return approved;
 }
 
 export async function rejectBookingForAdmin(
@@ -190,11 +212,16 @@ export async function rejectBookingForAdmin(
   assertBookingRejectionPermission(canReject);
   assertBookingDecisionNote(decisionNote);
 
-  return rejectBooking(
+  const rejected = await rejectBooking(
     {
       bookingId,
       actorUserId,
       decisionNote,
     },
   );
+  await dispatchNotifications(async () => {
+    await queueBookingNotifications(rejected.id, "BOOKING_REJECTED");
+    await processPendingNotifications();
+  });
+  return rejected;
 }
