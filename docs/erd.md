@@ -17,6 +17,8 @@ Phase 10.5 ergaenzt CSV-, XLSX- und PDF-Exporte sowie strukturierte
 Reportingdaten fuer Abrechnung, Vereinsuebersichten und Raumbelegung.
 Phase 11 rundet die oeffentliche Ansicht mit Standortuebersicht,
 datenschutzkonformem Kalender, freien Zeiten und iCal-Export ab.
+Phase 12 bereitet zentrale Hintergrundjobs fuer Notification Queue,
+Wartelistenablauf und Maintenance-Laeufe vor.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -149,6 +151,13 @@ erDiagram
 - Der oeffentliche iCal-Export verwendet dieselben Sichtbarkeitsregeln wie der
   oeffentliche Kalender. Er enthaelt keine Buchungsdetails, die laut
   Datenschutzmodus verborgen sind.
+- `WorkerService` orchestriert Hintergrundjobs, ohne Fachlogik zu duplizieren.
+  Benachrichtigungen werden ueber `processPendingNotifications()` verarbeitet;
+  Wartelistenablaeufe laufen ueber `expireWaitlistOffers()`.
+- Worker-Laeufe werden als `AuditEntry` mit Jobname, Startzeit, Endzeit,
+  Erfolg/Fehler, verarbeiteter Anzahl und Fehlermeldung protokolliert.
+- Das Recht `MANAGE_SYSTEM_JOBS` schuetzt die manuelle Job-Verwaltung im
+  Verwaltungsportal.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -165,6 +174,8 @@ erDiagram
   ausgeschlossen.
 - Phase 11 enthaelt keine oeffentliche Suche und keine oeffentlichen
   Schreibfunktionen fuer Buchungen oder Warteliste.
+- Phase 12 fuehrt keinen Deployment-Scheduler ein; Cron/Worker-Aufrufe bleiben
+  betriebliche Konfiguration.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
