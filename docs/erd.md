@@ -11,7 +11,8 @@ Genehmigungsworkflow im Verwaltungsportal. Phase 7 fuegt die
 Wartelistenbasis mit 48-Stunden-Angebotsfrist und erneuter Antragserzeugung
 im Portal hinzu. Phase 9 ergaenzt E-Mail-Benachrichtigungen; Phase 9.5
 haertet die Queue mit Retry-/Backoff-Feldern und administrierbaren
-Event-Schaltern. Abrechnung bleibt ausserhalb dieses Umfangs.
+Event-Schaltern. Phase 10 fuegt die Abrechnungsvorbereitung fuer genehmigte
+Buchungen hinzu, ohne automatische Rechnungslegung oder Zahlungsabwicklung.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -115,6 +116,14 @@ erDiagram
 - Administrierbare Event-Schalter werden als typisierte `SystemSetting`
   unter `notifications.events.enabled` gespeichert. Ohne gespeicherte
   Einstellung sind alle definierten E-Mail-Ereignisse aktiv.
+- Abrechnungseintraege entstehen ausschliesslich aus `APPROVED`-Buchungen.
+  Stornierte, abgelehnte, beantragte oder in Pruefung befindliche Buchungen
+  werden nicht automatisch abgerechnet. Organisationen koennen ueber
+  `isBillingRelevant` von der Abrechnungsvorbereitung ausgenommen werden.
+- Tarife werden nach Raum, Tarifgruppe, Organisationstyp, Nutzungstyp,
+  Gueltigkeitszeitraum und Tagesart (`ALL`, `WEEKDAY`, `WEEKEND`, `HOLIDAY`)
+  aufgeloest. Pauschalen haben Vorrang vor Stundensaetzen; 0-Euro-Tarife sind
+  ausdruecklich erlaubt.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -126,6 +135,8 @@ erDiagram
 ## Offene fachliche Konkretisierungen
 
 - Konkrete Tarifbetraege und Tarifkombinationen sind noch nicht festgelegt.
+- Phase 10 erzeugt nur Abrechnungseintraege und Exportstatus; Excel-/PDF-Dateien
+  und Rechnungslegung bleiben Folgephasen.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.

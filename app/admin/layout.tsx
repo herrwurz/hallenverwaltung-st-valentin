@@ -3,12 +3,13 @@ import { AdminShell } from "@/components/admin-shell";
 import { hasPermission, requireAnyPermission } from "@/lib/permissions";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const user = await requireAnyPermission(["MANAGE_USERS", "VIEW_BOOKINGS", "APPROVE_BOOKING", "REJECT_BOOKING"]);
-  const [canManageUsers, canViewBookings, canApproveBookings, canRejectBookings] = await Promise.all([
+  const user = await requireAnyPermission(["MANAGE_USERS", "VIEW_BOOKINGS", "APPROVE_BOOKING", "REJECT_BOOKING", "CREATE_EXPORTS"]);
+  const [canManageUsers, canViewBookings, canApproveBookings, canRejectBookings, canCreateExports] = await Promise.all([
     hasPermission(user.id, "MANAGE_USERS"),
     hasPermission(user.id, "VIEW_BOOKINGS"),
     hasPermission(user.id, "APPROVE_BOOKING"),
     hasPermission(user.id, "REJECT_BOOKING"),
+    hasPermission(user.id, "CREATE_EXPORTS"),
   ]);
   const navigationItems = [
     ...(canManageUsers ? [{ href: "/admin", label: "Dashboard" }] : []),
@@ -19,6 +20,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           { href: "/admin/notifications", label: "Benachrichtigungen" },
         ]
       : []),
+    ...(canCreateExports ? [{ href: "/admin/billing", label: "Abrechnung" }] : []),
     ...(canManageUsers
       ? [
           { href: "/admin/settings/calendar", label: "Einstellungen" },

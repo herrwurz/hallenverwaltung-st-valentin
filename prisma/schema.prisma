@@ -58,6 +58,19 @@ enum BillingStatus {
   CANCELLED
 }
 
+enum TariffDayType {
+  ALL
+  WEEKDAY
+  WEEKEND
+  HOLIDAY
+}
+
+enum BillingCalculationType {
+  HOURLY
+  FLAT
+  ZERO
+}
+
 enum DamageStatus {
   REPORTED
   IN_REVIEW
@@ -176,6 +189,7 @@ model Organization {
   status             OrganizationStatus    @default(ACTIVE)
   blockedReason      String?
   canRequestBookings Boolean               @default(true)
+  isBillingRelevant  Boolean               @default(true)
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
   organizationType   OrganizationType      @relation(fields: [organizationTypeId], references: [id])
@@ -460,6 +474,7 @@ model Tariff {
   name               String
   hourlyRate         Decimal?         @db.Decimal(10, 2)
   flatRate           Decimal?         @db.Decimal(10, 2)
+  dayType            TariffDayType    @default(ALL)
   validFrom          DateTime
   validUntil         DateTime?
   tariffGroup        TariffGroup      @relation(fields: [tariffGroupId], references: [id])
@@ -478,6 +493,11 @@ model BillingEntry {
   tariffId       String?
   status         BillingStatus @default(OPEN)
   amount         Decimal?      @db.Decimal(10, 2)
+  periodStart    DateTime
+  periodEnd      DateTime
+  durationMinutes Int
+  unitPrice      Decimal?      @db.Decimal(10, 2)
+  calculationType BillingCalculationType
   exportedAt     DateTime?
   billedAt       DateTime?
   booking        Booking       @relation(fields: [bookingId], references: [id])

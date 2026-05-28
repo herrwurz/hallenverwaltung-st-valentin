@@ -8,6 +8,7 @@ export default async function AdminPage() {
   const cards = [
     { href: "/admin/bookings", label: "Buchungsantraege", value: "Workflow" },
     { href: "/admin/calendar", label: "Kalender", value: "Tag/Woche" },
+    { href: "/admin/billing", label: "Abrechnung", value: "Export" },
     { href: "/admin/notifications", label: "Benachrichtigungen", value: "Queue" },
     { href: "/admin/settings/calendar", label: "Einstellungen", value: "Datenschutz" },
     { href: "/admin/waitlist", label: "Warteliste", value: "Queue" },
@@ -38,8 +39,8 @@ export default async function AdminPage() {
         ))}
       </div>
       <p className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-300">
-        Buchungsantraege, Warteliste und lesende Kalenderansichten sind angebunden. Mailversand und Abrechnung sind
-        weiterhin noch nicht enthalten.
+        Buchungsantraege, Warteliste, Kalender, Mailversand und Abrechnungsvorbereitung sind angebunden. Automatische
+        Rechnungslegung und Zahlungsabwicklung sind weiterhin nicht enthalten.
       </p>
     </>
   );
