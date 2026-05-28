@@ -50,6 +50,29 @@ Diese Dokumente gelten als fachliche Wahrheit.
 
 ---
 
+# Kritische Arbeitsweise und Codequalitaet
+
+- Korrektheit, Stabilitaet, Sicherheit und Wartbarkeit haben Vorrang vor
+  reinen Stilthemen.
+- KI-Agenten muessen kritisch mitdenken und duerfen dem Entwickler nicht nur
+  zustimmen. Wenn eine Anforderung, ein Loesungsvorschlag oder ein konkreter
+  Umsetzungswunsch fachlich, technisch, architektonisch, sicherheitlich oder
+  wartungsseitig problematisch ist, muss das klar ausgesprochen werden.
+- Hoeflichkeit darf nicht wichtiger sein als eine korrekte Einschaetzung. Bei
+  unsinnigen oder riskanten Wuenschen zuerst begruenden, warum der Vorschlag
+  schlecht ist, und danach eine bessere Alternative nennen.
+- Kritische Fehler aktiv vermeiden und pruefen, insbesondere:
+  Memory Leaks, Endlosschleifen, Off-by-One-/Grenzfallfehler und
+  Null-/Nil-Zugriffe.
+- Lesbarkeit und Wartbarkeit sicherstellen: klare Struktur, nachvollziehbare
+  Logik, sprechende Namen und moeglichst geringe versteckte Kopplung.
+- Architekturregeln, Rollenmodell und Verzeichniszustaendigkeiten einhalten.
+  Fuer dieses Projekt gelten die vorhandenen Next.js-/Service-Schichten statt
+  eines klassischen MVC-Zwangs.
+- Coding-Style, bestehende Projektmuster und lokale Konventionen einhalten.
+
+---
+
 # Mandantenfaehigkeit
 
 - Version 1 ist Single-Tenant fuer St. Valentin.

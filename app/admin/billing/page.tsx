@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requirePermission } from "@/lib/permissions";
-import { getBillableBookings, getBillingEntries } from "@/lib/services/billing-service";
+import { getBillableBookings } from "@/lib/services/billing-service";
+import { getBillingFilterOptions, getBillingReportData } from "@/lib/services/reporting-service";
 import {
   createBillingEntriesAction,
   markBillingEntriesExportedAction,
@@ -31,6 +32,10 @@ type SearchParams = Promise<{
   skipped?: string;
   exported?: string;
   error?: string;
+  organizationId?: string;
+  buildingId?: string;
+  roomId?: string;
+  status?: string;
 }>;
 
 function formatInputDate(date: Date) {
@@ -65,6 +70,38 @@ function money(value: { toString(): string } | null) {
   return currencyFormatter.format(Number(value?.toString() ?? 0));
 }
 
+function exportParams({
+  periodStart,
+  periodEnd,
+  params,
+  format,
+  report,
+}: {
+  periodStart: Date;
+  periodEnd: Date;
+  params: Awaited<SearchParams>;
+  format: string;
+  report?: string;
+}) {
+  const query = new URLSearchParams({
+    format,
+    periodStart: formatInputDate(periodStart),
+    periodEnd: formatInputDate(addDays(periodEnd, -1)),
+  });
+
+  for (const key of ["organizationId", "buildingId", "roomId", "status"] as const) {
+    if (params[key]) {
+      query.set(key, params[key]);
+    }
+  }
+
+  if (report) {
+    query.set("report", report);
+  }
+
+  return `/admin/billing/export?${query.toString()}`;
+}
+
 export default async function AdminBillingPage({ searchParams }: { searchParams: SearchParams }) {
   await requirePermission("BILLING_EXPORT");
   const params = await searchParams;
@@ -73,9 +110,18 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
   const defaultEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
   const periodStart = parseDateInput(params.periodStart, defaultStart);
   const periodEnd = parseEndDateInput(params.periodEnd, defaultEnd);
-  const [bookings, entries] = await Promise.all([
+  const status = Object.keys(statusLabels).includes(params.status ?? "") ? params.status as keyof typeof statusLabels : undefined;
+  const [bookings, entries, filterOptions] = await Promise.all([
     getBillableBookings({ periodStart, periodEnd }),
-    getBillingEntries({ periodStart, periodEnd }),
+    getBillingReportData({
+      periodStart,
+      periodEnd,
+      organizationId: params.organizationId,
+      buildingId: params.buildingId,
+      roomId: params.roomId,
+      status,
+    }),
+    getBillingFilterOptions(),
   ]);
   const openEntries = entries.filter((entry) => entry.status === "OPEN");
 
@@ -111,7 +157,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <h3 className="text-xl font-medium">Zeitraum</h3>
-        <form className="mt-5 grid gap-4 md:grid-cols-[1fr,1fr,auto]" action="/admin/billing">
+        <form className="mt-5 grid gap-4 md:grid-cols-[1fr,1fr,1fr,1fr,1fr,1fr,auto]" action="/admin/billing">
           <label className="text-sm text-slate-300">
             Von
             <input
@@ -129,6 +175,42 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
               defaultValue={formatInputDate(addDays(periodEnd, -1))}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
             />
+          </label>
+          <label className="text-sm text-slate-300">
+            Organisation
+            <select name="organizationId" defaultValue={params.organizationId ?? ""} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+              <option value="">Alle</option>
+              {filterOptions.organizations.map((organization) => (
+                <option key={organization.id} value={organization.id}>{organization.name}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm text-slate-300">
+            Gebaeude
+            <select name="buildingId" defaultValue={params.buildingId ?? ""} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+              <option value="">Alle</option>
+              {filterOptions.buildings.map((building) => (
+                <option key={building.id} value={building.id}>{building.name}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm text-slate-300">
+            Raum
+            <select name="roomId" defaultValue={params.roomId ?? ""} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+              <option value="">Alle</option>
+              {filterOptions.rooms.map((room) => (
+                <option key={room.id} value={room.id}>{room.buildingName} - {room.name}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm text-slate-300">
+            Status
+            <select name="status" defaultValue={params.status ?? ""} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
+              <option value="">Alle</option>
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </label>
           <button className="self-end rounded-lg bg-slate-700 px-5 py-2 text-sm font-medium text-white hover:bg-slate-600">
             Anzeigen
@@ -189,7 +271,27 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-medium">Abrechnungseintraege</h3>
-            <p className="mt-2 text-sm text-slate-400">Erzeugte Eintraege koennen als exportiert markiert werden.</p>
+            <p className="mt-2 text-sm text-slate-400">Erzeugte Eintraege koennen exportiert oder als exportiert markiert werden.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a href={exportParams({ periodStart, periodEnd, params, format: "csv" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
+              CSV
+            </a>
+            <a href={exportParams({ periodStart, periodEnd, params, format: "xlsx" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
+              XLSX
+            </a>
+            <a href={exportParams({ periodStart, periodEnd, params, format: "pdf", report: "monthly" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
+              PDF Monat
+            </a>
+            <a href={exportParams({ periodStart, periodEnd, params, format: "pdf", report: "organization" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
+              PDF Vereine
+            </a>
+            <a href={exportParams({ periodStart, periodEnd, params, format: "pdf", report: "roomUsage" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
+              PDF Raeume
+            </a>
+            <a href={`${exportParams({ periodStart, periodEnd, params, format: "csv" })}&markExported=1`} className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+              CSV + exportiert
+            </a>
           </div>
         </div>
 
@@ -226,13 +328,13 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
                         )}
                       </td>
                       <td className="py-3 pr-4 text-slate-300">{dateFormatter.format(entry.periodStart)}</td>
-                      <td className="py-3 pr-4 font-medium">{entry.booking.title}</td>
-                      <td className="py-3 pr-4 text-slate-300">{entry.organization.name}</td>
-                      <td className="py-3 pr-4 text-slate-300">{entry.tariff?.name ?? "Kein Tarif"}</td>
+                      <td className="py-3 pr-4 font-medium">{entry.bookingTitle}</td>
+                      <td className="py-3 pr-4 text-slate-300">{entry.organizationName}</td>
+                      <td className="py-3 pr-4 text-slate-300">{entry.tariffName}</td>
                       <td className="py-3 pr-4 text-slate-300">
-                        {entry.calculationType} | {entry.durationMinutes} Min. | {money(entry.unitPrice)}
+                        {entry.calculationType} | {entry.durationMinutes} Min. | {money({ toString: () => entry.unitPrice })}
                       </td>
-                      <td className="py-3 pr-4 font-medium">{money(entry.amount)}</td>
+                      <td className="py-3 pr-4 font-medium">{money({ toString: () => entry.amount })}</td>
                       <td className="py-3 pr-4 text-slate-300">{statusLabels[entry.status]}</td>
                     </tr>
                   ))}

@@ -13,6 +13,8 @@ im Portal hinzu. Phase 9 ergaenzt E-Mail-Benachrichtigungen; Phase 9.5
 haertet die Queue mit Retry-/Backoff-Feldern und administrierbaren
 Event-Schaltern. Phase 10 fuegt die Abrechnungsvorbereitung fuer genehmigte
 Buchungen hinzu, ohne automatische Rechnungslegung oder Zahlungsabwicklung.
+Phase 10.5 ergaenzt CSV-, XLSX- und PDF-Exporte sowie strukturierte
+Reportingdaten fuer Abrechnung, Vereinsuebersichten und Raumbelegung.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -130,6 +132,15 @@ erDiagram
   Exporte reserviert.
 - Billing-Statusaenderungen laufen zentral ueber den Billing-Transition-Service;
   Phase 10.1 erlaubt nur `OPEN -> EXPORTED`.
+- Reportingdaten werden ueber `ReportingService` bereitgestellt. Der Service
+  liefert reine strukturierte Daten; Datei-Erzeugung ist Aufgabe des
+  `ExportService`.
+- CSV-, XLSX- und PDF-Exporte enthalten Organisation, Gebaeude, Raum, Datum,
+  Zeit, Nutzungstyp, Tarif, Betrag, Status und Exportdatum. Sie erzeugen keine
+  Rechnung und loesen keine Zahlung aus.
+- Exportvorgaenge werden ueber `AuditEntry` mit Zeitpunkt, Benutzer, Exporttyp,
+  Zeitraum und Filterparametern protokolliert. Optional koennen offene
+  `BillingEntry`-Datensaetze beim Export zentral auf `EXPORTED` gesetzt werden.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
@@ -141,8 +152,9 @@ erDiagram
 ## Offene fachliche Konkretisierungen
 
 - Konkrete Tarifbetraege und Tarifkombinationen sind noch nicht festgelegt.
-- Phase 10 erzeugt nur Abrechnungseintraege und Exportstatus; Excel-/PDF-Dateien
-  und Rechnungslegung bleiben Folgephasen.
+- Phase 10.5 erzeugt einfache CSV-/Excel-/PDF-Dateien. Eine automatische
+  Rechnungslegung, Zahlungsabwicklung oder komplexe Druckengine bleibt
+  ausgeschlossen.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
