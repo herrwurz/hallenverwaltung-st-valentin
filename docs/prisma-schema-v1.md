@@ -10,8 +10,9 @@ Genehmigungsworkflow fuer `REQUESTED`, `IN_REVIEW`, `APPROVED` und `REJECTED`
 im Verwaltungsportal um. Phase 7 ergaenzt die Wartelistenbasis mit
 Angebotsfrist, Angebotsannahme und erneuter Genehmigung ueber neue
 Buchungsantraege. Phase 10 ergaenzt die Abrechnungsvorbereitung fuer
-genehmigte Buchungen. Die in Phase 3 vorhandene Authentifizierung verwendet
-`User.passwordHash`.
+genehmigte Buchungen. Phase 10.5 ergaenzt Reportingdaten sowie CSV-, XLSX-
+und PDF-Exporte ohne automatische Rechnungslegung. Die in Phase 3 vorhandene
+Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -136,6 +137,13 @@ Zusatz fuer Phase 10:
   bleibt fuer sonstige Exporte reserviert.
 - Statusaenderungen fuer `BillingEntry` laufen zentral; aktuell ist nur
   `OPEN -> EXPORTED` vorgesehen.
+- `ReportingService` liefert reine strukturierte Daten fuer Monatsabrechnung,
+  Organisationsuebersicht, Raumbelegung und monatliche Nutzungssummen.
+- `ExportService` erzeugt daraus UTF-8-CSV, echte XLSX-Dateien und einfache
+  druckbare PDF-Reports. Dateierzeugung liegt bewusst nicht im
+  `ReportingService`.
+- Exportvorgaenge werden in `AuditEntry` mit Exporttyp, Zeitraum, Filterwerten
+  und Anzahl der exportierten Zeilen protokolliert.
 
 ## Seed-Umfang
 
@@ -154,6 +162,5 @@ und Tarifgruppen sowie folgende reale Standorte:
 
 - Keine Buchungen, Serien, Wartelistenplaetze oder Statushistorien als Seed-Daten.
 - Keine Tarifbetraege oder Rechnungen als Seed-Daten.
-- Keine automatische Rechnungslegung, keine Zahlungsabwicklung und noch kein
-  echter Excel-/PDF-Export.
+- Keine automatische Rechnungslegung und keine Zahlungsabwicklung.
 - Keine Umsetzung der Mandantenfaehigkeit.
