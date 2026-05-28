@@ -63,6 +63,9 @@ Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
    erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen. CSV-, XLSX-
    und PDF-Exporte koennen dort fuer gefilterte Zeitraeume erstellt werden.
    Der Zugriff ist ueber das Recht `BILLING_EXPORT` geschuetzt.
+   Die oeffentliche Ansicht unter `/public` zeigt Standortuebersicht,
+   datenschutzkonforme Kalenderdaten, freie Zeiten und einen iCal-Export unter
+   `/public/calendar/ical`.
 
 4. Entwicklungsserver starten:
 

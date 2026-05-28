@@ -64,6 +64,7 @@ type CalendarClosure = {
   reason: string;
   startsAt: Date;
   endsAt: Date;
+  isPublic: boolean;
   building: {
     id: string;
     name: string;
@@ -383,6 +384,7 @@ async function loadCalendarRecords({
   buildingId,
   roomId,
   bookingStatuses,
+  publicClosuresOnly = false,
 }: {
   client: CalendarServiceClient;
   rangeStart: Date;
@@ -390,6 +392,7 @@ async function loadCalendarRecords({
   buildingId?: string;
   roomId?: string;
   bookingStatuses: BookingStatus[];
+  publicClosuresOnly?: boolean;
 }) {
   const { roomIds, buildingIds, selectedRoomId } = await resolveRoomScope({ client, buildingId, roomId });
 
@@ -467,6 +470,7 @@ async function loadCalendarRecords({
       status: { in: closureStatusesBlocking },
       startsAt: { lt: rangeEnd },
       endsAt: { gt: rangeStart },
+      isPublic: publicClosuresOnly ? true : undefined,
       OR: closureScopeFilters,
     },
     select: {
@@ -477,6 +481,7 @@ async function loadCalendarRecords({
       reason: true,
       startsAt: true,
       endsAt: true,
+      isPublic: true,
       building: {
         select: {
           id: true,
@@ -653,11 +658,13 @@ async function buildCalendarResult({
   client,
   eventFactory,
   includeBookingStatuses = bookingStatusesForCalendar,
+  publicClosuresOnly = false,
 }: {
   query: CalendarQuery;
   client: CalendarServiceClient;
   eventFactory: (booking: CalendarBooking) => CalendarEvent | null;
   includeBookingStatuses?: BookingStatus[];
+  publicClosuresOnly?: boolean;
 }) {
   const selectedDate = parseCalendarDateInput(query.date);
   const view = query.view === "week" ? "week" : "day";
@@ -672,6 +679,7 @@ async function buildCalendarResult({
     buildingId: query.buildingId,
     roomId: query.roomId,
     bookingStatuses: includeBookingStatuses,
+    publicClosuresOnly,
   });
 
   const events = [
@@ -729,6 +737,7 @@ export async function getPublicCalendarEvents(
     client,
     eventFactory: (booking) => toPublicBookingEvent(booking, visibilityMode),
     includeBookingStatuses: publicBookingStatusesForCalendar,
+    publicClosuresOnly: true,
   });
 }
 
@@ -839,6 +848,7 @@ export async function getFreeSlots(
         reason: true,
         startsAt: true,
         endsAt: true,
+        isPublic: true,
         building: {
           select: {
             id: true,

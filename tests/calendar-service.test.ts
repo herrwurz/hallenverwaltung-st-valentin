@@ -6,6 +6,7 @@ import {
   getPortalCalendarEvents,
   getPublicCalendarEvents,
 } from "../lib/services/calendar-service";
+import { exportPublicCalendarIcs } from "../lib/services/public-calendar-export-service";
 
 const calendarDate = "2026-06-10";
 type BuildingRecord = {
@@ -52,6 +53,7 @@ type ClosureRecord = {
   reason: string;
   startsAt: Date;
   endsAt: Date;
+  isPublic: boolean;
 };
 
 type MembershipRecord = {
@@ -123,6 +125,7 @@ function makeClosure(overrides: Partial<ClosureRecord> = {}): ClosureRecord {
     reason: "Reinigung",
     startsAt: new Date("2026-06-10T12:00:00Z"),
     endsAt: new Date("2026-06-10T13:00:00Z"),
+    isPublic: true,
     ...overrides,
   };
 }
@@ -261,12 +264,14 @@ function createCalendarClient({
         const statuses = ((args.where.status as { in?: ClosureRecord["status"][] } | undefined)?.in) ?? [];
         const startsAt = (args.where.startsAt as { lt?: Date } | undefined)?.lt;
         const endsAt = (args.where.endsAt as { gt?: Date } | undefined)?.gt;
+        const isPublic = args.where.isPublic as boolean | undefined;
         const scopeFilters = Array.isArray(args.where.OR) ? args.where.OR : [];
 
         return closures
           .filter((closure) => (statuses.length > 0 ? statuses.includes(closure.status) : true))
           .filter((closure) => (startsAt ? closure.startsAt < startsAt : true))
           .filter((closure) => (endsAt ? closure.endsAt > endsAt : true))
+          .filter((closure) => (typeof isPublic === "boolean" ? closure.isPublic === isPublic : true))
           .filter((closure) => {
             if (scopeFilters.length === 0) {
               return true;
@@ -434,6 +439,20 @@ test("public calendar can show the event title", async () => {
   assert.equal(calendar.events[0]?.title, "Sommerfest");
 });
 
+test("public iCal export uses public visibility rules", async () => {
+  const client = createCalendarClient({
+    bookings: [makeBooking({ title: "Internes Turnier" })],
+    visibilityMode: "occupied_only",
+  });
+
+  const ics = await exportPublicCalendarIcs({ date: calendarDate }, client as never);
+
+  assert.match(ics, /BEGIN:VCALENDAR/);
+  assert.match(ics, /SUMMARY:Belegt/);
+  assert.doesNotMatch(ics, /Internes Turnier/);
+  assert.doesNotMatch(ics, /Verein Blau/);
+});
+
 test("public calendar does not include cancelled bookings", async () => {
   const client = createCalendarClient({
     bookings: [
@@ -448,6 +467,16 @@ test("public calendar does not include cancelled bookings", async () => {
   const calendar = await getPublicCalendarEvents({ date: calendarDate }, client as never);
 
   assert.equal(calendar.events.length, 0);
+});
+
+test("public calendar hides non-public closure details", async () => {
+  const client = createCalendarClient({
+    closures: [makeClosure({ isPublic: false, reason: "Interne Wartung" })],
+  });
+
+  const calendar = await getPublicCalendarEvents({ date: calendarDate }, client as never);
+
+  assert.equal(calendar.events.some((event) => event.title.includes("Interne Wartung")), false);
 });
 
 test("cancelled bookings do not block free slots", async () => {
@@ -493,6 +522,24 @@ test("closures block free slots", async () => {
       makeClosure({
         buildingId: "building-1",
         roomId: null,
+        startsAt: new Date("2026-06-10T13:00:00Z"),
+        endsAt: new Date("2026-06-10T14:00:00Z"),
+      }),
+    ],
+  });
+
+  const freeSlots = await getFreeSlots({ roomId: "room-1", date: calendarDate }, client as never);
+
+  assert.equal(freeSlots?.freeSlots.length, 2);
+  assert.equal(freeSlots?.freeSlots[0]?.endsAt.toISOString(), "2026-06-10T13:00:00.000Z");
+  assert.equal(freeSlots?.freeSlots[1]?.startsAt.toISOString(), "2026-06-10T14:00:00.000Z");
+});
+
+test("non-public closures still block public free slots", async () => {
+  const client = createCalendarClient({
+    closures: [
+      makeClosure({
+        isPublic: false,
         startsAt: new Date("2026-06-10T13:00:00Z"),
         endsAt: new Date("2026-06-10T14:00:00Z"),
       }),
