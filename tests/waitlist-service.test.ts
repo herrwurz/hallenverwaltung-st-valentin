@@ -81,6 +81,7 @@ function makeWaitlistEntry(overrides: Partial<WaitlistEntryRecord> = {}): Waitli
 function makeRoom(
   overrides: Partial<{
     id: string;
+    name: string;
     status: "ACTIVE" | "RESTRICTED" | "OUT_OF_SERVICE";
     openingTime: string;
     closingTime: string;
@@ -97,6 +98,7 @@ function makeRoom(
 ) {
   return {
     id: roomId,
+    name: "Turnsaal",
     status: "ACTIVE" as const,
     openingTime: "06:00",
     closingTime: "23:00",
@@ -638,17 +640,20 @@ test("offers the earliest matching waitlist entry first, writes notification pay
     new Date("2026-05-29T12:00:00Z"),
   );
   assert.deepEqual(harness.state.notifications[0], {
+    bookingId: null,
     waitlistEntryId: "waitlist-2",
     recipientUserId: actorUserId,
     recipient: "max@example.com",
     eventCode: "WAITLIST_OFFER_CREATED",
-    status: "PENDING",
     payload: {
       waitlistEntryId: "waitlist-2",
-      offerExpiresAt: "2026-05-29T12:00:00.000Z",
-      roomId,
+      title: "Training",
+      organizationName: "Verein",
+      buildingName: "Sporthalle",
+      roomName: "Turnsaal",
       startsAt: slotStart.toISOString(),
       endsAt: slotEnd.toISOString(),
+      offerExpiresAt: "2026-05-29T12:00:00.000Z",
     },
   });
 });

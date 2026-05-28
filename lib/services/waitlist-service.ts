@@ -10,6 +10,12 @@ import {
 import { checkBookingConflicts, lockWaitlistContext } from "@/lib/services/booking-conflict-service";
 import { createBookingRequest, resolveBookingBlockedWindow } from "@/lib/services/booking-request-service";
 import {
+  processPendingNotifications,
+  queueBookingNotifications,
+  queueWaitlistExpiredNotification,
+  queueWaitlistOfferNotification,
+} from "@/lib/services/notification-service";
+import {
   assertBookingRequestPermission,
   assertBookingViewPermission,
   assertOrganizationBookingAccess,
@@ -29,6 +35,14 @@ const waitlistRequestSchema = z.object({
 
 const defaultAdminStatuses: AdminWaitlistFilterStatus[] = ["ACTIVE", "OFFERED"];
 const waitlistOfferWindowHours = 48;
+
+async function dispatchNotifications(work: () => Promise<void>) {
+  try {
+    await work();
+  } catch (error) {
+    console.error("Notification dispatch failed after waitlist workflow.", error);
+  }
+}
 
 type WaitlistRequestInput = z.infer<typeof waitlistRequestSchema>;
 
@@ -238,48 +252,6 @@ async function validateWaitlistSlot(
   return room;
 }
 
-async function prepareWaitlistNotification(
-  client: Prisma.TransactionClient,
-  {
-    waitlistEntryId,
-    recipientUserId,
-    recipientEmail,
-    roomId,
-    startsAt,
-    endsAt,
-    offerExpiresAt,
-  }: {
-    waitlistEntryId: string;
-    recipientUserId: string | null;
-    recipientEmail: string | null;
-    roomId: string;
-    startsAt: Date;
-    endsAt: Date;
-    offerExpiresAt: Date;
-  },
-) {
-  if (!recipientUserId || !recipientEmail) {
-    return;
-  }
-
-  await client.notification.create({
-    data: {
-      waitlistEntryId,
-      recipientUserId,
-      recipient: recipientEmail,
-      eventCode: "WAITLIST_OFFER_CREATED",
-      status: "PENDING",
-      payload: {
-        waitlistEntryId,
-        offerExpiresAt: offerExpiresAt.toISOString(),
-        roomId,
-        startsAt: startsAt.toISOString(),
-        endsAt: endsAt.toISOString(),
-      },
-    },
-  });
-}
-
 function overlapsFreedSlot(
   entry: WaitlistOfferCandidate,
   blockedFrom: Date,
@@ -402,15 +374,7 @@ async function activateNextWaitlistEntryForSlotWithClient(
       continue;
     }
 
-    await prepareWaitlistNotification(client, {
-      waitlistEntryId: candidate.id,
-      recipientUserId: candidate.requestedBy?.id ?? null,
-      recipientEmail: candidate.requestedBy?.email ?? null,
-      roomId: candidate.roomId,
-      startsAt: candidate.startsAt,
-      endsAt: candidate.endsAt,
-      offerExpiresAt,
-    });
+    await queueWaitlistOfferNotification(candidate.id, offerExpiresAt, client);
 
     return client.waitlistEntry.findUnique({
       where: { id: candidate.id },
@@ -569,7 +533,7 @@ export async function activateNextWaitlistEntryForSlot(
     });
   }
 
-  return (options.rootClient ?? prisma).$transaction((transaction) =>
+  const result = await (options.rootClient ?? prisma).$transaction((transaction) =>
     activateNextWaitlistEntryForSlotWithClient(transaction, {
       roomId,
       blockedFrom,
@@ -577,6 +541,14 @@ export async function activateNextWaitlistEntryForSlot(
       now,
     }),
   );
+
+  if (result) {
+    await dispatchNotifications(async () => {
+      await processPendingNotifications();
+    });
+  }
+
+  return result;
 }
 
 export async function acceptWaitlistOffer(
@@ -653,7 +625,7 @@ export async function acceptWaitlistOffer(
       },
     );
 
-    return {
+    const result = {
       waitlistEntry: await transaction.waitlistEntry.findUniqueOrThrow({
         where: { id: waitlistEntryId },
         include: {
@@ -664,6 +636,14 @@ export async function acceptWaitlistOffer(
       }),
       booking: bookingResult.booking,
     };
+
+    return result;
+  }).then(async (result) => {
+    await dispatchNotifications(async () => {
+      await queueBookingNotifications(result.booking.id, "BOOKING_REQUESTED");
+      await processPendingNotifications();
+    });
+    return result;
   });
 }
 
@@ -755,6 +735,7 @@ export async function expireWaitlistOffers(
       roomId: true,
       startsAt: true,
       endsAt: true,
+      offerExpiresAt: true,
     },
     orderBy: { offerExpiresAt: "asc" },
   });
@@ -780,6 +761,8 @@ export async function expireWaitlistOffers(
         return false;
       }
 
+      await queueWaitlistExpiredNotification(offer.id, offer.offerExpiresAt ?? now, transaction);
+
       await activateNextWaitlistEntryForSlotWithClient(transaction, {
         roomId: offer.roomId,
         blockedFrom: offer.startsAt,
@@ -793,6 +776,12 @@ export async function expireWaitlistOffers(
     if (expired) {
       expiredIds.push(offer.id);
     }
+  }
+
+  if (expiredIds.length > 0) {
+    await dispatchNotifications(async () => {
+      await processPendingNotifications();
+    });
   }
 
   return expiredIds;
