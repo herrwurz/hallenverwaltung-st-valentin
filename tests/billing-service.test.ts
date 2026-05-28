@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import type { TariffDayType } from "@prisma/client";
 import { Prisma } from "@prisma/client";
@@ -242,4 +243,82 @@ test("creates billing entries and marks them exported", async () => {
   assert.equal(exported.count, 1);
   assert.equal(harness.entries[0]?.status, "EXPORTED");
   assert.deepEqual(harness.entries[0]?.exportedAt, new Date("2026-07-02T12:00:00Z"));
+});
+
+test("requires BILLING_EXPORT permission for billing mutations", async () => {
+  const harness = createBillingHarness();
+
+  await assert.rejects(
+    createBillingEntriesForPeriod(
+      { periodStart, periodEnd, actorUserId: "user-without-export" },
+      harness.client as never,
+      { canExport: false },
+    ),
+    /Abrechnungsdaten/,
+  );
+});
+
+test("does not change already exported billing entries", async () => {
+  const harness = createBillingHarness();
+  await createBillingEntriesForPeriod(
+    { periodStart, periodEnd, actorUserId: "user-admin" },
+    harness.client as never,
+    { canExport: true },
+  );
+  harness.entries[0]!.status = "EXPORTED";
+  harness.entries[0]!.exportedAt = new Date("2026-07-01T12:00:00Z");
+
+  const exported = await markBillingEntriesExported(
+    {
+      entryIds: ["billing-1"],
+      actorUserId: "user-admin",
+      exportedAt: new Date("2026-07-02T12:00:00Z"),
+    },
+    harness.client as never,
+    { canExport: true },
+  );
+
+  assert.equal(exported.count, 0);
+  assert.deepEqual(harness.entries[0]?.exportedAt, new Date("2026-07-01T12:00:00Z"));
+});
+
+test("rejects conflicting overlapping tariffs", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-1", dayType: "WEEKDAY", validFrom: new Date("2026-01-01T00:00:00Z"), validUntil: new Date("2026-12-31T00:00:00Z") }),
+      makeTariff({ id: "tariff-2", dayType: "WEEKDAY", validFrom: new Date("2026-06-01T00:00:00Z"), validUntil: null }),
+    ],
+  });
+
+  await assert.rejects(calculateBillingEntry("booking-1", harness.client as never), /widerspruechliche Tarife/);
+});
+
+test("non-billing-relevant organizations do not create billing entries", async () => {
+  const harness = createBillingHarness({
+    bookings: [
+      makeBooking({
+        organization: {
+          ...makeBookingBase().organization,
+          isBillingRelevant: false,
+        },
+      }),
+    ],
+  });
+
+  const result = await createBillingEntriesForPeriod(
+    { periodStart, periodEnd, actorUserId: "user-admin" },
+    harness.client as never,
+    { canExport: true },
+  );
+
+  assert.equal(result.entries.length, 0);
+  assert.equal(harness.entries.length, 0);
+});
+
+test("billing indexes are present in the Prisma schema", () => {
+  const schema = readFileSync("prisma/schema.prisma", "utf8");
+
+  assert.match(schema, /@@index\(\[status, periodStart\]\)/);
+  assert.match(schema, /@@index\(\[organizationId, periodStart\]\)/);
+  assert.match(schema, /@@index\(\[exportedAt\]\)/);
 });

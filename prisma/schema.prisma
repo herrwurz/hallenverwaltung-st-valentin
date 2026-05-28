@@ -484,6 +484,7 @@ model Tariff {
   billingEntries     BillingEntry[]
 
   @@index([roomId, tariffGroupId, usageTypeId, validFrom])
+  @@index([roomId, tariffGroupId, usageTypeId, dayType, validFrom, validUntil])
 }
 
 model BillingEntry {
@@ -503,6 +504,10 @@ model BillingEntry {
   booking        Booking       @relation(fields: [bookingId], references: [id])
   organization   Organization  @relation(fields: [organizationId], references: [id])
   tariff         Tariff?       @relation(fields: [tariffId], references: [id])
+
+  @@index([status, periodStart])
+  @@index([organizationId, periodStart])
+  @@index([exportedAt])
 }
 
 model Document {
