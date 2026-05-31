@@ -26,36 +26,45 @@ function getErrorMessage(error: unknown) {
 
 export async function processNotificationQueueJobAction() {
   await requirePermission("MANAGE_SYSTEM_JOBS");
+  let redirectParams: Record<string, string | number | undefined>;
 
   try {
     const result = await processNotificationQueue();
     revalidatePath("/admin/system/jobs");
-    jobsRedirect({ job: result.jobName, processed: result.processedCount });
+    redirectParams = { job: result.jobName, processed: result.processedCount };
   } catch (error) {
-    jobsRedirect({ error: getErrorMessage(error) });
+    redirectParams = { error: getErrorMessage(error) };
   }
+
+  jobsRedirect(redirectParams);
 }
 
 export async function processExpiredWaitlistOffersJobAction() {
   await requirePermission("MANAGE_SYSTEM_JOBS");
+  let redirectParams: Record<string, string | number | undefined>;
 
   try {
     const result = await processExpiredWaitlistOffers();
     revalidatePath("/admin/system/jobs");
-    jobsRedirect({ job: result.jobName, processed: result.processedCount });
+    redirectParams = { job: result.jobName, processed: result.processedCount };
   } catch (error) {
-    jobsRedirect({ error: getErrorMessage(error) });
+    redirectParams = { error: getErrorMessage(error) };
   }
+
+  jobsRedirect(redirectParams);
 }
 
 export async function runMaintenanceJobsAction() {
   await requirePermission("MANAGE_SYSTEM_JOBS");
+  let redirectParams: Record<string, string | number | undefined>;
 
   try {
     const result = await runMaintenanceJobs();
     revalidatePath("/admin/system/jobs");
-    jobsRedirect({ job: result.jobName, processed: result.processedCount });
+    redirectParams = { job: result.jobName, processed: result.processedCount };
   } catch (error) {
-    jobsRedirect({ error: getErrorMessage(error) });
+    redirectParams = { error: getErrorMessage(error) };
   }
+
+  jobsRedirect(redirectParams);
 }

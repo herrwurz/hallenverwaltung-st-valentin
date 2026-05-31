@@ -120,6 +120,10 @@ Scheduler / Worker
 
 Deployment & Backup
 
+## Phase 14
+
+E2E-Tests
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -297,13 +301,12 @@ Version 1:
 * Hallenordnungen
 * Schadensfotos
 
-### E2E-Tests
+### E2E-Ausbau
 
-* Browserflows
-* Genehmigungsworkflow
-* Warteliste
-* Kalender
-* Export
+* vollstaendiger Genehmigungsworkflow
+* Wartelistenannahme und Ablauf im Browser
+* Kalenderfilter im Browser
+* Exportdownloads im Browser
 
 ---
 
@@ -325,9 +328,11 @@ Mailversand wurde service-seitig getestet, aber nicht gegen produktiven SMTP-Ser
 
 ---
 
-## Keine vollständigen E2E-Tests
+## E2E-Abdeckung noch nicht vollstaendig
 
-Es existieren viele Service-Tests, aber noch keine vollständigen Browser-Workflows.
+Es existieren erste Playwright-Smoke-Tests. Vollstaendige Browserflows fuer
+Genehmigungsworkflow, Warteliste, Kalenderfilter und Exportdownloads fehlen
+noch.
 
 ---
 
@@ -346,17 +351,6 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 ---
 
 # Empfohlene nächste Phasen
-
-## Phase 14
-
-E2E-Tests
-
-* Playwright
-* echte Browserflows
-* Genehmigungen
-* Warteliste
-* Kalender
-* Export
 
 ## Phase 15
 
