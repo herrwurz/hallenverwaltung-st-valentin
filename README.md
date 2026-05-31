@@ -3,7 +3,7 @@
 Technisches Grundgeruest fuer eine Hallenverwaltungssoftware auf Basis von
 Next.js, TypeScript, Tailwind CSS, Prisma und PostgreSQL.
 
-## Stand: Phase 1
+## Stand: Phase 13
 
 Enthalten sind:
 
@@ -11,9 +11,10 @@ Enthalten sind:
 - Tailwind CSS fuer das UI-Grundgeruest
 - Prisma mit PostgreSQL-Anbindung
 - Docker-Setup fuer Webanwendung, Migrationen und PostgreSQL
-- Initialmigration und Seed-Entry-Point ohne fachliche Daten
-
-Nicht enthalten sind Geschaeftslogik, Buchungen oder Kalenderfunktionen.
+- Authentifizierung, Rollen/Rechte, Stammdaten, Buchungen, Genehmigung,
+  Warteliste, Kalender, Benachrichtigungen, Exporte und oeffentliche Ansicht
+- Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
+- Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
 
 ## Voraussetzungen
 
@@ -124,6 +125,75 @@ Der Dienst `migrate` fuehrt die vorhandenen Prisma-Migrationen aus, bevor
 der Webcontainer startet. PostgreSQL-Daten werden im Volume `postgres_data`
 gespeichert.
 
+## Produktionsvorbereitung
+
+Phase 13 stellt eine produktionsnahe, aber bewusst noch nicht
+umgebungsspezifisch ausgerollte Grundlage bereit:
+
+- `docker-compose.production.yml` fuer PostgreSQL, Migrationen, Web,
+  Worker und Nginx Reverse Proxy
+- `.env.production.example` als Vorlage fuer Produktionsvariablen
+- `deploy/nginx/templates/hallenverwaltung.conf.template` fuer HTTPS-Terminierung
+- Backup-, Restore- und Restore-Test-Scripts unter `deploy/scripts`
+
+Produktionsumgebung vorbereiten:
+
+```bash
+cp .env.production.example .env.production
+```
+
+Danach muessen mindestens `POSTGRES_PASSWORD`, `AUTH_SECRET`, `AUTH_URL`,
+`SERVER_NAME` und die SMTP-Werte fuer die Zielumgebung gesetzt werden.
+Zertifikate werden nicht generiert und nicht committed. Erwartet werden:
+
+```text
+deploy/certs/fullchain.pem
+deploy/certs/privkey.pem
+```
+
+Produktionskonfiguration pruefen:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml config
+```
+
+Produktionsnahe Umgebung starten:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml up --build -d
+```
+
+Der Worker wird in dieser Compose-Datei als eigener Dienst gestartet und fuehrt
+`npm run worker:run` im Abstand von `WORKER_INTERVAL_SECONDS` aus. Alternativ
+kann der Worker ueber Cron ausserhalb von Docker betrieben werden.
+
+### Backup und Restore
+
+Backup erstellen:
+
+```bash
+ENV_FILE=.env.production deploy/scripts/backup-postgres.sh
+```
+
+Restore-Test in einer temporaeren Datenbank ausfuehren:
+
+```bash
+BACKUP_FILE=backups/hallenverwaltung_YYYYMMDDTHHMMSSZ.dump \
+ENV_FILE=.env.production \
+deploy/scripts/restore-test-postgres.sh
+```
+
+Restore in die konfigurierte Datenbank ist destruktiv und nur fuer bewusst
+geplante Wiederherstellungen gedacht:
+
+```bash
+BACKUP_FILE=backups/hallenverwaltung_YYYYMMDDTHHMMSSZ.dump \
+ENV_FILE=.env.production \
+deploy/scripts/restore-postgres.sh
+```
+
+Backups und TLS-Zertifikate sind in `.gitignore` ausgeschlossen.
+
 ## Datenbank
 
 Das Prisma-Schema befindet sich in `prisma/schema.prisma`. In Phase 1
@@ -148,5 +218,8 @@ prisma.config.ts        Prisma-CLI- und Seed-Konfiguration
 public/                 Statische Dateien
 Dockerfile              Produktions-Build der Webanwendung
 docker-compose.yml      Web, Migrationen und PostgreSQL
+docker-compose.production.yml  Produktionsnahe Compose-Konfiguration
+deploy/                 Reverse-Proxy-Templates und Backup-Scripts
 .env.example            Beispielkonfiguration
+.env.production.example Produktionskonfiguration ohne Secrets
 ```

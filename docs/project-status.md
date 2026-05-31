@@ -116,6 +116,10 @@ Oeffentliche Ansicht
 
 Scheduler / Worker
 
+## Phase 13
+
+Deployment & Backup
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -293,14 +297,6 @@ Version 1:
 * Hallenordnungen
 * Schadensfotos
 
-### Deployment
-
-* Produktions-Docker
-* HTTPS
-* Reverse Proxy
-* Backupstrategie
-* Restoretests
-
 ### E2E-Tests
 
 * Browserflows
@@ -313,12 +309,12 @@ Version 1:
 
 # Aktuelle Produktionsrisiken
 
-## Kein Deployment-Scheduler
+## Worker-Betrieb muss produktiv aktiviert bleiben
 
-Der Worker ist vorbereitet, muss im Betrieb aber per Cron, separatem Worker-
-Container oder vergleichbarer Infrastruktur gestartet werden.
+Der Worker ist in der Production-Compose-Konfiguration vorbereitet und kann
+alternativ per Cron gestartet werden.
 
-Ohne diese Betriebsintegration laufen Notification Queue und Wartelistenabläufe
+Ohne aktivierten Worker-Dienst laufen Notification Queue und Wartelistenabläufe
 nicht automatisch.
 
 ---
@@ -335,9 +331,11 @@ Es existieren viele Service-Tests, aber noch keine vollständigen Browser-Workfl
 
 ---
 
-## Kein produktionsfertiges Deployment
+## Deployment noch nicht real ausgerollt
 
-HTTPS, Reverse Proxy, Backup und Restore fehlen noch.
+Produktionsnahe Docker-, HTTPS-Reverse-Proxy-, Backup- und Restore-Grundlagen
+sind vorbereitet. Zertifikate, Server-Hardening, Monitoring und echte Restore-
+Proben muessen in der Zielumgebung noch durchgefuehrt werden.
 
 ---
 
@@ -348,16 +346,6 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 ---
 
 # Empfohlene nächste Phasen
-
-## Phase 13
-
-Deployment & Backup
-
-* Docker Production Setup
-* HTTPS
-* Reverse Proxy
-* Backupstrategie
-* Restoretests
 
 ## Phase 14
 
