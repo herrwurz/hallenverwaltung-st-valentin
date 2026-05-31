@@ -19,6 +19,9 @@ Phase 11 rundet die oeffentliche Ansicht mit Standortuebersicht,
 datenschutzkonformem Kalender, freien Zeiten und iCal-Export ab.
 Phase 12 bereitet zentrale Hintergrundjobs fuer Notification Queue,
 Wartelistenablauf und Maintenance-Laeufe vor.
+Phase 15 fuehrt Aenderungsantraege fuer genehmigte Buchungen ein: Verschiebungen
+werden beantragt, verwaltungsseitig geprueft und bei Genehmigung als neuer
+Ersatztermin angelegt.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -65,7 +68,11 @@ erDiagram
   USAGE_TYPE ||--o{ BOOKING : describes
   BOOKING_SERIES ||--o{ BOOKING : generates
   BOOKING ||--o{ BOOKING_STATUS_HISTORY : records
+  BOOKING ||--o{ BOOKING_CHANGE_REQUEST : changes
+  ROOM ||--o{ BOOKING_CHANGE_REQUEST : old_slot
+  ROOM ||--o{ BOOKING_CHANGE_REQUEST : new_slot
   USER ||--o{ BOOKING_STATUS_HISTORY : acts
+  USER ||--o{ BOOKING_CHANGE_REQUEST : requests
   ORGANIZATION ||--o{ WAITLIST_ENTRY : registers
   ROOM ||--o{ WAITLIST_ENTRY : concerns
 
@@ -103,6 +110,13 @@ erDiagram
   auf allen konfliktrelevanten Raum-IDs eines Buchungskontexts. Dadurch werden
   Gesamtbereich und Teilraeume gemeinsam serialisiert, bevor die harte
   Konfliktpruefung und der Statuswechsel nach `APPROVED` erfolgen.
+- Terminverschiebungen werden ab Phase 15 ueber `BookingChangeRequest`
+  modelliert. Der bestehende genehmigte Termin wird bei Antragstellung nicht
+  ueberschrieben. Bei Genehmigung wird die Ausgangsbuchung auf `MOVED` gesetzt,
+  per `BookingStatusHistory` historisiert und ein neuer `APPROVED`-Ersatztermin
+  angelegt. Tauschantraege sind ueber `BookingChangeRequestType.SWAP`
+  vorbereitet, aber in Version 1 dieser Phase noch nicht vollstaendig
+  genehmigbar.
 - Wartelistenplaetze nutzen `WaitlistEntry` mit den Status `ACTIVE`,
   `OFFERED`, `ACCEPTED`, `DECLINED`, `EXPIRED` und `CANCELLED`. Die Reihung
   erfolgt nach `placedAt`; gleichzeitig darf pro passendem Slot-Kontext nur

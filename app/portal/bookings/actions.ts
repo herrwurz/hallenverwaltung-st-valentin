@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
+import { createMoveChangeRequest } from "@/lib/services/booking-change-service";
 import { cancelOwnBookingRequest, createBookingRequest } from "@/lib/services/booking-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
@@ -67,4 +68,27 @@ export async function cancelOwnBookingRequestAction(formData: FormData) {
 
   revalidatePath("/portal/bookings");
   redirect(`/portal/bookings?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "cancelled=1"}`);
+}
+
+export async function createMoveChangeRequestAction(formData: FormData) {
+  const user = await requirePermission("REQUEST_RESCHEDULE");
+  let errorMessage: string | undefined;
+
+  try {
+    await createMoveChangeRequest(
+      {
+        bookingId: formData.get("bookingId"),
+        newRoomId: formData.get("newRoomId"),
+        newStartAt: formData.get("newStartAt"),
+        newEndAt: formData.get("newEndAt"),
+        reason: formData.get("reason"),
+      },
+      user.id,
+    );
+  } catch (error) {
+    errorMessage = bookingErrorMessage(error);
+  }
+
+  revalidatePath("/portal/bookings");
+  redirect(`/portal/bookings?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "changeRequested=1"}`);
 }

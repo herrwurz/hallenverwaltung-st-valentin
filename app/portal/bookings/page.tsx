@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
 import { getBookingStatusBadgeClass, getBookingStatusLabel } from "@/lib/booking-status";
+import { getBookingChangeStatusBadgeClass, getBookingChangeStatusLabel, getBookingChangeTypeLabel } from "@/lib/booking-change-status";
 import { requirePermission } from "@/lib/permissions";
+import { getChangeRequestsForOrganization } from "@/lib/services/booking-change-service";
 import { getBookingRequestOptions, getBookingsForOrganization } from "@/lib/services/booking-service";
-import { cancelOwnBookingRequestAction, createBookingRequestAction } from "@/app/portal/bookings/actions";
+import { cancelOwnBookingRequestAction, createBookingRequestAction, createMoveChangeRequestAction } from "@/app/portal/bookings/actions";
 
 const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -12,15 +14,16 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
 });
 
 type PageProps = {
-  searchParams: Promise<{ saved?: string; cancelled?: string; warning?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; cancelled?: string; changeRequested?: string; warning?: string; error?: string }>;
 };
 
 export default async function PortalBookingsPage({ searchParams }: PageProps) {
   const user = await requirePermission("REQUEST_BOOKING");
-  const [params, options, bookings] = await Promise.all([
+  const [params, options, bookings, changeRequests] = await Promise.all([
     searchParams,
     getBookingRequestOptions(user.id),
     getBookingsForOrganization(user.id),
+    getChangeRequestsForOrganization(user.id),
   ]);
 
   return (
@@ -47,6 +50,11 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
       {params.cancelled ? (
         <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
           Der Buchungsantrag wurde storniert.
+        </p>
+      ) : null}
+      {params.changeRequested ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Der Verschiebungsantrag wurde gespeichert.
         </p>
       ) : null}
       {params.warning ? (
@@ -161,6 +169,76 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                       </form>
                     ) : null}
                   </div>
+                </div>
+                {booking.status === "APPROVED" ? (
+                  <form action={createMoveChangeRequestAction} className="mt-5 grid gap-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 lg:grid-cols-2">
+                    <input type="hidden" name="bookingId" value={booking.id} />
+                    <p className="text-sm font-medium text-slate-200 lg:col-span-2">Verschiebung beantragen</p>
+                    <label className="text-sm text-slate-300">
+                      Neuer Raum
+                      <select name="newRoomId" required defaultValue={booking.roomId} className={inputClass}>
+                        {options.buildings.flatMap((building) =>
+                          building.rooms.map((room) => (
+                            <option key={room.id} value={room.id}>
+                              {building.name} - {room.name}
+                            </option>
+                          )),
+                        )}
+                      </select>
+                    </label>
+                    <label className="text-sm text-slate-300">
+                      Neuer Beginn
+                      <input name="newStartAt" type="datetime-local" required className={inputClass} />
+                    </label>
+                    <label className="text-sm text-slate-300">
+                      Neues Ende
+                      <input name="newEndAt" type="datetime-local" required className={inputClass} />
+                    </label>
+                    <label className="text-sm text-slate-300">
+                      Grund
+                      <input name="reason" required maxLength={1000} className={inputClass} />
+                    </label>
+                    <div className="lg:col-span-2 lg:text-right">
+                      <button className="rounded-lg border border-sky-700 px-4 py-2 text-sm text-sky-200 hover:bg-sky-950">
+                        Verschiebung beantragen
+                      </button>
+                    </div>
+                  </form>
+                ) : null}
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-xl font-medium">Verschiebungs- und Tauschantraege</h2>
+        <div className="mt-4 space-y-3">
+          {changeRequests.length === 0 ? (
+            <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+              Noch keine Aenderungsantraege vorhanden.
+            </p>
+          ) : (
+            changeRequests.map((request) => (
+              <article key={request.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                <div className="flex flex-wrap justify-between gap-4">
+                  <div>
+                    <h3 className="font-medium">
+                      {getBookingChangeTypeLabel(request.type)}: {request.booking.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Alt: {request.oldRoom.building.name} - {request.oldRoom.name}, {dateFormatter.format(request.oldStartAt)} bis{" "}
+                      {dateFormatter.format(request.oldEndAt)}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Neu: {request.newRoom.building.name} - {request.newRoom.name}, {dateFormatter.format(request.newStartAt)} bis{" "}
+                      {dateFormatter.format(request.newEndAt)}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-300">{request.reason}</p>
+                  </div>
+                  <p className={`inline-flex h-fit rounded-full px-3 py-1 text-sm ${getBookingChangeStatusBadgeClass(request.status)}`}>
+                    {getBookingChangeStatusLabel(request.status)}
+                  </p>
                 </div>
               </article>
             ))

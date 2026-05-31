@@ -24,6 +24,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(canViewBookings || canApproveBookings || canRejectBookings
       ? [
           { href: "/admin/bookings", label: "Buchungsantraege" },
+          { href: "/admin/booking-changes", label: "Aenderungsantraege" },
           { href: "/admin/calendar", label: "Kalender" },
           { href: "/admin/notifications", label: "Benachrichtigungen" },
         ]
