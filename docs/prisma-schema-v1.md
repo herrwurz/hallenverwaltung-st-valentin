@@ -15,8 +15,9 @@ und PDF-Exporte ohne automatische Rechnungslegung. Phase 11 nutzt das Modell
 fuer die oeffentliche Ansicht mit Kalender, freien Zeiten und iCal-Export. Die
 Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
 Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
-vorbereitete Tauschantraege. Die in Phase 3 vorhandene Authentifizierung
-verwendet `User.passwordHash`.
+vorbereitete Tauschantraege. Phase 16 nutzt `Document` und `DamageReport`
+fuer Dokumentenmetadaten und Schadensmeldungen. Die in Phase 3 vorhandene
+Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -93,6 +94,11 @@ werden.
   `BookingStatusHistory` und legt einen neuen `APPROVED`-Ersatztermin an.
 - Tauschantraege sind ueber `BookingChangeRequestType.SWAP` vorbereitet. Die
   vollstaendige fachliche Tauschlogik ist noch nicht freigeschaltet.
+- `Document` speichert in Phase 16 nur Metadaten und `storageKey`. Genau eine
+  Zuordnung zu Organisation, Gebaeude oder Raum wird service-seitig validiert.
+- `DamageReport` bildet Schadensmeldungen mit optionalem Foto-Storage-Key und
+  den Status `REPORTED`, `IN_REVIEW`, `RESOLVED` ab. `REPORT_DAMAGE` schuetzt
+  die Meldung, `MANAGE_DAMAGE` die Bearbeitung.
 
 ## Indizes
 

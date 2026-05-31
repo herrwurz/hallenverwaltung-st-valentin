@@ -22,6 +22,8 @@ Wartelistenablauf und Maintenance-Laeufe vor.
 Phase 15 fuehrt Aenderungsantraege fuer genehmigte Buchungen ein: Verschiebungen
 werden beantragt, verwaltungsseitig geprueft und bei Genehmigung als neuer
 Ersatztermin angelegt.
+Phase 16 aktiviert die Dokumentenverwaltung als Metadaten-Workflow und das
+Schadensmanagement fuer Portal und Verwaltung.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -84,7 +86,12 @@ erDiagram
 
   BUILDING ||--o{ CLOSURE : blocked_by
   ROOM ||--o{ CLOSURE : blocked_by
+  ORGANIZATION ||--o{ DOCUMENT : owns
+  BUILDING ||--o{ DOCUMENT : owns
+  ROOM ||--o{ DOCUMENT : owns
   ROOM ||--o{ DAMAGE_REPORT : receives
+  USER ||--o{ DAMAGE_REPORT : reports
+  USER ||--o{ DAMAGE_REPORT : processes
   BOOKING ||--o| HANDOVER : documents
   BUILDING ||--o{ ACCESS_MEDIUM : owns
   ACCESS_MEDIUM ||--o{ ACCESS_ASSIGNMENT : issues
@@ -172,6 +179,13 @@ erDiagram
   Erfolg/Fehler, verarbeiteter Anzahl und Fehlermeldung protokolliert.
 - Das Recht `MANAGE_SYSTEM_JOBS` schuetzt die manuelle Job-Verwaltung im
   Verwaltungsportal.
+- Dokumente werden in Phase 16 als Metadaten (`fileName`, `storageKey`,
+  `DocumentType`) verwaltet und genau einer Organisation, einem Gebaeude oder
+  einem Raum zugeordnet. Ein echter Datei-Storage ist bewusst vorbereitet, aber
+  noch nicht implementiert.
+- Schadensmeldungen nutzen `DamageReport` mit Status `REPORTED`, `IN_REVIEW`
+  und `RESOLVED`. Portalnutzer duerfen Schaeden melden; die Verwaltung setzt
+  den Bearbeitungsstatus.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer

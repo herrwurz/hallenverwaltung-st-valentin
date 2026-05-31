@@ -1,0 +1,101 @@
+import type { DamageStatus } from "@prisma/client";
+import { z } from "zod";
+import { hasPermission } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
+import { BookingValidationError } from "@/lib/services/booking-rules";
+
+export const damageReportSchema = z.object({
+  roomId: z.string().trim().min(1, "Ein Raum ist erforderlich."),
+  description: z.string().trim().min(5, "Bitte beschreiben Sie den Schaden.").max(2000),
+  photoStorageKey: z.string().trim().max(500).optional(),
+});
+
+export const damageStatusSchema = z.object({
+  damageReportId: z.string().trim().min(1, "Die Schadensmeldung ist ungueltig."),
+  status: z.enum(["REPORTED", "IN_REVIEW", "RESOLVED"] satisfies DamageStatus[]),
+});
+
+export async function getPortalDamageData(actorUserId: string) {
+  const [reports, buildings] = await Promise.all([
+    prisma.damageReport.findMany({
+      where: { reportedByUserId: actorUserId },
+      include: {
+        room: { include: { building: true } },
+        processedBy: { select: { displayName: true, email: true } },
+      },
+      orderBy: { reportedAt: "desc" },
+    }),
+    prisma.building.findMany({
+      where: { isActive: true },
+      include: { rooms: { where: { status: "ACTIVE" }, orderBy: { name: "asc" } } },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  return { reports, buildings };
+}
+
+export async function getAdminDamageData(status?: string) {
+  const statusFilter =
+    status === "REPORTED" || status === "IN_REVIEW" || status === "RESOLVED" ? status : undefined;
+
+  const reports = await prisma.damageReport.findMany({
+    where: statusFilter ? { status: statusFilter } : undefined,
+    include: {
+      room: { include: { building: true } },
+      reportedBy: { select: { displayName: true, email: true } },
+      processedBy: { select: { displayName: true, email: true } },
+    },
+    orderBy: [{ status: "asc" }, { reportedAt: "desc" }],
+  });
+
+  return { reports, selectedStatus: statusFilter };
+}
+
+export async function reportDamage(input: unknown, actorUserId: string) {
+  const canReportDamage = await hasPermission(actorUserId, "REPORT_DAMAGE");
+  if (!canReportDamage) {
+    throw new BookingValidationError("Fuer Schadensmeldungen fehlt das Recht REPORT_DAMAGE.");
+  }
+
+  const data = damageReportSchema.parse(input);
+  const room = await prisma.room.findUnique({
+    where: { id: data.roomId },
+    select: { id: true, status: true, building: { select: { isActive: true } } },
+  });
+
+  if (!room || room.status === "OUT_OF_SERVICE" || !room.building.isActive) {
+    throw new BookingValidationError("Der ausgewaehlte Raum kann fuer Schadensmeldungen nicht verwendet werden.");
+  }
+
+  return prisma.damageReport.create({
+    data: {
+      roomId: data.roomId,
+      reportedByUserId: actorUserId,
+      description: data.description,
+      photoStorageKey: data.photoStorageKey || null,
+    },
+  });
+}
+
+export async function updateDamageStatus(input: unknown, actorUserId: string) {
+  const canManageDamage = await hasPermission(actorUserId, "MANAGE_DAMAGE");
+  if (!canManageDamage) {
+    throw new BookingValidationError("Fuer die Schadensbearbeitung fehlt das Recht MANAGE_DAMAGE.");
+  }
+
+  const data = damageStatusSchema.parse(input);
+  const damage = await prisma.damageReport.findUnique({ where: { id: data.damageReportId } });
+  if (!damage) {
+    throw new BookingValidationError("Die Schadensmeldung wurde nicht gefunden.");
+  }
+
+  return prisma.damageReport.update({
+    where: { id: data.damageReportId },
+    data: {
+      status: data.status,
+      processedByUserId: actorUserId,
+      resolvedAt: data.status === "RESOLVED" ? new Date() : null,
+    },
+  });
+}

@@ -128,6 +128,10 @@ E2E-Tests
 
 Verschiebungen & Tauschanträge
 
+## Phase 16
+
+Dokumentenmanagement und Schadensmeldungen
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -150,6 +154,8 @@ Beispiele:
 
 * BookingTransitionService
 * BookingChangeService
+* DocumentService
+* DamageService
 * WaitlistService
 * NotificationService
 * BillingTransitionService
@@ -302,10 +308,13 @@ Version 1:
 
 ### Dokumentenmanagement
 
-* Uploads
-* Verträge
-* Hallenordnungen
-* Schadensfotos
+* Dokumente werden als Metadaten mit Storage-Key erfasst
+* echter Datei-Upload/Storage ist vorbereitet, aber noch nicht angebunden
+
+### Schadensmanagement
+
+* Portal-Schadensmeldungen mit optionalem Foto-Storage-Key
+* Admin-Statusbearbeitung fuer gemeldet, in Bearbeitung und erledigt
 
 ### E2E-Ausbau
 
@@ -358,13 +367,13 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
-## Phase 16
+## Phase 17
 
-Dokumentenmanagement und Schadensmeldungen
+Serienbuchungen und Ferien-/Ausnahmelogik
 
-* Uploads für Hallenordnung, Verträge und Nachweise
-* Schadensmeldungen inklusive Bearbeitungsstatus
-* spätere Hallenübergabe/Zutrittsverwaltung vorbereiten
+* Serienantraege fuer wiederkehrende Termine
+* Ferien- und Feiertagsregeln anwenden
+* einzelne Serientermine verschiebbar halten
 
 ---
 

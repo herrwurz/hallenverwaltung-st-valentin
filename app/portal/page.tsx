@@ -33,6 +33,20 @@ export default async function PortalPage() {
         <h2 className="text-lg font-medium">Warteliste</h2>
         <p className="mt-2 text-slate-300">Zeitfenster vormerken und Angebote innerhalb von 48 Stunden annehmen.</p>
       </Link>
+      <Link
+        href="/portal/documents"
+        className="mt-4 block rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-sky-700"
+      >
+        <h2 className="text-lg font-medium">Dokumente</h2>
+        <p className="mt-2 text-slate-300">Hallenordnungen, Vertraege und Nachweise als Metadaten verwalten.</p>
+      </Link>
+      <Link
+        href="/portal/damages"
+        className="mt-4 block rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-sky-700"
+      >
+        <h2 className="text-lg font-medium">Schadensmeldungen</h2>
+        <p className="mt-2 text-slate-300">Schaeden mit Beschreibung und optionalem Foto-Ablagepfad melden.</p>
+      </Link>
     </AreaShell>
   );
 }

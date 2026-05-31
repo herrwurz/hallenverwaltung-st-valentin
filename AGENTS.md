@@ -150,6 +150,15 @@ Version 1:
 - Nur Abrechnungsvorbereitung
 - Excel- und PDF-Export
 
+## Dokumente und Schaeden
+
+- Dokumente werden in Version 1 als Metadaten mit `storageKey` verwaltet.
+- Ein echter Datei-Storage darf spaeter ergaenzt werden, aber nicht durch
+  lokale Pfad-Hardcodierung erzwungen werden.
+- Schadensmeldungen haben Beschreibung, optionalen Foto-Storage-Key und Status.
+- Hallenuebergabe und Zutrittsverwaltung sind vorbereitet, aber nicht Teil von
+  Phase 16.
+
 ---
 
 # Erlaubte Standardbefehle
