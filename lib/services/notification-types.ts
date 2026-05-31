@@ -8,6 +8,7 @@ export const notificationEventCodes = [
   "BOOKING_CANCELLED",
   "WAITLIST_OFFER_CREATED",
   "WAITLIST_OFFER_EXPIRED",
+  "DAMAGE_REPORTED",
 ] as const;
 
 export type NotificationEventCode = (typeof notificationEventCodes)[number];
@@ -42,6 +43,17 @@ export const waitlistNotificationPayloadSchema = z.object({
 
 export type WaitlistNotificationPayload = z.infer<typeof waitlistNotificationPayloadSchema>;
 
+export const damageNotificationPayloadSchema = z.object({
+  damageReportId: z.string().min(1),
+  buildingName: z.string().min(1),
+  roomName: z.string().min(1),
+  reportedByName: z.string().min(1).optional(),
+  description: z.string().min(1),
+  reportedAt: isoDateString,
+});
+
+export type DamageNotificationPayload = z.infer<typeof damageNotificationPayloadSchema>;
+
 export type NotificationTemplateData =
   | {
       eventCode:
@@ -55,6 +67,10 @@ export type NotificationTemplateData =
   | {
       eventCode: "WAITLIST_OFFER_CREATED" | "WAITLIST_OFFER_EXPIRED";
       payload: WaitlistNotificationPayload;
+    }
+  | {
+      eventCode: "DAMAGE_REPORTED";
+      payload: DamageNotificationPayload;
     };
 
 export function parseNotificationTemplateData(
@@ -76,6 +92,11 @@ export function parseNotificationTemplateData(
       return {
         eventCode,
         payload: waitlistNotificationPayloadSchema.parse(payload),
+      };
+    case "DAMAGE_REPORTED":
+      return {
+        eventCode,
+        payload: damageNotificationPayloadSchema.parse(payload),
       };
     default:
       throw new Error(`Unsupported notification event code: ${eventCode}`);

@@ -153,9 +153,12 @@ Version 1:
 ## Dokumente und Schaeden
 
 - Dokumente werden in Version 1 als Metadaten mit `storageKey` verwaltet.
+- `storageKey` wird serverseitig erzeugt und darf nicht aus Client-Eingaben
+  uebernommen werden.
 - Ein echter Datei-Storage darf spaeter ergaenzt werden, aber nicht durch
   lokale Pfad-Hardcodierung erzwungen werden.
 - Schadensmeldungen haben Beschreibung, optionalen Foto-Storage-Key und Status.
+- Schadensstatuswechsel muessen service-seitig validiert und auditiert werden.
 - Hallenuebergabe und Zutrittsverwaltung sind vorbereitet, aber nicht Teil von
   Phase 16.
 

@@ -186,5 +186,33 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           </ul>
         `,
       };
+    case "DAMAGE_REPORTED":
+      return {
+        subject: `Schaden gemeldet: ${template.payload.buildingName} - ${template.payload.roomName}`,
+        text: [
+          "Eine neue Schadensmeldung wurde erfasst.",
+          "",
+          `Ort: ${template.payload.buildingName} - ${template.payload.roomName}`,
+          `Gemeldet am: ${dateFormatter.format(new Date(template.payload.reportedAt))}`,
+          template.payload.reportedByName ? `Gemeldet von: ${template.payload.reportedByName}` : "",
+          "",
+          template.payload.description,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        html: `
+          <p>Eine neue Schadensmeldung wurde erfasst.</p>
+          <ul>
+            <li><strong>Ort:</strong> ${escapeHtml(template.payload.buildingName)} - ${escapeHtml(template.payload.roomName)}</li>
+            <li><strong>Gemeldet am:</strong> ${escapeHtml(dateFormatter.format(new Date(template.payload.reportedAt)))}</li>
+            ${
+              template.payload.reportedByName
+                ? `<li><strong>Gemeldet von:</strong> ${escapeHtml(template.payload.reportedByName)}</li>`
+                : ""
+            }
+          </ul>
+          <p>${escapeHtml(template.payload.description)}</p>
+        `,
+      };
   }
 }

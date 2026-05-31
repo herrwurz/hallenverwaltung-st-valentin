@@ -309,12 +309,14 @@ Version 1:
 ### Dokumentenmanagement
 
 * Dokumente werden als Metadaten mit Storage-Key erfasst
+* Storage-Key wird serverseitig erzeugt und DB-seitig gibt es genau eine Zielzuordnung
 * echter Datei-Upload/Storage ist vorbereitet, aber noch nicht angebunden
 
 ### Schadensmanagement
 
 * Portal-Schadensmeldungen mit optionalem Foto-Storage-Key
 * Admin-Statusbearbeitung fuer gemeldet, in Bearbeitung und erledigt
+* Statuswechsel werden auditiert, neue Meldungen koennen `DAMAGE_REPORTED` benachrichtigen
 
 ### E2E-Ausbau
 

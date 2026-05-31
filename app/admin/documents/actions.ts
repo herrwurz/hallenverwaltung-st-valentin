@@ -31,7 +31,6 @@ export async function createAdminDocumentAction(formData: FormData) {
         roomId: formData.get("roomId"),
         type: formData.get("type"),
         fileName: formData.get("fileName"),
-        storageKey: formData.get("storageKey"),
       },
       user.id,
     );

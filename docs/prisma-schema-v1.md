@@ -96,9 +96,15 @@ werden.
   vollstaendige fachliche Tauschlogik ist noch nicht freigeschaltet.
 - `Document` speichert in Phase 16 nur Metadaten und `storageKey`. Genau eine
   Zuordnung zu Organisation, Gebaeude oder Raum wird service-seitig validiert.
+- Phase 16.5 ergaenzt den Datenbank-Check
+  `Document_exactly_one_target_check`; `storageKey` wird serverseitig erzeugt
+  und nicht aus Client-Eingaben uebernommen.
 - `DamageReport` bildet Schadensmeldungen mit optionalem Foto-Storage-Key und
   den Status `REPORTED`, `IN_REVIEW`, `RESOLVED` ab. `REPORT_DAMAGE` schuetzt
   die Meldung, `MANAGE_DAMAGE` die Bearbeitung.
+- Schadensstatuswechsel sind vorwaertsgerichtet (`REPORTED -> IN_REVIEW ->
+  RESOLVED`) und werden ueber `AuditEntry` protokolliert. Neue Meldungen
+  koennen das Notification-Event `DAMAGE_REPORTED` erzeugen.
 
 ## Indizes
 

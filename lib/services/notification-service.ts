@@ -6,6 +6,7 @@ import { isNotificationEventEnabled } from "@/lib/services/notification-settings
 import { renderNotificationTemplate } from "@/lib/services/notification-template-service";
 import type {
   BookingNotificationPayload,
+  DamageNotificationPayload,
   NotificationEventCode,
   WaitlistNotificationPayload,
 } from "@/lib/services/notification-types";
@@ -14,7 +15,7 @@ type NotificationEventStatusFilter = "ALL" | "PENDING" | "SENT" | "FAILED";
 
 type NotificationClient = Pick<
   PrismaClient,
-  "notification" | "booking" | "waitlistEntry" | "user" | "systemSetting"
+  "notification" | "booking" | "waitlistEntry" | "damageReport" | "user" | "systemSetting"
 >;
 
 type MailSender = (payload: MailPayload) => Promise<unknown>;
@@ -518,6 +519,90 @@ export async function queueWaitlistExpiredNotification(
         payload,
       },
     ],
+    client,
+  );
+}
+
+export async function queueDamageReportedNotification(
+  damageReportId: string,
+  client: NotificationClient = prisma,
+) {
+  const damage = await client.damageReport.findUnique({
+    where: { id: damageReportId },
+    select: {
+      id: true,
+      description: true,
+      reportedAt: true,
+      reportedBy: { select: { displayName: true } },
+      room: {
+        select: {
+          name: true,
+          caretakers: {
+            select: {
+              caretaker: {
+                select: {
+                  id: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          building: {
+            select: {
+              name: true,
+              caretakers: {
+                select: {
+                  caretaker: {
+                    select: {
+                      id: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!damage) {
+    return [];
+  }
+
+  const payload: DamageNotificationPayload = {
+    damageReportId: damage.id,
+    buildingName: damage.room.building.name,
+    roomName: damage.room.name,
+    reportedByName: damage.reportedBy?.displayName ?? undefined,
+    description: damage.description,
+    reportedAt: damage.reportedAt.toISOString(),
+  };
+
+  const adminRecipients = await getAdminRecipients(client);
+  const caretakerRecipients = dedupeRecipients(
+    [
+      ...damage.room.caretakers.map(({ caretaker }) => ({
+        id: caretaker.id,
+        email: caretaker.email,
+      })),
+      ...damage.room.building.caretakers.map(({ caretaker }) => ({
+        id: caretaker.id,
+        email: caretaker.email,
+      })),
+    ],
+  );
+
+  return queueNotificationRows(
+    [...adminRecipients, ...caretakerRecipients]
+      .filter((recipient) => recipient.email)
+      .map((recipient) => ({
+        eventCode: "DAMAGE_REPORTED",
+        recipientUserId: recipient.id,
+        recipient: recipient.email!,
+        payload,
+      })),
     client,
   );
 }

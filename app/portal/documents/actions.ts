@@ -29,7 +29,6 @@ export async function createOrganizationDocumentAction(formData: FormData) {
         organizationId: formData.get("organizationId"),
         type: formData.get("type"),
         fileName: formData.get("fileName"),
-        storageKey: formData.get("storageKey"),
       },
       user.id,
     );
