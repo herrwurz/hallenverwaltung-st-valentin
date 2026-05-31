@@ -112,6 +112,63 @@ node ./node_modules/typescript/bin/tsc --noEmit
 Der Webpack-Buildpfad ist fuer dieses Projekt bewusst als robuster
 Produktionsbuild hinterlegt.
 
+## E2E-Tests
+
+Phase 14 fuehrt Playwright-Smoke-Tests fuer echte Browserflows ein. Die Tests
+legen ueber `e2e/global-setup.ts` wiederholbare Testbenutzer und minimale
+Katalogdaten an:
+
+- Admin-Login und Weiterleitung ins Verwaltungsportal
+- Portal-Login und Buchungsantrag
+- oeffentlicher Bereich und Kalender
+- manuelle System-Job-Ausfuehrung im Adminbereich
+
+Vor dem ersten Lauf muss der Chromium-Browser installiert werden:
+
+```bash
+npm run test:e2e:install
+```
+
+Danach kann die E2E-Suite gestartet werden:
+
+```bash
+npm run test:e2e
+```
+
+Ohne `E2E_BASE_URL` startet Playwright den lokalen Next.js-Devserver auf
+`http://127.0.0.1:3000`. Fuer externe Umgebungen kann stattdessen gesetzt
+werden:
+
+```bash
+E2E_BASE_URL=https://hallenverwaltung.example.org npm run test:e2e
+```
+
+Die Tests benoetigen eine erreichbare PostgreSQL-Datenbank ueber
+`DATABASE_URL`. Ohne gesetzte Variable wird die lokale Entwicklungs-URL
+`postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public`
+verwendet.
+
+Falls der automatische Playwright-Webserver in einer Windows-/Codex-Session
+beim Beenden haengen bleibt, kann der Server manuell gestartet und die Suite
+gegen die laufende Instanz ausgefuehrt werden:
+
+```powershell
+$env:DATABASE_URL="postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public"
+$env:AUTH_SECRET="phase-14-e2e-local-secret-change-in-real-env"
+$env:AUTH_TRUST_HOST="true"
+npm run dev -- --hostname 127.0.0.1 --port 3000
+```
+
+In einem zweiten Terminal:
+
+```powershell
+$env:E2E_BASE_URL="http://127.0.0.1:3000"
+$env:DATABASE_URL="postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public"
+$env:AUTH_SECRET="phase-14-e2e-local-secret-change-in-real-env"
+$env:AUTH_TRUST_HOST="true"
+npm run test:e2e
+```
+
 ## Start mit Docker Compose
 
 Nach dem Anlegen einer `.env`-Datei kann die gesamte Anwendung gestartet
@@ -220,6 +277,7 @@ Dockerfile              Produktions-Build der Webanwendung
 docker-compose.yml      Web, Migrationen und PostgreSQL
 docker-compose.production.yml  Produktionsnahe Compose-Konfiguration
 deploy/                 Reverse-Proxy-Templates und Backup-Scripts
+e2e/                    Playwright-Smoke-Tests
 .env.example            Beispielkonfiguration
 .env.production.example Produktionskonfiguration ohne Secrets
 ```
