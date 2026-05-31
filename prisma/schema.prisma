@@ -35,6 +35,19 @@ enum BookingStatus {
   ARCHIVED
 }
 
+enum BookingChangeRequestType {
+  MOVE
+  SWAP
+}
+
+enum BookingChangeRequestStatus {
+  REQUESTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
 enum ClosureStatus {
   OPEN
   RESTRICTED
@@ -144,6 +157,8 @@ model User {
   permissions             UserPermission[]
   requestedBookings       Booking[]              @relation("BookingRequestedBy")
   processedBookings       Booking[]              @relation("BookingProcessedBy")
+  requestedBookingChanges BookingChangeRequest[] @relation("BookingChangeRequestedBy")
+  decidedBookingChanges   BookingChangeRequest[] @relation("BookingChangeDecidedBy")
   waitlistEntries         WaitlistEntry[]        @relation("WaitlistRequestedBy")
   reportedDamages         DamageReport[]         @relation("DamageReportedBy")
   processedDamages        DamageReport[]         @relation("DamageProcessedBy")
@@ -249,29 +264,31 @@ model Building {
 }
 
 model Room {
-  id                     String            @id @default(cuid())
+  id                     String                 @id @default(cuid())
   buildingId             String
-  code                   String            @unique
+  code                   String                 @unique
   name                   String
   description            String?
-  status                 RoomStatus        @default(ACTIVE)
-  isCombinable           Boolean           @default(false)
-  openingTime            String            @default("06:00")
-  closingTime            String            @default("23:00")
-  setupBufferMinutes     Int               @default(0)
-  teardownBufferMinutes  Int               @default(0)
+  status                 RoomStatus             @default(ACTIVE)
+  isCombinable           Boolean                @default(false)
+  openingTime            String                 @default("06:00")
+  closingTime            String                 @default("23:00")
+  setupBufferMinutes     Int                    @default(0)
+  teardownBufferMinutes  Int                    @default(0)
   maximumBookingMinutes  Int?
-  singleBookingLeadDays  Int               @default(180)
+  singleBookingLeadDays  Int                    @default(180)
   costCenter             String?
-  publicShowOrganization Boolean           @default(true)
-  publicShowEventName    Boolean           @default(true)
-  building               Building          @relation(fields: [buildingId], references: [id])
-  componentParents       RoomComposition[] @relation("ComponentParent")
-  componentChildren      RoomComposition[] @relation("ComponentChild")
+  publicShowOrganization Boolean                @default(true)
+  publicShowEventName    Boolean                @default(true)
+  building               Building               @relation(fields: [buildingId], references: [id])
+  componentParents       RoomComposition[]      @relation("ComponentParent")
+  componentChildren      RoomComposition[]      @relation("ComponentChild")
   caretakers             RoomCaretaker[]
   bookings               Booking[]
   series                 BookingSeries[]
   waitlistEntries        WaitlistEntry[]
+  bookingChangesFrom     BookingChangeRequest[] @relation("BookingChangeOldRoom")
+  bookingChangesTo       BookingChangeRequest[] @relation("BookingChangeNewRoom")
   closures               Closure[]
   tariffs                Tariff[]
   documents              Document[]
@@ -382,14 +399,48 @@ model Booking {
   handover          Handover?
   notifications     Notification[]
   statusHistory     BookingStatusHistory[]
+  changeRequests    BookingChangeRequest[] @relation("BookingChangeOriginal")
+  swapRequests      BookingChangeRequest[] @relation("BookingChangeSwapTarget")
 
   @@index([status, startsAt])
   @@index([roomId, startsAt, endsAt])
   @@index([organizationId, status])
 }
 
+model BookingChangeRequest {
+  id                String                     @id @default(cuid())
+  bookingId         String
+  requestedByUserId String
+  type              BookingChangeRequestType
+  status            BookingChangeRequestStatus @default(REQUESTED)
+  oldRoomId         String
+  oldStartAt        DateTime
+  oldEndAt          DateTime
+  newRoomId         String
+  newStartAt        DateTime
+  newEndAt          DateTime
+  swapWithBookingId String?
+  reason            String
+  decisionNote      String?
+  decidedByUserId   String?
+  decidedAt         DateTime?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  booking           Booking                    @relation("BookingChangeOriginal", fields: [bookingId], references: [id], onDelete: Restrict)
+  requestedBy       User                       @relation("BookingChangeRequestedBy", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  decidedBy         User?                      @relation("BookingChangeDecidedBy", fields: [decidedByUserId], references: [id], onDelete: Restrict)
+  oldRoom           Room                       @relation("BookingChangeOldRoom", fields: [oldRoomId], references: [id], onDelete: Restrict)
+  newRoom           Room                       @relation("BookingChangeNewRoom", fields: [newRoomId], references: [id], onDelete: Restrict)
+  swapWithBooking   Booking?                   @relation("BookingChangeSwapTarget", fields: [swapWithBookingId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([bookingId, status])
+  @@index([requestedByUserId, status])
+  @@index([newRoomId, newStartAt, newEndAt])
+}
+
 model BookingStatusHistory {
-  id          String        @id @default(cuid())
+  id          String         @id @default(cuid())
   bookingId   String
   actorUserId String?
   oldStatus   BookingStatus?
@@ -399,9 +450,9 @@ model BookingStatusHistory {
   oldEndAt    DateTime?
   newStartAt  DateTime?
   newEndAt    DateTime?
-  createdAt   DateTime      @default(now())
-  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Restrict)
-  actor       User?         @relation("BookingStatusActor", fields: [actorUserId], references: [id])
+  createdAt   DateTime       @default(now())
+  booking     Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  actor       User?          @relation("BookingStatusActor", fields: [actorUserId], references: [id])
 
   @@index([bookingId, createdAt])
   @@index([actorUserId, createdAt])
@@ -488,22 +539,22 @@ model Tariff {
 }
 
 model BillingEntry {
-  id             String        @id @default(cuid())
-  bookingId      String        @unique
-  organizationId String
-  tariffId       String?
-  status         BillingStatus @default(OPEN)
-  amount         Decimal?      @db.Decimal(10, 2)
-  periodStart    DateTime
-  periodEnd      DateTime
+  id              String                 @id @default(cuid())
+  bookingId       String                 @unique
+  organizationId  String
+  tariffId        String?
+  status          BillingStatus          @default(OPEN)
+  amount          Decimal?               @db.Decimal(10, 2)
+  periodStart     DateTime
+  periodEnd       DateTime
   durationMinutes Int
-  unitPrice      Decimal?      @db.Decimal(10, 2)
+  unitPrice       Decimal?               @db.Decimal(10, 2)
   calculationType BillingCalculationType
-  exportedAt     DateTime?
-  billedAt       DateTime?
-  booking        Booking       @relation(fields: [bookingId], references: [id])
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  tariff         Tariff?       @relation(fields: [tariffId], references: [id])
+  exportedAt      DateTime?
+  billedAt        DateTime?
+  booking         Booking                @relation(fields: [bookingId], references: [id])
+  organization    Organization           @relation(fields: [organizationId], references: [id])
+  tariff          Tariff?                @relation(fields: [tariffId], references: [id])
 
   @@index([status, periodStart])
   @@index([organizationId, periodStart])

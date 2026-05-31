@@ -14,7 +14,9 @@ genehmigte Buchungen. Phase 10.5 ergaenzt Reportingdaten sowie CSV-, XLSX-
 und PDF-Exporte ohne automatische Rechnungslegung. Phase 11 nutzt das Modell
 fuer die oeffentliche Ansicht mit Kalender, freien Zeiten und iCal-Export. Die
 Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
-Phase 3 vorhandene Authentifizierung verwendet `User.passwordHash`.
+Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
+vorbereitete Tauschantraege. Die in Phase 3 vorhandene Authentifizierung
+verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, spaetere Erweiterbarkeit soll aber nicht absichtlich verhindert
@@ -27,7 +29,7 @@ werden.
 | Berechtigungen | `Role`, `Permission`, `RolePermission`, `User`, `UserRole`, `UserPermission` | Rollen plus ergaenzende Einzelrechte |
 | Organisationen | `OrganizationType`, `Organization`, `OrganizationContact`, `OrganizationMember` | Organisationen, Kontakte und gueltige Benutzerzuordnungen |
 | Hallen | `Building`, `Room`, `RoomComposition`, `Caretaker`, `BuildingCaretaker`, `RoomCaretaker` | Gebaeude, kombinierbare Raeume und Betreuung |
-| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingStatusHistory`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, unveraenderbare Historie, Warteliste und Sperren |
+| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingChangeRequest`, `BookingStatusHistory`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, Aenderungsantraege, unveraenderbare Historie, Warteliste und Sperren |
 | Abrechnung | `TariffGroup`, `Tariff`, `BillingEntry` | Flexible Preis- und Abrechnungsgrundlage |
 | Erweiterungen | `Document`, `DamageReport`, `Handover`, `AccessMedium`, `AccessAssignment`, `Notification`, `AuditEntry`, `SystemSetting` | Erweiterbarkeit und Nachvollziehbarkeit |
 
@@ -38,6 +40,8 @@ werden.
 | `OrganizationStatus` | `ACTIVE`, `BLOCKED`, `INACTIVE` |
 | `RoomStatus` | `ACTIVE`, `RESTRICTED`, `OUT_OF_SERVICE` |
 | `BookingStatus` | `DRAFT`, `REQUESTED`, `IN_REVIEW`, `APPROVED`, `REJECTED`, `CANCELLED`, `MOVED`, `ARCHIVED` |
+| `BookingChangeRequestType` | `MOVE`, `SWAP` |
+| `BookingChangeRequestStatus` | `REQUESTED`, `IN_REVIEW`, `APPROVED`, `REJECTED`, `CANCELLED` |
 | `ClosureStatus` | `OPEN`, `RESTRICTED`, `CLOSED` |
 | `WaitlistStatus` | `ACTIVE`, `OFFERED`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED` |
 | `BillingStatus` | `NOT_RELEVANT`, `OPEN`, `EXPORTED`, `BILLED`, `CANCELLED` |
@@ -82,6 +86,13 @@ werden.
   und `activateNextWaitlistEntryForSlot()` serialisieren denselben
   Raum-/Teilraum-Kontext per Advisory-Lock, damit ein Slot nicht parallel
   mehrfach verarbeitet werden kann.
+- `BookingChangeRequest` speichert alte und neue Raum-/Zeitdaten eines
+  Aenderungsantrags. Bei Antragstellung bleibt die urspruengliche genehmigte
+  Buchung unveraendert.
+- Eine genehmigte Verschiebung setzt die Ausgangsbuchung auf `MOVED`, schreibt
+  `BookingStatusHistory` und legt einen neuen `APPROVED`-Ersatztermin an.
+- Tauschantraege sind ueber `BookingChangeRequestType.SWAP` vorbereitet. Die
+  vollstaendige fachliche Tauschlogik ist noch nicht freigeschaltet.
 
 ## Indizes
 
@@ -96,6 +107,7 @@ vorbereitet:
 | `Tariff` | `(roomId, tariffGroupId, usageTypeId, validFrom)` |
 | `Notification` | `(status, createdAt)`, `(status, nextAttemptAt)` |
 | `DamageReport` | `(roomId, status)` |
+| `BookingChangeRequest` | `(status, createdAt)`, `(bookingId, status)`, `(requestedByUserId, status)`, `(newRoomId, newStartAt, newEndAt)` |
 
 `startsAt`/`endsAt`, `startsOn`/`endsOn` und `placedAt` sind die bereits
 bestehenden Schema-Bezeichnungen fuer Beginn/Ende bzw. Erstellzeitpunkt der

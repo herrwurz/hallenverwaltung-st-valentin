@@ -90,6 +90,12 @@ Diese Dokumente gelten als fachliche Wahrheit.
 - Alle Buchungen benötigen Genehmigung.
 - Buchungen werden niemals physisch gelöscht.
 - Historisierung erfolgt über Statusänderungen.
+- Terminverschiebungen laufen ueber `BookingChangeRequest`. Der bestehende
+  genehmigte Termin wird bei Antragstellung nicht veraendert. Bei Genehmigung
+  wird die alte Buchung auf `MOVED` gesetzt und ein neuer genehmigter
+  Ersatztermin angelegt.
+- Tauschantraege sind als eigener Aenderungsantrag vorbereitet, aber erst nach
+  gesonderter fachlicher Umsetzung vollstaendig nutzbar.
 
 Status:
 

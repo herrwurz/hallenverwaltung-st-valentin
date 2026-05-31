@@ -124,6 +124,10 @@ Deployment & Backup
 
 E2E-Tests
 
+## Phase 15
+
+Verschiebungen & Tauschanträge
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -145,6 +149,7 @@ Mandantenfähigkeit wurde nicht umgesetzt, aber spätere Erweiterbarkeit soll ni
 Beispiele:
 
 * BookingTransitionService
+* BookingChangeService
 * WaitlistService
 * NotificationService
 * BillingTransitionService
@@ -283,9 +288,10 @@ Version 1:
 
 ### Verschiebungen & Tauschanträge
 
-* moveBooking() vorbereitet
-* keine UI
-* kein vollständiger Workflow
+* Verschiebungsanträge im Portal
+* Verwaltungsprüfung unter /admin/booking-changes
+* Genehmigung legt Ersatztermin an und setzt Ausgangsbuchung auf MOVED
+* Tauschanträge strukturell vorbereitet, aber noch nicht vollständig umgesetzt
 
 ### Serienbuchungen erweitert
 
@@ -352,15 +358,13 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
-## Phase 15
+## Phase 16
 
-Verschiebungen & Tauschanträge
+Dokumentenmanagement und Schadensmeldungen
 
-* Terminverschiebungen
-* Tauschanträge
-* Gegenbuchungen
-* Historisierung
-* Konfliktprüfung
+* Uploads für Hallenordnung, Verträge und Nachweise
+* Schadensmeldungen inklusive Bearbeitungsstatus
+* spätere Hallenübergabe/Zutrittsverwaltung vorbereiten
 
 ---
 
