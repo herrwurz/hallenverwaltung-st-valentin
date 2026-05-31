@@ -10,14 +10,27 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     "REJECT_BOOKING",
     "BILLING_EXPORT",
     "MANAGE_SYSTEM_JOBS",
+    "MANAGE_DOCUMENTS",
+    "MANAGE_DAMAGE",
   ]);
-  const [canManageUsers, canViewBookings, canApproveBookings, canRejectBookings, canCreateExports, canManageSystemJobs] = await Promise.all([
+  const [
+    canManageUsers,
+    canViewBookings,
+    canApproveBookings,
+    canRejectBookings,
+    canCreateExports,
+    canManageSystemJobs,
+    canManageDocuments,
+    canManageDamage,
+  ] = await Promise.all([
     hasPermission(user.id, "MANAGE_USERS"),
     hasPermission(user.id, "VIEW_BOOKINGS"),
     hasPermission(user.id, "APPROVE_BOOKING"),
     hasPermission(user.id, "REJECT_BOOKING"),
     hasPermission(user.id, "BILLING_EXPORT"),
     hasPermission(user.id, "MANAGE_SYSTEM_JOBS"),
+    hasPermission(user.id, "MANAGE_DOCUMENTS"),
+    hasPermission(user.id, "MANAGE_DAMAGE"),
   ]);
   const navigationItems = [
     ...(canManageUsers ? [{ href: "/admin", label: "Dashboard" }] : []),
@@ -31,6 +44,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       : []),
     ...(canCreateExports ? [{ href: "/admin/billing", label: "Abrechnung" }] : []),
     ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "System-Jobs" }] : []),
+    ...(canManageDocuments ? [{ href: "/admin/documents", label: "Dokumente" }] : []),
+    ...(canManageDamage ? [{ href: "/admin/damages", label: "Schaeden" }] : []),
     ...(canManageUsers
       ? [
           { href: "/admin/settings/calendar", label: "Einstellungen" },
