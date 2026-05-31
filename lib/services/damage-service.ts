@@ -1,8 +1,9 @@
-import type { DamageStatus } from "@prisma/client";
+import type { DamageStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { BookingValidationError } from "@/lib/services/booking-rules";
+import { queueDamageReportedNotification } from "@/lib/services/notification-service";
 
 export const damageReportSchema = z.object({
   roomId: z.string().trim().min(1, "Ein Raum ist erforderlich."),
@@ -14,6 +15,14 @@ export const damageStatusSchema = z.object({
   damageReportId: z.string().trim().min(1, "Die Schadensmeldung ist ungueltig."),
   status: z.enum(["REPORTED", "IN_REVIEW", "RESOLVED"] satisfies DamageStatus[]),
 });
+
+type DamageClient = Prisma.TransactionClient | typeof prisma;
+
+const allowedDamageTransitions: Record<DamageStatus, DamageStatus[]> = {
+  REPORTED: ["IN_REVIEW", "RESOLVED"],
+  IN_REVIEW: ["RESOLVED"],
+  RESOLVED: [],
+};
 
 export async function getPortalDamageData(actorUserId: string) {
   const [reports, buildings] = await Promise.all([
@@ -68,12 +77,68 @@ export async function reportDamage(input: unknown, actorUserId: string) {
     throw new BookingValidationError("Der ausgewaehlte Raum kann fuer Schadensmeldungen nicht verwendet werden.");
   }
 
-  return prisma.damageReport.create({
+  return prisma.$transaction(async (transaction) => {
+    const damage = await transaction.damageReport.create({
+      data: {
+        roomId: data.roomId,
+        reportedByUserId: actorUserId,
+        description: data.description,
+        photoStorageKey: data.photoStorageKey || null,
+      },
+    });
+
+    await transaction.auditEntry.create({
+      data: {
+        actorUserId,
+        entityType: "DamageReport",
+        entityId: damage.id,
+        action: "REPORTED",
+        payload: {
+          roomId: data.roomId,
+          photoAttached: Boolean(data.photoStorageKey),
+        },
+      },
+    });
+
+    await queueDamageReportedNotification(damage.id, transaction);
+
+    return damage;
+  });
+}
+
+export function assertDamageTransition(currentStatus: DamageStatus, nextStatus: DamageStatus) {
+  if (currentStatus === nextStatus) {
+    return;
+  }
+
+  if (!allowedDamageTransitions[currentStatus].includes(nextStatus)) {
+    throw new BookingValidationError("Dieser Statuswechsel fuer die Schadensmeldung ist nicht erlaubt.");
+  }
+}
+
+async function writeDamageStatusAudit({
+  damageReportId,
+  actorUserId,
+  oldStatus,
+  newStatus,
+  client,
+}: {
+  damageReportId: string;
+  actorUserId: string;
+  oldStatus: DamageStatus;
+  newStatus: DamageStatus;
+  client: DamageClient;
+}) {
+  await client.auditEntry.create({
     data: {
-      roomId: data.roomId,
-      reportedByUserId: actorUserId,
-      description: data.description,
-      photoStorageKey: data.photoStorageKey || null,
+      actorUserId,
+      entityType: "DamageReport",
+      entityId: damageReportId,
+      action: "STATUS_CHANGED",
+      payload: {
+        oldStatus,
+        newStatus,
+      },
     },
   });
 }
@@ -85,17 +150,31 @@ export async function updateDamageStatus(input: unknown, actorUserId: string) {
   }
 
   const data = damageStatusSchema.parse(input);
-  const damage = await prisma.damageReport.findUnique({ where: { id: data.damageReportId } });
-  if (!damage) {
-    throw new BookingValidationError("Die Schadensmeldung wurde nicht gefunden.");
-  }
+  return prisma.$transaction(async (transaction) => {
+    const damage = await transaction.damageReport.findUnique({ where: { id: data.damageReportId } });
+    if (!damage) {
+      throw new BookingValidationError("Die Schadensmeldung wurde nicht gefunden.");
+    }
 
-  return prisma.damageReport.update({
-    where: { id: data.damageReportId },
-    data: {
-      status: data.status,
-      processedByUserId: actorUserId,
-      resolvedAt: data.status === "RESOLVED" ? new Date() : null,
-    },
+    assertDamageTransition(damage.status, data.status);
+
+    const updated = await transaction.damageReport.update({
+      where: { id: data.damageReportId },
+      data: {
+        status: data.status,
+        processedByUserId: actorUserId,
+        resolvedAt: data.status === "RESOLVED" ? new Date() : damage.resolvedAt,
+      },
+    });
+
+    await writeDamageStatusAudit({
+      damageReportId: updated.id,
+      actorUserId,
+      oldStatus: damage.status,
+      newStatus: updated.status,
+      client: transaction,
+    });
+
+    return updated;
   });
 }

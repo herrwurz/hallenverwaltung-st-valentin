@@ -183,9 +183,14 @@ erDiagram
   `DocumentType`) verwaltet und genau einer Organisation, einem Gebaeude oder
   einem Raum zugeordnet. Ein echter Datei-Storage ist bewusst vorbereitet, aber
   noch nicht implementiert.
+- Ab Phase 16.5 wird der `storageKey` ausschliesslich serverseitig erzeugt.
+  Die Dokument-Zielzuordnung ist zusaetzlich durch einen Datenbank-Check
+  abgesichert.
 - Schadensmeldungen nutzen `DamageReport` mit Status `REPORTED`, `IN_REVIEW`
   und `RESOLVED`. Portalnutzer duerfen Schaeden melden; die Verwaltung setzt
   den Bearbeitungsstatus.
+- Schadensmeldungen schreiben `AuditEntry`-Eintraege und erzeugen das
+  Benachrichtigungsereignis `DAMAGE_REPORTED` fuer Verwaltung/Hauswarte.
 - Eine `Closure` muss entweder ein Gebaeude oder einen Raum referenzieren,
   niemals beide oder keines. Die Migration sichert dies durch einen
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer

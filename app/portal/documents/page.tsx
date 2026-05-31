@@ -64,10 +64,9 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
               Dateiname
               <input name="fileName" required className={inputClass} placeholder="hallenordnung.pdf" />
             </label>
-            <label className="text-sm text-slate-300">
-              Ablagepfad / Storage-Key
-              <input name="storageKey" required className={inputClass} placeholder="documents/verein/hallenordnung.pdf" />
-            </label>
+            <p className="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-400">
+              Der interne Storage-Key wird serverseitig erzeugt und nicht manuell eingegeben.
+            </p>
             <div className="lg:col-span-2 lg:text-right">
               <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
                 Dokument speichern

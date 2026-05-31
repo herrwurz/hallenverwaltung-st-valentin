@@ -13,6 +13,7 @@ export const notificationEventLabels: Record<NotificationEventCode, string> = {
   BOOKING_CANCELLED: "Buchung storniert",
   WAITLIST_OFFER_CREATED: "Wartelistenangebot",
   WAITLIST_OFFER_EXPIRED: "Wartelistenangebot abgelaufen",
+  DAMAGE_REPORTED: "Schaden gemeldet",
 };
 
 export const notificationEventSettingsSchema = z.object(

@@ -6,9 +6,11 @@ import {
 } from "../lib/document-damage-labels";
 import {
   assertExactlyOneDocumentTarget,
+  createDocumentStorageKey,
   documentMetadataSchema,
 } from "../lib/services/document-service";
 import {
+  assertDamageTransition,
   damageReportSchema,
   damageStatusSchema,
 } from "../lib/services/damage-service";
@@ -19,11 +21,24 @@ test("validates document metadata", () => {
     organizationId: "organization-1",
     type: "INSURANCE_CERTIFICATE",
     fileName: "versicherung.pdf",
-    storageKey: "documents/organization-1/versicherung.pdf",
   });
 
   assert.equal(document.organizationId, "organization-1");
   assert.equal(document.type, "INSURANCE_CERTIFICATE");
+});
+
+test("creates a normalized server-side document storage key", () => {
+  const key = createDocumentStorageKey({
+    organizationId: "organization-1",
+    type: "HOUSE_RULES",
+    fileName: "Hallenordnung 2026!.PDF",
+    now: new Date("2026-05-31T12:34:56.000Z"),
+  });
+
+  assert.equal(
+    key,
+    "documents/organizations/organization-1/house_rules/20260531123456000-hallenordnung-2026.pdf",
+  );
 });
 
 test("requires exactly one document target", () => {
@@ -52,6 +67,12 @@ test("validates damage status transitions input", () => {
     "IN_REVIEW",
   );
   assert.throws(() => damageStatusSchema.parse({ damageReportId: "damage-1", status: "CLOSED" }));
+});
+
+test("allows only forward damage status transitions", () => {
+  assert.doesNotThrow(() => assertDamageTransition("REPORTED", "IN_REVIEW"));
+  assert.doesNotThrow(() => assertDamageTransition("IN_REVIEW", "RESOLVED"));
+  assert.throws(() => assertDamageTransition("RESOLVED", "IN_REVIEW"), BookingValidationError);
 });
 
 test("labels documents and damage statuses", () => {

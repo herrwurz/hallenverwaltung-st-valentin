@@ -18,7 +18,6 @@ export const documentMetadataSchema = z.object({
   roomId: z.string().trim().optional(),
   type: z.enum(documentTypes),
   fileName: z.string().trim().min(3, "Ein Dateiname ist erforderlich.").max(255),
-  storageKey: z.string().trim().min(3, "Ein Storage-Key oder Ablagepfad ist erforderlich.").max(500),
 });
 
 type DocumentClient = Prisma.TransactionClient | typeof prisma;
@@ -32,6 +31,46 @@ export function assertExactlyOneDocumentTarget(input: {
   if (targetCount !== 1) {
     throw new BookingValidationError("Ein Dokument muss genau einer Organisation, einem Gebaeude oder einem Raum zugeordnet sein.");
   }
+}
+
+function normalizeOptionalId(value?: string | null) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function sanitizeFileName(fileName: string) {
+  const trimmed = fileName.trim();
+  const extensionMatch = trimmed.match(/(\.[a-zA-Z0-9]{1,12})$/);
+  const extension = extensionMatch?.[1].toLowerCase() ?? "";
+  const baseName = extension ? trimmed.slice(0, -extension.length) : trimmed;
+  const normalizedBaseName = baseName
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^[.-]+|[.-]+$/g, "")
+    .toLowerCase();
+
+  return `${normalizedBaseName || "document"}${extension}`;
+}
+
+export function createDocumentStorageKey(input: {
+  organizationId?: string | null;
+  buildingId?: string | null;
+  roomId?: string | null;
+  type: DocumentType;
+  fileName: string;
+  now?: Date;
+}) {
+  const organizationId = normalizeOptionalId(input.organizationId);
+  const buildingId = normalizeOptionalId(input.buildingId);
+  const roomId = normalizeOptionalId(input.roomId);
+  assertExactlyOneDocumentTarget({ organizationId, buildingId, roomId });
+
+  const target =
+    organizationId ? `organizations/${organizationId}` : buildingId ? `buildings/${buildingId}` : `rooms/${roomId}`;
+  const timestamp = (input.now ?? new Date()).toISOString().replace(/[-:.TZ]/g, "");
+  return `documents/${target}/${input.type.toLowerCase()}/${timestamp}-${sanitizeFileName(input.fileName)}`;
 }
 
 async function assertActiveOrganizationMembership({
@@ -136,7 +175,13 @@ export async function getAdminDocumentData() {
 }
 
 export async function createOrganizationDocument(input: unknown, actorUserId: string) {
-  const data = documentMetadataSchema.parse(input);
+  const parsed = documentMetadataSchema.parse(input);
+  const data = {
+    ...parsed,
+    organizationId: normalizeOptionalId(parsed.organizationId),
+    buildingId: normalizeOptionalId(parsed.buildingId),
+    roomId: normalizeOptionalId(parsed.roomId),
+  };
   if (!data.organizationId || data.buildingId || data.roomId) {
     throw new BookingValidationError("Im Portal koennen Dokumente nur Organisationen zugeordnet werden.");
   }
@@ -153,7 +198,7 @@ export async function createOrganizationDocument(input: unknown, actorUserId: st
         organizationId: data.organizationId,
         type: data.type,
         fileName: data.fileName,
-        storageKey: data.storageKey,
+        storageKey: createDocumentStorageKey(data),
       },
     });
   });
@@ -165,7 +210,13 @@ export async function createAdminDocument(input: unknown, actorUserId: string) {
     throw new BookingValidationError("Fuer die Dokumentenverwaltung fehlt das Recht MANAGE_DOCUMENTS.");
   }
 
-  const data = documentMetadataSchema.parse(input);
+  const parsed = documentMetadataSchema.parse(input);
+  const data = {
+    ...parsed,
+    organizationId: normalizeOptionalId(parsed.organizationId),
+    buildingId: normalizeOptionalId(parsed.buildingId),
+    roomId: normalizeOptionalId(parsed.roomId),
+  };
   assertExactlyOneDocumentTarget(data);
 
   return prisma.$transaction(async (transaction) => {
@@ -177,7 +228,7 @@ export async function createAdminDocument(input: unknown, actorUserId: string) {
         roomId: data.roomId || null,
         type: data.type,
         fileName: data.fileName,
-        storageKey: data.storageKey,
+        storageKey: createDocumentStorageKey(data),
       },
     });
   });
