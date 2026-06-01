@@ -16,7 +16,9 @@ fuer die oeffentliche Ansicht mit Kalender, freien Zeiten und iCal-Export. Die
 Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
 Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
 vorbereitete Tauschantraege. Phase 16 nutzt `Document` und `DamageReport`
-fuer Dokumentenmetadaten und Schadensmeldungen. Die in Phase 3 vorhandene
+fuer Dokumentenmetadaten und Schadensmeldungen. Phase 17 nutzt `BookingSeries`
+und `HolidayPeriod` fuer woechentliche Serienantraege und Ferienregeln. Phase
+18 ergaenzt `NoShowReport` fuer Hallenwart- und Verwaltungsprotokolle. Die in Phase 3 vorhandene
 Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
@@ -30,7 +32,7 @@ werden.
 | Berechtigungen | `Role`, `Permission`, `RolePermission`, `User`, `UserRole`, `UserPermission` | Rollen plus ergaenzende Einzelrechte |
 | Organisationen | `OrganizationType`, `Organization`, `OrganizationContact`, `OrganizationMember` | Organisationen, Kontakte und gueltige Benutzerzuordnungen |
 | Hallen | `Building`, `Room`, `RoomComposition`, `Caretaker`, `BuildingCaretaker`, `RoomCaretaker` | Gebaeude, kombinierbare Raeume und Betreuung |
-| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingChangeRequest`, `BookingStatusHistory`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, Aenderungsantraege, unveraenderbare Historie, Warteliste und Sperren |
+| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingChangeRequest`, `BookingStatusHistory`, `NoShowReport`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, Aenderungsantraege, No-Show-Protokolle, unveraenderbare Historie, Warteliste und Sperren |
 | Abrechnung | `TariffGroup`, `Tariff`, `BillingEntry` | Flexible Preis- und Abrechnungsgrundlage |
 | Erweiterungen | `Document`, `DamageReport`, `Handover`, `AccessMedium`, `AccessAssignment`, `Notification`, `AuditEntry`, `SystemSetting` | Erweiterbarkeit und Nachvollziehbarkeit |
 
@@ -48,6 +50,7 @@ werden.
 | `BillingStatus` | `NOT_RELEVANT`, `OPEN`, `EXPORTED`, `BILLED`, `CANCELLED` |
 | `TariffDayType` | `ALL`, `WEEKDAY`, `WEEKEND`, `HOLIDAY` |
 | `BillingCalculationType` | `HOURLY`, `FLAT`, `ZERO` |
+| `NoShowStatus` | `REPORTED`, `ACKNOWLEDGED` |
 
 ## Harte Invarianten
 
@@ -105,6 +108,22 @@ werden.
 - Schadensstatuswechsel sind vorwaertsgerichtet (`REPORTED -> IN_REVIEW ->
   RESOLVED`) und werden ueber `AuditEntry` protokolliert. Neue Meldungen
   koennen das Notification-Event `DAMAGE_REPORTED` erzeugen.
+- `BookingSeries` erzeugt in Phase 17 woechentliche `Booking`-Einzeltermine
+  mit `kind = SERIES_OCCURRENCE`. Jeder Termin bleibt ein normaler
+  Buchungsantrag mit Statushistorie und Genehmigungsworkflow.
+- `HolidayPeriod.defaultStatus` steuert die Serienanlage: `CLOSED` fuehrt zum
+  Ueberspringen des betroffenen Termins, `RESTRICTED` erzeugt einen Hinweis,
+  `OPEN` blockiert nicht.
+- Manuelle Ausnahmedaten bei Serienantraegen werden nicht als eigene Tabelle
+  gespeichert, sondern in der `BookingSeries.recurrenceRule` als `EXDATE`
+  dokumentiert und durch das Fehlen einer erzeugten Einzelbuchung sichtbar.
+- `NoShowReport` ist eindeutig pro `Booking`. No-Shows duerfen nur fuer
+  `APPROVED`-Buchungen nach deren Ende gemeldet werden. Sie veraendern den
+  Buchungsstatus nicht und erzeugen keine automatische Sanktion oder
+  Abrechnung.
+- `REPORT_NO_SHOW` erlaubt die Meldung. Ohne `VIEW_BOOKINGS` wird zusaetzlich
+  geprueft, ob die Benutzer-E-Mail einem `Caretaker.email` des Raums oder
+  Gebaeudes entspricht.
 
 ## Indizes
 
@@ -119,6 +138,7 @@ vorbereitet:
 | `Tariff` | `(roomId, tariffGroupId, usageTypeId, validFrom)` |
 | `Notification` | `(status, createdAt)`, `(status, nextAttemptAt)` |
 | `DamageReport` | `(roomId, status)` |
+| `NoShowReport` | `(status, reportedAt)`, `(roomId, reportedAt)`, `(organizationId, reportedAt)` |
 | `BookingChangeRequest` | `(status, createdAt)`, `(bookingId, status)`, `(requestedByUserId, status)`, `(newRoomId, newStartAt, newEndAt)` |
 
 `startsAt`/`endsAt`, `startsOn`/`endsOn` und `placedAt` sind die bereits

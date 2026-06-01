@@ -5,7 +5,8 @@ import { getBookingChangeStatusBadgeClass, getBookingChangeStatusLabel, getBooki
 import { requirePermission } from "@/lib/permissions";
 import { getChangeRequestsForOrganization } from "@/lib/services/booking-change-service";
 import { getBookingRequestOptions, getBookingsForOrganization } from "@/lib/services/booking-service";
-import { cancelOwnBookingRequestAction, createBookingRequestAction, createMoveChangeRequestAction } from "@/app/portal/bookings/actions";
+import { getBookingSeriesForOrganization } from "@/lib/services/booking-series-service";
+import { cancelOwnBookingRequestAction, createBookingRequestAction, createBookingSeriesRequestAction, createMoveChangeRequestAction } from "@/app/portal/bookings/actions";
 
 const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -14,16 +15,17 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
 });
 
 type PageProps = {
-  searchParams: Promise<{ saved?: string; cancelled?: string; changeRequested?: string; warning?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; seriesSaved?: string; cancelled?: string; changeRequested?: string; warning?: string; error?: string }>;
 };
 
 export default async function PortalBookingsPage({ searchParams }: PageProps) {
   const user = await requirePermission("REQUEST_BOOKING");
-  const [params, options, bookings, changeRequests] = await Promise.all([
+  const [params, options, bookings, changeRequests, series] = await Promise.all([
     searchParams,
     getBookingRequestOptions(user.id),
     getBookingsForOrganization(user.id),
     getChangeRequestsForOrganization(user.id),
+    getBookingSeriesForOrganization(user.id),
   ]);
 
   return (
@@ -45,6 +47,11 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
       {params.saved ? (
         <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
           Der Buchungsantrag wurde gespeichert.
+        </p>
+      ) : null}
+      {params.seriesSaved ? (
+        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+          Der Serienantrag wurde gespeichert.
         </p>
       ) : null}
       {params.cancelled ? (
@@ -137,6 +144,97 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
         )}
       </section>
 
+      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
+        <h2 className="text-xl font-medium">Neuer Serienantrag</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          Erzeugt woechentliche Einzeltermine. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden
+          uebersprungen.
+        </p>
+        {options.organizations.length === 0 ? (
+          <p className="mt-4 text-sm text-amber-200">
+            Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
+          </p>
+        ) : (
+          <form action={createBookingSeriesRequestAction} className="mt-5 grid gap-4 lg:grid-cols-2">
+            <label className="text-sm text-slate-300">
+              Organisation
+              <select name="organizationId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte waehlen
+                </option>
+                {options.organizations.map((organization) => (
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-slate-300">
+              Raum
+              <select name="roomId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte waehlen
+                </option>
+                {options.buildings.flatMap((building) =>
+                  building.rooms.map((room) => (
+                    <option key={room.id} value={room.id}>
+                      {building.name} - {room.name}
+                    </option>
+                  )),
+                )}
+              </select>
+            </label>
+            <label className="text-sm text-slate-300">
+              Titel
+              <input name="title" required maxLength={160} className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300">
+              Nutzungstyp
+              <select name="usageTypeId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte waehlen
+                </option>
+                {options.usageTypes.map((usageType) => (
+                  <option key={usageType.id} value={usageType.id}>
+                    {usageType.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-slate-300">
+              Erster Beginn
+              <input name="firstStartsAt" type="datetime-local" required className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300">
+              Erstes Ende
+              <input name="firstEndsAt" type="datetime-local" required className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300">
+              Wiederholen bis
+              <input name="repeatUntil" type="date" required className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300">
+              Beschreibung (optional)
+              <input name="description" maxLength={1000} className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300 lg:col-span-2">
+              Ausnahmedaten (optional, ein Datum pro Zeile)
+              <textarea
+                name="excludedDates"
+                rows={3}
+                placeholder="2026-10-26"
+                className={inputClass}
+              />
+            </label>
+            <div className="lg:col-span-2 lg:text-right">
+              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+                Serienantrag absenden
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+
       <section className="mt-8">
         <h2 className="text-xl font-medium">Antraege Ihrer Organisationen</h2>
         <div className="mt-4 space-y-3">
@@ -205,6 +303,32 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                     </div>
                   </form>
                 ) : null}
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-xl font-medium">Serien Ihrer Organisationen</h2>
+        <div className="mt-4 space-y-3">
+          {series.length === 0 ? (
+            <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+              Noch keine Serien vorhanden.
+            </p>
+          ) : (
+            series.map((item) => (
+              <article key={item.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+                <h3 className="font-medium">{item.title}</h3>
+                <p className="mt-1 text-sm text-slate-400">
+                  {item.organization.name} | {item.room.building.name} - {item.room.name} | {item.usageType.name}
+                </p>
+                <p className="mt-1 text-sm text-slate-400">
+                  {dateFormatter.format(item.startsOn)} bis {dateFormatter.format(item.endsOn)} | {item.bookings.length} Termine
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  Ganze Serien werden nicht gesammelt geaendert; einzelne Termine koennen ueber Verschiebungsantraege behandelt werden.
+                </p>
               </article>
             ))
           )}

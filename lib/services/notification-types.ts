@@ -9,6 +9,7 @@ export const notificationEventCodes = [
   "WAITLIST_OFFER_CREATED",
   "WAITLIST_OFFER_EXPIRED",
   "DAMAGE_REPORTED",
+  "NO_SHOW_REPORTED",
 ] as const;
 
 export type NotificationEventCode = (typeof notificationEventCodes)[number];
@@ -54,6 +55,22 @@ export const damageNotificationPayloadSchema = z.object({
 
 export type DamageNotificationPayload = z.infer<typeof damageNotificationPayloadSchema>;
 
+export const noShowNotificationPayloadSchema = z.object({
+  noShowReportId: z.string().min(1),
+  bookingId: z.string().min(1),
+  title: z.string().min(1),
+  organizationName: z.string().min(1),
+  buildingName: z.string().min(1),
+  roomName: z.string().min(1),
+  startsAt: isoDateString,
+  endsAt: isoDateString,
+  reportedByName: z.string().min(1).optional(),
+  description: z.string().min(1),
+  reportedAt: isoDateString,
+});
+
+export type NoShowNotificationPayload = z.infer<typeof noShowNotificationPayloadSchema>;
+
 export type NotificationTemplateData =
   | {
       eventCode:
@@ -71,6 +88,10 @@ export type NotificationTemplateData =
   | {
       eventCode: "DAMAGE_REPORTED";
       payload: DamageNotificationPayload;
+    }
+  | {
+      eventCode: "NO_SHOW_REPORTED";
+      payload: NoShowNotificationPayload;
     };
 
 export function parseNotificationTemplateData(
@@ -97,6 +118,11 @@ export function parseNotificationTemplateData(
       return {
         eventCode,
         payload: damageNotificationPayloadSchema.parse(payload),
+      };
+    case "NO_SHOW_REPORTED":
+      return {
+        eventCode,
+        payload: noShowNotificationPayloadSchema.parse(payload),
       };
     default:
       throw new Error(`Unsupported notification event code: ${eventCode}`);

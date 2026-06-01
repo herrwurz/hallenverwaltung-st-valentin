@@ -117,9 +117,18 @@ Status:
 
 ## Serienbuchungen
 
+- Serienbuchungen erzeugen woechentliche Einzeltermine als normale
+  Buchungsantraege im Status `REQUESTED`.
+- Jede erzeugte Einzelbuchung durchlaeuft den normalen Genehmigungsworkflow.
 - Einzeltermine verschiebbar
 - Ganze Serien nicht nachträglich änderbar
 - Zukünftige Serientermine nicht gesammelt änderbar
+- Geschlossene Ferien-/Feiertagszeitraeume (`CLOSED`) werden bei neuen Serien
+  uebersprungen.
+- Eingeschraenkte Ferien-/Feiertagszeitraeume (`RESTRICTED`) erzeugen einen
+  Hinweis, verhindern den Antrag aber nicht automatisch.
+- Einzelne Ausnahmedaten koennen bei der Serienanlage angegeben werden und
+  werden uebersprungen.
 
 ## Hallenlogik
 
@@ -161,6 +170,16 @@ Version 1:
 - Schadensstatuswechsel muessen service-seitig validiert und auditiert werden.
 - Hallenuebergabe und Zutrittsverwaltung sind vorbereitet, aber nicht Teil von
   Phase 16.
+
+## No-Shows und Hallenwart-Workflows
+
+- No-Shows werden fuer genehmigte, bereits beendete Buchungen protokolliert.
+- No-Shows loesen keine automatische Sanktion, keine automatische Abrechnung
+  und keine Buchungsstatusaenderung aus.
+- Hallenwarte duerfen No-Shows nur fuer ihnen zugeordnete Raeume oder Gebaeude
+  melden, sofern kein Verwaltungsrecht fuer Buchungen vorliegt.
+- No-Show-Meldungen werden auditiert und koennen als `NO_SHOW_REPORTED`
+  benachrichtigt werden.
 
 ---
 

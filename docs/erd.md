@@ -24,6 +24,9 @@ werden beantragt, verwaltungsseitig geprueft und bei Genehmigung als neuer
 Ersatztermin angelegt.
 Phase 16 aktiviert die Dokumentenverwaltung als Metadaten-Workflow und das
 Schadensmanagement fuer Portal und Verwaltung.
+Phase 17 fuehrt woechentliche Serienantraege und konfigurierbare Ferien-/
+Feiertagsregeln ein.
+Phase 18 fuegt No-Show-Meldungen fuer Hallenwarte und Verwaltung hinzu.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -71,12 +74,15 @@ erDiagram
   BOOKING_SERIES ||--o{ BOOKING : generates
   BOOKING ||--o{ BOOKING_STATUS_HISTORY : records
   BOOKING ||--o{ BOOKING_CHANGE_REQUEST : changes
+  BOOKING ||--o| NO_SHOW_REPORT : may_have
   ROOM ||--o{ BOOKING_CHANGE_REQUEST : old_slot
   ROOM ||--o{ BOOKING_CHANGE_REQUEST : new_slot
   USER ||--o{ BOOKING_STATUS_HISTORY : acts
   USER ||--o{ BOOKING_CHANGE_REQUEST : requests
   ORGANIZATION ||--o{ WAITLIST_ENTRY : registers
+  ORGANIZATION ||--o{ NO_SHOW_REPORT : has
   ROOM ||--o{ WAITLIST_ENTRY : concerns
+  ROOM ||--o{ NO_SHOW_REPORT : receives
 
   ROOM ||--o{ TARIFF : priced_for
   ORGANIZATION_TYPE ||--o{ TARIFF : priced_for
@@ -196,8 +202,26 @@ erDiagram
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
   kuenftige Service-Schreibpfade vor.
 - Serien bleiben weiterhin reine Datenmodellgrundlage; umgesetzt werden
-  einzelne Buchungsantraege mit dem Workflow `REQUESTED -> IN_REVIEW ->
-  APPROVED/REJECTED`.
+  ab Phase 17 woechentliche Serienantraege, die einzelne
+  `Booking`-Datensaetze mit `kind = SERIES_OCCURRENCE` und Verknuepfung zur
+  `BookingSeries` erzeugen. Diese Einzeltermine starten im Status `REQUESTED`
+  und durchlaufen den normalen Genehmigungsworkflow.
+- Ferien- und Feiertagszeitraeume werden ueber `HolidayPeriod` verwaltet.
+  `CLOSED` ueberspringt Serientermine bei Neuanlage, `RESTRICTED` erzeugt
+  Hinweise und `OPEN` blockiert nicht. Bei der Serienanlage koennen
+  zusaetzliche Ausnahmedaten angegeben werden; diese Termine werden ebenfalls
+  uebersprungen und in der `recurrenceRule` als `EXDATE` dokumentiert. Ganze
+  Serien werden in Version 1 nicht gesammelt veraendert; einzelne erzeugte
+  Termine koennen ueber den normalen Aenderungsworkflow behandelt werden.
+- `NoShowReport` protokolliert Nichtnutzungen genehmigter und bereits
+  beendeter Buchungen. Pro Buchung ist maximal eine No-Show-Meldung erlaubt.
+  Die Buchung selbst wird dadurch nicht storniert, verschoben oder abgerechnet.
+- No-Show-Meldungen sind fuer Verwaltung und zugeordnete Hallenwarte gedacht.
+  Hallenwart-Zuordnung wird in Version 1 ueber die E-Mail des Benutzers gegen
+  `Caretaker.email` fuer Raum oder Gebaeude abgeglichen.
+- Das Ereignis `NO_SHOW_REPORTED` bereitet Benachrichtigungen fuer die
+  Verwaltung vor. Sanktionen, automatische Statistiken oder Abrechnungsfolgen
+  bleiben ausgeschlossen.
 
 ## Offene fachliche Konkretisierungen
 
@@ -209,6 +233,9 @@ erDiagram
   Schreibfunktionen fuer Buchungen oder Warteliste.
 - Phase 12 fuehrt keinen Deployment-Scheduler ein; Cron/Worker-Aufrufe bleiben
   betriebliche Konfiguration.
+- Blockbuchungen sind fachlich noch nicht eindeutig genug spezifiziert. Bis
+  dahin werden wiederkehrende Nutzungen als woechentliche Serien mit
+  Einzelterminen abgebildet.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.

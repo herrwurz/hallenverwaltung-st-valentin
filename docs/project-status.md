@@ -132,6 +132,18 @@ Verschiebungen & Tauschanträge
 
 Dokumentenmanagement und Schadensmeldungen
 
+## Phase 16.5
+
+Dokumenten- und Schadens-Haertung
+
+## Phase 17
+
+Serienbuchungen und Ferien-/Ausnahmelogik
+
+## Phase 18
+
+No-Show- und Hallenwart-Workflows
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -154,6 +166,8 @@ Beispiele:
 
 * BookingTransitionService
 * BookingChangeService
+* BookingSeriesService
+* NoShowService
 * DocumentService
 * DamageService
 * WaitlistService
@@ -285,6 +299,8 @@ Version 1:
 * BILLING_EXPORT
 * CREATE_EXPORTS
 * MANAGE_SYSTEM_JOBS
+* BLOCK_ROOM
+* REPORT_NO_SHOW
 
 ---
 
@@ -301,10 +317,14 @@ Version 1:
 
 ### Serienbuchungen erweitert
 
-* Semesterlogik
-* Ausnahmen
-* Ferienunterbrechungen
-* Blockbuchungen
+* woechentliche Serienantraege erzeugen einzelne REQUESTED-Buchungen
+* Ferien-/Feiertagszeitraeume sind administrierbar
+* CLOSED-Zeitraeume werden uebersprungen
+* RESTRICTED-Zeitraeume erzeugen Hinweise
+* einzelne Ausnahmedaten koennen bei Serienanlage angegeben werden
+* Saison-/Semesterlogik wird aktuell ueber das Feld "Wiederholen bis"
+  abgebildet
+* Blockbuchungen bleiben offen, bis die Fachregel eindeutig spezifiziert ist
 
 ### Dokumentenmanagement
 
@@ -317,6 +337,13 @@ Version 1:
 * Portal-Schadensmeldungen mit optionalem Foto-Storage-Key
 * Admin-Statusbearbeitung fuer gemeldet, in Bearbeitung und erledigt
 * Statuswechsel werden auditiert, neue Meldungen koennen `DAMAGE_REPORTED` benachrichtigen
+
+### No-Show-Management
+
+* No-Shows koennen fuer genehmigte, beendete Buchungen gemeldet werden
+* Hallenwarte duerfen nur zugeordnete Raeume/Gebaeude melden
+* Verwaltung kann Meldungen zur Kenntnis nehmen
+* keine Sanktionen, keine automatische Abrechnung, keine Buchungsstatusaenderung
 
 ### E2E-Ausbau
 
@@ -369,13 +396,13 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
-## Phase 17
+## Phase 19
 
-Serienbuchungen und Ferien-/Ausnahmelogik
+Hallenuebergabe und Zutrittsverwaltung
 
-* Serienantraege fuer wiederkehrende Termine
-* Ferien- und Feiertagsregeln anwenden
-* einzelne Serientermine verschiebbar halten
+* Schluesselausgabe/-rueckgabe
+* Hallenuebergabe protokollieren
+* Zutrittsmedien verwalten
 
 ---
 
