@@ -5,6 +5,10 @@ Dieses Runbook beschreibt die konkrete Ausfuehrung der Hoch-Blocker aus
 aber dafuer, dass Go-Live-Schritte, Nachweise und Stop-Kriterien einheitlich
 dokumentiert werden.
 
+Die Ergebnisse der echten Zielumgebungs-Abnahme werden in
+`docs/go-live-evidence.md` protokolliert. Dort duerfen keine Secrets, privaten
+Schluessel oder echten Passwoerter eingetragen werden.
+
 ## Grundregel
 
 Ein Produktivstart ist erst freigabefaehig, wenn jeder Hoch-Blocker entweder
@@ -315,6 +319,9 @@ deploy/scripts/restore-postgres.sh
 ```
 
 ## Abschluss
+
+Die folgende Kurzliste dient als schneller Abschlussblick. Die ausfuehrlichen
+Nachweise stehen in `docs/go-live-evidence.md`.
 
 | Punkt | Ergebnis | Nachweis | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |

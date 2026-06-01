@@ -2,6 +2,8 @@
 
 Dieser Plan beschreibt die fachliche Abnahme vor dem Go-Live von Version 1.
 Er baut auf `docs/pilot-testplan.md` und `docs/production-readiness.md` auf.
+Die betrieblichen Go-Live-Nachweise werden in `docs/go-live-evidence.md`
+dokumentiert.
 
 ## Ziel
 
@@ -248,6 +250,10 @@ dem ersten Go-Live umgesetzt sein. Sie muessen aber bewusst als
 entschieden werden.
 
 ## Abnahmeprotokoll
+
+Die Detailnachweise fuer Betrieb, SMTP, Worker, Backup/Restore und
+Risikoakzeptanzen werden im Go-Live-Nachweisprotokoll gefuehrt:
+`docs/go-live-evidence.md`.
 
 | Punkt | Ergebnis | Bemerkung | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |

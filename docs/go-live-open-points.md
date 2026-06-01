@@ -13,6 +13,8 @@ Verantwortlichem.
 Die konkrete Ausfuehrung und die erwarteten Nachweise stehen in
 `docs/go-live-runbook.md`.
 
+Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
+
 | Blocker | Status | Entscheidung / Nachweis | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |
 | Zielserver und Domain festgelegt | offen |  |  |  |

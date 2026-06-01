@@ -211,3 +211,6 @@ freigegeben wurden.
 Die operative Schrittfolge fuer Zielserver, TLS, Produktionskonfiguration,
 SMTP, Worker, Backup/Restore, Monitoring und Abnahme steht in
 `docs/go-live-runbook.md`.
+
+Die tatsaechlichen Nachweise aus der Zielumgebung werden in
+`docs/go-live-evidence.md` dokumentiert.
