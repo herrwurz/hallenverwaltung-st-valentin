@@ -128,7 +128,8 @@ werden.
   bleibt nur als Fallback fuer vorhandene Stammdaten.
 - `Handover` ist eindeutig pro `Booking` und protokolliert die operative
   Hallenuebergabe mit `keyReceivedAt`, `roomAcceptedAt` und `roomReturnedAt`.
-  Die Schritte sind vorwaertsgerichtet und werden ueber den Service auditiert.
+  Die Schritte sind vorwaertsgerichtet, werden atomar mit erwartetem
+  Ausgangszustand gespeichert und ueber den Service auditiert.
 - `MANAGE_HANDOVERS` erlaubt Hallenuebergaben. Ohne `VIEW_BOOKINGS` wird wie
   bei No-Shows die konkrete Hallenwart-Zuordnung ueber `Caretaker.userId` und
   nur ersatzweise ueber `Caretaker.email` geprueft.

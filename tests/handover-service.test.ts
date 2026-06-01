@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { BookingValidationError } from "../lib/services/booking-rules";
 import {
+  applyHandoverTransition,
   assertHandoverTransition,
   getHandoverActionLabel,
   getHandoverStatus,
@@ -49,6 +50,70 @@ test("enforces forward-only handover transitions", () => {
   );
   assert.throws(
     () => assertHandoverTransition({ keyReceivedAt: now, roomAcceptedAt: now, roomReturnedAt: now }, "ROOM_RETURNED"),
+    BookingValidationError,
+  );
+});
+
+test("applies handover transitions with atomic expected state checks", async () => {
+  const now = new Date("2026-06-01T10:00:00.000Z");
+  const calls: unknown[] = [];
+  const handover = {
+    id: "handover-1",
+    bookingId: "booking-1",
+    keyReceivedAt: now,
+    roomAcceptedAt: now,
+    roomReturnedAt: null,
+    notes: "Uebernommen",
+  };
+  const client = {
+    handover: {
+      async create(args: unknown) {
+        calls.push(args);
+        return handover;
+      },
+      async updateMany(args: unknown) {
+        calls.push(args);
+        return { count: 1 };
+      },
+      async findUnique(args: unknown) {
+        calls.push(args);
+        return handover;
+      },
+    },
+  };
+
+  await applyHandoverTransition(client, "booking-1", "ROOM_ACCEPTED", now, "Uebernommen");
+
+  assert.deepEqual(calls[0], {
+    where: {
+      bookingId: "booking-1",
+      keyReceivedAt: { not: null },
+      roomAcceptedAt: null,
+      roomReturnedAt: null,
+    },
+    data: { roomAcceptedAt: now, notes: "Uebernommen" },
+  });
+  assert.deepEqual(calls[1], { where: { bookingId: "booking-1" } });
+});
+
+test("blocks stale handover transitions without writing a follow-up state", async () => {
+  const now = new Date("2026-06-01T10:00:00.000Z");
+  const client = {
+    handover: {
+      async create() {
+        throw new Error("create should not be used");
+      },
+      async updateMany() {
+        return { count: 0 };
+      },
+      async findUnique() {
+        throw new Error("findUnique should not be used after failed transition");
+      },
+    },
+  };
+
+  await assert.rejects(
+    () => applyHandoverTransition(client, "booking-1", "ROOM_RETURNED", now, undefined),
     BookingValidationError,
   );
 });
