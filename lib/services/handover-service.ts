@@ -1,4 +1,4 @@
-import type { Handover, Prisma } from "@prisma/client";
+import { Prisma, type Handover } from "@prisma/client";
 import { z } from "zod";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
@@ -174,6 +174,14 @@ type HandoverTimestampData = {
   notes?: string;
 };
 
+type HandoverMutationClient = {
+  handover: {
+    create(args: Prisma.HandoverCreateArgs): Promise<Handover>;
+    updateMany(args: Prisma.HandoverUpdateManyArgs): Promise<Prisma.BatchPayload>;
+    findUnique(args: Prisma.HandoverFindUniqueArgs): Promise<Handover | null>;
+  };
+};
+
 function handoverTimestampData(action: HandoverAction, now: Date, notes: string | undefined): HandoverTimestampData {
   return {
     ...(action === "KEY_RECEIVED" ? { keyReceivedAt: now } : {}),
@@ -181,6 +189,64 @@ function handoverTimestampData(action: HandoverAction, now: Date, notes: string 
     ...(action === "ROOM_RETURNED" ? { roomReturnedAt: now } : {}),
     ...(notes ? { notes } : {}),
   };
+}
+
+export async function applyHandoverTransition(
+  client: HandoverMutationClient,
+  bookingId: string,
+  action: HandoverAction,
+  now: Date,
+  notes: string | undefined,
+) {
+  const data = handoverTimestampData(action, now, notes);
+
+  if (action === "KEY_RECEIVED") {
+    try {
+      return await client.handover.create({
+        data: {
+          bookingId,
+          ...data,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new BookingValidationError("Dieser Hallenuebergabe-Schritt wurde bereits erfasst.");
+      }
+
+      throw error;
+    }
+  }
+
+  const expectedState: Prisma.HandoverWhereInput =
+    action === "ROOM_ACCEPTED"
+      ? {
+          bookingId,
+          keyReceivedAt: { not: null },
+          roomAcceptedAt: null,
+          roomReturnedAt: null,
+        }
+      : {
+          bookingId,
+          keyReceivedAt: { not: null },
+          roomAcceptedAt: { not: null },
+          roomReturnedAt: null,
+        };
+
+  const result = await client.handover.updateMany({
+    where: expectedState,
+    data,
+  });
+
+  if (result.count !== 1) {
+    throw new BookingValidationError("Dieser Hallenuebergabe-Schritt ist nicht mehr im erwarteten Zustand.");
+  }
+
+  const handover = await client.handover.findUnique({ where: { bookingId } });
+  if (!handover) {
+    throw new BookingValidationError("Die Hallenuebergabe wurde nicht gefunden.");
+  }
+
+  return handover;
 }
 
 export async function recordHandoverEvent(input: unknown, actorUserId: string, now = new Date()) {
@@ -215,17 +281,7 @@ export async function recordHandoverEvent(input: unknown, actorUserId: string, n
   const notes = data.notes?.trim() || undefined;
 
   return prisma.$transaction(async (transaction) => {
-    const current = await transaction.handover.findUnique({ where: { bookingId: booking.id } });
-    assertHandoverTransition(current, data.action);
-
-    const handover = await transaction.handover.upsert({
-      where: { bookingId: booking.id },
-      create: {
-        bookingId: booking.id,
-        ...handoverTimestampData(data.action, now, notes),
-      },
-      update: handoverTimestampData(data.action, now, notes),
-    });
+    const handover = await applyHandoverTransition(transaction, booking.id, data.action, now, notes);
 
     await transaction.auditEntry.create({
       data: {

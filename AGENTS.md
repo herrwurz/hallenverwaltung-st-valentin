@@ -184,6 +184,9 @@ Version 1:
   benachrichtigt werden.
 - Hallenuebergaben werden fuer genehmigte Buchungen ueber `Handover`
   protokolliert: Schluessel erhalten, Halle uebernommen, Halle retourniert.
+- Hallenuebergabe-Schritte muessen atomar mit erwartetem Ausgangszustand
+  gespeichert werden, damit doppelte oder parallele Erfassung nicht mehrfach
+  auditiert wird.
 - Hallenuebergaben veraendern den Buchungsstatus nicht und erzeugen keine
   automatische Abrechnung.
 - Das Recht `MANAGE_HANDOVERS` erlaubt die Erfassung. Ohne `VIEW_BOOKINGS`
