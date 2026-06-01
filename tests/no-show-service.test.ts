@@ -7,14 +7,15 @@ import {
   assertNoShowAcknowledgeTransition,
   assertNoShowReportPermission,
   isAssignedCaretakerForBooking,
+  isAssignedCaretakerUserForBooking,
   noShowAcknowledgeSchema,
   noShowReportSchema,
 } from "../lib/services/no-show-service";
 
 const assignedBooking = {
   room: {
-    caretakers: [{ caretaker: { email: "wart@example.test" } }],
-    building: { caretakers: [{ caretaker: { email: "building@example.test" } }] },
+    caretakers: [{ caretaker: { userId: "caretaker-user-1", email: "wart@example.test" } }],
+    building: { caretakers: [{ caretaker: { userId: "building-user-1", email: "building@example.test" } }] },
   },
 };
 
@@ -34,10 +35,17 @@ test("detects assigned caretakers by room or building email", () => {
   assert.equal(isAssignedCaretakerForBooking("other@example.test", assignedBooking), false);
 });
 
+test("detects assigned caretakers by linked user", () => {
+  assert.equal(isAssignedCaretakerUserForBooking("caretaker-user-1", assignedBooking), true);
+  assert.equal(isAssignedCaretakerUserForBooking("building-user-1", assignedBooking), true);
+  assert.equal(isAssignedCaretakerUserForBooking("other-user", assignedBooking), false);
+});
+
 test("allows admins and assigned caretakers to report no-shows", () => {
   assert.doesNotThrow(() =>
     assertNoShowReportPermission({
       permissions: { canReportNoShow: true, canViewBookings: true },
+      actorUserId: "other-user",
       actorEmail: "other@example.test",
       booking: assignedBooking,
     }),
@@ -45,6 +53,15 @@ test("allows admins and assigned caretakers to report no-shows", () => {
   assert.doesNotThrow(() =>
     assertNoShowReportPermission({
       permissions: { canReportNoShow: true, canViewBookings: false },
+      actorUserId: "caretaker-user-1",
+      actorEmail: "other@example.test",
+      booking: assignedBooking,
+    }),
+  );
+  assert.doesNotThrow(() =>
+    assertNoShowReportPermission({
+      permissions: { canReportNoShow: true, canViewBookings: false },
+      actorUserId: "legacy-user",
       actorEmail: "wart@example.test",
       booking: assignedBooking,
     }),
@@ -56,6 +73,7 @@ test("blocks no-show reports without permission or assignment", () => {
     () =>
       assertNoShowReportPermission({
         permissions: { canReportNoShow: false, canViewBookings: true },
+        actorUserId: "caretaker-user-1",
         actorEmail: "wart@example.test",
         booking: assignedBooking,
       }),
@@ -65,6 +83,7 @@ test("blocks no-show reports without permission or assignment", () => {
     () =>
       assertNoShowReportPermission({
         permissions: { canReportNoShow: true, canViewBookings: false },
+        actorUserId: "other-user",
         actorEmail: "other@example.test",
         booking: assignedBooking,
       }),
@@ -85,6 +104,8 @@ test("labels no-show statuses and documents schema indexes", () => {
   const schema = readFileSync("prisma/schema.prisma", "utf8");
   assert.match(schema, /enum NoShowStatus/);
   assert.match(schema, /model NoShowReport/);
+  assert.match(schema, /userId\s+String\?\s+@unique/);
+  assert.match(schema, /caretakerProfile\s+Caretaker\?/);
   assert.match(schema, /@@index\(\[status, reportedAt\]\)/);
   assert.match(schema, /@@index\(\[roomId, reportedAt\]\)/);
   assert.match(schema, /@@index\(\[organizationId, reportedAt\]\)/);

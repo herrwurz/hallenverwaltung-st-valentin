@@ -169,6 +169,7 @@ model User {
   processedDamages        DamageReport[]         @relation("DamageProcessedBy")
   reportedNoShows         NoShowReport[]         @relation("NoShowReportedBy")
   acknowledgedNoShows     NoShowReport[]         @relation("NoShowAcknowledgedBy")
+  caretakerProfile        Caretaker?             @relation("CaretakerUser")
   notifications           Notification[]
   auditEntries            AuditEntry[]
   organizationMemberships OrganizationMember[]
@@ -319,10 +320,12 @@ model RoomComposition {
 model Caretaker {
   id        String              @id @default(cuid())
   code      String              @unique
+  userId    String?             @unique
   name      String
   email     String?
   phone     String?
   isActive  Boolean             @default(true)
+  user      User?               @relation("CaretakerUser", fields: [userId], references: [id], onDelete: SetNull)
   buildings BuildingCaretaker[]
   rooms     RoomCaretaker[]
 }

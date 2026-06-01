@@ -178,6 +178,8 @@ Version 1:
   und keine Buchungsstatusaenderung aus.
 - Hallenwarte duerfen No-Shows nur fuer ihnen zugeordnete Raeume oder Gebaeude
   melden, sofern kein Verwaltungsrecht fuer Buchungen vorliegt.
+- Die Hallenwart-Zuordnung soll primaer ueber `Caretaker.userId` erfolgen.
+  `Caretaker.email` ist nur ein Fallback fuer vorhandene Stammdaten.
 - No-Show-Meldungen werden auditiert und koennen als `NO_SHOW_REPORTED`
   benachrichtigt werden.
 
