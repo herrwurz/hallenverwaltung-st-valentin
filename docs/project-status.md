@@ -144,6 +144,10 @@ Serienbuchungen und Ferien-/Ausnahmelogik
 
 No-Show- und Hallenwart-Workflows
 
+## Phase 19.1
+
+Caretaker-User-Haertung
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -342,6 +346,8 @@ Version 1:
 
 * No-Shows koennen fuer genehmigte, beendete Buchungen gemeldet werden
 * Hallenwarte duerfen nur zugeordnete Raeume/Gebaeude melden
+* Zuordnung erfolgt primaer ueber `Caretaker.userId`, mit E-Mail-Fallback fuer
+  vorhandene Stammdaten
 * Verwaltung kann Meldungen zur Kenntnis nehmen
 * keine Sanktionen, keine automatische Abrechnung, keine Buchungsstatusaenderung
 

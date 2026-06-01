@@ -63,6 +63,7 @@ erDiagram
   BUILDING ||--o{ ROOM : contains
   ROOM ||--o{ ROOM_COMPOSITION : combined_room
   ROOM ||--o{ ROOM_COMPOSITION : component_room
+  USER ||--o| CARETAKER : linked_to
   CARETAKER ||--o{ BUILDING_CARETAKER : responsible
   BUILDING ||--o{ BUILDING_CARETAKER : assigned
   CARETAKER ||--o{ ROOM_CARETAKER : responsible
@@ -217,8 +218,9 @@ erDiagram
   beendeter Buchungen. Pro Buchung ist maximal eine No-Show-Meldung erlaubt.
   Die Buchung selbst wird dadurch nicht storniert, verschoben oder abgerechnet.
 - No-Show-Meldungen sind fuer Verwaltung und zugeordnete Hallenwarte gedacht.
-  Hallenwart-Zuordnung wird in Version 1 ueber die E-Mail des Benutzers gegen
-  `Caretaker.email` fuer Raum oder Gebaeude abgeglichen.
+  Hallenwart-Zuordnung wird ab Phase 19.1 primaer ueber `Caretaker.userId`
+  gegen den angemeldeten Benutzer geprueft. `Caretaker.email` bleibt nur als
+  Fallback fuer vorhandene Stammdaten ohne Benutzerverknuepfung.
 - Das Ereignis `NO_SHOW_REPORTED` bereitet Benachrichtigungen fuer die
   Verwaltung vor. Sanktionen, automatische Statistiken oder Abrechnungsfolgen
   bleiben ausgeschlossen.

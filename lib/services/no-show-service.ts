@@ -26,8 +26,8 @@ type NoShowActor = {
 
 type NoShowBookingScope = {
   room: {
-    caretakers: Array<{ caretaker: { email: string | null } }>;
-    building: { caretakers: Array<{ caretaker: { email: string | null } }> };
+    caretakers: Array<{ caretaker: { userId?: string | null; email: string | null } }>;
+    building: { caretakers: Array<{ caretaker: { userId?: string | null; email: string | null } }> };
   };
 };
 
@@ -47,12 +47,25 @@ export function isAssignedCaretakerForBooking(actorEmail: string, booking: NoSho
   ].some((email) => normalizeEmail(email) === normalizedActorEmail);
 }
 
+export function isAssignedCaretakerUserForBooking(actorUserId: string, booking: NoShowBookingScope) {
+  if (!actorUserId) {
+    return false;
+  }
+
+  return [
+    ...booking.room.caretakers.map(({ caretaker }) => caretaker.userId),
+    ...booking.room.building.caretakers.map(({ caretaker }) => caretaker.userId),
+  ].some((userId) => userId === actorUserId);
+}
+
 export function assertNoShowReportPermission({
   permissions,
+  actorUserId,
   actorEmail,
   booking,
 }: {
   permissions: NoShowPermissionState;
+  actorUserId: string;
   actorEmail: string;
   booking: NoShowBookingScope;
 }) {
@@ -64,12 +77,23 @@ export function assertNoShowReportPermission({
     return;
   }
 
-  if (!isAssignedCaretakerForBooking(actorEmail, booking)) {
+  if (!isAssignedCaretakerUserForBooking(actorUserId, booking) && !isAssignedCaretakerForBooking(actorEmail, booking)) {
     throw new BookingValidationError("No-Shows duerfen nur fuer zugeordnete Raeume oder Gebaeude gemeldet werden.");
   }
 }
 
-function reportableBookingWhere(now: Date, actorEmail?: string, canViewBookings = false): Prisma.BookingWhereInput {
+function caretakerAssignmentFilter(actor: NoShowActor): Prisma.RoomWhereInput {
+  return {
+    OR: [
+      { caretakers: { some: { caretaker: { userId: actor.id } } } },
+      { building: { caretakers: { some: { caretaker: { userId: actor.id } } } } },
+      { caretakers: { some: { caretaker: { email: actor.email } } } },
+      { building: { caretakers: { some: { caretaker: { email: actor.email } } } } },
+    ],
+  };
+}
+
+function reportableBookingWhere(now: Date, actor: NoShowActor, canViewBookings = false): Prisma.BookingWhereInput {
   return {
     status: "APPROVED",
     endsAt: { lte: now },
@@ -77,12 +101,7 @@ function reportableBookingWhere(now: Date, actorEmail?: string, canViewBookings 
     ...(canViewBookings
       ? {}
       : {
-          room: {
-            OR: [
-              { caretakers: { some: { caretaker: { email: actorEmail } } } },
-              { building: { caretakers: { some: { caretaker: { email: actorEmail } } } } },
-            ],
-          },
+          room: caretakerAssignmentFilter(actor),
         }),
   };
 }
@@ -121,12 +140,7 @@ export async function getAdminNoShowData(actorUserId: string, status?: string) {
   const caretakerReportFilter: Prisma.NoShowReportWhereInput = permissions.canViewBookings
     ? {}
     : {
-        room: {
-          OR: [
-            { caretakers: { some: { caretaker: { email: actor.email } } } },
-            { building: { caretakers: { some: { caretaker: { email: actor.email } } } } },
-          ],
-        },
+        room: caretakerAssignmentFilter(actor),
       };
 
   const [reports, reportableBookings] = await Promise.all([
@@ -145,7 +159,7 @@ export async function getAdminNoShowData(actorUserId: string, status?: string) {
       orderBy: [{ status: "asc" }, { reportedAt: "desc" }],
     }),
     prisma.booking.findMany({
-      where: reportableBookingWhere(new Date(), actor.email, permissions.canViewBookings),
+      where: reportableBookingWhere(new Date(), actor, permissions.canViewBookings),
       include: {
         organization: true,
         room: { include: { building: true } },
@@ -183,7 +197,7 @@ export async function reportNoShow(input: unknown, actorUserId: string, now = ne
     throw new BookingValidationError("Die Buchung wurde nicht gefunden.");
   }
 
-  assertNoShowReportPermission({ permissions, actorEmail: actor.email, booking });
+  assertNoShowReportPermission({ permissions, actorUserId: actor.id, actorEmail: actor.email, booking });
 
   if (booking.status !== "APPROVED") {
     throw new BookingValidationError("No-Shows koennen nur fuer genehmigte Buchungen gemeldet werden.");

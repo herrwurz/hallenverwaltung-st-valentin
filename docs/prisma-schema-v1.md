@@ -18,7 +18,8 @@ Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
 vorbereitete Tauschantraege. Phase 16 nutzt `Document` und `DamageReport`
 fuer Dokumentenmetadaten und Schadensmeldungen. Phase 17 nutzt `BookingSeries`
 und `HolidayPeriod` fuer woechentliche Serienantraege und Ferienregeln. Phase
-18 ergaenzt `NoShowReport` fuer Hallenwart- und Verwaltungsprotokolle. Die in Phase 3 vorhandene
+18 ergaenzt `NoShowReport` fuer Hallenwart- und Verwaltungsprotokolle. Phase
+19.1 haertet die Hallenwart-Zuordnung mit `Caretaker.userId`. Die in Phase 3 vorhandene
 Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
@@ -122,8 +123,9 @@ werden.
   Buchungsstatus nicht und erzeugen keine automatische Sanktion oder
   Abrechnung.
 - `REPORT_NO_SHOW` erlaubt die Meldung. Ohne `VIEW_BOOKINGS` wird zusaetzlich
-  geprueft, ob die Benutzer-E-Mail einem `Caretaker.email` des Raums oder
-  Gebaeudes entspricht.
+  primaer geprueft, ob der Benutzer ueber `Caretaker.userId` einem
+  Hallenwartdatensatz des Raums oder Gebaeudes entspricht. `Caretaker.email`
+  bleibt nur als Fallback fuer vorhandene Stammdaten.
 
 ## Indizes
 
