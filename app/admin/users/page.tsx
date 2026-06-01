@@ -1,5 +1,7 @@
 import { saveUserAction } from "@/app/admin/actions";
+import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminFeedback } from "@/components/admin-feedback";
+import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
 import { getUserAdministrationData } from "@/lib/services/admin/user-service";
 
@@ -20,6 +22,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
       <p className="mt-3 text-slate-300">
         Benutzerzugang, Rollen und Organisationsmitgliedschaften verwalten.
       </p>
+      <AdminBackLink />
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>
@@ -134,10 +137,8 @@ function UserForm({
           </label>
         </div>
       </fieldset>
-      <div className="text-right">
-        <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {user ? "Änderungen speichern" : "Benutzer anlegen"}
-        </button>
+      <div>
+        <FormActions submitLabel={user ? "Änderungen speichern" : "Benutzer anlegen"} cancelHref="/admin/users" />
       </div>
     </form>
   );

@@ -19,7 +19,10 @@ export function FormActions({
       >
         {cancelLabel}
       </Link>
-      <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+      <button
+        type="submit"
+        className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400"
+      >
         {submitLabel}
       </button>
     </div>

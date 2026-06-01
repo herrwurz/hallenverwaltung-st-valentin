@@ -22,7 +22,22 @@ Vor jeder Änderung lesen:
 
 Diese Dokumente gelten als fachliche Wahrheit.
 
-- docs/project-status.md  (nur kontextabhängig verpflichtend lesen; nicht bei jeder Änderung als Standarddokument)
+## Projektstatus-Datei
+
+docs/project-status.md dient als kompakter Projektüberblick.
+
+Lesen wenn:
+
+- neue Codex-Session startet
+- neue Phase beginnt
+- Architekturentscheidungen betroffen sind
+- der Nutzer ausdrücklich auf den Projektstatus verweist
+
+Nicht standardmäßig bei jeder Aufgabe lesen.
+
+AGENTS.md bleibt die primäre Arbeitsanweisung.
+
+project-status.md dient ausschließlich als Projektkontext und soll Credits sparen, indem nicht bei jeder Aufgabe Pflichtenheft, ERD und Prisma-Dokumentation erneut geladen werden.
 
 ---
 
@@ -72,6 +87,57 @@ Diese Dokumente gelten als fachliche Wahrheit.
   Fuer dieses Projekt gelten die vorhandenen Next.js-/Service-Schichten statt
   eines klassischen MVC-Zwangs.
 - Coding-Style, bestehende Projektmuster und lokale Konventionen einhalten.
+
+
+
+# Karpathy-Arbeitsprinzipien
+
+## Vor der Umsetzung
+
+- Annahmen explizit benennen.
+- Bei mehreren möglichen Interpretationen die Alternativen nennen.
+- Einfachere Lösungen aktiv bevorzugen.
+- Unklare Anforderungen nicht stillschweigend interpretieren.
+
+## Einfachheit vor Abstraktion
+
+- Nur umsetzen, was tatsächlich gefordert wurde.
+- Keine vorsorglichen Erweiterungen.
+- Keine Konfigurierbarkeit ohne fachlichen Bedarf.
+- Keine Abstraktionen für Einmalverwendung.
+- Die einfachste wartbare Lösung bevorzugen.
+
+Prüffrage:
+
+"Würde ein erfahrener Senior-Entwickler diese Lösung als unnötig komplex betrachten?"
+
+## Chirurgische Änderungen
+
+- Nur betroffene Bereiche ändern.
+- Keine ungefragten Refactorings.
+- Bestehende Projektmuster respektieren.
+- Durch die Änderung entstandene ungenutzte Artefakte entfernen.
+- Bereits vorhandenen Dead Code nur melden, nicht ungefragt löschen.
+
+Jede geänderte Zeile muss direkt auf die Anforderung zurückführbar sein.
+
+## Zielorientierte Umsetzung
+
+Vor größeren Änderungen einen kurzen Plan erstellen:
+
+1. Umsetzungsschritt
+2. Verifikation
+3. Erfolgskriterium
+
+Fehlerbehebungen möglichst testgetrieben:
+
+- Fehler reproduzieren
+- Test erstellen
+- Fehler beheben
+- Test erfolgreich ausführen
+
+Abschluss immer anhand überprüfbarer Kriterien bewerten.
+
 
 ---
 
@@ -367,6 +433,27 @@ Standardverhalten ab sofort:
    - Beispiel: Export-Service, Admin-UI, Tests, Doku, Abschlussprüfung.
    - Umsetzung dann Schritt für Schritt, statt alles gleichzeitig zu laden und
      zu prüfen.
+
+---
+
+# Arbeitsregeln für Tool-Laufzeiten und bekannte Umgebungsprobleme
+
+- Für bekannte Langläufer nicht mit zu kurzen Timeouts starten.
+- `npm run build`, `npm run lint`, `npm test`, `npx tsc --noEmit` und
+  vergleichbare Abschlussprüfungen direkt mit großzügigem Timeout planen.
+- Nicht erst einen erwartbaren Timeout produzieren und danach denselben Befehl
+  mit mehr Zeit wiederholen.
+- Richtwert: schnelle Datei-/Git-Befehle 30-60 Sekunden, gezielte Checks 2-4
+  Minuten, volle Tests oder Build 6-10 Minuten.
+- Bekannte, bereits gelöste oder eingegrenzte Umgebungsprobleme nicht jedes
+  Mal neu diagnostizieren.
+- Beim Next/SWC-Lockfile-Problem zuerst die zuletzt funktionierende Variante
+  verwenden: `npm install`, Next-Version im Lockfile prüfen, dann
+  Produktionsbuild mit direktem Node-/npm.cmd-Aufruf und ausreichend Timeout.
+- `npm run dev` in der Codex-Windows-Umgebung nur als Smoke-Test bewerten,
+  wenn Port 3000 stabil erreichbar bleibt. Bei erneutem
+  `Found lockfile missing swc dependencies` plus `EACCES/fetch failed` nicht
+  weiter experimentieren, sondern als bekanntes Umgebungsrisiko dokumentieren.
 
 ---
 

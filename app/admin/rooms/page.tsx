@@ -1,5 +1,7 @@
 import { saveRoomAction } from "@/app/admin/actions";
+import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminFeedback } from "@/components/admin-feedback";
+import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
 import { getRoomAdministrationData } from "@/lib/services/admin/room-service";
 
@@ -18,6 +20,7 @@ export default async function RoomsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Räume</p>
       <h2 className="mt-3 text-3xl font-semibold">Raum-Verwaltung</h2>
       <p className="mt-3 text-slate-300">Räume, Betriebsstatus und optionale Teilbereichsbeziehungen pflegen.</p>
+      <AdminBackLink />
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>
@@ -150,10 +153,8 @@ function RoomForm({
           className={inputClass}
         />
       </label>
-      <div className="lg:col-span-4 lg:text-right">
-        <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {room ? "Änderungen speichern" : "Raum anlegen"}
-        </button>
+      <div className="lg:col-span-4">
+        <FormActions submitLabel={room ? "Änderungen speichern" : "Raum anlegen"} cancelHref="/admin/rooms" />
       </div>
     </form>
   );

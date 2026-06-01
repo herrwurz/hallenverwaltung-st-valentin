@@ -1,3 +1,4 @@
+import { AdminBackLink } from "@/components/admin-back-link";
 import { requirePermission } from "@/lib/permissions";
 import { getRoleAdministrationData } from "@/lib/services/admin/role-service";
 
@@ -12,6 +13,7 @@ export default async function RolesPage() {
       <p className="mt-3 text-slate-300">
         Rollen und ihre aus der Datenbank geladenen Rechte. Die Zuordnung ist in dieser Phase nur lesbar.
       </p>
+      <AdminBackLink />
       <section className="mt-8 grid gap-4 lg:grid-cols-2">
         {data.roles.map((role) => (
           <article key={role.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
+import { PortalOrganizationField } from "@/components/portal-organization-field";
 import { requirePermission } from "@/lib/permissions";
 import { getBookingRequestOptions } from "@/lib/services/booking-service";
 import {
@@ -73,19 +74,7 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
           </p>
         ) : (
           <form action={createWaitlistEntryAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-            <label className="text-sm text-slate-300">
-              Organisation
-              <select name="organizationId" required defaultValue="" className={inputClass}>
-                <option value="" disabled>
-                  Bitte wählen
-                </option>
-                {options.organizations.map((organization) => (
-                  <option key={organization.id} value={organization.id}>
-                    {organization.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <PortalOrganizationField organizations={options.organizations} inputClassName={inputClass} />
             <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
             <label className="text-sm text-slate-300">
               Titel

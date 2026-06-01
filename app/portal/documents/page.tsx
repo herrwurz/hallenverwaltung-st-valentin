@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createOrganizationDocumentAction } from "@/app/portal/documents/actions";
 import { FormActions } from "@/components/form-actions";
+import { PortalOrganizationField } from "@/components/portal-organization-field";
 import { getDocumentTypeLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { documentTypes, getPortalDocumentData } from "@/lib/services/document-service";
@@ -44,19 +45,7 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
           <p className="mt-4 text-sm text-amber-200">Keine aktive Organisation ist Ihrem Benutzer zugeordnet.</p>
         ) : (
           <form action={createOrganizationDocumentAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-            <label className="text-sm text-slate-300">
-              Organisation
-              <select name="organizationId" required defaultValue="" className={inputClass}>
-                <option value="" disabled>
-                  Bitte wählen
-                </option>
-                {data.organizations.map((organization) => (
-                  <option key={organization.id} value={organization.id}>
-                    {organization.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <PortalOrganizationField organizations={data.organizations} inputClassName={inputClass} />
             <label className="text-sm text-slate-300">
               Dokumenttyp
               <select name="type" required defaultValue="OTHER" className={inputClass}>
