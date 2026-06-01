@@ -10,6 +10,9 @@ Diese Punkte blockieren einen echten Produktivstart. Sie duerfen nicht nur
 "zur Kenntnis" genommen werden, sondern brauchen ein Ergebnis mit Datum und
 Verantwortlichem.
 
+Die konkrete Ausfuehrung und die erwarteten Nachweise stehen in
+`docs/go-live-runbook.md`.
+
 | Blocker | Status | Entscheidung / Nachweis | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |
 | Zielserver und Domain festgelegt | offen |  |  |  |

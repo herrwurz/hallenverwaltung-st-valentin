@@ -232,6 +232,13 @@ Nachweisspalten dokumentiert. Mittlere Pilotpunkte wie Stammdaten-Loeschkonzept
 und Ferien-/Semesterlogik wurden als bewusste Fachentscheidungen vor einem
 breiteren Pilot eingeordnet.
 
+## Phase 23.3
+
+Go-Live-Runbook: Die Hoch-Blocker wurden in `docs/go-live-runbook.md` in eine
+operative Schrittfolge mit Befehlen, Nachweisen, Stop-Kriterien und
+Rollback-Hinweisen ueberfuehrt. README, Produktions-Readiness und
+Go-Live-Entscheidungsliste verweisen auf das Runbook.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -533,6 +540,7 @@ Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 * `docs/user-guide-admin.md`
 * `docs/user-guide-portal.md`
 * `docs/go-live-open-points.md`
+* `docs/go-live-runbook.md`
 
 Hoch priorisierte Go-Live-Blocker muessen vor Produktivstart erledigt oder
 ausdruecklich mit Risikoakzeptanz freigegeben werden. Mittlere Pilotpunkte

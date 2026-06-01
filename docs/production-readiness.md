@@ -207,3 +207,7 @@ Die verbindliche Go-Live-Entscheidungsliste liegt in
 `docs/go-live-open-points.md`. Punkte mit Prioritaet hoch blockieren den
 Produktivstart, bis sie erledigt oder ausdruecklich mit Risikoakzeptanz
 freigegeben wurden.
+
+Die operative Schrittfolge fuer Zielserver, TLS, Produktionskonfiguration,
+SMTP, Worker, Backup/Restore, Monitoring und Abnahme steht in
+`docs/go-live-runbook.md`.
