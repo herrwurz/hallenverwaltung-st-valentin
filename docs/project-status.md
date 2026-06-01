@@ -192,6 +192,13 @@ wurde erneut geprüft; in der Codex-Umgebung bleibt eine Next/SWC-Lockfile-
 Warnung mit Netzwerk-/EACCES-Abbruch bestehen, während der Produktionsbuild
 weiterhin erfolgreich läuft.
 
+## Phase 22.1
+
+UI-Konventionen fuer Portalformulare: Organisationsauswahl wird bei genau einer
+aktiven Organisation automatisch als verstecktes Feld gesetzt. Die sichtbare
+Auswahl bleibt nur bei mehreren Organisationen erhalten. Zentrale
+Formularaktionen verwenden explizite Submit-Buttons.
+
 ---
 
 # Wichtigste Architekturentscheidungen
