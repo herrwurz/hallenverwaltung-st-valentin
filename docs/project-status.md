@@ -246,6 +246,13 @@ Vorlage fuer echte Zielumgebungsnachweise, Risikoakzeptanzen, mittlere
 Pilotentscheidungen und finale Freigabe ergaenzt. Runbook, Abnahmeplan,
 README und Readiness-Dokumente verweisen darauf.
 
+## Phase 23.5
+
+Produktionskonfigurationscheck: `npm run production:check` prueft
+`.env.production` auf fehlende Pflichtwerte, Platzhalter, unsichere
+Basiswerte und optional fehlende TLS-Dateien, ohne Secret-Werte auszugeben.
+Runbook, Readiness, README und Nachweisprotokoll verweisen auf den Check.
+
 ---
 
 # Wichtigste Architekturentscheidungen

@@ -258,7 +258,14 @@ deploy/certs/privkey.pem
 Produktionskonfiguration pruefen:
 
 ```bash
+npm run production:check
 docker compose --env-file .env.production -f docker-compose.production.yml config
+```
+
+Optional prueft der Produktionscheck auch Zertifikatsdateien:
+
+```bash
+npm run production:check -- --check-files
 ```
 
 Produktionsnahe Umgebung starten:

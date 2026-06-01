@@ -54,11 +54,13 @@ Regeln:
 ## 3. Konfiguration pruefen
 
 ```bash
+npm run production:check
 docker compose --env-file .env.production -f docker-compose.production.yml config
 ```
 
 Erfolgskriterium:
 
+- `npm run production:check` meldet keine Fehler.
 - Compose rendert ohne Fehler.
 - Keine Platzhalterwerte wie `replace-with-*` bleiben in der echten
   `.env.production`.
