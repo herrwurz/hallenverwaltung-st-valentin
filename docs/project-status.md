@@ -156,6 +156,10 @@ Hallenuebergabe-Basis
 
 Zutrittsverwaltung-Basis
 
+## Phase 20
+
+Pilot-Test und Demo-Readiness
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -382,6 +386,15 @@ Version 1:
 * Kalenderfilter im Browser
 * Exportdownloads im Browser
 
+### Pilot-Test
+
+* Demo-Seed erstellt lokale Testbenutzer fuer Gemeinde/Admin, Verein und
+  Hallenwart
+* `docs/pilot-testplan.md` beschreibt manuelle Smoke-Tests fuer reale
+  Oberflaechenpruefung
+* lokale Produktansicht ist nach Migration, Seed, Demo-Seed und `npm run dev`
+  direkt unter `http://localhost:3000` moeglich
+
 ---
 
 # Aktuelle Produktionsrisiken
@@ -426,13 +439,29 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
-## Phase 19
+## Phase 21
 
-Hallenuebergabe und Zutrittsverwaltung
+Fachlicher Pilot-Review mit echten Testlaeufen
 
-* Schluesselausgabe/-rueckgabe
-* Hallenuebergabe protokollieren
-* Zutrittsmedien verwalten
+* manuelle Tests mit Gemeinde/Admin, Verein und Hallenwart
+* Fehlerliste aus realer Bedienung priorisieren
+* fehlende Pflichtfelder, Texte und Bedienlogik nachschaerfen
+
+## Phase 22
+
+Produktions-Readiness
+
+* echte Zielumgebung vorbereiten
+* HTTPS, SMTP, Backup, Restore-Probe und Worker-Betrieb pruefen
+* sichere Initialbenutzer und Betriebsdokumentation
+
+## Phase 23
+
+Abnahme und Go-Live-Vorbereitung
+
+* Abnahmetestplan
+* Schulungs-/Kurzanleitung fuer Verwaltung und Vereine
+* finale offene Punkte fuer Version 1 entscheiden
 
 ---
 

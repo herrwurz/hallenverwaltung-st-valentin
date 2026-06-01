@@ -3,7 +3,7 @@
 Technisches Grundgeruest fuer eine Hallenverwaltungssoftware auf Basis von
 Next.js, TypeScript, Tailwind CSS, Prisma und PostgreSQL.
 
-## Stand: Phase 13
+## Stand: Phase 20
 
 Enthalten sind:
 
@@ -15,6 +15,7 @@ Enthalten sind:
   Warteliste, Kalender, Benachrichtigungen, Exporte und oeffentliche Ansicht
 - Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
 - Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
+- Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 
 ## Voraussetzungen
 
@@ -55,6 +56,22 @@ Enthalten sind:
    npm run db:seed
    ```
 
+4. Optional Demo-Daten fuer einen lokalen Produkttest anlegen:
+
+   ```bash
+   npm run demo:seed
+   ```
+
+   Demo-Logins:
+
+   | Rolle | E-Mail | Passwort |
+   | --- | --- | --- |
+   | Gemeinde/Admin | `demo.admin@example.test` | `DemoAdminPassword!2026` |
+   | Verein | `demo.verein@example.test` | `DemoVereinPassword!2026` |
+   | Hallenwart | `demo.hallenwart@example.test` | `DemoHallenwartPassword!2026` |
+
+   Diese Demo-Zugaenge sind nur fuer lokale Tests gedacht.
+
    Fuer Benachrichtigungen per SMTP muessen zusaetzlich die
    `SMTP_*`-Variablen in der `.env` gepflegt werden. Die Verarbeitung
    der Benachrichtigungsqueue kann ueber `/admin/notifications` manuell
@@ -84,7 +101,7 @@ Enthalten sind:
    Container oder ueber den Host-Cron gegen das laufende App-Image gestartet
    werden. Es wird kein externer Scheduler-Dienst vorausgesetzt.
 
-4. Entwicklungsserver starten:
+5. Entwicklungsserver starten:
 
    ```bash
    npm run dev
@@ -92,6 +109,19 @@ Enthalten sind:
 
 Die Anwendung ist unter [http://localhost:3000](http://localhost:3000)
 erreichbar.
+
+## Produkt Lokal Ansehen
+
+Fuer einen ersten realen Durchstich ist der aktuelle Stand bereits lokal
+nutzbar:
+
+- Oeffentlich: [http://localhost:3000/public](http://localhost:3000/public)
+- Login: [http://localhost:3000/login](http://localhost:3000/login)
+- Admin nach Login: `/admin`
+- Vereinsportal nach Login: `/portal`
+- Hallenwart-Funktionen nach Login: `/admin/handovers`
+
+Ein manueller Testleitfaden liegt in `docs/pilot-testplan.md`.
 
 ### Hinweis zu Codex auf Windows
 
