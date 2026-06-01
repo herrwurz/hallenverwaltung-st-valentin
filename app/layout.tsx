@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Hallenverwaltung St. Valentin",
-  description: "Technisches Grundgeruest fuer die Hallenverwaltung St. Valentin",
+  description: "Technisches Grundgerüst für die Hallenverwaltung St. Valentin",
 };
 
 export default function RootLayout({

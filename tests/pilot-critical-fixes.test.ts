@@ -19,7 +19,7 @@ test("admin bookings uses status select and redirects completed transitions to t
   const adminActions = readFileSync("app/admin/bookings/actions.ts", "utf8");
 
   assert.match(adminBookings, /<select\s+name="status"/);
-  assert.match(adminBookings, /Offen \(beantragt \+ in Pruefung\)/);
+  assert.match(adminBookings, /Offen \(beantragt \+ in Prüfung\)/);
   assert.match(adminActions, /"reviewed",\s*"IN_REVIEW"/);
   assert.match(adminActions, /"approved",\s*"APPROVED"/);
   assert.match(adminActions, /"rejected",\s*"REJECTED"/);

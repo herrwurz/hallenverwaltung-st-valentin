@@ -13,7 +13,7 @@ import { BookingValidationError } from "@/lib/services/booking-rules";
 
 function waitlistErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind nicht gueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
   }
 
   if (error instanceof BookingValidationError) {

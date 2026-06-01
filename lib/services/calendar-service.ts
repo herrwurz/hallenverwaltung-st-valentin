@@ -649,7 +649,7 @@ function toPublicBookingEvent(
 }
 
 function toClosureEvent(closure: CalendarClosure): CalendarEvent {
-  const buildingName = closure.room?.building.name ?? closure.building?.name ?? "Gebaeude";
+  const buildingName = closure.room?.building.name ?? closure.building?.name ?? "Gebäude";
   const buildingId = closure.room?.building.id ?? closure.building?.id ?? "";
   const roomName = closure.room?.name ?? null;
   const roomIdValue = closure.room?.id ?? closure.roomId ?? null;

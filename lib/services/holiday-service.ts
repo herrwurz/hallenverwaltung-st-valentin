@@ -15,7 +15,7 @@ export const holidayPeriodSchema = z.object({
 
 export function assertHolidayPeriodRange(startsOn: Date, endsOn: Date) {
   if (!(startsOn < endsOn)) {
-    throw new BookingValidationError("Der Ferienzeitraum muss ein gueltiges Beginn- und Enddatum haben.");
+    throw new BookingValidationError("Der Ferienzeitraum muss ein gültiges Beginn- und Enddatum haben.");
   }
 }
 
@@ -28,7 +28,7 @@ export async function getHolidayAdministrationData() {
 export async function saveHolidayPeriod(input: unknown, actorUserId: string) {
   const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
   if (!canBlockRoom) {
-    throw new BookingValidationError("Fuer Ferien- und Sperrzeiten fehlt das Recht BLOCK_ROOM.");
+    throw new BookingValidationError("Für Ferien- und Sperrzeiten fehlt das Recht BLOCK_ROOM.");
   }
 
   const data = holidayPeriodSchema.parse(input);
@@ -49,9 +49,9 @@ export async function saveHolidayPeriod(input: unknown, actorUserId: string) {
 export function getHolidayStatusLabel(status: ClosureStatus) {
   switch (status) {
     case "OPEN":
-      return "Geoeffnet";
+      return "Geöffnet";
     case "RESTRICTED":
-      return "Eingeschraenkt";
+      return "Eingeschränkt";
     case "CLOSED":
       return "Gesperrt";
     default:

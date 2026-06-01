@@ -10,7 +10,7 @@ export async function markOpenBillingEntriesExported(
   const ids = [...new Set(input.entryIds.map((id) => id.trim()).filter(Boolean))];
 
   if (ids.length === 0) {
-    throw new Error("Es wurden keine Abrechnungseintraege ausgewaehlt.");
+    throw new Error("Es wurden keine Abrechnungseinträge ausgewählt.");
   }
 
   return client.billingEntry.updateMany({

@@ -21,7 +21,7 @@ function jobsRedirect(params: Record<string, string | number | undefined>) {
 }
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Der Job konnte nicht ausgefuehrt werden.";
+  return error instanceof Error ? error.message : "Der Job konnte nicht ausgeführt werden.";
 }
 
 export async function processNotificationQueueJobAction() {

@@ -54,7 +54,7 @@ test("labels change request types and statuses", () => {
   assert.equal(getBookingChangeTypeLabel("MOVE"), "Verschiebung");
   assert.equal(getBookingChangeTypeLabel("SWAP"), "Tausch");
   assert.equal(getBookingChangeStatusLabel("REQUESTED"), "Beantragt");
-  assert.equal(getBookingChangeStatusLabel("IN_REVIEW"), "In Pruefung");
+  assert.equal(getBookingChangeStatusLabel("IN_REVIEW"), "In Prüfung");
   assert.equal(getBookingChangeStatusLabel("APPROVED"), "Genehmigt");
   assert.equal(getBookingChangeStatusLabel("REJECTED"), "Abgelehnt");
   assert.equal(getBookingChangeStatusLabel("CANCELLED"), "Storniert");

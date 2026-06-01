@@ -39,18 +39,18 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
         <div>
           <h2 className="text-3xl font-semibold">System-Jobs</h2>
           <p className="mt-3 max-w-3xl text-slate-300">
-            Manuelle Ausfuehrung der Hintergrundjobs fuer Benachrichtigungen und Wartelistenangebote. Fuer den
+            Manuelle Ausführung der Hintergrundjobs für Benachrichtigungen und Wartelistenangebote. Für den
             Serverbetrieb kann derselbe Ablauf per CLI/Cron gestartet werden.
           </p>
         </div>
         <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Dashboard
+          Zurück zum Dashboard
         </Link>
       </div>
 
       {params.job ? (
         <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Job {params.job} ausgefuehrt. Verarbeitete Eintraege: {params.processed ?? "0"}.
+          Job {params.job} ausgeführt. Verarbeitete Einträge: {params.processed ?? "0"}.
         </p>
       ) : null}
       {params.error ? (
@@ -61,7 +61,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
         <form action={processNotificationQueueJobAction} className="rounded-xl border border-slate-800 bg-slate-900 p-6">
           <h3 className="text-lg font-medium">Notification Queue</h3>
           <p className="mt-2 text-sm text-slate-400">
-            Verarbeitet faellige PENDING/FAILED E-Mail-Benachrichtigungen unter Beachtung von Backoff und maxAttempts.
+            Verarbeitet fällige PENDING/FAILED E-Mail-Benachrichtigungen unter Beachtung von Backoff und maxAttempts.
           </p>
           <button className="mt-5 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
             Queue verarbeiten
@@ -71,7 +71,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
         <form action={processExpiredWaitlistOffersJobAction} className="rounded-xl border border-slate-800 bg-slate-900 p-6">
           <h3 className="text-lg font-medium">Wartelistenablauf</h3>
           <p className="mt-2 text-sm text-slate-400">
-            Laesst abgelaufene OFFERED-Eintraege auslaufen und aktiviert servicekonform den naechsten passenden Platz.
+            Laesst abgelaufene OFFERED-Einträge auslaufen und aktiviert servicekonform den nächsten passenden Platz.
           </p>
           <button className="mt-5 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
             Angebote verarbeiten
@@ -81,16 +81,16 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
         <form action={runMaintenanceJobsAction} className="rounded-xl border border-slate-800 bg-slate-900 p-6">
           <h3 className="text-lg font-medium">Maintenance</h3>
           <p className="mt-2 text-sm text-slate-400">
-            Fuehrt Notification Queue und Wartelistenablauf in einem Wartungslauf aus und protokolliert das Ergebnis.
+            Führt Notification Queue und Wartelistenablauf in einem Wartungslauf aus und protokolliert das Ergebnis.
           </p>
           <button className="mt-5 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-            Maintenance ausfuehren
+            Maintenance ausführen
           </button>
         </form>
       </section>
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
-        <h3 className="text-xl font-medium">Letzte Ausfuehrungen</h3>
+        <h3 className="text-xl font-medium">Letzte Ausführungen</h3>
         {runs.length === 0 ? (
           <p className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-400">
             Noch keine Job-Protokolle vorhanden.

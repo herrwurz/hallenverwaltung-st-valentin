@@ -70,7 +70,7 @@ test("detects closed and restricted holiday overlaps", () => {
       startsOn: new Date("2026-09-14T00:00:00Z"),
       endsOn: new Date("2026-09-15T00:00:00Z"),
       defaultStatus: "RESTRICTED" as const,
-      reason: "Eingeschraenkter Betrieb",
+      reason: "Eingeschränkter Betrieb",
     },
   ];
 
@@ -158,8 +158,8 @@ test("validates holiday period ranges and labels", () => {
     () => assertHolidayPeriodRange(new Date("2026-12-24T00:00:00Z"), new Date("2026-12-24T00:00:00Z")),
     BookingValidationError,
   );
-  assert.equal(getHolidayStatusLabel("OPEN"), "Geoeffnet");
-  assert.equal(getHolidayStatusLabel("RESTRICTED"), "Eingeschraenkt");
+  assert.equal(getHolidayStatusLabel("OPEN"), "Geöffnet");
+  assert.equal(getHolidayStatusLabel("RESTRICTED"), "Eingeschränkt");
   assert.equal(getHolidayStatusLabel("CLOSED"), "Gesperrt");
 });
 

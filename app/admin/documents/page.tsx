@@ -19,7 +19,7 @@ export default async function AdminDocumentsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Dokumente</p>
       <h2 className="mt-3 text-3xl font-semibold">Dokumentenverwaltung</h2>
       <p className="mt-3 text-slate-300">
-        Verwaltung von Dokument-Metadaten fuer Organisationen, Gebaeude und Raeume. Dateiablage wird ueber Storage-Key
+        Verwaltung von Dokument-Metadaten für Organisationen, Gebäude und Räume. Dateiablage wird über Storage-Key
         vorbereitet.
       </p>
       {params.error ? (
@@ -49,9 +49,9 @@ export default async function AdminDocumentsPage({ searchParams }: PageProps) {
             </select>
           </label>
           <label className="text-sm text-slate-300">
-            Gebaeude
+            Gebäude
             <select name="buildingId" defaultValue="" className={inputClass}>
-              <option value="">Kein Gebaeude</option>
+              <option value="">Kein Gebäude</option>
               {data.buildings.map((building) => (
                 <option key={building.id} value={building.id}>
                   {building.name}

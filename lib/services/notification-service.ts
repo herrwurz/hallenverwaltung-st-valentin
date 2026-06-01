@@ -387,7 +387,7 @@ export async function queueBookingNotifications(
     case "BOOKING_CANCELLED":
       pushRecipients(requesterRecipients, booking.cancellationNote ?? "Die Buchung wurde storniert.");
       pushRecipients(adminRecipients, booking.cancellationNote ?? "Eine beantragte Buchung wurde storniert.");
-      pushRecipients(caretakerRecipients, booking.cancellationNote ?? "Eine Buchung fuer Ihren Bereich wurde storniert.");
+      pushRecipients(caretakerRecipients, booking.cancellationNote ?? "Eine Buchung für Ihren Bereich wurde storniert.");
       break;
   }
 
@@ -813,7 +813,7 @@ export async function retryFailedNotification(
       ? permissions.canView
       : await hasPermission(actorUserId, "VIEW_BOOKINGS");
   if (!canView) {
-    throw new Error("Sie duerfen Benachrichtigungen nicht erneut versenden.");
+    throw new Error("Sie dürfen Benachrichtigungen nicht erneut versenden.");
   }
 
   return sendNotificationRecord(notificationId, client, dependencies, { force: true });
@@ -840,7 +840,7 @@ export async function getNotificationsForAdmin(
       ? permissions.canView
       : await hasPermission(actorUserId, "VIEW_BOOKINGS");
   if (!canView) {
-    throw new Error("Sie duerfen Benachrichtigungen nicht einsehen.");
+    throw new Error("Sie dürfen Benachrichtigungen nicht einsehen.");
   }
 
   return client.notification.findMany({

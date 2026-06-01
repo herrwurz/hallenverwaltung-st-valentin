@@ -40,7 +40,7 @@ async function assertBillingExportPermission(actorUserId: string, permissions: E
       : await hasPermission(actorUserId, "BILLING_EXPORT");
 
   if (!canExport) {
-    throw new Error("Sie duerfen Abrechnungsexporte nicht erstellen.");
+    throw new Error("Sie dürfen Abrechnungsexporte nicht erstellen.");
   }
 }
 
@@ -68,7 +68,7 @@ function csvEscape(value: string | number | null) {
 function toCsv(rows: BillingReportRow[]) {
   const header = [
     "Organisation",
-    "Gebaeude",
+    "Gebäude",
     "Raum",
     "Datum",
     "Zeit",
@@ -215,7 +215,7 @@ function buildZip(files: Array<{ name: string; content: string }>) {
 
 function toXlsx(rows: BillingReportRow[]) {
   const sheetRows: Array<Array<string | number>> = [
-    ["Organisation", "Gebaeude", "Raum", "Datum", "Zeit", "Nutzungstyp", "Buchung", "Tarif", "Betrag", "Status", "Exportdatum"],
+    ["Organisation", "Gebäude", "Raum", "Datum", "Zeit", "Nutzungstyp", "Buchung", "Tarif", "Betrag", "Status", "Exportdatum"],
     ...rows.map((row) => [
       row.organizationName,
       row.buildingName,
@@ -438,7 +438,7 @@ export async function exportBillingPdf(
     reportType === "roomUsage"
       ? "Raumbelegung Hallenverwaltung St. Valentin"
       : reportType === "organization"
-        ? "Vereinsuebersicht Hallenverwaltung St. Valentin"
+        ? "Vereinsübersicht Hallenverwaltung St. Valentin"
         : "Monatsabrechnung Hallenverwaltung St. Valentin";
   const lines =
     reportType === "roomUsage"

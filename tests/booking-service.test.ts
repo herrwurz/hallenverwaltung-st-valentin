@@ -166,7 +166,7 @@ test("rejects a request outside the opening hours", () => {
         singleBookingLeadDays: 180,
         now: requestNow,
       }),
-    /Oeffnungszeit/,
+    /Öffnungszeit/,
   );
 });
 
@@ -313,7 +313,7 @@ test("rejects an atomic cancellation when the status changed in parallel", async
           },
         },
       ),
-    /zwischenzeitlich geaendert/,
+    /zwischenzeitlich geändert/,
   );
 });
 

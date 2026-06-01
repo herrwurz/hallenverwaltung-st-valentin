@@ -97,11 +97,11 @@ type BillingReportRecord = Prisma.BillingEntryGetPayload<{ select: typeof billin
 
 function assertValidPeriod(periodStart: Date, periodEnd: Date) {
   if (!(periodStart instanceof Date) || Number.isNaN(periodStart.getTime())) {
-    throw new Error("Der Zeitraum-Beginn ist ungueltig.");
+    throw new Error("Der Zeitraum-Beginn ist ungültig.");
   }
 
   if (!(periodEnd instanceof Date) || Number.isNaN(periodEnd.getTime())) {
-    throw new Error("Das Zeitraum-Ende ist ungueltig.");
+    throw new Error("Das Zeitraum-Ende ist ungültig.");
   }
 
   if (periodStart >= periodEnd) {

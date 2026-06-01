@@ -10,15 +10,15 @@ import { updateCalendarVisibilitySettingAction } from "@/app/admin/settings/cale
 const optionLabels: Record<PublicCalendarVisibilityMode, { title: string; description: string }> = {
   occupied_only: {
     title: "Nur belegt/frei",
-    description: "Im oeffentlichen Kalender wird nur angezeigt, dass ein Zeitraum belegt ist.",
+    description: "Im öffentlichen Kalender wird nur angezeigt, dass ein Zeitraum belegt ist.",
   },
   organization: {
     title: "Vereinsname anzeigen",
-    description: "Wenn ein Raum es erlaubt, wird im oeffentlichen Kalender der Vereinsname angezeigt.",
+    description: "Wenn ein Raum es erlaubt, wird im öffentlichen Kalender der Vereinsname angezeigt.",
   },
   event: {
     title: "Veranstaltungsname anzeigen",
-    description: "Wenn ein Raum es erlaubt, wird im oeffentlichen Kalender der Veranstaltungstitel angezeigt.",
+    description: "Wenn ein Raum es erlaubt, wird im öffentlichen Kalender der Veranstaltungstitel angezeigt.",
   },
 };
 
@@ -37,15 +37,15 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Einstellungen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Oeffentlicher Kalender</h2>
+      <h2 className="mt-3 text-3xl font-semibold">Öffentlicher Kalender</h2>
       <p className="mt-3 max-w-3xl text-slate-300">
-        Hier wird festgelegt, welche Details die Oeffentlichkeit im Kalender sehen darf. Ohne passende Raumfreigabe
+        Hier wird festgelegt, welche Details die Öffentlichkeit im Kalender sehen darf. Ohne passende Raumfreigabe
         bleibt die sichere Anzeige immer bei belegt oder frei.
       </p>
 
       <div className="mt-8 flex items-center justify-between gap-4">
         <Link href="/admin/calendar" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Kalender
+          Zurück zum Kalender
         </Link>
       </div>
 

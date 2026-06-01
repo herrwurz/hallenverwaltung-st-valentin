@@ -15,7 +15,7 @@ test("validates handover event input", () => {
   const event = handoverEventSchema.parse({
     bookingId: "booking-1",
     action: "KEY_RECEIVED",
-    notes: "Schluessel im Buero uebergeben.",
+    notes: "Schlüssel im Büro übergeben.",
   });
 
   assert.equal(event.bookingId, "booking-1");
@@ -119,7 +119,7 @@ test("blocks stale handover transitions without writing a follow-up state", asyn
 });
 
 test("labels handover states and documents permission seed", () => {
-  assert.equal(getHandoverActionLabel("KEY_RECEIVED"), "Schluessel erhalten");
+  assert.equal(getHandoverActionLabel("KEY_RECEIVED"), "Schlüssel erhalten");
   assert.equal(getHandoverStatusLabel("ROOM_RETURNED"), "Halle retourniert");
 
   const seed = readFileSync("prisma/seed.ts", "utf8");
@@ -127,6 +127,6 @@ test("labels handover states and documents permission seed", () => {
   const docs = readFileSync("docs/prisma-schema-v1.md", "utf8");
 
   assert.match(seed, /MANAGE_HANDOVERS/);
-  assert.match(agents, /Hallenuebergaben/);
+  assert.match(agents, /Hallen(?:ue|ü)bergaben/);
   assert.match(docs, /Handover/);
 });

@@ -15,15 +15,15 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Gebaeude</p>
-      <h2 className="mt-3 text-3xl font-semibold">Gebaeude-Verwaltung</h2>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Gebäude</p>
+      <h2 className="mt-3 text-3xl font-semibold">Gebäude-Verwaltung</h2>
       <p className="mt-3 text-slate-300">Standorte erfassen, aktivieren und einem Hauswart zuordnen.</p>
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>
 
       <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-        <h3 className="text-lg font-medium">Neues Gebaeude</h3>
+        <h3 className="text-lg font-medium">Neues Gebäude</h3>
         <BuildingForm caretakers={data.caretakers} />
       </section>
 
@@ -35,7 +35,7 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
                 <div>
                   <h3 className="font-medium">{building.name}</h3>
                   <p className="mt-1 text-sm text-slate-400">
-                    {building.code} | {building.rooms.length} Raeume |{" "}
+                    {building.code} | {building.rooms.length} Räume |{" "}
                     {building.caretakers[0]?.caretaker.name ?? "Kein Hauswart"}
                   </p>
                 </div>
@@ -74,7 +74,7 @@ function BuildingForm({ caretakers, building }: BuildingFormProps) {
         <input name="address" defaultValue={building?.address ?? ""} className={inputClass} />
       </label>
       <label className="text-sm text-slate-300">
-        Primaerer Hauswart
+        Primärer Hauswart
         <select
           name="caretakerId"
           defaultValue={building?.caretakers[0]?.caretakerId ?? ""}
@@ -94,7 +94,7 @@ function BuildingForm({ caretakers, building }: BuildingFormProps) {
       </label>
       <div className="lg:col-span-3 lg:text-right">
         <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {building ? "Aenderungen speichern" : "Gebaeude anlegen"}
+          {building ? "Änderungen speichern" : "Gebäude anlegen"}
         </button>
       </div>
     </form>

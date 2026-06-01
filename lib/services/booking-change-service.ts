@@ -20,7 +20,7 @@ import {
 } from "@/lib/services/booking-rules";
 
 export const bookingMoveRequestSchema = z.object({
-  bookingId: z.string().trim().min(1, "Die Buchung ist ungueltig."),
+  bookingId: z.string().trim().min(1, "Die Buchung ist ungültig."),
   newRoomId: z.string().trim().min(1, "Ein neuer Raum ist erforderlich."),
   newStartAt: z.coerce.date(),
   newEndAt: z.coerce.date(),
@@ -100,7 +100,7 @@ async function validateNewSlot({
   });
 
   if (!room || room.status !== "ACTIVE" || !room.building.isActive) {
-    throw new BookingValidationError("Der ausgewaehlte neue Raum ist nicht aktiv buchbar.");
+    throw new BookingValidationError("Der ausgewählte neue Raum ist nicht aktiv buchbar.");
   }
 
   const { blockedFrom, blockedUntil } = resolveBookingBlockedWindow({
@@ -163,11 +163,11 @@ export async function createMoveChangeRequest(
     });
 
     if (!booking || booking.status !== "APPROVED") {
-      throw new BookingValidationError("Nur genehmigte Buchungen koennen verschoben werden.");
+      throw new BookingValidationError("Nur genehmigte Buchungen können verschoben werden.");
     }
 
     if (booking.organization.status !== "ACTIVE" || !booking.organization.canRequestBookings) {
-      throw new BookingValidationError("Die Organisation ist nicht fuer Buchungen aktiv.");
+      throw new BookingValidationError("Die Organisation ist nicht für Buchungen aktiv.");
     }
 
     await assertActiveMembershipOrAdmin({
@@ -187,7 +187,7 @@ export async function createMoveChangeRequest(
     });
 
     if (existingOpenRequest) {
-      throw new BookingValidationError("Fuer diese Buchung existiert bereits ein offener Aenderungsantrag.");
+      throw new BookingValidationError("Für diese Buchung existiert bereits ein offener Änderungsantrag.");
     }
 
     const slot = await validateNewSlot({
@@ -315,9 +315,9 @@ async function updateRequestStatus({
 }) {
   const request = await client.bookingChangeRequest.findUnique({ where: { id: requestId } });
   if (!request) {
-    throw new BookingValidationError("Der Aenderungsantrag wurde nicht gefunden.");
+    throw new BookingValidationError("Der Änderungsantrag wurde nicht gefunden.");
   }
-  assertTransitionStatus(request.status, expectedStatuses, "Der Aenderungsantrag hat inzwischen einen anderen Status.");
+  assertTransitionStatus(request.status, expectedStatuses, "Der Änderungsantrag hat inzwischen einen anderen Status.");
 
   const result = await client.bookingChangeRequest.updateMany({
     where: { id: requestId, status: request.status },
@@ -329,7 +329,7 @@ async function updateRequestStatus({
     },
   });
   if (result.count !== 1) {
-    throw new BookingValidationError("Der Aenderungsantrag wurde zwischenzeitlich geaendert. Bitte neu laden.");
+    throw new BookingValidationError("Der Änderungsantrag wurde zwischenzeitlich geändert. Bitte neu laden.");
   }
 }
 
@@ -380,11 +380,11 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
     });
 
     if (!request) {
-      throw new BookingValidationError("Der Aenderungsantrag wurde nicht gefunden.");
+      throw new BookingValidationError("Der Änderungsantrag wurde nicht gefunden.");
     }
-    assertTransitionStatus(request.status, ["IN_REVIEW"], "Nur Antraege in Pruefung koennen genehmigt werden.");
+    assertTransitionStatus(request.status, ["IN_REVIEW"], "Nur Anträge in Prüfung können genehmigt werden.");
     if (request.type !== "MOVE") {
-      throw new BookingValidationError("Tauschantraege sind in dieser Phase nur vorbereitet und noch nicht genehmigbar.");
+      throw new BookingValidationError("Tauschanträge sind in dieser Phase nur vorbereitet und noch nicht genehmigbar.");
     }
     if (request.booking.status !== "APPROVED") {
       throw new BookingValidationError("Die Ausgangsbuchung ist nicht mehr genehmigt.");
@@ -405,7 +405,7 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
       data: { status: "MOVED", processedByUserId: actorUserId, processedAt: new Date() },
     });
     if (moveResult.count !== 1) {
-      throw new BookingValidationError("Die Ausgangsbuchung wurde zwischenzeitlich geaendert. Bitte neu laden.");
+      throw new BookingValidationError("Die Ausgangsbuchung wurde zwischenzeitlich geändert. Bitte neu laden.");
     }
 
     await transaction.bookingStatusHistory.create({
@@ -414,7 +414,7 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
         actorUserId,
         oldStatus: "APPROVED",
         newStatus: "MOVED",
-        reason: `Verschoben durch Aenderungsantrag ${request.id}.`,
+        reason: `Verschoben durch Änderungsantrag ${request.id}.`,
         oldStartAt: request.oldStartAt,
         oldEndAt: request.oldEndAt,
         newStartAt: request.newStartAt,
@@ -438,7 +438,7 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
         endsAt: request.newEndAt,
         blockedFrom: slot.blockedFrom,
         blockedUntil: slot.blockedUntil,
-        decisionNote: `Ersatztermin aus Aenderungsantrag ${request.id}.`,
+        decisionNote: `Ersatztermin aus Änderungsantrag ${request.id}.`,
         requestedAt: request.createdAt,
         processedAt: new Date(),
       },
@@ -450,7 +450,7 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
         actorUserId,
         oldStatus: null,
         newStatus: "APPROVED" as BookingStatus,
-        reason: `Ersatztermin aus Aenderungsantrag ${request.id} genehmigt.`,
+        reason: `Ersatztermin aus Änderungsantrag ${request.id} genehmigt.`,
         newStartAt: replacement.startsAt,
         newEndAt: replacement.endsAt,
       },

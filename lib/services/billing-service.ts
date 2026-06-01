@@ -122,11 +122,11 @@ type BillingEntryRecord = Prisma.BillingEntryGetPayload<{ select: typeof billing
 
 function assertValidPeriod(periodStart: Date, periodEnd: Date) {
   if (!(periodStart instanceof Date) || Number.isNaN(periodStart.getTime())) {
-    throw new BillingValidationError("Der Zeitraum-Beginn ist ungueltig.");
+    throw new BillingValidationError("Der Zeitraum-Beginn ist ungültig.");
   }
 
   if (!(periodEnd instanceof Date) || Number.isNaN(periodEnd.getTime())) {
-    throw new BillingValidationError("Das Zeitraum-Ende ist ungueltig.");
+    throw new BillingValidationError("Das Zeitraum-Ende ist ungültig.");
   }
 
   if (periodStart >= periodEnd) {
@@ -141,7 +141,7 @@ async function assertBillingPermission(actorUserId: string, permissions: Billing
       : await hasPermission(actorUserId, "BILLING_EXPORT");
 
   if (!canExport) {
-    throw new BillingValidationError("Sie duerfen Abrechnungsdaten nicht bearbeiten.");
+    throw new BillingValidationError("Sie dürfen Abrechnungsdaten nicht bearbeiten.");
   }
 }
 
@@ -218,7 +218,7 @@ function assertNoConflictingTariffs(
         const left = group[index]!;
         const right = group[nextIndex]!;
         if (intervalsOverlap(left, right)) {
-          throw new BillingValidationError("Es gibt widerspruechliche Tarife fuer diese Kombination.");
+          throw new BillingValidationError("Es gibt widersprüchliche Tarife für diese Kombination.");
         }
       }
     }
@@ -227,7 +227,7 @@ function assertNoConflictingTariffs(
 
 async function resolveTariff(booking: BillableBooking, client: BillingClient) {
   if (!booking.organization.tariffGroupId) {
-    throw new BillingValidationError("Fuer die Organisation ist keine Tarifgruppe hinterlegt.");
+    throw new BillingValidationError("Für die Organisation ist keine Tarifgruppe hinterlegt.");
   }
 
   const dayType = await resolveTariffDayType(booking, client);
@@ -250,7 +250,7 @@ async function resolveTariff(booking: BillableBooking, client: BillingClient) {
     .sort((left, right) => tariffSpecificity(left.dayType, dayType) - tariffSpecificity(right.dayType, dayType))[0];
 
   if (!tariff) {
-    throw new BillingValidationError("Fuer diese Buchung wurde kein passender Tarif gefunden.");
+    throw new BillingValidationError("Für diese Buchung wurde kein passender Tarif gefunden.");
   }
 
   return tariff;

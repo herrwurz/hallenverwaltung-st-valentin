@@ -34,7 +34,7 @@ export function LoginForm() {
         disabled={pending}
         className="w-full rounded-lg bg-sky-500 px-4 py-3 font-medium text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {pending ? "Anmeldung laeuft..." : "Anmelden"}
+        {pending ? "Anmeldung läuft..." : "Anmelden"}
       </button>
     </form>
   );

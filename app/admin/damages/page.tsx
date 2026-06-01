@@ -19,11 +19,11 @@ export default async function AdminDamagesPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Schaeden</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Schäden</p>
       <h2 className="mt-3 text-3xl font-semibold">Schadensmanagement</h2>
       <p className="mt-3 text-slate-300">
-        Schadensmeldungen einsehen und den Bearbeitungsstatus aktualisieren. Hallenuebergaben und Zutrittsverwaltung
-        werden in eigenen Verwaltungsbereichen gefuehrt.
+        Schadensmeldungen einsehen und den Bearbeitungsstatus aktualisieren. Hallenübergaben und Zutrittsverwaltung
+        werden in eigenen Verwaltungsbereichen geführt.
       </p>
       {params.error ? (
         <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
@@ -45,7 +45,7 @@ export default async function AdminDamagesPage({ searchParams }: PageProps) {
       <section className="mt-8 space-y-3">
         {data.reports.length === 0 ? (
           <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Fuer den gewaehlten Filter sind keine Schadensmeldungen vorhanden.
+            Für den gewählten Filter sind keine Schadensmeldungen vorhanden.
           </p>
         ) : (
           data.reports.map((report) => (

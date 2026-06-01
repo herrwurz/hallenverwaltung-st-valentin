@@ -36,7 +36,7 @@ export default async function AdminCalendarPage({ searchParams }: { searchParams
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Kalender</p>
       <h2 className="mt-3 text-3xl font-semibold">Verwaltungskalender</h2>
       <p className="mt-3 max-w-3xl text-slate-300">
-        Lesende Tages-, Wochen-, Monats- und Jahresansicht fuer Buchungsantraege, genehmigte Termine und
+        Lesende Tages-, Wochen-, Monats- und Jahresansicht für Buchungsanträge, genehmigte Termine und
         Hallensperren inklusive Pufferzeiten.
       </p>
 
@@ -46,7 +46,7 @@ export default async function AdminCalendarPage({ searchParams }: { searchParams
         freeSlots={freeSlots}
         detailHint="Verwaltung sieht alle Buchungsdetails."
         backHref="/admin"
-        backLabel="Zurueck zur Verwaltung"
+        backLabel="Zurück zur Verwaltung"
       />
     </>
   );

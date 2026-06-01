@@ -37,12 +37,12 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
     <AreaShell
       eyebrow="Portal"
       title="Warteliste"
-      description="Wartelistenplaetze fuer gefragte Zeitfenster anlegen und Angebote innerhalb von 48 Stunden bearbeiten."
+      description="Wartelistenplätze für gefragte Zeitfenster anlegen und Angebote innerhalb von 48 Stunden bearbeiten."
       userName={user.name}
     >
       <div className="mt-8 flex items-center justify-between">
         <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Portal
+          Zurück zum Portal
         </Link>
       </div>
 
@@ -77,7 +77,7 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
               Organisation
               <select name="organizationId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {options.organizations.map((organization) => (
                   <option key={organization.id} value={organization.id}>
@@ -95,7 +95,7 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
               Nutzungstyp
               <select name="usageTypeId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {options.usageTypes.map((usageType) => (
                   <option key={usageType.id} value={usageType.id}>
@@ -120,11 +120,11 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
       </section>
 
       <section className="mt-8">
-        <h2 className="text-xl font-medium">Wartelistenplaetze Ihrer Organisationen</h2>
+        <h2 className="text-xl font-medium">Wartelistenplätze Ihrer Organisationen</h2>
         <div className="mt-4 space-y-3">
           {entries.length === 0 ? (
             <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-              Noch keine Wartelistenplaetze vorhanden.
+              Noch keine Wartelistenplätze vorhanden.
             </p>
           ) : (
             entries.map((entry) => (

@@ -7,7 +7,7 @@ export default function UnauthorizedPage() {
         <p className="text-sm font-medium uppercase tracking-[0.3em] text-red-300">Kein Zugriff</p>
         <h1 className="mt-4 text-3xl font-semibold">Berechtigung fehlt</h1>
         <p className="mt-4 text-slate-300">
-          Ihr Benutzerkonto besitzt nicht die erforderliche Berechtigung fuer diesen Bereich.
+          Ihr Benutzerkonto besitzt nicht die erforderliche Berechtigung für diesen Bereich.
         </p>
         <Link
           href="/dashboard"

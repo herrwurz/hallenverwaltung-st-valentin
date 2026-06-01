@@ -74,9 +74,9 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
       };
     case "BOOKING_IN_REVIEW":
       return {
-        subject: `Buchung in Pruefung: ${template.payload.title}`,
+        subject: `Buchung in Prüfung: ${template.payload.title}`,
         text: [
-          "Ihr Buchungsantrag befindet sich jetzt in Pruefung.",
+          "Ihr Buchungsantrag befindet sich jetzt in Prüfung.",
           "",
           renderBookingCommonText(template),
           template.payload.processedByName ? `Bearbeitet von: ${template.payload.processedByName}` : "",
@@ -84,7 +84,7 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           .filter(Boolean)
           .join("\n"),
         html: `
-          <p>Ihr Buchungsantrag befindet sich jetzt in Pruefung.</p>
+          <p>Ihr Buchungsantrag befindet sich jetzt in Prüfung.</p>
           ${renderBookingCommonHtml(template)}
           ${template.payload.processedByName ? `<p><strong>Bearbeitet von:</strong> ${escapeHtml(template.payload.processedByName)}</p>` : ""}
         `,
@@ -113,14 +113,14 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           "Ihre Buchung wurde abgelehnt.",
           "",
           renderBookingCommonText(template),
-          template.payload.note ? `Begruendung: ${template.payload.note}` : "",
+          template.payload.note ? `Begründung: ${template.payload.note}` : "",
         ]
           .filter(Boolean)
           .join("\n"),
         html: `
           <p>Ihre Buchung wurde abgelehnt.</p>
           ${renderBookingCommonHtml(template)}
-          ${template.payload.note ? `<p><strong>Begruendung:</strong> ${escapeHtml(template.payload.note)}</p>` : ""}
+          ${template.payload.note ? `<p><strong>Begründung:</strong> ${escapeHtml(template.payload.note)}</p>` : ""}
         `,
       };
     case "BOOKING_CANCELLED":
@@ -144,22 +144,22 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
       return {
         subject: `Wartelistenplatz angeboten: ${template.payload.title}`,
         text: [
-          "Fuer Ihren Wartelistenplatz ist ein Angebot frei geworden.",
+          "Für Ihren Wartelistenplatz ist ein Angebot frei geworden.",
           "",
           `Titel: ${template.payload.title}`,
           `Organisation: ${template.payload.organizationName}`,
           `Ort: ${template.payload.buildingName} - ${template.payload.roomName}`,
           `Termin: ${formatDateRange(template.payload.startsAt, template.payload.endsAt)}`,
-          `Angebot gueltig bis: ${dateFormatter.format(new Date(template.payload.offerExpiresAt))}`,
+          `Angebot gültig bis: ${dateFormatter.format(new Date(template.payload.offerExpiresAt))}`,
         ].join("\n"),
         html: `
-          <p>Fuer Ihren Wartelistenplatz ist ein Angebot frei geworden.</p>
+          <p>Für Ihren Wartelistenplatz ist ein Angebot frei geworden.</p>
           <ul>
             <li><strong>Titel:</strong> ${escapeHtml(template.payload.title)}</li>
             <li><strong>Organisation:</strong> ${escapeHtml(template.payload.organizationName)}</li>
             <li><strong>Ort:</strong> ${escapeHtml(template.payload.buildingName)} - ${escapeHtml(template.payload.roomName)}</li>
             <li><strong>Termin:</strong> ${escapeHtml(formatDateRange(template.payload.startsAt, template.payload.endsAt))}</li>
-            <li><strong>Angebot gueltig bis:</strong> ${escapeHtml(dateFormatter.format(new Date(template.payload.offerExpiresAt)))}</li>
+            <li><strong>Angebot gültig bis:</strong> ${escapeHtml(dateFormatter.format(new Date(template.payload.offerExpiresAt)))}</li>
           </ul>
         `,
       };

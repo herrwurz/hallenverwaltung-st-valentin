@@ -29,7 +29,7 @@ export function assertExactlyOneDocumentTarget(input: {
 }) {
   const targetCount = [input.organizationId, input.buildingId, input.roomId].filter(Boolean).length;
   if (targetCount !== 1) {
-    throw new BookingValidationError("Ein Dokument muss genau einer Organisation, einem Gebaeude oder einem Raum zugeordnet sein.");
+    throw new BookingValidationError("Ein Dokument muss genau einer Organisation, einem Gebäude oder einem Raum zugeordnet sein.");
   }
 }
 
@@ -95,7 +95,7 @@ async function assertActiveOrganizationMembership({
   });
 
   if (!membership) {
-    throw new BookingValidationError("Sie duerfen nur Dokumente fuer aktive eigene Organisationen verwalten.");
+    throw new BookingValidationError("Sie dürfen nur Dokumente für aktive eigene Organisationen verwalten.");
   }
 }
 
@@ -119,7 +119,7 @@ async function assertExistingDocumentTarget(
       select: { id: true },
     });
     if (!building) {
-      throw new BookingValidationError("Das Gebaeude wurde nicht gefunden.");
+      throw new BookingValidationError("Das Gebäude wurde nicht gefunden.");
     }
   }
 
@@ -183,7 +183,7 @@ export async function createOrganizationDocument(input: unknown, actorUserId: st
     roomId: normalizeOptionalId(parsed.roomId),
   };
   if (!data.organizationId || data.buildingId || data.roomId) {
-    throw new BookingValidationError("Im Portal koennen Dokumente nur Organisationen zugeordnet werden.");
+    throw new BookingValidationError("Im Portal können Dokumente nur Organisationen zugeordnet werden.");
   }
 
   return prisma.$transaction(async (transaction) => {
@@ -207,7 +207,7 @@ export async function createOrganizationDocument(input: unknown, actorUserId: st
 export async function createAdminDocument(input: unknown, actorUserId: string) {
   const canManageDocuments = await hasPermission(actorUserId, "MANAGE_DOCUMENTS");
   if (!canManageDocuments) {
-    throw new BookingValidationError("Fuer die Dokumentenverwaltung fehlt das Recht MANAGE_DOCUMENTS.");
+    throw new BookingValidationError("Für die Dokumentenverwaltung fehlt das Recht MANAGE_DOCUMENTS.");
   }
 
   const parsed = documentMetadataSchema.parse(input);

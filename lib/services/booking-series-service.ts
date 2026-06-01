@@ -69,7 +69,7 @@ export function parseExcludedDates(value: unknown): Date[] {
     .map((entry) => {
       const parsed = new Date(`${entry}T00:00:00`);
       if (Number.isNaN(parsed.getTime())) {
-        throw new BookingValidationError(`Das Ausnahmedatum "${entry}" ist ungueltig.`);
+        throw new BookingValidationError(`Das Ausnahmedatum "${entry}" ist ungültig.`);
       }
       return parsed;
     });
@@ -154,7 +154,7 @@ export async function createBookingSeriesRequest(input: unknown, actorUserId: st
   const endsOn = occurrences.at(-1)?.endsAt;
 
   if (!startsOn || !endsOn) {
-    throw new BookingValidationError("Die Serie enthaelt keine Termine.");
+    throw new BookingValidationError("Die Serie enthält keine Termine.");
   }
 
   return prisma.$transaction(async (transaction) => {
@@ -204,7 +204,7 @@ export async function createBookingSeriesRequest(input: unknown, actorUserId: st
       }
 
       if (holiday?.status === "RESTRICTED") {
-        warnings.push(`${holiday.name}: eingeschraenkter Betrieb fuer ${occurrence.startsAt.toLocaleDateString("de-AT")}.`);
+        warnings.push(`${holiday.name}: eingeschränkter Betrieb für ${occurrence.startsAt.toLocaleDateString("de-AT")}.`);
       }
 
       try {

@@ -12,7 +12,7 @@ import {
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
 const changeRequestTransitionSchema = z.object({
-  requestId: z.string().trim().min(1, "Der Aenderungsantrag ist ungueltig."),
+  requestId: z.string().trim().min(1, "Der Änderungsantrag ist ungültig."),
   status: z.string().trim().optional(),
 });
 
@@ -22,14 +22,14 @@ const changeRequestDecisionSchema = changeRequestTransitionSchema.extend({
 
 function changeRequestErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind nicht gueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
   }
 
   if (error instanceof BookingValidationError) {
     return error.message;
   }
 
-  return "Der Aenderungsantrag konnte nicht bearbeitet werden.";
+  return "Der Änderungsantrag konnte nicht bearbeitet werden.";
 }
 
 function buildRedirect(status: string | undefined, params: string) {

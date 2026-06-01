@@ -12,7 +12,7 @@ import {
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
 const transitionSchema = z.object({
-  bookingId: z.string().trim().min(1, "Die Buchung ist ungueltig."),
+  bookingId: z.string().trim().min(1, "Die Buchung ist ungültig."),
   status: z.string().trim().optional(),
 });
 
@@ -22,7 +22,7 @@ const decisionSchema = transitionSchema.extend({
 
 function workflowErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind nicht gueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
   }
 
   if (error instanceof BookingValidationError) {

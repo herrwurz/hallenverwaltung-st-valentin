@@ -578,7 +578,7 @@ test("blocks waitlist creation for organizations without active membership", asy
         },
         harness.rootClient as never,
       ),
-    /fuer diese Organisation keine Buchung beantragen/,
+    /für diese Organisation keine Buchung beantragen/,
   );
 });
 
@@ -606,7 +606,7 @@ test("blocks waitlist creation for blocked organizations", async () => {
         },
         harness.rootClient as never,
       ),
-    /gesperrt oder fuer Wartelistenplaetze nicht aktiv/,
+    /gesperrt oder für Wartelistenplätze nicht aktiv/,
   );
 });
 
@@ -708,7 +708,7 @@ test("rejects acceptance of an expired waitlist offer", async () => {
         },
         harness.rootClient as never,
       ),
-    /nicht mehr gueltig/,
+    /nicht mehr gültig/,
   );
 });
 
@@ -814,7 +814,7 @@ test("prevents duplicate active waitlist processing during parallel acceptance",
         { hasRequestBookingPermission: true, isAdmin: false },
         secondHarness.rootClient as never,
       ),
-    /zwischenzeitlich geaendert|nicht mehr gueltig/,
+    /zwischenzeitlich geändert|nicht mehr gültig/,
   );
 
   firstHarness.resumeLock();

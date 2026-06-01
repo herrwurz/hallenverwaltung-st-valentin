@@ -9,8 +9,8 @@ export default function Home() {
           Hallenverwaltung St. Valentin
         </h1>
         <p className="mt-5 text-lg leading-8 text-slate-300">
-          Das technische Grundgeruest ist eingerichtet. Fachliche Funktionen
-          folgen in einer spaeteren Phase.
+          Das technische Grundgerüst ist eingerichtet. Fachliche Funktionen
+          folgen in einer späteren Phase.
         </p>
       </section>
     </main>

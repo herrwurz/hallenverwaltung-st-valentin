@@ -11,7 +11,7 @@ import {
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Einstellung ist ungueltig.";
+    return error.issues[0]?.message ?? "Die Einstellung ist ungültig.";
   }
 
   return "Die Kalender-Datenschutzeinstellung konnte nicht gespeichert werden.";

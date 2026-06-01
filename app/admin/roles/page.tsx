@@ -8,7 +8,7 @@ export default async function RolesPage() {
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Rollen / Rechte</p>
-      <h2 className="mt-3 text-3xl font-semibold">Berechtigungsuebersicht</h2>
+      <h2 className="mt-3 text-3xl font-semibold">Berechtigungsübersicht</h2>
       <p className="mt-3 text-slate-300">
         Rollen und ihre aus der Datenbank geladenen Rechte. Die Zuordnung ist in dieser Phase nur lesbar.
       </p>
@@ -33,7 +33,7 @@ export default async function RolesPage() {
         ))}
       </section>
       <section className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-5">
-        <h3 className="text-lg font-medium">Verfuegbare Rechte</h3>
+        <h3 className="text-lg font-medium">Verfügbare Rechte</h3>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {data.permissions.map((permission) => (
             <div key={permission.id} className="rounded-lg border border-slate-800 p-3">

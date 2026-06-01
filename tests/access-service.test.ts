@@ -47,7 +47,7 @@ test("blocks issuing inactive or already assigned media", () => {
 });
 
 test("labels access medium types and documents schema guard", () => {
-  assert.equal(getAccessMediumTypeLabel("KEY"), "Schluessel");
+  assert.equal(getAccessMediumTypeLabel("KEY"), "Schlüssel");
   assert.equal(getAccessMediumTypeLabel("RFID_CARD"), "RFID-Karte");
   assert.equal(getAccessMediumTypeLabel("ELECTRONIC_ACCESS"), "Elektronischer Zutritt");
 

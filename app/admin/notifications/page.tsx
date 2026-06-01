@@ -58,7 +58,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
         <div>
           <h2 className="text-3xl font-semibold">Notification Queue</h2>
           <p className="mt-3 max-w-3xl text-slate-300">
-            Versandprotokoll fuer zentrale Buchungs- und Wartelistenereignisse inklusive Fehlerstatus und manuellem
+            Versandprotokoll für zentrale Buchungs- und Wartelistenereignisse inklusive Fehlerstatus und manuellem
             Retry.
           </p>
         </div>
@@ -68,7 +68,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
           </button>
         </form>
         <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Dashboard
+          Zurück zum Dashboard
         </Link>
       </div>
 
@@ -130,7 +130,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
       <section className="mt-8 space-y-3">
         {notifications.length === 0 ? (
           <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Keine Benachrichtigungen fuer den gewaehlten Filter vorhanden.
+            Keine Benachrichtigungen für den gewählten Filter vorhanden.
           </p>
         ) : (
           notifications.map((notification) => {
@@ -145,7 +145,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
                 <div>
                   <h3 className="font-medium">{eventLabel}</h3>
                   <p className="mt-1 text-sm text-slate-400">
-                    Empfaenger: {notification.recipientUser?.displayName ?? notification.recipient} ({notification.recipient})
+                    Empfänger: {notification.recipientUser?.displayName ?? notification.recipient} ({notification.recipient})
                   </p>
                   <p className="mt-1 text-sm text-slate-400">
                     Erstellt am {dateFormatter.format(notification.createdAt)}
@@ -153,7 +153,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
                   </p>
                   <p className="mt-1 text-sm text-slate-400">
                     Versuche: {notification.attemptCount}/{notification.maxAttempts}
-                    {notification.nextAttemptAt ? ` | Naechster Versuch ab ${dateFormatter.format(notification.nextAttemptAt)}` : ""}
+                    {notification.nextAttemptAt ? ` | Nächster Versuch ab ${dateFormatter.format(notification.nextAttemptAt)}` : ""}
                   </p>
                   {notification.booking ? (
                     <p className="mt-1 text-sm text-slate-400">

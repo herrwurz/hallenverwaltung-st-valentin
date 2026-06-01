@@ -15,9 +15,9 @@ export default async function RoomsPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Raeume</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Räume</p>
       <h2 className="mt-3 text-3xl font-semibold">Raum-Verwaltung</h2>
-      <p className="mt-3 text-slate-300">Raeume, Betriebsstatus und optionale Teilbereichsbeziehungen pflegen.</p>
+      <p className="mt-3 text-slate-300">Räume, Betriebsstatus und optionale Teilbereichsbeziehungen pflegen.</p>
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>
@@ -67,10 +67,10 @@ function RoomForm({
     <form action={saveRoomAction} className="mt-5 grid gap-4 lg:grid-cols-4">
       {room ? <input type="hidden" name="id" value={room.id} /> : null}
       <label className="text-sm text-slate-300">
-        Gebaeude
+        Gebäude
         <select name="buildingId" required defaultValue={room?.buildingId ?? ""} className={inputClass}>
           <option value="" disabled>
-            Bitte waehlen
+            Bitte wählen
           </option>
           {buildings.map((building) => (
             <option key={building.id} value={building.id}>
@@ -91,7 +91,7 @@ function RoomForm({
         Status
         <select name="status" defaultValue={room?.status ?? "ACTIVE"} className={inputClass}>
           <option value="ACTIVE">Aktiv</option>
-          <option value="RESTRICTED">Eingeschraenkt</option>
+          <option value="RESTRICTED">Eingeschränkt</option>
           <option value="OUT_OF_SERVICE">Inaktiv / ausser Betrieb</option>
         </select>
       </label>
@@ -121,11 +121,11 @@ function RoomForm({
         Kombinierbar
       </label>
       <label className="text-sm text-slate-300">
-        Geoeffnet ab
+        Geöffnet ab
         <input name="openingTime" required defaultValue={room?.openingTime ?? "06:00"} className={inputClass} />
       </label>
       <label className="text-sm text-slate-300">
-        Geoeffnet bis
+        Geöffnet bis
         <input name="closingTime" required defaultValue={room?.closingTime ?? "23:00"} className={inputClass} />
       </label>
       <label className="text-sm text-slate-300">
@@ -152,7 +152,7 @@ function RoomForm({
       </label>
       <div className="lg:col-span-4 lg:text-right">
         <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {room ? "Aenderungen speichern" : "Raum anlegen"}
+          {room ? "Änderungen speichern" : "Raum anlegen"}
         </button>
       </div>
     </form>
