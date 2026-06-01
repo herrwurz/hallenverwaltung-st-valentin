@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { StatusFilterSelect } from "@/components/status-filter-select";
 import {
   getBookingChangeStatusBadgeClass,
   getBookingChangeStatusLabel,
@@ -22,7 +22,7 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
 });
 
 const filterLabels: Record<BookingChangeFilterKey, string> = {
-  OPEN: "Offen",
+  OPEN: "Offen (beantragt + in Pruefung)",
   ALL: "Alle",
   REQUESTED: "Beantragt",
   IN_REVIEW: "In Pruefung",
@@ -110,24 +110,13 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
         </p>
       ) : null}
 
-      <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
-        {filterButtons.map((filterKey) => {
-          const isActive =
-            filterKey === "OPEN" ? selectedFilter === "OPEN" || !params.status : selectedFilter === filterKey;
-
-          return (
-            <Link
-              key={filterKey}
-              href={filterKey === "OPEN" ? "/admin/booking-changes" : `/admin/booking-changes?status=${filterKey}`}
-              className={`rounded-full px-4 py-2 text-sm transition ${
-                isActive ? "bg-sky-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              {filterLabels[filterKey]}
-            </Link>
-          );
-        })}
-      </nav>
+      <StatusFilterSelect
+        selectedValue={selectedFilter}
+        options={filterButtons.map((filterKey) => ({
+          value: filterKey,
+          label: filterLabels[filterKey],
+        }))}
+      />
 
       <section className="mt-8 space-y-3">
         {requests.length === 0 ? (

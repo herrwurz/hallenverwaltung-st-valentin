@@ -4,14 +4,14 @@ import { LogoutButton } from "@/components/logout-button";
 
 const navigation = [
   { href: "/admin", label: "Dashboard" },
-  { href: "/admin/bookings", label: "Buchungsantraege" },
+  { href: "/admin/bookings", label: "Buchungsanträge" },
   { href: "/admin/calendar", label: "Kalender" },
   { href: "/admin/billing", label: "Abrechnung" },
   { href: "/admin/notifications", label: "Benachrichtigungen" },
   { href: "/admin/settings/calendar", label: "Einstellungen" },
   { href: "/admin/waitlist", label: "Warteliste" },
-  { href: "/admin/buildings", label: "Gebaeude" },
-  { href: "/admin/rooms", label: "Raeume" },
+  { href: "/admin/buildings", label: "Gebäude" },
+  { href: "/admin/rooms", label: "Räume" },
   { href: "/admin/organizations", label: "Organisationen" },
   { href: "/admin/users", label: "Benutzer" },
   { href: "/admin/roles", label: "Rollen/Rechte" },
@@ -35,7 +35,7 @@ export function AdminShell({ children, navigationItems = navigation, userName }:
               <Link
                 key={item.href}
                 href={item.href}
-                className="block rounded-lg px-3 py-2.5 text-sm text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                className="block rounded-sm px-3 py-2.5 text-sm text-slate-300 transition hover:bg-slate-900 hover:text-white"
               >
                 {item.label}
               </Link>

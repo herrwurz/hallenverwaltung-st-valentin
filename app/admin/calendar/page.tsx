@@ -16,7 +16,7 @@ function toCalendarQuery(params: Awaited<SearchParams>): CalendarQuery {
 
   return {
     date,
-    view: view === "week" ? "week" : "day",
+    view: view === "week" || view === "month" || view === "year" ? view : "day",
     buildingId: buildingId || undefined,
     roomId: roomId || undefined,
   };
@@ -36,8 +36,8 @@ export default async function AdminCalendarPage({ searchParams }: { searchParams
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Kalender</p>
       <h2 className="mt-3 text-3xl font-semibold">Verwaltungskalender</h2>
       <p className="mt-3 max-w-3xl text-slate-300">
-        Lesende Tages- und Wochenansicht fuer Buchungsantraege, genehmigte Termine und Hallensperren inklusive
-        Pufferzeiten.
+        Lesende Tages-, Wochen-, Monats- und Jahresansicht fuer Buchungsantraege, genehmigte Termine und
+        Hallensperren inklusive Pufferzeiten.
       </p>
 
       <CalendarView

@@ -10,7 +10,7 @@ export function LogoutButton() {
     >
       <button
         type="submit"
-        className="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-200 transition hover:border-sky-400 hover:text-white"
+        className="rounded-sm border border-slate-600 px-4 py-2 text-sm text-slate-200 transition hover:border-sky-400 hover:text-white"
       >
         Abmelden
       </button>

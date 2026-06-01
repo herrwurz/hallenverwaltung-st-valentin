@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
+import { BuildingRoomSelect } from "@/components/building-room-select";
+import { FormActions } from "@/components/form-actions";
 import { getBookingStatusBadgeClass, getBookingStatusLabel } from "@/lib/booking-status";
 import { getBookingChangeStatusBadgeClass, getBookingChangeStatusLabel, getBookingChangeTypeLabel } from "@/lib/booking-change-status";
 import { requirePermission } from "@/lib/permissions";
@@ -91,21 +93,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-slate-300">
-              Raum
-              <select name="roomId" required defaultValue="" className={inputClass}>
-                <option value="" disabled>
-                  Bitte waehlen
-                </option>
-                {options.buildings.flatMap((building) =>
-                  building.rooms.map((room) => (
-                    <option key={room.id} value={room.id}>
-                      {building.name} - {room.name}
-                    </option>
-                  )),
-                )}
-              </select>
-            </label>
+            <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
             <label className="text-sm text-slate-300">
               Titel
               <input name="title" required maxLength={160} className={inputClass} />
@@ -135,10 +123,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Beschreibung (optional)
               <textarea name="description" rows={3} maxLength={1000} className={inputClass} />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Antrag absenden
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Antrag absenden" cancelHref="/portal" />
             </div>
           </form>
         )}
@@ -169,21 +155,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-slate-300">
-              Raum
-              <select name="roomId" required defaultValue="" className={inputClass}>
-                <option value="" disabled>
-                  Bitte waehlen
-                </option>
-                {options.buildings.flatMap((building) =>
-                  building.rooms.map((room) => (
-                    <option key={room.id} value={room.id}>
-                      {building.name} - {room.name}
-                    </option>
-                  )),
-                )}
-              </select>
-            </label>
+            <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
             <label className="text-sm text-slate-300">
               Titel
               <input name="title" required maxLength={160} className={inputClass} />
@@ -226,10 +198,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                 className={inputClass}
               />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Serienantrag absenden
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Serienantrag absenden" cancelHref="/portal" />
             </div>
           </form>
         )}
@@ -272,18 +242,13 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                   <form action={createMoveChangeRequestAction} className="mt-5 grid gap-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 lg:grid-cols-2">
                     <input type="hidden" name="bookingId" value={booking.id} />
                     <p className="text-sm font-medium text-slate-200 lg:col-span-2">Verschiebung beantragen</p>
-                    <label className="text-sm text-slate-300">
-                      Neuer Raum
-                      <select name="newRoomId" required defaultValue={booking.roomId} className={inputClass}>
-                        {options.buildings.flatMap((building) =>
-                          building.rooms.map((room) => (
-                            <option key={room.id} value={room.id}>
-                              {building.name} - {room.name}
-                            </option>
-                          )),
-                        )}
-                      </select>
-                    </label>
+                    <BuildingRoomSelect
+                      buildings={options.buildings}
+                      roomName="newRoomId"
+                      defaultRoomId={booking.roomId}
+                      roomLabel="Neuer Raum"
+                      inputClassName={inputClass}
+                    />
                     <label className="text-sm text-slate-300">
                       Neuer Beginn
                       <input name="newStartAt" type="datetime-local" required className={inputClass} />
@@ -296,10 +261,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                       Grund
                       <input name="reason" required maxLength={1000} className={inputClass} />
                     </label>
-                    <div className="lg:col-span-2 lg:text-right">
-                      <button className="rounded-lg border border-sky-700 px-4 py-2 text-sm text-sky-200 hover:bg-sky-950">
-                        Verschiebung beantragen
-                      </button>
+                    <div className="lg:col-span-2">
+                      <FormActions submitLabel="Verschiebung beantragen" cancelHref="/portal/bookings" />
                     </div>
                   </form>
                 ) : null}

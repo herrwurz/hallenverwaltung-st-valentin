@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getBookingStatusBadgeClass, getBookingStatusLabel, type AdminBookingFilterKey } from "@/lib/booking-status";
 import { hasPermission, requirePermission } from "@/lib/permissions";
 import {
@@ -17,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
 });
 
 const statusLabels: Record<AdminBookingFilterKey, string> = {
-  OPEN: "Offen",
+  OPEN: "Offen (beantragt + in Pruefung)",
   ALL: "Alle",
   REQUESTED: "Beantragt",
   IN_REVIEW: "In Pruefung",
@@ -58,7 +57,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
     getBookingsForAdmin(user.id, selectedFilter),
   ]);
   const activeStatuses = new Set(resolveAdminBookingFilter(selectedFilter));
-  const filterButtons: AdminBookingFilterKey[] = ["OPEN", "REQUESTED", "IN_REVIEW", "APPROVED", "REJECTED", "CANCELLED", "ALL"];
+  const filterOptions: AdminBookingFilterKey[] = ["OPEN", "REQUESTED", "IN_REVIEW", "APPROVED", "REJECTED", "CANCELLED", "ALL"];
 
   return (
     <>
@@ -87,26 +86,25 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
         </p>
       ) : null}
 
-      <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
-        {filterButtons.map((filterKey) => {
-          const isActive =
-            filterKey === "OPEN"
-              ? selectedFilter === "OPEN" || !params.status
-              : selectedFilter === filterKey;
-
-          return (
-            <Link
-              key={filterKey}
-              href={filterKey === "OPEN" ? "/admin/bookings" : `/admin/bookings?status=${filterKey}`}
-              className={`rounded-full px-4 py-2 text-sm transition ${
-                isActive ? "bg-sky-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              {statusLabels[filterKey]}
-            </Link>
-          );
-        })}
-      </nav>
+      <form className="mt-8 flex flex-wrap items-end gap-3" aria-label="Statusfilter">
+        <label className="text-sm text-slate-300">
+          Status filtern
+          <select
+            name="status"
+            defaultValue={selectedFilter}
+            className="mt-1 min-w-72 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+          >
+            {filterOptions.map((filterKey) => (
+              <option key={filterKey} value={filterKey}>
+                {statusLabels[filterKey]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+          Anwenden
+        </button>
+      </form>
 
       <section className="mt-8 space-y-3">
         {bookings.length === 0 ? (

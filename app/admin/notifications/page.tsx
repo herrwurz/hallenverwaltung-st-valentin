@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StatusFilterSelect } from "@/components/status-filter-select";
 import { requirePermission } from "@/lib/permissions";
 import { getNotificationsForAdmin } from "@/lib/services/notification-service";
 import {
@@ -118,22 +119,13 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
         </form>
       </section>
 
-      <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
-        {Object.entries(statusLabels).map(([status, label]) => {
-          const active = selectedStatus === status;
-          return (
-            <Link
-              key={status}
-              href={status === "ALL" ? "/admin/notifications" : `/admin/notifications?status=${status}`}
-              className={`rounded-full px-4 py-2 text-sm transition ${
-                active ? "bg-sky-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
+      <StatusFilterSelect
+        selectedValue={selectedStatus}
+        options={Object.entries(statusLabels).map(([status, label]) => ({
+          value: status,
+          label,
+        }))}
+      />
 
       <section className="mt-8 space-y-3">
         {notifications.length === 0 ? (
@@ -141,11 +133,17 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
             Keine Benachrichtigungen fuer den gewaehlten Filter vorhanden.
           </p>
         ) : (
-          notifications.map((notification) => (
+          notifications.map((notification) => {
+            const eventLabel =
+              notification.eventCode in notificationEventLabels
+                ? notificationEventLabels[notification.eventCode as keyof typeof notificationEventLabels]
+                : notification.eventCode;
+
+            return (
             <article key={notification.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="font-medium">{notification.eventCode}</h3>
+                  <h3 className="font-medium">{eventLabel}</h3>
                   <p className="mt-1 text-sm text-slate-400">
                     Empfaenger: {notification.recipientUser?.displayName ?? notification.recipient} ({notification.recipient})
                   </p>
@@ -193,7 +191,8 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
                 </div>
               </div>
             </article>
-          ))
+            );
+          })
         )}
       </section>
     </>

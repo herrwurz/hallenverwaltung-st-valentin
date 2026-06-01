@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { reportDamageAction } from "@/app/portal/damages/actions";
+import { BuildingRoomSelect } from "@/components/building-room-select";
+import { FormActions } from "@/components/form-actions";
 import { getDamageStatusBadgeClass, getDamageStatusLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { getPortalDamageData } from "@/lib/services/damage-service";
@@ -21,6 +24,11 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
       <p className="mt-3 text-slate-300">
         Melden Sie Schaeden mit Beschreibung und optionalem Foto-Ablagepfad. Die Gemeinde bearbeitet den Status.
       </p>
+      <div className="mt-8 flex items-center justify-between">
+        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
+          Zurueck zum Portal
+        </Link>
+      </div>
       {params.error ? (
         <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
       ) : null}
@@ -33,21 +41,7 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <h3 className="text-lg font-medium">Neuen Schaden melden</h3>
         <form action={reportDamageAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-          <label className="text-sm text-slate-300">
-            Raum
-            <select name="roomId" required defaultValue="" className={inputClass}>
-              <option value="" disabled>
-                Bitte waehlen
-              </option>
-              {data.buildings.flatMap((building) =>
-                building.rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {building.name} - {room.name}
-                  </option>
-                )),
-              )}
-            </select>
-          </label>
+          <BuildingRoomSelect buildings={data.buildings} inputClassName={inputClass} />
           <label className="text-sm text-slate-300">
             Foto-Ablagepfad optional
             <input name="photoStorageKey" className={inputClass} placeholder="damages/foto-001.jpg" />
@@ -56,10 +50,8 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
             Beschreibung
             <textarea name="description" rows={4} required className={inputClass} />
           </label>
-          <div className="lg:col-span-2 lg:text-right">
-            <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-              Schaden melden
-            </button>
+          <div className="lg:col-span-2">
+            <FormActions submitLabel="Schaden melden" cancelHref="/portal" />
           </div>
         </form>
       </section>

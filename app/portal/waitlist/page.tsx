@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
+import { BuildingRoomSelect } from "@/components/building-room-select";
+import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
 import { getBookingRequestOptions } from "@/lib/services/booking-service";
 import {
@@ -84,21 +86,7 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-slate-300">
-              Raum
-              <select name="roomId" required defaultValue="" className={inputClass}>
-                <option value="" disabled>
-                  Bitte waehlen
-                </option>
-                {options.buildings.flatMap((building) =>
-                  building.rooms.map((room) => (
-                    <option key={room.id} value={room.id}>
-                      {building.name} - {room.name}
-                    </option>
-                  )),
-                )}
-              </select>
-            </label>
+            <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
             <label className="text-sm text-slate-300">
               Titel
               <input name="title" required maxLength={160} className={inputClass} />
@@ -124,10 +112,8 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
               Ende
               <input name="endsAt" type="datetime-local" required className={inputClass} />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Wartelistenplatz anlegen
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Wartelistenplatz anlegen" cancelHref="/portal" />
             </div>
           </form>
         )}

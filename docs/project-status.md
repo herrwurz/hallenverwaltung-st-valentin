@@ -152,6 +152,37 @@ Caretaker-User-Haertung
 
 Hallenuebergabe-Basis
 
+## Phase 19.3
+
+Zutrittsverwaltung-Basis
+
+## Phase 20
+
+Pilot-Test und Demo-Readiness
+
+## Phase 21.1
+
+Kritische Pilotkorrekturen aus Erstfeedback: raumabhaengige Gebaeudeauswahl,
+Admin-Buchungsstatusfilter und klarer Wartelistenstatus im Portal.
+
+## Phase 21.2
+
+UI-/UX-Grundhaertung aus Pilotfeedback: Statusfilter als Comboboxen,
+Abbrechen-Aktionen in zentralen Formularen und fehlende Zurueck-Navigation im
+Portal.
+
+## Phase 21.3
+
+Kalender-UX aus Pilotfeedback: Tages-, Wochen-, Monats- und Jahresansicht mit
+rasterbasierter, Google-Kalender-aehnlicher Darstellung ohne neue
+Buchungslogik.
+
+## Phase 21.4-21.6
+
+Zusammengefasste UI-Politur aus Pilotfeedback: Kalender-Termin-Details als
+Dialog, sichtbare Umlautkorrekturen in den beruehrten Kalenderflaechen und ein
+konservativer Verwaltungsstil mit eckigeren, sachlicheren Kalender-Elementen.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -363,12 +394,29 @@ Version 1:
   und E-Mail-Fallback ohne `VIEW_BOOKINGS`
 * keine automatische Buchungsstatusaenderung und keine Abrechnungsfolge
 
+### Zutrittsverwaltung
+
+* `AccessMedium` verwaltet Schluessel, RFID-Karten und elektronische Zutritte
+* `AccessAssignment` protokolliert Ausgabe und Rueckgabe
+* pro Medium ist nur eine aktive Ausgabe ohne `returnedAt` erlaubt
+* Recht `MANAGE_ACCESS`, Audit fuer Anlage, Ausgabe, Rueckgabe und Deaktivierung
+* keine Integration in externe Schliess- oder Tuerkontrollsysteme
+
 ### E2E-Ausbau
 
 * vollstaendiger Genehmigungsworkflow
 * Wartelistenannahme und Ablauf im Browser
 * Kalenderfilter im Browser
 * Exportdownloads im Browser
+
+### Pilot-Test
+
+* Demo-Seed erstellt lokale Testbenutzer fuer Gemeinde/Admin, Verein und
+  Hallenwart
+* `docs/pilot-testplan.md` beschreibt manuelle Smoke-Tests fuer reale
+  Oberflaechenpruefung
+* lokale Produktansicht ist nach Migration, Seed, Demo-Seed und `npm run dev`
+  direkt unter `http://localhost:3000` moeglich
 
 ---
 
@@ -414,13 +462,29 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
-## Phase 19
+## Phase 21
 
-Hallenuebergabe und Zutrittsverwaltung
+Fachlicher Pilot-Review mit echten Testlaeufen
 
-* Schluesselausgabe/-rueckgabe
-* Hallenuebergabe protokollieren
-* Zutrittsmedien verwalten
+* manuelle Tests mit Gemeinde/Admin, Verein und Hallenwart
+* Fehlerliste aus realer Bedienung priorisieren
+* fehlende Pflichtfelder, Texte und Bedienlogik nachschaerfen
+
+## Phase 22
+
+Produktions-Readiness
+
+* echte Zielumgebung vorbereiten
+* HTTPS, SMTP, Backup, Restore-Probe und Worker-Betrieb pruefen
+* sichere Initialbenutzer und Betriebsdokumentation
+
+## Phase 23
+
+Abnahme und Go-Live-Vorbereitung
+
+* Abnahmetestplan
+* Schulungs-/Kurzanleitung fuer Verwaltung und Vereine
+* finale offene Punkte fuer Version 1 entscheiden
 
 ---
 

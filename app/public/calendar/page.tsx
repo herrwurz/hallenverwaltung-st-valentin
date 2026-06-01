@@ -17,7 +17,7 @@ function toCalendarQuery(params: Awaited<SearchParams>): CalendarQuery {
 
   return {
     date,
-    view: view === "week" ? "week" : "day",
+    view: view === "week" || view === "month" || view === "year" ? view : "day",
     buildingId: buildingId || undefined,
     roomId: roomId || undefined,
   };
@@ -62,7 +62,7 @@ export default async function PublicCalendarPage({ searchParams }: { searchParam
     <AreaShell
       eyebrow="Oeffentlich"
       title="Oeffentlicher Kalender"
-      description="Lesende Kalenderansicht fuer Hallenbelegung und freie Zeiten. Die sichtbaren Details richten sich nach der Datenschutzkonfiguration."
+      description="Lesende Tages-, Wochen-, Monats- und Jahresansicht fuer Hallenbelegung und freie Zeiten. Die sichtbaren Details richten sich nach der Datenschutzkonfiguration."
       authenticated={false}
     >
       <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
