@@ -126,6 +126,12 @@ werden.
   primaer geprueft, ob der Benutzer ueber `Caretaker.userId` einem
   Hallenwartdatensatz des Raums oder Gebaeudes entspricht. `Caretaker.email`
   bleibt nur als Fallback fuer vorhandene Stammdaten.
+- `Handover` ist eindeutig pro `Booking` und protokolliert die operative
+  Hallenuebergabe mit `keyReceivedAt`, `roomAcceptedAt` und `roomReturnedAt`.
+  Die Schritte sind vorwaertsgerichtet und werden ueber den Service auditiert.
+- `MANAGE_HANDOVERS` erlaubt Hallenuebergaben. Ohne `VIEW_BOOKINGS` wird wie
+  bei No-Shows die konkrete Hallenwart-Zuordnung ueber `Caretaker.userId` und
+  nur ersatzweise ueber `Caretaker.email` geprueft.
 
 ## Indizes
 
