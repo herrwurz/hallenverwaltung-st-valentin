@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
+import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
 import { getBookingRequestOptions } from "@/lib/services/booking-service";
 import {
@@ -111,10 +112,8 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
               Ende
               <input name="endsAt" type="datetime-local" required className={inputClass} />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Wartelistenplatz anlegen
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Wartelistenplatz anlegen" cancelHref="/portal" />
             </div>
           </form>
         )}

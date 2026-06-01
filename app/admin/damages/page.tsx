@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { updateDamageStatusAction } from "@/app/admin/damages/actions";
+import { StatusFilterSelect } from "@/components/status-filter-select";
 import { getDamageStatusBadgeClass, getDamageStatusLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { getAdminDamageData } from "@/lib/services/damage-service";
@@ -34,22 +34,13 @@ export default async function AdminDamagesPage({ searchParams }: PageProps) {
         </p>
       ) : null}
 
-      <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
-        {filterButtons.map((filter) => {
-          const isActive = filter === "ALL" ? !data.selectedStatus : data.selectedStatus === filter;
-          return (
-            <Link
-              key={filter}
-              href={filter === "ALL" ? "/admin/damages" : `/admin/damages?status=${filter}`}
-              className={`rounded-full px-4 py-2 text-sm transition ${
-                isActive ? "bg-sky-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              {filter === "ALL" ? "Alle" : getDamageStatusLabel(filter)}
-            </Link>
-          );
-        })}
-      </nav>
+      <StatusFilterSelect
+        selectedValue={data.selectedStatus ?? "ALL"}
+        options={filterButtons.map((filter) => ({
+          value: filter,
+          label: filter === "ALL" ? "Alle" : getDamageStatusLabel(filter),
+        }))}
+      />
 
       <section className="mt-8 space-y-3">
         {data.reports.length === 0 ? (

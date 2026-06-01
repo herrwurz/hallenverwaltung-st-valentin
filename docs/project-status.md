@@ -165,6 +165,12 @@ Pilot-Test und Demo-Readiness
 Kritische Pilotkorrekturen aus Erstfeedback: raumabhaengige Gebaeudeauswahl,
 Admin-Buchungsstatusfilter und klarer Wartelistenstatus im Portal.
 
+## Phase 21.2
+
+UI-/UX-Grundhaertung aus Pilotfeedback: Statusfilter als Comboboxen,
+Abbrechen-Aktionen in zentralen Formularen und fehlende Zurueck-Navigation im
+Portal.
+
 ---
 
 # Wichtigste Architekturentscheidungen

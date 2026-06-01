@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { createOrganizationDocumentAction } from "@/app/portal/documents/actions";
+import { FormActions } from "@/components/form-actions";
 import { getDocumentTypeLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { documentTypes, getPortalDocumentData } from "@/lib/services/document-service";
@@ -22,6 +24,11 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
         Dokumente werden in Phase 16 als sichere Metadaten erfasst. Ein echter Datei-Storage kann spaeter angebunden
         werden.
       </p>
+      <div className="mt-8 flex items-center justify-between">
+        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
+          Zurueck zum Portal
+        </Link>
+      </div>
       {params.error ? (
         <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
       ) : null}
@@ -67,10 +74,8 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
             <p className="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-400">
               Der interne Storage-Key wird serverseitig erzeugt und nicht manuell eingegeben.
             </p>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Dokument speichern
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Dokument speichern" cancelHref="/portal" />
             </div>
           </form>
         )}

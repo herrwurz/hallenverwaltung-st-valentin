@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin-shell";
+import { StatusFilterSelect } from "@/components/status-filter-select";
 import { requirePermission } from "@/lib/permissions";
 import {
   adminWaitlistFilterStatuses,
@@ -22,6 +23,7 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
   const user = await requirePermission("VIEW_BOOKINGS");
   const params = await searchParams;
   const entries = await getWaitlistForAdmin(user.id, params.status);
+  const selectedStatus = params.status ?? "";
 
   return (
     <AdminShell userName={user.name}>
@@ -39,23 +41,17 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-2">
-        <Link
-          href="/admin/waitlist?status=ALL"
-          className="rounded-full border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:border-sky-600"
-        >
-          Alle
-        </Link>
-        {adminWaitlistFilterStatuses.map((status) => (
-          <Link
-            key={status}
-            href={`/admin/waitlist?status=${status}`}
-            className="rounded-full border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:border-sky-600"
-          >
-            {getWaitlistStatusLabel(status)}
-          </Link>
-        ))}
-      </div>
+      <StatusFilterSelect
+        selectedValue={selectedStatus}
+        options={[
+          { value: "", label: "Aktiv + angeboten" },
+          { value: "ALL", label: "Alle" },
+          ...adminWaitlistFilterStatuses.map((status) => ({
+            value: status,
+            label: getWaitlistStatusLabel(status),
+          })),
+        ]}
+      />
 
       <div className="mt-8 space-y-4">
         {entries.length === 0 ? (

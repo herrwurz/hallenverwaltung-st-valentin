@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { acknowledgeNoShowAction, reportNoShowAction } from "@/app/admin/no-shows/actions";
+import { FormActions } from "@/components/form-actions";
+import { StatusFilterSelect } from "@/components/status-filter-select";
 import { getNoShowStatusBadgeClass, getNoShowStatusLabel } from "@/lib/no-show-status";
 import { requirePermission } from "@/lib/permissions";
 import { getAdminNoShowData } from "@/lib/services/no-show-service";
@@ -66,31 +67,20 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
               Beschreibung
               <textarea name="description" rows={3} required maxLength={2000} className={inputClass} />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                No-Show melden
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="No-Show melden" cancelHref="/admin" />
             </div>
           </form>
         )}
       </section>
 
-      <nav className="mt-8 flex flex-wrap gap-2" aria-label="Statusfilter">
-        {filterButtons.map((filter) => {
-          const isActive = filter === "ALL" ? !data.selectedStatus : data.selectedStatus === filter;
-          return (
-            <Link
-              key={filter}
-              href={filter === "ALL" ? "/admin/no-shows" : `/admin/no-shows?status=${filter}`}
-              className={`rounded-full px-4 py-2 text-sm transition ${
-                isActive ? "bg-sky-500 text-slate-950" : "bg-slate-900 text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              {filter === "ALL" ? "Alle" : getNoShowStatusLabel(filter)}
-            </Link>
-          );
-        })}
-      </nav>
+      <StatusFilterSelect
+        selectedValue={data.selectedStatus ?? "ALL"}
+        options={filterButtons.map((filter) => ({
+          value: filter,
+          label: filter === "ALL" ? "Alle" : getNoShowStatusLabel(filter),
+        }))}
+      />
 
       <section className="mt-8 space-y-3">
         {data.reports.length === 0 ? (

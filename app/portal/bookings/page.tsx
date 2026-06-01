@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
+import { FormActions } from "@/components/form-actions";
 import { getBookingStatusBadgeClass, getBookingStatusLabel } from "@/lib/booking-status";
 import { getBookingChangeStatusBadgeClass, getBookingChangeStatusLabel, getBookingChangeTypeLabel } from "@/lib/booking-change-status";
 import { requirePermission } from "@/lib/permissions";
@@ -122,10 +123,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Beschreibung (optional)
               <textarea name="description" rows={3} maxLength={1000} className={inputClass} />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Antrag absenden
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Antrag absenden" cancelHref="/portal" />
             </div>
           </form>
         )}
@@ -199,10 +198,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                 className={inputClass}
               />
             </label>
-            <div className="lg:col-span-2 lg:text-right">
-              <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                Serienantrag absenden
-              </button>
+            <div className="lg:col-span-2">
+              <FormActions submitLabel="Serienantrag absenden" cancelHref="/portal" />
             </div>
           </form>
         )}
@@ -264,10 +261,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                       Grund
                       <input name="reason" required maxLength={1000} className={inputClass} />
                     </label>
-                    <div className="lg:col-span-2 lg:text-right">
-                      <button className="rounded-lg border border-sky-700 px-4 py-2 text-sm text-sky-200 hover:bg-sky-950">
-                        Verschiebung beantragen
-                      </button>
+                    <div className="lg:col-span-2">
+                      <FormActions submitLabel="Verschiebung beantragen" cancelHref="/portal/bookings" />
                     </div>
                   </form>
                 ) : null}
