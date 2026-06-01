@@ -17,3 +17,22 @@ test("calendar UI exposes day week month and year views", () => {
   assert.match(portalCalendar, /view === "month" \|\| view === "year"/);
   assert.match(publicCalendar, /view === "month" \|\| view === "year"/);
 });
+
+test("calendar UI exposes event detail dialogs and localized labels", () => {
+  const calendarView = readFileSync("components/calendar-view.tsx", "utf8");
+
+  assert.match(calendarView, /role="dialog"/);
+  assert.match(calendarView, /Details anzeigen/);
+  assert.match(calendarView, /Termin-Details/);
+  assert.match(calendarView, /Gebäude/);
+  assert.match(calendarView, /Alle Räume/);
+  assert.doesNotMatch(calendarView, /Gebaeude|Raeume|Eintraege|auswaehlen|gewaehl/);
+});
+
+test("admin navigation uses localized umlauts for core master data", () => {
+  const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
+
+  assert.match(adminShell, /Buchungsanträge/);
+  assert.match(adminShell, /Gebäude/);
+  assert.match(adminShell, /Räume/);
+});

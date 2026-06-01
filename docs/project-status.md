@@ -177,6 +177,12 @@ Kalender-UX aus Pilotfeedback: Tages-, Wochen-, Monats- und Jahresansicht mit
 rasterbasierter, Google-Kalender-aehnlicher Darstellung ohne neue
 Buchungslogik.
 
+## Phase 21.4-21.6
+
+Zusammengefasste UI-Politur aus Pilotfeedback: Kalender-Termin-Details als
+Dialog, sichtbare Umlautkorrekturen in den beruehrten Kalenderflaechen und ein
+konservativer Verwaltungsstil mit eckigeren, sachlicheren Kalender-Elementen.
+
 ---
 
 # Wichtigste Architekturentscheidungen
