@@ -227,6 +227,12 @@ erDiagram
 - Hallenuebergaben nutzen `MANAGE_HANDOVERS`. Ohne Verwaltungsrecht
   `VIEW_BOOKINGS` duerfen Hallenwarte nur Uebergaben fuer zugeordnete Raeume
   oder Gebaeude erfassen.
+- `AccessMedium` und `AccessAssignment` bilden die Zutrittsverwaltung ab:
+  Schluessel, RFID-Karten und elektronische Zutritte koennen Gebaeuden oder
+  optional Raeumen zugeordnet, ausgegeben und retourniert werden.
+- Pro Zutrittsmedium ist maximal eine aktive Ausgabe erlaubt. Dies wird
+  service-seitig validiert und durch einen partiellen PostgreSQL-Unique-Index
+  abgesichert. Eine echte Schliesssystem-Integration bleibt ausgeschlossen.
 - Das Ereignis `NO_SHOW_REPORTED` bereitet Benachrichtigungen fuer die
   Verwaltung vor. Sanktionen, automatische Statistiken oder Abrechnungsfolgen
   bleiben ausgeschlossen.

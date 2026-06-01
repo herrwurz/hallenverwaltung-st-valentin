@@ -192,6 +192,12 @@ Version 1:
 - Das Recht `MANAGE_HANDOVERS` erlaubt die Erfassung. Ohne `VIEW_BOOKINGS`
   duerfen Hallenwarte nur Buchungen ihrer zugeordneten Raeume oder Gebaeude
   bearbeiten.
+- Zutrittsmedien werden ueber `AccessMedium` und `AccessAssignment`
+  verwaltet. Pro Zutrittsmedium darf es maximal eine aktive Ausgabe ohne
+  `returnedAt` geben.
+- Zutrittsverwaltung nutzt `MANAGE_ACCESS`, schreibt Audit-Eintraege und ist
+  in Version 1 nicht an ein externes Schliess- oder Tuerkontrollsystem
+  gekoppelt.
 
 ---
 

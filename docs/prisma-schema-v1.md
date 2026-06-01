@@ -133,6 +133,12 @@ werden.
 - `MANAGE_HANDOVERS` erlaubt Hallenuebergaben. Ohne `VIEW_BOOKINGS` wird wie
   bei No-Shows die konkrete Hallenwart-Zuordnung ueber `Caretaker.userId` und
   nur ersatzweise ueber `Caretaker.email` geprueft.
+- `AccessMedium` verwaltet Schluessel, RFID-Karten und elektronische
+  Zutritte. `AccessAssignment` protokolliert Ausgabe und Rueckgabe.
+- `MANAGE_ACCESS` erlaubt die Zutrittsverwaltung. Externe Schliesssysteme
+  werden in Version 1 nicht angebunden.
+- PostgreSQL sichert mit einem partiellen Unique-Index, dass pro
+  Zutrittsmedium nur eine aktive Ausgabe ohne `returnedAt` existieren kann.
 
 ## Indizes
 
@@ -148,6 +154,8 @@ vorbereitet:
 | `Notification` | `(status, createdAt)`, `(status, nextAttemptAt)` |
 | `DamageReport` | `(roomId, status)` |
 | `NoShowReport` | `(status, reportedAt)`, `(roomId, reportedAt)`, `(organizationId, reportedAt)` |
+| `AccessMedium` | `(buildingId, isActive)`, `(roomId, isActive)` |
+| `AccessAssignment` | `(accessMediumId, returnedAt)`, `(organizationId, returnedAt)`, partiell eindeutig `(accessMediumId) WHERE returnedAt IS NULL` |
 | `BookingChangeRequest` | `(status, createdAt)`, `(bookingId, status)`, `(requestedByUserId, status)`, `(newRoomId, newStartAt, newEndAt)` |
 
 `startsAt`/`endsAt`, `startsOn`/`endsOn` und `placedAt` sind die bereits

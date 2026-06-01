@@ -647,6 +647,9 @@ model AccessMedium {
   building    Building           @relation(fields: [buildingId], references: [id])
   room        Room?              @relation(fields: [roomId], references: [id])
   assignments AccessAssignment[]
+
+  @@index([buildingId, isActive])
+  @@index([roomId, isActive])
 }
 
 model AccessAssignment {
@@ -658,6 +661,9 @@ model AccessAssignment {
   returnedAt     DateTime?
   accessMedium   AccessMedium  @relation(fields: [accessMediumId], references: [id])
   organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([accessMediumId, returnedAt])
+  @@index([organizationId, returnedAt])
 }
 
 model Notification {

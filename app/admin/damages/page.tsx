@@ -22,8 +22,8 @@ export default async function AdminDamagesPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Schaeden</p>
       <h2 className="mt-3 text-3xl font-semibold">Schadensmanagement</h2>
       <p className="mt-3 text-slate-300">
-        Schadensmeldungen einsehen und den Bearbeitungsstatus aktualisieren. Keine Hallenuebergabe oder
-        Zutrittsverwaltung in dieser Phase.
+        Schadensmeldungen einsehen und den Bearbeitungsstatus aktualisieren. Hallenuebergaben und Zutrittsverwaltung
+        werden in eigenen Verwaltungsbereichen gefuehrt.
       </p>
       {params.error ? (
         <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>

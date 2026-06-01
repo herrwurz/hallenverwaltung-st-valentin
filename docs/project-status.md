@@ -152,6 +152,10 @@ Caretaker-User-Haertung
 
 Hallenuebergabe-Basis
 
+## Phase 19.3
+
+Zutrittsverwaltung-Basis
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -362,6 +366,14 @@ Version 1:
 * Recht `MANAGE_HANDOVERS`, mit Hallenwart-Zuordnung ueber `Caretaker.userId`
   und E-Mail-Fallback ohne `VIEW_BOOKINGS`
 * keine automatische Buchungsstatusaenderung und keine Abrechnungsfolge
+
+### Zutrittsverwaltung
+
+* `AccessMedium` verwaltet Schluessel, RFID-Karten und elektronische Zutritte
+* `AccessAssignment` protokolliert Ausgabe und Rueckgabe
+* pro Medium ist nur eine aktive Ausgabe ohne `returnedAt` erlaubt
+* Recht `MANAGE_ACCESS`, Audit fuer Anlage, Ausgabe, Rueckgabe und Deaktivierung
+* keine Integration in externe Schliess- oder Tuerkontrollsysteme
 
 ### E2E-Ausbau
 
