@@ -32,6 +32,10 @@ type CreateBookingRequestOptions = {
   client?: Prisma.TransactionClient;
   now?: Date;
   permissions?: BookingRequestPermissionOverrides;
+  bookingMeta?: {
+    seriesId?: string | null;
+    kind?: "SINGLE" | "SERIES_OCCURRENCE";
+  };
 };
 
 export function resolveBookingBlockedWindow({
@@ -74,9 +78,11 @@ async function createBookingRequestWithClient(
   {
     now,
     permissions,
+    bookingMeta,
   }: {
     now: Date;
     permissions: Awaited<ReturnType<typeof resolveBookingRequestPermissions>>;
+    bookingMeta?: CreateBookingRequestOptions["bookingMeta"];
   },
 ) {
   const [organization, room, usageType, membership] = await Promise.all([
@@ -169,6 +175,8 @@ async function createBookingRequestWithClient(
       organizationId: data.organizationId,
       roomId: data.roomId,
       usageTypeId: data.usageTypeId,
+      seriesId: bookingMeta?.seriesId ?? null,
+      kind: bookingMeta?.kind ?? "SINGLE",
       title: data.title,
       description: data.description || null,
       startsAt: data.startsAt,
@@ -192,10 +200,18 @@ export async function createBookingRequest(
   const permissions = await resolveBookingRequestPermissions(actorUserId, options.permissions);
 
   if (options.client) {
-    return createBookingRequestWithClient(data, actorUserId, options.client, { now, permissions });
+    return createBookingRequestWithClient(data, actorUserId, options.client, {
+      now,
+      permissions,
+      bookingMeta: options.bookingMeta,
+    });
   }
 
   return prisma.$transaction((transaction) =>
-    createBookingRequestWithClient(data, actorUserId, transaction, { now, permissions }),
+    createBookingRequestWithClient(data, actorUserId, transaction, {
+      now,
+      permissions,
+      bookingMeta: options.bookingMeta,
+    }),
   );
 }

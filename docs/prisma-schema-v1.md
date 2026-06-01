@@ -16,7 +16,8 @@ fuer die oeffentliche Ansicht mit Kalender, freien Zeiten und iCal-Export. Die
 Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
 Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
 vorbereitete Tauschantraege. Phase 16 nutzt `Document` und `DamageReport`
-fuer Dokumentenmetadaten und Schadensmeldungen. Die in Phase 3 vorhandene
+fuer Dokumentenmetadaten und Schadensmeldungen. Phase 17 nutzt `BookingSeries`
+und `HolidayPeriod` fuer woechentliche Serienantraege und Ferienregeln. Die in Phase 3 vorhandene
 Authentifizierung verwendet `User.passwordHash`.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
@@ -105,6 +106,12 @@ werden.
 - Schadensstatuswechsel sind vorwaertsgerichtet (`REPORTED -> IN_REVIEW ->
   RESOLVED`) und werden ueber `AuditEntry` protokolliert. Neue Meldungen
   koennen das Notification-Event `DAMAGE_REPORTED` erzeugen.
+- `BookingSeries` erzeugt in Phase 17 woechentliche `Booking`-Einzeltermine
+  mit `kind = SERIES_OCCURRENCE`. Jeder Termin bleibt ein normaler
+  Buchungsantrag mit Statushistorie und Genehmigungsworkflow.
+- `HolidayPeriod.defaultStatus` steuert die Serienanlage: `CLOSED` fuehrt zum
+  Ueberspringen des betroffenen Termins, `RESTRICTED` erzeugt einen Hinweis,
+  `OPEN` blockiert nicht.
 
 ## Indizes
 

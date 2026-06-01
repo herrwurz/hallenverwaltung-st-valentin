@@ -7,6 +7,11 @@ import { requirePermission } from "@/lib/permissions";
 import { createMoveChangeRequest } from "@/lib/services/booking-change-service";
 import { cancelOwnBookingRequest, createBookingRequest } from "@/lib/services/booking-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
+import { createBookingSeriesRequest } from "@/lib/services/booking-series-service";
+import {
+  processPendingNotifications,
+  queueBookingNotifications,
+} from "@/lib/services/notification-service";
 
 function bookingErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
@@ -52,6 +57,52 @@ export async function createBookingRequestAction(formData: FormData) {
     : warningMessage
       ? `saved=1&warning=${encodeURIComponent(warningMessage)}`
       : "saved=1";
+  redirect(`/portal/bookings?${feedback}`);
+}
+
+export async function createBookingSeriesRequestAction(formData: FormData) {
+  const user = await requirePermission("REQUEST_BOOKING");
+  let errorMessage: string | undefined;
+  let warningMessage: string | undefined;
+
+  try {
+    const result = await createBookingSeriesRequest(
+      {
+        organizationId: formData.get("organizationId"),
+        roomId: formData.get("roomId"),
+        usageTypeId: formData.get("usageTypeId"),
+        title: formData.get("title"),
+        description: formData.get("description"),
+        firstStartsAt: formData.get("firstStartsAt"),
+        firstEndsAt: formData.get("firstEndsAt"),
+        repeatUntil: formData.get("repeatUntil"),
+      },
+      user.id,
+    );
+
+    try {
+      for (const booking of result.createdBookings) {
+        await queueBookingNotifications(booking.id, "BOOKING_REQUESTED");
+      }
+      await processPendingNotifications();
+    } catch (notificationError) {
+      console.error("Booking series notifications failed", notificationError);
+    }
+
+    warningMessage = [
+      ...result.warnings,
+      ...result.skipped.map((entry) => `${entry.startsAt.toLocaleDateString("de-AT")}: ${entry.reason}`),
+    ].join(" ");
+  } catch (error) {
+    errorMessage = bookingErrorMessage(error);
+  }
+
+  revalidatePath("/portal/bookings");
+  const feedback = errorMessage
+    ? `error=${encodeURIComponent(errorMessage)}`
+    : warningMessage
+      ? `seriesSaved=1&warning=${encodeURIComponent(warningMessage)}`
+      : "seriesSaved=1";
   redirect(`/portal/bookings?${feedback}`);
 }
 

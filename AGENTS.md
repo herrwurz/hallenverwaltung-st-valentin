@@ -117,9 +117,16 @@ Status:
 
 ## Serienbuchungen
 
+- Serienbuchungen erzeugen woechentliche Einzeltermine als normale
+  Buchungsantraege im Status `REQUESTED`.
+- Jede erzeugte Einzelbuchung durchlaeuft den normalen Genehmigungsworkflow.
 - Einzeltermine verschiebbar
 - Ganze Serien nicht nachträglich änderbar
 - Zukünftige Serientermine nicht gesammelt änderbar
+- Geschlossene Ferien-/Feiertagszeitraeume (`CLOSED`) werden bei neuen Serien
+  uebersprungen.
+- Eingeschraenkte Ferien-/Feiertagszeitraeume (`RESTRICTED`) erzeugen einen
+  Hinweis, verhindern den Antrag aber nicht automatisch.
 
 ## Hallenlogik
 

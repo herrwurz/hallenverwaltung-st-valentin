@@ -60,6 +60,8 @@ type CreateBookingTransitionInput = {
   organizationId: string;
   roomId: string;
   usageTypeId: string;
+  seriesId?: string | null;
+  kind?: "SINGLE" | "SERIES_OCCURRENCE";
   title: string;
   description: string | null;
   startsAt: Date;
@@ -183,7 +185,8 @@ export async function requestBooking(input: CreateBookingTransitionInput, client
       roomId: input.roomId,
       usageTypeId: input.usageTypeId,
       requestedByUserId: input.actorUserId,
-      kind: "SINGLE",
+      seriesId: input.seriesId ?? null,
+      kind: input.kind ?? "SINGLE",
       status: "REQUESTED",
       title: input.title,
       description: input.description,

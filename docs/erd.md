@@ -24,6 +24,8 @@ werden beantragt, verwaltungsseitig geprueft und bei Genehmigung als neuer
 Ersatztermin angelegt.
 Phase 16 aktiviert die Dokumentenverwaltung als Metadaten-Workflow und das
 Schadensmanagement fuer Portal und Verwaltung.
+Phase 17 fuehrt woechentliche Serienantraege und konfigurierbare Ferien-/
+Feiertagsregeln ein.
 
 Version 1 ist Single-Tenant fuer St. Valentin. Mandantenfaehigkeit wird nicht
 umgesetzt, eine spaetere Erweiterung soll durch das Modell jedoch nicht
@@ -196,8 +198,15 @@ erDiagram
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
   kuenftige Service-Schreibpfade vor.
 - Serien bleiben weiterhin reine Datenmodellgrundlage; umgesetzt werden
-  einzelne Buchungsantraege mit dem Workflow `REQUESTED -> IN_REVIEW ->
-  APPROVED/REJECTED`.
+  ab Phase 17 woechentliche Serienantraege, die einzelne
+  `Booking`-Datensaetze mit `kind = SERIES_OCCURRENCE` und Verknuepfung zur
+  `BookingSeries` erzeugen. Diese Einzeltermine starten im Status `REQUESTED`
+  und durchlaufen den normalen Genehmigungsworkflow.
+- Ferien- und Feiertagszeitraeume werden ueber `HolidayPeriod` verwaltet.
+  `CLOSED` ueberspringt Serientermine bei Neuanlage, `RESTRICTED` erzeugt
+  Hinweise und `OPEN` blockiert nicht. Ganze Serien werden in Version 1 nicht
+  gesammelt veraendert; einzelne erzeugte Termine koennen ueber den normalen
+  Aenderungsworkflow behandelt werden.
 
 ## Offene fachliche Konkretisierungen
 

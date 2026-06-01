@@ -132,6 +132,14 @@ Verschiebungen & Tauschanträge
 
 Dokumentenmanagement und Schadensmeldungen
 
+## Phase 16.5
+
+Dokumenten- und Schadens-Haertung
+
+## Phase 17
+
+Serienbuchungen und Ferien-/Ausnahmelogik
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -154,6 +162,7 @@ Beispiele:
 
 * BookingTransitionService
 * BookingChangeService
+* BookingSeriesService
 * DocumentService
 * DamageService
 * WaitlistService
@@ -285,6 +294,7 @@ Version 1:
 * BILLING_EXPORT
 * CREATE_EXPORTS
 * MANAGE_SYSTEM_JOBS
+* BLOCK_ROOM
 
 ---
 
@@ -301,10 +311,11 @@ Version 1:
 
 ### Serienbuchungen erweitert
 
-* Semesterlogik
-* Ausnahmen
-* Ferienunterbrechungen
-* Blockbuchungen
+* woechentliche Serienantraege erzeugen einzelne REQUESTED-Buchungen
+* Ferien-/Feiertagszeitraeume sind administrierbar
+* CLOSED-Zeitraeume werden uebersprungen
+* RESTRICTED-Zeitraeume erzeugen Hinweise
+* Semesterlogik, komplexe Ausnahmen und Blockbuchungen bleiben offen
 
 ### Dokumentenmanagement
 
@@ -369,13 +380,13 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
-## Phase 17
+## Phase 18
 
-Serienbuchungen und Ferien-/Ausnahmelogik
+No-Show- und Hallenwart-Workflows
 
-* Serienantraege fuer wiederkehrende Termine
-* Ferien- und Feiertagsregeln anwenden
-* einzelne Serientermine verschiebbar halten
+* Nichtnutzung melden
+* kurzfristige Stornos auswerten
+* Hallenwart-Sicht fachlich schaerfen
 
 ---
 
