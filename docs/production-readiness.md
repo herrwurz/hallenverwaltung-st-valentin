@@ -202,3 +202,8 @@ Details stehen in `docs/pilot-testplan.md`.
 - Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz fehlt noch.
 - Restore-Probe muss nach Servereinrichtung dokumentiert werden.
 - Finaler Abnahmetest gehoert in Phase 23.
+
+Die verbindliche Go-Live-Entscheidungsliste liegt in
+`docs/go-live-open-points.md`. Punkte mit Prioritaet hoch blockieren den
+Produktivstart, bis sie erledigt oder ausdruecklich mit Risikoakzeptanz
+freigegeben wurden.

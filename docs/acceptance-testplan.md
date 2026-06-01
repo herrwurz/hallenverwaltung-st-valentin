@@ -225,6 +225,28 @@ Version 1 kann fachlich abgenommen werden, wenn:
 - eine Restore-Probe dokumentiert wurde,
 - finale Initialbenutzer ohne Demo-Passwoerter angelegt sind.
 
+## Blockerbewertung
+
+Vor Unterschrift muessen die Hoch-Blocker aus
+`docs/go-live-open-points.md` einzeln bewertet werden. Ein Punkt darf nur als
+erledigt gelten, wenn ein Nachweis vorliegt, zum Beispiel:
+
+- Domain zeigt auf Zielserver.
+- TLS-Zertifikat ist aktiv.
+- `.env.production` enthaelt keine Platzhalter.
+- Admin-Initialbenutzer wurde mit sicherem Passwort angelegt.
+- Demo-Zugaenge sind nicht vorhanden oder deaktiviert.
+- SMTP-Test wurde real versendet.
+- Worker-Logs zeigen erfolgreiche Joblaeufe.
+- Backup-Datei wurde erzeugt.
+- Restore-Probe wurde erfolgreich ausgefuehrt.
+- Monitoring/Alarmierung ist mindestens organisatorisch geregelt.
+
+Mittlere Punkte aus `docs/go-live-open-points.md` muessen nicht zwingend vor
+dem ersten Go-Live umgesetzt sein. Sie muessen aber bewusst als
+"vor erweitertem Pilot", "nach Version 1" oder "nicht erforderlich"
+entschieden werden.
+
 ## Abnahmeprotokoll
 
 | Punkt | Ergebnis | Bemerkung | Verantwortlich | Datum |

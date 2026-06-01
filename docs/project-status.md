@@ -224,6 +224,14 @@ Abnahme- und Go-Live-Vorbereitung: Abnahmetestplan, Kurzanleitung fuer
 Verwaltung, Kurzanleitung fuer Vereine und Go-Live-Entscheidungsliste wurden
 unter `docs/` ergaenzt. README verweist auf die neuen Abnahmedokumente.
 
+## Phase 23.2
+
+Go-Live-Review-Schaerfung fuer priorisierte Punkte: Hoch-Blocker wurden in
+`docs/go-live-open-points.md` als echte Produktivstart-Blocker mit
+Nachweisspalten dokumentiert. Mittlere Pilotpunkte wie Stammdaten-Loeschkonzept
+und Ferien-/Semesterlogik wurden als bewusste Fachentscheidungen vor einem
+breiteren Pilot eingeordnet.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -525,6 +533,10 @@ Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 * `docs/user-guide-admin.md`
 * `docs/user-guide-portal.md`
 * `docs/go-live-open-points.md`
+
+Hoch priorisierte Go-Live-Blocker muessen vor Produktivstart erledigt oder
+ausdruecklich mit Risikoakzeptanz freigegeben werden. Mittlere Pilotpunkte
+werden vor einem breiteren Vereins-Pilot entschieden.
 
 ---
 
