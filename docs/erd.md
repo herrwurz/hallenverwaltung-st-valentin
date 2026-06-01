@@ -204,9 +204,11 @@ erDiagram
   und durchlaufen den normalen Genehmigungsworkflow.
 - Ferien- und Feiertagszeitraeume werden ueber `HolidayPeriod` verwaltet.
   `CLOSED` ueberspringt Serientermine bei Neuanlage, `RESTRICTED` erzeugt
-  Hinweise und `OPEN` blockiert nicht. Ganze Serien werden in Version 1 nicht
-  gesammelt veraendert; einzelne erzeugte Termine koennen ueber den normalen
-  Aenderungsworkflow behandelt werden.
+  Hinweise und `OPEN` blockiert nicht. Bei der Serienanlage koennen
+  zusaetzliche Ausnahmedaten angegeben werden; diese Termine werden ebenfalls
+  uebersprungen und in der `recurrenceRule` als `EXDATE` dokumentiert. Ganze
+  Serien werden in Version 1 nicht gesammelt veraendert; einzelne erzeugte
+  Termine koennen ueber den normalen Aenderungsworkflow behandelt werden.
 
 ## Offene fachliche Konkretisierungen
 
@@ -218,6 +220,9 @@ erDiagram
   Schreibfunktionen fuer Buchungen oder Warteliste.
 - Phase 12 fuehrt keinen Deployment-Scheduler ein; Cron/Worker-Aufrufe bleiben
   betriebliche Konfiguration.
+- Blockbuchungen sind fachlich noch nicht eindeutig genug spezifiziert. Bis
+  dahin werden wiederkehrende Nutzungen als woechentliche Serien mit
+  Einzelterminen abgebildet.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.

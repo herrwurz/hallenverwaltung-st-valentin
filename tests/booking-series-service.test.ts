@@ -3,8 +3,11 @@ import test from "node:test";
 import { requestBooking } from "../lib/services/booking-transition-service";
 import { BookingValidationError } from "../lib/services/booking-rules";
 import {
+  bookingSeriesRequestSchema,
   evaluateHolidayOverlap,
   generateWeeklyOccurrences,
+  isExcludedOccurrence,
+  parseExcludedDates,
 } from "../lib/services/booking-series-service";
 import { assertHolidayPeriodRange, getHolidayStatusLabel } from "../lib/services/holiday-service";
 
@@ -89,6 +92,61 @@ test("detects closed and restricted holiday overlaps", () => {
       holidays,
     )?.status,
     "RESTRICTED",
+  );
+});
+
+test("parses explicit series exception dates", () => {
+  const excludedDates = parseExcludedDates("2026-09-14\n2026-09-28");
+
+  assert.equal(excludedDates.length, 2);
+  assert.equal(
+    isExcludedOccurrence(
+      {
+        startsAt: new Date(2026, 8, 14, 18, 0, 0),
+        endsAt: new Date(2026, 8, 14, 20, 0, 0),
+      },
+      excludedDates,
+    ),
+    true,
+  );
+  assert.equal(
+    isExcludedOccurrence(
+      {
+        startsAt: new Date(2026, 8, 21, 18, 0, 0),
+        endsAt: new Date(2026, 8, 21, 20, 0, 0),
+      },
+      excludedDates,
+    ),
+    false,
+  );
+});
+
+test("validates exception dates in the series schema", () => {
+  const parsed = bookingSeriesRequestSchema.parse({
+    organizationId: "organization-1",
+    roomId: "room-1",
+    usageTypeId: "usage-1",
+    title: "Serientraining",
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: "2026-09-30",
+    excludedDates: "2026-09-14",
+  });
+
+  assert.equal(parsed.excludedDates.length, 1);
+  assert.throws(
+    () =>
+      bookingSeriesRequestSchema.parse({
+        organizationId: "organization-1",
+        roomId: "room-1",
+        usageTypeId: "usage-1",
+        title: "Serientraining",
+        firstStartsAt,
+        firstEndsAt,
+        repeatUntil: "2026-09-30",
+        excludedDates: "kein-datum",
+      }),
+    BookingValidationError,
   );
 });
 

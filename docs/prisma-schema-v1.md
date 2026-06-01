@@ -112,6 +112,9 @@ werden.
 - `HolidayPeriod.defaultStatus` steuert die Serienanlage: `CLOSED` fuehrt zum
   Ueberspringen des betroffenen Termins, `RESTRICTED` erzeugt einen Hinweis,
   `OPEN` blockiert nicht.
+- Manuelle Ausnahmedaten bei Serienantraegen werden nicht als eigene Tabelle
+  gespeichert, sondern in der `BookingSeries.recurrenceRule` als `EXDATE`
+  dokumentiert und durch das Fehlen einer erzeugten Einzelbuchung sichtbar.
 
 ## Indizes
 

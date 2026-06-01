@@ -76,6 +76,7 @@ export async function createBookingSeriesRequestAction(formData: FormData) {
         firstStartsAt: formData.get("firstStartsAt"),
         firstEndsAt: formData.get("firstEndsAt"),
         repeatUntil: formData.get("repeatUntil"),
+        excludedDates: formData.get("excludedDates"),
       },
       user.id,
     );

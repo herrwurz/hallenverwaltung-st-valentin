@@ -15,6 +15,9 @@ export const bookingSeriesRequestSchema = z.object({
   firstStartsAt: z.coerce.date(),
   firstEndsAt: z.coerce.date(),
   repeatUntil: z.coerce.date(),
+  excludedDates: z
+    .preprocess((value) => parseExcludedDates(value), z.array(z.date()))
+    .default([]),
 });
 
 type SeriesOccurrence = {
@@ -35,8 +38,51 @@ function endOfDay(date: Date) {
   return normalized;
 }
 
+function dateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function overlaps(startA: Date, endA: Date, startB: Date, endB: Date) {
   return startA < endB && startB < endA;
+}
+
+export function parseExcludedDates(value: unknown): Date[] {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) => parseExcludedDates(entry));
+  }
+
+  if (value instanceof Date) {
+    return [value];
+  }
+
+  return String(value)
+    .split(/[\n,;]+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const parsed = new Date(`${entry}T00:00:00`);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new BookingValidationError(`Das Ausnahmedatum "${entry}" ist ungueltig.`);
+      }
+      return parsed;
+    });
+}
+
+export function isExcludedOccurrence(occurrence: SeriesOccurrence, excludedDates: Date[]) {
+  const excludedDateKeys = new Set(excludedDates.map(dateKey));
+  return excludedDateKeys.has(dateKey(occurrence.startsAt));
+}
+
+function buildWeeklyRecurrenceRule(excludedDates: Date[]) {
+  const excluded = Array.from(new Set(excludedDates.map(dateKey))).sort();
+  return excluded.length ? `FREQ=WEEKLY;INTERVAL=1;EXDATE=${excluded.join(",")}` : "FREQ=WEEKLY;INTERVAL=1";
 }
 
 export function generateWeeklyOccurrences({
@@ -128,7 +174,7 @@ export async function createBookingSeriesRequest(input: unknown, actorUserId: st
         title: data.title,
         startsOn,
         endsOn,
-        recurrenceRule: "FREQ=WEEKLY;INTERVAL=1",
+        recurrenceRule: buildWeeklyRecurrenceRule(data.excludedDates),
       },
     });
 
@@ -137,6 +183,15 @@ export async function createBookingSeriesRequest(input: unknown, actorUserId: st
     const warnings: string[] = [];
 
     for (const occurrence of occurrences) {
+      if (isExcludedOccurrence(occurrence, data.excludedDates)) {
+        skipped.push({
+          startsAt: occurrence.startsAt,
+          endsAt: occurrence.endsAt,
+          reason: "Ausnahmedatum der Serie.",
+        });
+        continue;
+      }
+
       const holiday = evaluateHolidayOverlap(occurrence, holidays);
 
       if (holiday?.status === "CLOSED") {

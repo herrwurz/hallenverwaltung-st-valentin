@@ -315,7 +315,10 @@ Version 1:
 * Ferien-/Feiertagszeitraeume sind administrierbar
 * CLOSED-Zeitraeume werden uebersprungen
 * RESTRICTED-Zeitraeume erzeugen Hinweise
-* Semesterlogik, komplexe Ausnahmen und Blockbuchungen bleiben offen
+* einzelne Ausnahmedaten koennen bei Serienanlage angegeben werden
+* Saison-/Semesterlogik wird aktuell ueber das Feld "Wiederholen bis"
+  abgebildet
+* Blockbuchungen bleiben offen, bis die Fachregel eindeutig spezifiziert ist
 
 ### Dokumentenmanagement
 

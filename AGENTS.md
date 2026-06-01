@@ -127,6 +127,8 @@ Status:
   uebersprungen.
 - Eingeschraenkte Ferien-/Feiertagszeitraeume (`RESTRICTED`) erzeugen einen
   Hinweis, verhindern den Antrag aber nicht automatisch.
+- Einzelne Ausnahmedaten koennen bei der Serienanlage angegeben werden und
+  werden uebersprungen.
 
 ## Hallenlogik
 

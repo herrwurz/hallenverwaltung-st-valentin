@@ -147,7 +147,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <h2 className="text-xl font-medium">Neuer Serienantrag</h2>
         <p className="mt-2 text-sm text-slate-400">
-          Erzeugt woechentliche Einzeltermine. Geschlossene Ferienzeiten werden uebersprungen.
+          Erzeugt woechentliche Einzeltermine. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden
+          uebersprungen.
         </p>
         {options.organizations.length === 0 ? (
           <p className="mt-4 text-sm text-amber-200">
@@ -215,6 +216,15 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
             <label className="text-sm text-slate-300">
               Beschreibung (optional)
               <input name="description" maxLength={1000} className={inputClass} />
+            </label>
+            <label className="text-sm text-slate-300 lg:col-span-2">
+              Ausnahmedaten (optional, ein Datum pro Zeile)
+              <textarea
+                name="excludedDates"
+                rows={3}
+                placeholder="2026-10-26"
+                className={inputClass}
+              />
             </label>
             <div className="lg:col-span-2 lg:text-right">
               <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
