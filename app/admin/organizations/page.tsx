@@ -1,4 +1,5 @@
 import { saveOrganizationAction } from "@/app/admin/actions";
+import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
@@ -21,6 +22,7 @@ export default async function OrganizationsPage({ searchParams }: PageProps) {
       <p className="mt-3 text-slate-300">
         Organisationstyp, Aktivität und verwaltungsseitige Sperre pflegen.
       </p>
+      <AdminBackLink />
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>

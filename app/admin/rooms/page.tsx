@@ -1,4 +1,5 @@
 import { saveRoomAction } from "@/app/admin/actions";
+import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
@@ -19,6 +20,7 @@ export default async function RoomsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Räume</p>
       <h2 className="mt-3 text-3xl font-semibold">Raum-Verwaltung</h2>
       <p className="mt-3 text-slate-300">Räume, Betriebsstatus und optionale Teilbereichsbeziehungen pflegen.</p>
+      <AdminBackLink />
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>

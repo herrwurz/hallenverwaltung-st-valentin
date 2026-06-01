@@ -62,6 +62,25 @@ test("admin master data forms use shared form actions", () => {
   }
 });
 
+test("admin core management pages expose shared back navigation", () => {
+  const pages = [
+    "app/admin/buildings/page.tsx",
+    "app/admin/rooms/page.tsx",
+    "app/admin/organizations/page.tsx",
+    "app/admin/users/page.tsx",
+    "app/admin/roles/page.tsx",
+  ];
+  const backLink = readFileSync("components/admin-back-link.tsx", "utf8");
+
+  assert.match(backLink, /Zurück zum Dashboard/);
+  assert.match(backLink, /href = "\/admin"/);
+
+  for (const page of pages) {
+    const source = readFileSync(page, "utf8");
+    assert.match(source, /AdminBackLink/, `${page} should use AdminBackLink`);
+  }
+});
+
 test("damage forms use building filtered room selection", () => {
   const portalDamages = readFileSync("app/portal/damages/page.tsx", "utf8");
 

@@ -1,4 +1,5 @@
 import { AdminFeedback } from "@/components/admin-feedback";
+import { AdminBackLink } from "@/components/admin-back-link";
 import { FormActions } from "@/components/form-actions";
 import { saveBuildingAction } from "@/app/admin/actions";
 import { requirePermission } from "@/lib/permissions";
@@ -19,6 +20,7 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Gebäude</p>
       <h2 className="mt-3 text-3xl font-semibold">Gebäude-Verwaltung</h2>
       <p className="mt-3 text-slate-300">Standorte erfassen, aktivieren und einem Hauswart zuordnen.</p>
+      <AdminBackLink />
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>

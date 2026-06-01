@@ -205,6 +205,12 @@ UI-Konventionen fuer zentrale Admin-Stammdatenformulare: Gebaeude, Raeume,
 Organisationen und Benutzer verwenden einheitliche Formularaktionen mit
 Speichern und Abbrechen statt handgebauter Einzelbuttons.
 
+## Phase 22.3
+
+UI-Konventionen fuer Kern-Verwaltungsseiten: Gebaeude, Raeume, Organisationen,
+Benutzer und Rollen/Rechte verwenden einen gemeinsamen Ruecklink zum
+Admin-Dashboard.
+
 ---
 
 # Wichtigste Architekturentscheidungen
