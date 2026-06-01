@@ -15,7 +15,7 @@ export type AdminWaitlistFilterKey = AdminWaitlistFilterStatus | "ALL";
 export function getWaitlistStatusLabel(status: WaitlistStatus) {
   switch (status) {
     case "ACTIVE":
-      return "Aktiv";
+      return "Beantragt";
     case "OFFERED":
       return "Angeboten";
     case "ACCEPTED":

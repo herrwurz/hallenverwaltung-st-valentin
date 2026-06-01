@@ -160,6 +160,11 @@ Zutrittsverwaltung-Basis
 
 Pilot-Test und Demo-Readiness
 
+## Phase 21.1
+
+Kritische Pilotkorrekturen aus Erstfeedback: raumabhaengige Gebaeudeauswahl,
+Admin-Buchungsstatusfilter und klarer Wartelistenstatus im Portal.
+
 ---
 
 # Wichtigste Architekturentscheidungen

@@ -46,6 +46,7 @@ async function executeBookingWorkflowAction(
   formData: FormData,
   operation: (input: z.infer<typeof decisionSchema>, actorUserId: string) => Promise<void>,
   successFlag: string,
+  successStatus?: string,
 ) {
   const actor = await requireActiveSession();
   let input: z.infer<typeof decisionSchema>;
@@ -71,7 +72,7 @@ async function executeBookingWorkflowAction(
   revalidatePath("/portal/bookings");
   buildRedirect(
     "/admin/bookings",
-    input.status,
+    errorMessage ? input.status : successStatus ?? input.status,
     errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=1`,
   );
 }
@@ -83,6 +84,7 @@ export async function markBookingInReviewAction(formData: FormData) {
       await markBookingInReviewForAdmin(input.bookingId, actorUserId);
     },
     "reviewed",
+    "IN_REVIEW",
   );
 }
 
@@ -99,6 +101,7 @@ export async function approveBookingAction(formData: FormData) {
       );
     },
     "approved",
+    "APPROVED",
   );
 }
 
@@ -115,5 +118,6 @@ export async function rejectBookingAction(formData: FormData) {
       );
     },
     "rejected",
+    "REJECTED",
   );
 }
