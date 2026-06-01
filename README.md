@@ -16,6 +16,8 @@ Enthalten sind:
 - Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
 - Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
 - Produktions-Readiness-Checkliste unter `docs/production-readiness.md`
+- Abnahmetestplan und Kurzanleitungen unter `docs/acceptance-testplan.md`,
+  `docs/user-guide-admin.md` und `docs/user-guide-portal.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 
 ## Voraussetzungen
@@ -123,6 +125,9 @@ nutzbar:
 - Hallenwart-Funktionen nach Login: `/admin/handovers`
 
 Ein manueller Testleitfaden liegt in `docs/pilot-testplan.md`.
+Der finale Abnahmetestplan liegt in `docs/acceptance-testplan.md`.
+Kurzanleitungen fuer Verwaltung und Vereine liegen in
+`docs/user-guide-admin.md` und `docs/user-guide-portal.md`.
 
 ### Hinweis zu Codex auf Windows
 

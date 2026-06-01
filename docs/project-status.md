@@ -218,6 +218,12 @@ Produktionskonfiguration, Initialbenutzer, SMTP, Worker, Backup/Restore-Probe
 und Smoke-Tests wurde in `docs/production-readiness.md` dokumentiert. README
 verweist auf diese Checkliste und fuehrt den Projektstand als Phase 22.
 
+## Phase 23.1
+
+Abnahme- und Go-Live-Vorbereitung: Abnahmetestplan, Kurzanleitung fuer
+Verwaltung, Kurzanleitung fuer Vereine und Go-Live-Entscheidungsliste wurden
+unter `docs/` ergaenzt. README verweist auf die neuen Abnahmedokumente.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -513,11 +519,12 @@ in der Zielumgebung bleibt Teil der Betriebs-/Abnahmevorbereitung.
 
 ## Phase 23
 
-Abnahme und Go-Live-Vorbereitung
+Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 
-* Abnahmetestplan
-* Schulungs-/Kurzanleitung fuer Verwaltung und Vereine
-* finale offene Punkte fuer Version 1 entscheiden
+* `docs/acceptance-testplan.md`
+* `docs/user-guide-admin.md`
+* `docs/user-guide-portal.md`
+* `docs/go-live-open-points.md`
 
 ---
 
