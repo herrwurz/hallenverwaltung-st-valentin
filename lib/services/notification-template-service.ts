@@ -214,5 +214,39 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           <p>${escapeHtml(template.payload.description)}</p>
         `,
       };
+    case "NO_SHOW_REPORTED":
+      return {
+        subject: `No-Show gemeldet: ${template.payload.title}`,
+        text: [
+          "Eine Nichtnutzung wurde gemeldet.",
+          "",
+          `Titel: ${template.payload.title}`,
+          `Organisation: ${template.payload.organizationName}`,
+          `Ort: ${template.payload.buildingName} - ${template.payload.roomName}`,
+          `Termin: ${formatDateRange(template.payload.startsAt, template.payload.endsAt)}`,
+          `Gemeldet am: ${dateFormatter.format(new Date(template.payload.reportedAt))}`,
+          template.payload.reportedByName ? `Gemeldet von: ${template.payload.reportedByName}` : "",
+          "",
+          template.payload.description,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        html: `
+          <p>Eine Nichtnutzung wurde gemeldet.</p>
+          <ul>
+            <li><strong>Titel:</strong> ${escapeHtml(template.payload.title)}</li>
+            <li><strong>Organisation:</strong> ${escapeHtml(template.payload.organizationName)}</li>
+            <li><strong>Ort:</strong> ${escapeHtml(template.payload.buildingName)} - ${escapeHtml(template.payload.roomName)}</li>
+            <li><strong>Termin:</strong> ${escapeHtml(formatDateRange(template.payload.startsAt, template.payload.endsAt))}</li>
+            <li><strong>Gemeldet am:</strong> ${escapeHtml(dateFormatter.format(new Date(template.payload.reportedAt)))}</li>
+            ${
+              template.payload.reportedByName
+                ? `<li><strong>Gemeldet von:</strong> ${escapeHtml(template.payload.reportedByName)}</li>`
+                : ""
+            }
+          </ul>
+          <p>${escapeHtml(template.payload.description)}</p>
+        `,
+      };
   }
 }

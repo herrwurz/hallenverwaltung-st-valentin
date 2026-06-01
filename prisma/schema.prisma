@@ -90,6 +90,11 @@ enum DamageStatus {
   RESOLVED
 }
 
+enum NoShowStatus {
+  REPORTED
+  ACKNOWLEDGED
+}
+
 enum DocumentType {
   HOUSE_RULES
   USAGE_CONTRACT
@@ -162,6 +167,8 @@ model User {
   waitlistEntries         WaitlistEntry[]        @relation("WaitlistRequestedBy")
   reportedDamages         DamageReport[]         @relation("DamageReportedBy")
   processedDamages        DamageReport[]         @relation("DamageProcessedBy")
+  reportedNoShows         NoShowReport[]         @relation("NoShowReportedBy")
+  acknowledgedNoShows     NoShowReport[]         @relation("NoShowAcknowledgedBy")
   notifications           Notification[]
   auditEntries            AuditEntry[]
   organizationMemberships OrganizationMember[]
@@ -213,6 +220,7 @@ model Organization {
   bookings           Booking[]
   series             BookingSeries[]
   waitlistEntries    WaitlistEntry[]
+  noShowReports      NoShowReport[]
   documents          Document[]
   accessAssignments  AccessAssignment[]
   billingEntries     BillingEntry[]
@@ -293,6 +301,7 @@ model Room {
   tariffs                Tariff[]
   documents              Document[]
   damageReports          DamageReport[]
+  noShowReports          NoShowReport[]
   accessMedia            AccessMedium[]
 
   @@index([buildingId])
@@ -401,6 +410,7 @@ model Booking {
   statusHistory     BookingStatusHistory[]
   changeRequests    BookingChangeRequest[] @relation("BookingChangeOriginal")
   swapRequests      BookingChangeRequest[] @relation("BookingChangeSwapTarget")
+  noShowReport      NoShowReport?
 
   @@index([status, startsAt])
   @@index([roomId, startsAt, endsAt])
@@ -590,6 +600,28 @@ model DamageReport {
   processedBy       User?        @relation("DamageProcessedBy", fields: [processedByUserId], references: [id])
 
   @@index([roomId, status])
+}
+
+model NoShowReport {
+  id                   String       @id @default(cuid())
+  bookingId            String       @unique
+  organizationId       String
+  roomId               String
+  reportedByUserId     String?
+  acknowledgedByUserId String?
+  status               NoShowStatus @default(REPORTED)
+  description          String
+  reportedAt           DateTime     @default(now())
+  acknowledgedAt       DateTime?
+  booking              Booking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  room                 Room         @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  reportedBy           User?        @relation("NoShowReportedBy", fields: [reportedByUserId], references: [id])
+  acknowledgedBy       User?        @relation("NoShowAcknowledgedBy", fields: [acknowledgedByUserId], references: [id])
+
+  @@index([status, reportedAt])
+  @@index([roomId, reportedAt])
+  @@index([organizationId, reportedAt])
 }
 
 model Handover {

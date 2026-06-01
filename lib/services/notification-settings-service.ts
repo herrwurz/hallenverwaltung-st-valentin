@@ -14,6 +14,7 @@ export const notificationEventLabels: Record<NotificationEventCode, string> = {
   WAITLIST_OFFER_CREATED: "Wartelistenangebot",
   WAITLIST_OFFER_EXPIRED: "Wartelistenangebot abgelaufen",
   DAMAGE_REPORTED: "Schaden gemeldet",
+  NO_SHOW_REPORTED: "No-Show gemeldet",
 };
 
 export const notificationEventSettingsSchema = z.object(

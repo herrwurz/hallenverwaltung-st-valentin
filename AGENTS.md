@@ -171,6 +171,16 @@ Version 1:
 - Hallenuebergabe und Zutrittsverwaltung sind vorbereitet, aber nicht Teil von
   Phase 16.
 
+## No-Shows und Hallenwart-Workflows
+
+- No-Shows werden fuer genehmigte, bereits beendete Buchungen protokolliert.
+- No-Shows loesen keine automatische Sanktion, keine automatische Abrechnung
+  und keine Buchungsstatusaenderung aus.
+- Hallenwarte duerfen No-Shows nur fuer ihnen zugeordnete Raeume oder Gebaeude
+  melden, sofern kein Verwaltungsrecht fuer Buchungen vorliegt.
+- No-Show-Meldungen werden auditiert und koennen als `NO_SHOW_REPORTED`
+  benachrichtigt werden.
+
 ---
 
 # Erlaubte Standardbefehle

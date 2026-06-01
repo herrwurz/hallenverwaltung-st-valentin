@@ -13,6 +13,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     "MANAGE_DOCUMENTS",
     "MANAGE_DAMAGE",
     "BLOCK_ROOM",
+    "REPORT_NO_SHOW",
   ]);
   const [
     canManageUsers,
@@ -24,6 +25,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     canManageDocuments,
     canManageDamage,
     canBlockRoom,
+    canReportNoShow,
   ] = await Promise.all([
     hasPermission(user.id, "MANAGE_USERS"),
     hasPermission(user.id, "VIEW_BOOKINGS"),
@@ -34,6 +36,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     hasPermission(user.id, "MANAGE_DOCUMENTS"),
     hasPermission(user.id, "MANAGE_DAMAGE"),
     hasPermission(user.id, "BLOCK_ROOM"),
+    hasPermission(user.id, "REPORT_NO_SHOW"),
   ]);
   const navigationItems = [
     ...(canManageUsers ? [{ href: "/admin", label: "Dashboard" }] : []),
@@ -51,6 +54,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "System-Jobs" }] : []),
     ...(canManageDocuments ? [{ href: "/admin/documents", label: "Dokumente" }] : []),
     ...(canManageDamage ? [{ href: "/admin/damages", label: "Schaeden" }] : []),
+    ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "No-Shows" }] : []),
     ...(canManageUsers
       ? [
           { href: "/admin/settings/calendar", label: "Einstellungen" },

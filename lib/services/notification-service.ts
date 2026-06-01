@@ -7,6 +7,7 @@ import { renderNotificationTemplate } from "@/lib/services/notification-template
 import type {
   BookingNotificationPayload,
   DamageNotificationPayload,
+  NoShowNotificationPayload,
   NotificationEventCode,
   WaitlistNotificationPayload,
 } from "@/lib/services/notification-types";
@@ -15,7 +16,7 @@ type NotificationEventStatusFilter = "ALL" | "PENDING" | "SENT" | "FAILED";
 
 type NotificationClient = Pick<
   PrismaClient,
-  "notification" | "booking" | "waitlistEntry" | "damageReport" | "user" | "systemSetting"
+  "notification" | "booking" | "waitlistEntry" | "damageReport" | "noShowReport" | "user" | "systemSetting"
 >;
 
 type MailSender = (payload: MailPayload) => Promise<unknown>;
@@ -599,6 +600,58 @@ export async function queueDamageReportedNotification(
       .filter((recipient) => recipient.email)
       .map((recipient) => ({
         eventCode: "DAMAGE_REPORTED",
+        recipientUserId: recipient.id,
+        recipient: recipient.email!,
+        payload,
+      })),
+    client,
+  );
+}
+
+export async function queueNoShowReportedNotification(
+  noShowReportId: string,
+  client: NotificationClient = prisma,
+) {
+  const enabled = await isNotificationEventEnabled("NO_SHOW_REPORTED", client);
+  if (!enabled) {
+    return [];
+  }
+
+  const report = await client.noShowReport.findUnique({
+    where: { id: noShowReportId },
+    include: {
+      reportedBy: { select: { displayName: true } },
+      organization: { select: { name: true } },
+      booking: { select: { id: true, title: true, startsAt: true, endsAt: true } },
+      room: { include: { building: { select: { name: true } } } },
+    },
+  });
+
+  if (!report) {
+    return [];
+  }
+
+  const payload: NoShowNotificationPayload = {
+    noShowReportId: report.id,
+    bookingId: report.booking.id,
+    title: report.booking.title,
+    organizationName: report.organization.name,
+    buildingName: report.room.building.name,
+    roomName: report.room.name,
+    startsAt: report.booking.startsAt.toISOString(),
+    endsAt: report.booking.endsAt.toISOString(),
+    reportedByName: report.reportedBy?.displayName ?? undefined,
+    description: report.description,
+    reportedAt: report.reportedAt.toISOString(),
+  };
+
+  const adminRecipients = await getAdminRecipients(client);
+
+  return queueNotificationRows(
+    adminRecipients
+      .filter((recipient) => recipient.email)
+      .map((recipient) => ({
+        eventCode: "NO_SHOW_REPORTED",
         recipientUserId: recipient.id,
         recipient: recipient.email!,
         payload,
