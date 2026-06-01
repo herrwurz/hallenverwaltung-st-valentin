@@ -148,6 +148,10 @@ No-Show- und Hallenwart-Workflows
 
 Caretaker-User-Haertung
 
+## Phase 19.2
+
+Hallenuebergabe-Basis
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -350,6 +354,14 @@ Version 1:
   vorhandene Stammdaten
 * Verwaltung kann Meldungen zur Kenntnis nehmen
 * keine Sanktionen, keine automatische Abrechnung, keine Buchungsstatusaenderung
+
+### Hallenuebergaben
+
+* `Handover` protokolliert Schluesselerhalt, Hallenuebernahme und Retournierung
+* Schritte laufen vorwaertsgerichtet und werden auditiert
+* Recht `MANAGE_HANDOVERS`, mit Hallenwart-Zuordnung ueber `Caretaker.userId`
+  und E-Mail-Fallback ohne `VIEW_BOOKINGS`
+* keine automatische Buchungsstatusaenderung und keine Abrechnungsfolge
 
 ### E2E-Ausbau
 

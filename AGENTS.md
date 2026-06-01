@@ -182,6 +182,13 @@ Version 1:
   `Caretaker.email` ist nur ein Fallback fuer vorhandene Stammdaten.
 - No-Show-Meldungen werden auditiert und koennen als `NO_SHOW_REPORTED`
   benachrichtigt werden.
+- Hallenuebergaben werden fuer genehmigte Buchungen ueber `Handover`
+  protokolliert: Schluessel erhalten, Halle uebernommen, Halle retourniert.
+- Hallenuebergaben veraendern den Buchungsstatus nicht und erzeugen keine
+  automatische Abrechnung.
+- Das Recht `MANAGE_HANDOVERS` erlaubt die Erfassung. Ohne `VIEW_BOOKINGS`
+  duerfen Hallenwarte nur Buchungen ihrer zugeordneten Raeume oder Gebaeude
+  bearbeiten.
 
 ---
 

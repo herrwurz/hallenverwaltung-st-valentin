@@ -221,6 +221,12 @@ erDiagram
   Hallenwart-Zuordnung wird ab Phase 19.1 primaer ueber `Caretaker.userId`
   gegen den angemeldeten Benutzer geprueft. `Caretaker.email` bleibt nur als
   Fallback fuer vorhandene Stammdaten ohne Benutzerverknuepfung.
+- `Handover` ist als 1:1-Ergaenzung zu `Booking` umgesetzt und protokolliert
+  Schluesselerhalt, Hallenuebernahme und Retournierung. Die Schritte sind
+  vorwaertsgerichtet, werden auditiert und veraendern den Buchungsstatus nicht.
+- Hallenuebergaben nutzen `MANAGE_HANDOVERS`. Ohne Verwaltungsrecht
+  `VIEW_BOOKINGS` duerfen Hallenwarte nur Uebergaben fuer zugeordnete Raeume
+  oder Gebaeude erfassen.
 - Das Ereignis `NO_SHOW_REPORTED` bereitet Benachrichtigungen fuer die
   Verwaltung vor. Sanktionen, automatische Statistiken oder Abrechnungsfolgen
   bleiben ausgeschlossen.
