@@ -7,7 +7,7 @@ import {
 import { getBookingConflictRoomIds } from "@/lib/services/booking-conflict-service";
 import type { CalendarEventStatus } from "@/lib/calendar-status";
 
-export type CalendarView = "day" | "week";
+export type CalendarView = "day" | "week" | "month" | "year";
 
 export type CalendarQuery = {
   date?: string | Date;
@@ -183,6 +183,14 @@ function getRangeStart(date: Date, view: CalendarView) {
     return date;
   }
 
+  if (view === "month") {
+    return new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
+  }
+
+  if (view === "year") {
+    return new Date(date.getFullYear(), 0, 1, 0, 0, 0, 0);
+  }
+
   const day = date.getDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + mondayOffset, 0, 0, 0, 0);
@@ -193,7 +201,28 @@ function addDays(date: Date, amount: number) {
 }
 
 function buildDays(rangeStart: Date, view: CalendarView) {
-  const dayCount = view === "day" ? 1 : 7;
+  const dayCount =
+    view === "day"
+      ? 1
+      : view === "week"
+        ? 7
+        : view === "month"
+          ? new Date(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 0).getDate()
+          : 12;
+
+  if (view === "year") {
+    const monthFormatter = new Intl.DateTimeFormat("de-AT", { month: "long", year: "numeric" });
+
+    return Array.from({ length: dayCount }, (_, index) => {
+      const date = new Date(rangeStart.getFullYear(), index, 1, 0, 0, 0, 0);
+      return {
+        key: toLocalDateKey(date),
+        label: monthFormatter.format(date),
+        date,
+      };
+    });
+  }
+
   return Array.from({ length: dayCount }, (_, index) => {
     const date = addDays(rangeStart, index);
     return {
@@ -205,7 +234,19 @@ function buildDays(rangeStart: Date, view: CalendarView) {
 }
 
 function getRangeEnd(rangeStart: Date, view: CalendarView) {
-  return addDays(rangeStart, view === "day" ? 1 : 7);
+  if (view === "day") {
+    return addDays(rangeStart, 1);
+  }
+
+  if (view === "week") {
+    return addDays(rangeStart, 7);
+  }
+
+  if (view === "month") {
+    return new Date(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1, 0, 0, 0, 0);
+  }
+
+  return new Date(rangeStart.getFullYear() + 1, 0, 1, 0, 0, 0, 0);
 }
 
 function buildOpeningWindow(date: Date, room: Pick<CalendarRoom, "openingTime" | "closingTime">) {
@@ -667,7 +708,10 @@ async function buildCalendarResult({
   publicClosuresOnly?: boolean;
 }) {
   const selectedDate = parseCalendarDateInput(query.date);
-  const view = query.view === "week" ? "week" : "day";
+  const view =
+    query.view === "week" || query.view === "month" || query.view === "year"
+      ? query.view
+      : "day";
   const rangeStart = getRangeStart(selectedDate, view);
   const rangeEnd = getRangeEnd(rangeStart, view);
   const days = buildDays(rangeStart, view);

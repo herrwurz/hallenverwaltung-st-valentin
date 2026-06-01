@@ -171,6 +171,12 @@ UI-/UX-Grundhaertung aus Pilotfeedback: Statusfilter als Comboboxen,
 Abbrechen-Aktionen in zentralen Formularen und fehlende Zurueck-Navigation im
 Portal.
 
+## Phase 21.3
+
+Kalender-UX aus Pilotfeedback: Tages-, Wochen-, Monats- und Jahresansicht mit
+rasterbasierter, Google-Kalender-aehnlicher Darstellung ohne neue
+Buchungslogik.
+
 ---
 
 # Wichtigste Architekturentscheidungen

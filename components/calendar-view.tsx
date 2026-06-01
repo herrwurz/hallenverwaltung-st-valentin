@@ -15,6 +15,13 @@ const timeFormatter = new Intl.DateTimeFormat("de-AT", {
   minute: "2-digit",
 });
 
+const viewLabels: Record<CalendarResult["view"], string> = {
+  day: "Tag",
+  week: "Woche",
+  month: "Monat",
+  year: "Jahr",
+};
+
 type CalendarViewProps = {
   basePath: string;
   calendar: CalendarResult;
@@ -41,11 +48,38 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
   const groupedEvents = calendar.days.map((day) => ({
     ...day,
     events: calendar.events.filter((event) => {
-      const dayStartsAt = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 0, 0, 0, 0);
-      const dayEndsAt = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate() + 1, 0, 0, 0, 0);
-      return event.endsAt > dayStartsAt && event.startsAt < dayEndsAt;
+      const periodStartsAt = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 0, 0, 0, 0);
+      const periodEndsAt =
+        calendar.view === "year"
+          ? new Date(day.date.getFullYear(), day.date.getMonth() + 1, 1, 0, 0, 0, 0)
+          : new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate() + 1, 0, 0, 0, 0);
+      return event.endsAt > periodStartsAt && event.startsAt < periodEndsAt;
     }),
   }));
+  const viewLinks = (["day", "week", "month", "year"] as const).map((view) => {
+    const params = new URLSearchParams(shareParams);
+    params.set("view", view);
+    return {
+      view,
+      href: `${basePath}?${params.toString()}`,
+    };
+  });
+  const gridClass =
+    calendar.view === "day"
+      ? "grid-cols-1"
+      : calendar.view === "week"
+        ? "grid-cols-1 lg:grid-cols-7"
+        : calendar.view === "month"
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-7"
+          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+  const calendarTitle =
+    calendar.view === "day"
+      ? "Tagesansicht"
+      : calendar.view === "week"
+        ? "Wochenansicht"
+        : calendar.view === "month"
+          ? "Monatsansicht"
+          : "Jahresansicht";
 
   return (
     <>
@@ -57,6 +91,27 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
       </div>
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex rounded-xl border border-slate-800 bg-slate-950 p-1">
+            {viewLinks.map((item) => (
+              <Link
+                key={item.view}
+                href={item.href}
+                className={`rounded-lg px-4 py-2 text-sm transition ${
+                  calendar.view === item.view
+                    ? "bg-sky-500 text-slate-950"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                {viewLabels[item.view]}
+              </Link>
+            ))}
+          </div>
+          <p className="text-sm text-slate-400">
+            Zeitraum: {dateTimeFormatter.format(calendar.rangeStart)} bis {dateTimeFormatter.format(calendar.rangeEnd)}
+          </p>
+        </div>
+
         <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,220px,200px,auto]">
           <label className="text-sm text-slate-300">
             Gebaeude
@@ -101,6 +156,8 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             <select name="view" defaultValue={calendar.view} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm">
               <option value="day">Tag</option>
               <option value="week">Woche</option>
+              <option value="month">Monat</option>
+              <option value="year">Jahr</option>
             </select>
           </label>
 
@@ -114,9 +171,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
 
       <section className="mt-8">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-xl font-medium">
-            {calendar.view === "day" ? "Tagesansicht" : "Wochenansicht"}
-          </h3>
+          <h3 className="text-xl font-medium">{calendarTitle}</h3>
           <Link
             href={`${basePath}?${shareParams.toString()}`}
             className="text-sm text-sky-300 hover:text-sky-200"
@@ -124,32 +179,40 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             Ansicht teilen
           </Link>
         </div>
-        <div className="mt-4 space-y-4">
+        <div className={`mt-4 grid gap-3 ${gridClass}`}>
           {groupedEvents.map((day) => (
-            <section key={day.key} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-              <h4 className="font-medium">{day.label}</h4>
+            <section key={day.key} className="min-h-40 rounded-xl border border-slate-800 bg-slate-900 p-4">
+              <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <h4 className="font-medium">{day.label}</h4>
+                <span className="rounded-full bg-slate-950 px-2.5 py-1 text-xs text-slate-400">
+                  {day.events.length}
+                </span>
+              </div>
               {day.events.length === 0 ? (
                 <p className="mt-3 text-sm text-slate-400">Keine Eintraege fuer diesen Zeitraum.</p>
               ) : (
-                <div className="mt-4 space-y-3">
+                <div className="mt-3 space-y-2">
                   {day.events.map((event) => (
-                    <article key={`${event.sourceType}-${event.id}`} className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
+                    <article
+                      key={`${event.sourceType}-${event.id}`}
+                      className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 shadow-sm"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
                           <h5 className="font-medium">{event.title}</h5>
                           {event.subtitle ? <p className="mt-1 text-sm text-slate-400">{event.subtitle}</p> : null}
                           <p className="mt-1 text-sm text-slate-400">
-                            {dateTimeFormatter.format(event.startsAt)} bis {dateTimeFormatter.format(event.endsAt)}
+                            {calendar.view === "year" ? dateTimeFormatter.format(event.startsAt) : timeFormatter.format(event.startsAt)} bis{" "}
+                            {calendar.view === "year" ? dateTimeFormatter.format(event.endsAt) : timeFormatter.format(event.endsAt)}
                           </p>
                           {(event.blockedFrom.getTime() !== event.startsAt.getTime() ||
                             event.blockedUntil.getTime() !== event.endsAt.getTime()) ? (
                             <p className="mt-1 text-xs text-slate-500">
-                              Blockiert inkl. Puffer: {dateTimeFormatter.format(event.blockedFrom)} bis{" "}
-                              {dateTimeFormatter.format(event.blockedUntil)}
+                              Puffer: {timeFormatter.format(event.blockedFrom)} bis {timeFormatter.format(event.blockedUntil)}
                             </p>
                           ) : null}
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-sm ${getCalendarEventStatusBadgeClass(event.status)}`}>
+                        <span className={`rounded-full px-2.5 py-1 text-xs ${getCalendarEventStatusBadgeClass(event.status)}`}>
                           {getCalendarEventStatusLabel(event.status)}
                         </span>
                       </div>

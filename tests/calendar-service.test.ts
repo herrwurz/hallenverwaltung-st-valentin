@@ -351,6 +351,34 @@ test("admin calendar shows all booking details", async () => {
   assert.equal(calendar.events[0]?.subtitle, "Verein Blau | Sporthalle - Turnsaal");
 });
 
+test("calendar supports month view ranges", async () => {
+  const client = createCalendarClient({
+    bookings: [makeBooking()],
+  });
+
+  const calendar = await getAdminCalendarEvents({ date: calendarDate, view: "month" }, client as never);
+
+  assert.equal(calendar.view, "month");
+  assert.equal(calendar.days.length, 30);
+  assert.equal(calendar.rangeStart.getDate(), 1);
+  assert.equal(calendar.rangeEnd.getMonth(), 6);
+  assert.equal(calendar.events.length, 1);
+});
+
+test("calendar supports year view ranges", async () => {
+  const client = createCalendarClient({
+    bookings: [makeBooking()],
+  });
+
+  const calendar = await getAdminCalendarEvents({ date: calendarDate, view: "year" }, client as never);
+
+  assert.equal(calendar.view, "year");
+  assert.equal(calendar.days.length, 12);
+  assert.equal(calendar.rangeStart.getMonth(), 0);
+  assert.equal(calendar.rangeEnd.getFullYear(), 2027);
+  assert.equal(calendar.events.length, 1);
+});
+
 test("portal calendar shows own details and limits foreign bookings", async () => {
   const client = createCalendarClient({
     organizations: [makeOrganization(), makeOrganization({ id: "organization-2", name: "Gastverein" })],

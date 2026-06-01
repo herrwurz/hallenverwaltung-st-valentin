@@ -17,7 +17,7 @@ function toCalendarQuery(params: Awaited<SearchParams>): CalendarQuery {
 
   return {
     date,
-    view: view === "week" ? "week" : "day",
+    view: view === "week" || view === "month" || view === "year" ? view : "day",
     buildingId: buildingId || undefined,
     roomId: roomId || undefined,
   };
@@ -36,7 +36,7 @@ export default async function PortalCalendarPage({ searchParams }: { searchParam
     <AreaShell
       eyebrow="Portal"
       title="Kalender"
-      description="Lesende Tages- und Wochenansicht mit eigenen Details sowie eingeschraenkter Sicht auf fremde Belegungen."
+      description="Lesende Tages-, Wochen-, Monats- und Jahresansicht mit eigenen Details sowie eingeschraenkter Sicht auf fremde Belegungen."
       userName={user.name}
     >
       <CalendarView
