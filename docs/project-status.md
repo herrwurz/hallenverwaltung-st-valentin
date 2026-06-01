@@ -199,6 +199,12 @@ aktiven Organisation automatisch als verstecktes Feld gesetzt. Die sichtbare
 Auswahl bleibt nur bei mehreren Organisationen erhalten. Zentrale
 Formularaktionen verwenden explizite Submit-Buttons.
 
+## Phase 22.2
+
+UI-Konventionen fuer zentrale Admin-Stammdatenformulare: Gebaeude, Raeume,
+Organisationen und Benutzer verwenden einheitliche Formularaktionen mit
+Speichern und Abbrechen statt handgebauter Einzelbuttons.
+
 ---
 
 # Wichtigste Architekturentscheidungen

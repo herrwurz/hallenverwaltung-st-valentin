@@ -47,6 +47,21 @@ test("portal forms hide organization selection when there is only one organizati
   assert.match(portalDocuments, /PortalOrganizationField/);
 });
 
+test("admin master data forms use shared form actions", () => {
+  const pages = [
+    "app/admin/buildings/page.tsx",
+    "app/admin/rooms/page.tsx",
+    "app/admin/organizations/page.tsx",
+    "app/admin/users/page.tsx",
+  ];
+
+  for (const page of pages) {
+    const source = readFileSync(page, "utf8");
+    assert.match(source, /FormActions/, `${page} should use FormActions`);
+    assert.doesNotMatch(source, /lg:text-right[\s\S]*bg-sky-500/, `${page} should not hand-roll primary form actions`);
+  }
+});
+
 test("damage forms use building filtered room selection", () => {
   const portalDamages = readFileSync("app/portal/damages/page.tsx", "utf8");
 

@@ -1,5 +1,6 @@
 import { saveRoomAction } from "@/app/admin/actions";
 import { AdminFeedback } from "@/components/admin-feedback";
+import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
 import { getRoomAdministrationData } from "@/lib/services/admin/room-service";
 
@@ -150,10 +151,8 @@ function RoomForm({
           className={inputClass}
         />
       </label>
-      <div className="lg:col-span-4 lg:text-right">
-        <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {room ? "Änderungen speichern" : "Raum anlegen"}
-        </button>
+      <div className="lg:col-span-4">
+        <FormActions submitLabel={room ? "Änderungen speichern" : "Raum anlegen"} cancelHref="/admin/rooms" />
       </div>
     </form>
   );

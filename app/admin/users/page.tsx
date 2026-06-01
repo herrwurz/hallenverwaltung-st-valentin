@@ -1,5 +1,6 @@
 import { saveUserAction } from "@/app/admin/actions";
 import { AdminFeedback } from "@/components/admin-feedback";
+import { FormActions } from "@/components/form-actions";
 import { requirePermission } from "@/lib/permissions";
 import { getUserAdministrationData } from "@/lib/services/admin/user-service";
 
@@ -134,10 +135,8 @@ function UserForm({
           </label>
         </div>
       </fieldset>
-      <div className="text-right">
-        <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {user ? "Änderungen speichern" : "Benutzer anlegen"}
-        </button>
+      <div>
+        <FormActions submitLabel={user ? "Änderungen speichern" : "Benutzer anlegen"} cancelHref="/admin/users" />
       </div>
     </form>
   );
