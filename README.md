@@ -3,7 +3,7 @@
 Technisches Grundgeruest fuer eine Hallenverwaltungssoftware auf Basis von
 Next.js, TypeScript, Tailwind CSS, Prisma und PostgreSQL.
 
-## Stand: Phase 22
+## Stand: Phase 23
 
 Enthalten sind:
 
@@ -16,6 +16,11 @@ Enthalten sind:
 - Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
 - Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
 - Produktions-Readiness-Checkliste unter `docs/production-readiness.md`
+- Abnahmetestplan und Kurzanleitungen unter `docs/acceptance-testplan.md`,
+  `docs/user-guide-admin.md` und `docs/user-guide-portal.md`
+- Go-Live-Runbook, Nachweisprotokoll und Entscheidungsliste unter
+  `docs/go-live-runbook.md`, `docs/go-live-evidence.md` und
+  `docs/go-live-open-points.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 
 ## Voraussetzungen
@@ -123,6 +128,11 @@ nutzbar:
 - Hallenwart-Funktionen nach Login: `/admin/handovers`
 
 Ein manueller Testleitfaden liegt in `docs/pilot-testplan.md`.
+Der finale Abnahmetestplan liegt in `docs/acceptance-testplan.md`.
+Kurzanleitungen fuer Verwaltung und Vereine liegen in
+`docs/user-guide-admin.md` und `docs/user-guide-portal.md`.
+Die Go-Live-Ausfuehrung wird in `docs/go-live-runbook.md` gefuehrt.
+Das zugehoerige Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 
 ### Hinweis zu Codex auf Windows
 
@@ -225,6 +235,10 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
 - Backup-, Restore- und Restore-Test-Scripts unter `deploy/scripts`
 - `docs/production-readiness.md` als Checkliste fuer Zielumgebung,
   Initialbenutzer, SMTP, Worker, Backup/Restore und Smoke-Test
+- `docs/go-live-runbook.md` als operative Go-Live-Schrittfolge mit
+  Nachweisen und Stop-Kriterien
+- `docs/go-live-evidence.md` als ausfuellbares Protokoll fuer echte
+  Zielumgebungsnachweise
 
 Produktionsumgebung vorbereiten:
 

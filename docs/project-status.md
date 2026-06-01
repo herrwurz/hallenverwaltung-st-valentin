@@ -218,6 +218,34 @@ Produktionskonfiguration, Initialbenutzer, SMTP, Worker, Backup/Restore-Probe
 und Smoke-Tests wurde in `docs/production-readiness.md` dokumentiert. README
 verweist auf diese Checkliste und fuehrt den Projektstand als Phase 22.
 
+## Phase 23.1
+
+Abnahme- und Go-Live-Vorbereitung: Abnahmetestplan, Kurzanleitung fuer
+Verwaltung, Kurzanleitung fuer Vereine und Go-Live-Entscheidungsliste wurden
+unter `docs/` ergaenzt. README verweist auf die neuen Abnahmedokumente.
+
+## Phase 23.2
+
+Go-Live-Review-Schaerfung fuer priorisierte Punkte: Hoch-Blocker wurden in
+`docs/go-live-open-points.md` als echte Produktivstart-Blocker mit
+Nachweisspalten dokumentiert. Mittlere Pilotpunkte wie Stammdaten-Loeschkonzept
+und Ferien-/Semesterlogik wurden als bewusste Fachentscheidungen vor einem
+breiteren Pilot eingeordnet.
+
+## Phase 23.3
+
+Go-Live-Runbook: Die Hoch-Blocker wurden in `docs/go-live-runbook.md` in eine
+operative Schrittfolge mit Befehlen, Nachweisen, Stop-Kriterien und
+Rollback-Hinweisen ueberfuehrt. README, Produktions-Readiness und
+Go-Live-Entscheidungsliste verweisen auf das Runbook.
+
+## Phase 23.4
+
+Go-Live-Nachweisprotokoll: `docs/go-live-evidence.md` wurde als ausfuellbare
+Vorlage fuer echte Zielumgebungsnachweise, Risikoakzeptanzen, mittlere
+Pilotentscheidungen und finale Freigabe ergaenzt. Runbook, Abnahmeplan,
+README und Readiness-Dokumente verweisen darauf.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -513,11 +541,18 @@ in der Zielumgebung bleibt Teil der Betriebs-/Abnahmevorbereitung.
 
 ## Phase 23
 
-Abnahme und Go-Live-Vorbereitung
+Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 
-* Abnahmetestplan
-* Schulungs-/Kurzanleitung fuer Verwaltung und Vereine
-* finale offene Punkte fuer Version 1 entscheiden
+* `docs/acceptance-testplan.md`
+* `docs/user-guide-admin.md`
+* `docs/user-guide-portal.md`
+* `docs/go-live-open-points.md`
+* `docs/go-live-runbook.md`
+* `docs/go-live-evidence.md`
+
+Hoch priorisierte Go-Live-Blocker muessen vor Produktivstart erledigt oder
+ausdruecklich mit Risikoakzeptanz freigegeben werden. Mittlere Pilotpunkte
+werden vor einem breiteren Vereins-Pilot entschieden.
 
 ---
 
