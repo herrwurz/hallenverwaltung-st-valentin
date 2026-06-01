@@ -1,0 +1,204 @@
+# Produktions-Readiness Phase 22
+
+Diese Checkliste beschreibt die produktionsnahe Inbetriebnahme der
+Hallenverwaltung St. Valentin. Sie ersetzt kein echtes Server-Hardening, macht
+aber die Schritte vor Abnahme und Go-Live nachvollziehbar.
+
+## 1. Zielumgebung vorbereiten
+
+- Server mit Docker und Docker Compose bereitstellen.
+- DNS-Eintrag fuer die Ziel-Domain auf den Server zeigen lassen.
+- TLS-Zertifikate bereitstellen:
+  - `deploy/certs/fullchain.pem`
+  - `deploy/certs/privkey.pem`
+- Dateirechte fuer Zertifikate und Backups auf den Betriebsbenutzer begrenzen.
+- Firewall nur fuer benoetigte Ports oeffnen:
+  - 80/tcp fuer HTTP-Redirect und ACME-Challenge
+  - 443/tcp fuer HTTPS
+  - SSH nur fuer Administratoren
+
+## 2. Produktionskonfiguration
+
+Aus Vorlage erstellen:
+
+```bash
+cp .env.production.example .env.production
+```
+
+Pflichtwerte vor dem Start setzen:
+
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `AUTH_URL`
+- `AUTH_SECRET`
+- `AUTH_TRUST_HOST=true`
+- `SERVER_NAME`
+- `TLS_CERT_DIR`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `SMTP_FROM_EMAIL`
+- `SMTP_FROM_NAME`
+- `WORKER_INTERVAL_SECONDS`
+
+Regeln:
+
+- `AUTH_SECRET` muss ein langes zufaelliges Secret sein.
+- `.env.production` darf nicht committet werden.
+- SMTP-Zugangsdaten duerfen nicht in Logs oder Tickets kopiert werden.
+- Demo-Passwoerter aus README sind nur lokal erlaubt.
+
+## 3. Konfiguration pruefen
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml config
+```
+
+Erfolgskriterium:
+
+- Compose rendert ohne Fehler.
+- Keine Platzhalterwerte wie `replace-with-*` bleiben in der echten
+  `.env.production`.
+
+## 4. Start und Migration
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml up --build -d
+```
+
+Erwartung:
+
+- `db` wird healthy.
+- `migrate` endet erfolgreich.
+- `web` startet.
+- `worker` startet.
+- `reverse-proxy` startet.
+
+Pruefen:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml ps
+docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 web
+docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 worker
+```
+
+## 5. Initialbenutzer
+
+Version 1 benoetigt vor realem Betrieb mindestens:
+
+- einen Gemeinde-/Admin-Benutzer mit Systemrechten
+- einen Test-Vereinsbenutzer fuer Portal-Smoke-Tests
+- optional einen Hallenwart-Benutzer fuer Handover/No-Show-Smoke-Tests
+
+Vorgehen:
+
+- In lokalen Testumgebungen kann `npm run demo:seed` verwendet werden.
+- In Produktion keine Demo-Passwoerter verwenden.
+- Produktive Initialbenutzer muessen sichere, individuell vergebene Passwoerter
+  erhalten.
+- Nach Go-Live pruefen, ob keine Demo-Zugaenge aktiv sind.
+
+## 6. SMTP und Benachrichtigungen
+
+Pruefen:
+
+- SMTP-Werte in `.env.production` gesetzt.
+- Absenderadresse ist fuer die Domain erlaubt.
+- Admin-Seite `/admin/notifications` erreichbar.
+- Event-Schalter fuer benoetigte Ereignisse aktiv.
+- Testereignis erzeugt Queue-Eintrag.
+- Worker oder manuelle Verarbeitung versendet die Benachrichtigung.
+- Fehlgeschlagene Benachrichtigungen koennen erneut gesendet werden.
+
+Wichtig:
+
+- Es gibt keinen extern hartcodierten Maildienst.
+- Kein SMS und kein Push in Version 1.
+
+## 7. Worker-Betrieb
+
+Die Production-Compose-Datei startet den Worker als eigenen Dienst.
+
+Pruefen:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 worker
+```
+
+Erfolgskriterium:
+
+- Notification Queue wird verarbeitet.
+- Wartelistenangebote laufen ab.
+- Folgeplatz wird nach Ablauf aktiviert.
+- Joblaeufe werden als Audit-/Job-Protokoll sichtbar.
+
+Fallback ohne Worker-Dienst:
+
+```cron
+*/5 * * * * cd /srv/hallenverwaltung && npm run worker:run
+```
+
+Es darf nicht beides gleichzeitig produktiv laufen, wenn dadurch Jobs
+unnoetig doppelt verarbeitet werden.
+
+## 8. Backup und Restore-Probe
+
+Backup erstellen:
+
+```bash
+ENV_FILE=.env.production deploy/scripts/backup-postgres.sh
+```
+
+Restore-Probe in temporaerer Datenbank:
+
+```bash
+BACKUP_FILE=backups/hallenverwaltung_YYYYMMDDTHHMMSSZ.dump \
+ENV_FILE=.env.production \
+deploy/scripts/restore-test-postgres.sh
+```
+
+Erfolgskriterium:
+
+- Backup-Datei wird erzeugt.
+- Restore-Test laeuft ohne Fehler.
+- Restore-Test gibt wiederhergestellte Tabellen aus.
+
+Produktiver Restore ist destruktiv und darf nur nach ausdruecklicher Freigabe
+ausgefuehrt werden:
+
+```bash
+BACKUP_FILE=backups/hallenverwaltung_YYYYMMDDTHHMMSSZ.dump \
+ENV_FILE=.env.production \
+deploy/scripts/restore-postgres.sh
+```
+
+## 9. Smoke-Test nach Start
+
+Manuell pruefen:
+
+- `/public`
+- `/public/calendar`
+- `/login`
+- Admin-Login und `/admin`
+- Portal-Login und `/portal`
+- Buchungsantrag im Portal
+- Admin-Buchungsuebersicht
+- Kalenderansicht
+- Benachrichtigungsqueue
+- Worker-Jobs unter `/admin/system/jobs`
+- Abrechnungsexport in einer Testperiode
+
+Details stehen in `docs/pilot-testplan.md`.
+
+## 10. Offene Betriebsrisiken vor Go-Live
+
+- Zertifikate muessen in der Zielumgebung real eingerichtet werden.
+- SMTP muss gegen den echten Server getestet werden.
+- Backup-Rotation und Aufbewahrungsfrist muessen organisatorisch festgelegt
+  werden.
+- Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz fehlt noch.
+- Restore-Probe muss nach Servereinrichtung dokumentiert werden.
+- Finaler Abnahmetest gehoert in Phase 23.

@@ -211,6 +211,13 @@ UI-Konventionen fuer Kern-Verwaltungsseiten: Gebaeude, Raeume, Organisationen,
 Benutzer und Rollen/Rechte verwenden einen gemeinsamen Ruecklink zum
 Admin-Dashboard.
 
+## Phase 22.4
+
+Produktions-Readiness-Abschluss: Betriebscheckliste fuer Zielumgebung,
+Produktionskonfiguration, Initialbenutzer, SMTP, Worker, Backup/Restore-Probe
+und Smoke-Tests wurde in `docs/production-readiness.md` dokumentiert. README
+verweist auf diese Checkliste und fuehrt den Projektstand als Phase 22.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -477,7 +484,8 @@ noch.
 ## Deployment noch nicht real ausgerollt
 
 Produktionsnahe Docker-, HTTPS-Reverse-Proxy-, Backup- und Restore-Grundlagen
-sind vorbereitet. Zertifikate, Server-Hardening, Monitoring und echte Restore-
+sind vorbereitet und in `docs/production-readiness.md` als Checkliste
+dokumentiert. Zertifikate, Server-Hardening, Monitoring und echte Restore-
 Proben muessen in der Zielumgebung noch durchgefuehrt werden.
 
 ---
@@ -500,11 +508,8 @@ Fachlicher Pilot-Review mit echten Testlaeufen
 
 ## Phase 22
 
-Produktions-Readiness
-
-* echte Zielumgebung vorbereiten
-* HTTPS, SMTP, Backup, Restore-Probe und Worker-Betrieb pruefen
-* sichere Initialbenutzer und Betriebsdokumentation
+Produktions-Readiness ist dokumentarisch abgeschlossen. Die echte Ausfuehrung
+in der Zielumgebung bleibt Teil der Betriebs-/Abnahmevorbereitung.
 
 ## Phase 23
 

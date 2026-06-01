@@ -3,7 +3,7 @@
 Technisches Grundgeruest fuer eine Hallenverwaltungssoftware auf Basis von
 Next.js, TypeScript, Tailwind CSS, Prisma und PostgreSQL.
 
-## Stand: Phase 20
+## Stand: Phase 22
 
 Enthalten sind:
 
@@ -15,6 +15,7 @@ Enthalten sind:
   Warteliste, Kalender, Benachrichtigungen, Exporte und oeffentliche Ansicht
 - Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
 - Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
+- Produktions-Readiness-Checkliste unter `docs/production-readiness.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 
 ## Voraussetzungen
@@ -214,7 +215,7 @@ gespeichert.
 
 ## Produktionsvorbereitung
 
-Phase 13 stellt eine produktionsnahe, aber bewusst noch nicht
+Phase 22 stellt eine produktionsnahe, aber bewusst noch nicht
 umgebungsspezifisch ausgerollte Grundlage bereit:
 
 - `docker-compose.production.yml` fuer PostgreSQL, Migrationen, Web,
@@ -222,6 +223,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
 - `.env.production.example` als Vorlage fuer Produktionsvariablen
 - `deploy/nginx/templates/hallenverwaltung.conf.template` fuer HTTPS-Terminierung
 - Backup-, Restore- und Restore-Test-Scripts unter `deploy/scripts`
+- `docs/production-readiness.md` als Checkliste fuer Zielumgebung,
+  Initialbenutzer, SMTP, Worker, Backup/Restore und Smoke-Test
 
 Produktionsumgebung vorbereiten:
 
