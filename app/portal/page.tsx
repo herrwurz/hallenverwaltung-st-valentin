@@ -9,22 +9,22 @@ export default async function PortalPage() {
     <AreaShell
       eyebrow="Portal"
       title="Organisationsportal"
-      description="Geschuetzter Bereich fuer Vereine, VHS und Schulen."
+      description="Geschuetzter Bereich für Vereine, VHS und Schulen."
       userName={user.name}
     >
       <Link
         href="/portal/bookings"
         className="mt-10 block rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-sky-700"
       >
-        <h2 className="text-lg font-medium">Buchungsantraege</h2>
-        <p className="mt-2 text-slate-300">Einzeltermine beantragen und bestehende Antraege einsehen.</p>
+        <h2 className="text-lg font-medium">Buchungsanträge</h2>
+        <p className="mt-2 text-slate-300">Einzeltermine beantragen und bestehende Anträge einsehen.</p>
       </Link>
       <Link
         href="/portal/calendar"
         className="mt-4 block rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-sky-700"
       >
         <h2 className="text-lg font-medium">Kalender</h2>
-        <p className="mt-2 text-slate-300">Tages- und Wochenansicht mit freien Zeiten und eingeschraenkter Fremdsicht.</p>
+        <p className="mt-2 text-slate-300">Tages- und Wochenansicht mit freien Zeiten und eingeschränkter Fremdsicht.</p>
       </Link>
       <Link
         href="/portal/waitlist"
@@ -45,7 +45,7 @@ export default async function PortalPage() {
         className="mt-4 block rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-sky-700"
       >
         <h2 className="text-lg font-medium">Schadensmeldungen</h2>
-        <p className="mt-2 text-slate-300">Schaeden mit Beschreibung und optionalem Foto-Ablagepfad melden.</p>
+        <p className="mt-2 text-slate-300">Schäden mit Beschreibung und optionalem Foto-Ablagepfad melden.</p>
       </Link>
     </AreaShell>
   );

@@ -16,10 +16,10 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
 });
 
 const statusLabels: Record<AdminBookingFilterKey, string> = {
-  OPEN: "Offen (beantragt + in Pruefung)",
+  OPEN: "Offen (beantragt + in Prüfung)",
   ALL: "Alle",
   REQUESTED: "Beantragt",
-  IN_REVIEW: "In Pruefung",
+  IN_REVIEW: "In Prüfung",
   APPROVED: "Genehmigt",
   REJECTED: "Abgelehnt",
   CANCELLED: "Storniert",
@@ -62,9 +62,9 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Buchungen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Buchungsantraege</h2>
+      <h2 className="mt-3 text-3xl font-semibold">Buchungsanträge</h2>
       <p className="mt-3 text-slate-300">
-        Offene und bearbeitete Buchungsantraege mit Konflikthinweisen, Historie und serverseitig gesicherten
+        Offene und bearbeitete Buchungsanträge mit Konflikthinweisen, Historie und serverseitig gesicherten
         Entscheidungsaktionen.
       </p>
       {params.error ? (
@@ -72,7 +72,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
       ) : null}
       {params.reviewed ? (
         <p className="mt-6 rounded-lg border border-sky-800 bg-sky-950/40 p-4 text-sm text-sky-200">
-          Der Antrag wurde in Pruefung uebernommen.
+          Der Antrag wurde in Prüfung übernommen.
         </p>
       ) : null}
       {params.approved ? (
@@ -109,7 +109,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
       <section className="mt-8 space-y-3">
         {bookings.length === 0 ? (
           <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Fuer den gewaehlten Statusfilter sind keine Buchungen vorhanden.
+            Für den gewählten Statusfilter sind keine Buchungen vorhanden.
           </p>
         ) : (
           bookings.map((booking) => (
@@ -191,16 +191,16 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                 <section className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                   <h4 className="text-sm font-medium text-slate-200">Entscheidung</h4>
                   <p className="mt-2 text-sm text-slate-400">
-                    Workflow in Phase 6: Beantragt {"->"} In Pruefung {"->"} Genehmigt oder Abgelehnt.
+                    Workflow in Phase 6: Beantragt {"->"} In Prüfung {"->"} Genehmigt oder Abgelehnt.
                   </p>
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
                     {canApprove && booking.status === "REQUESTED" ? (
                       <form action={markBookingInReviewAction} className="rounded-lg border border-slate-800 p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <p className="text-sm text-slate-300">Antrag zur fachlichen Pruefung uebernehmen.</p>
+                        <p className="text-sm text-slate-300">Antrag zur fachlichen Prüfung übernehmen.</p>
                         <button className="mt-4 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                          In Pruefung setzen
+                          In Prüfung setzen
                         </button>
                       </form>
                     ) : null}
@@ -224,7 +224,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <label className="text-sm text-slate-300">
-                          Begruendung (erforderlich)
+                          Begründung (erforderlich)
                           <textarea name="decisionNote" rows={3} required className={textareaClass} />
                         </label>
                         <button className="mt-4 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-rose-400">

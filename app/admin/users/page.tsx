@@ -122,9 +122,9 @@ function UserForm({
             <input name="membershipFunction" defaultValue={functionValue} className={inputClass} />
           </label>
           <label className="text-sm text-slate-300">
-            Primaere Organisation
+            Primäre Organisation
             <select name="primaryOrganizationId" defaultValue={primaryOrganizationId ?? ""} className={inputClass}>
-              <option value="">Keine primaere Organisation</option>
+              <option value="">Keine primäre Organisation</option>
               {organizations.map((organization) => (
                 <option key={organization.id} value={organization.id}>
                   {organization.name}
@@ -136,7 +136,7 @@ function UserForm({
       </fieldset>
       <div className="text-right">
         <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {user ? "Aenderungen speichern" : "Benutzer anlegen"}
+          {user ? "Änderungen speichern" : "Benutzer anlegen"}
         </button>
       </div>
     </form>

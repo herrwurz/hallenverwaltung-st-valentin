@@ -48,8 +48,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(canManageUsers ? [{ href: "/admin", label: "Dashboard" }] : []),
     ...(canViewBookings || canApproveBookings || canRejectBookings
       ? [
-          { href: "/admin/bookings", label: "Buchungsantraege" },
-          { href: "/admin/booking-changes", label: "Aenderungsantraege" },
+          { href: "/admin/bookings", label: "Buchungsanträge" },
+          { href: "/admin/booking-changes", label: "Änderungsanträge" },
           { href: "/admin/series", label: "Serien" },
           { href: "/admin/calendar", label: "Kalender" },
           { href: "/admin/notifications", label: "Benachrichtigungen" },
@@ -59,15 +59,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(canCreateExports ? [{ href: "/admin/billing", label: "Abrechnung" }] : []),
     ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "System-Jobs" }] : []),
     ...(canManageDocuments ? [{ href: "/admin/documents", label: "Dokumente" }] : []),
-    ...(canManageDamage ? [{ href: "/admin/damages", label: "Schaeden" }] : []),
+    ...(canManageDamage ? [{ href: "/admin/damages", label: "Schäden" }] : []),
     ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "No-Shows" }] : []),
-    ...(canManageHandovers ? [{ href: "/admin/handovers", label: "Hallenuebergaben" }] : []),
+    ...(canManageHandovers ? [{ href: "/admin/handovers", label: "Hallenübergaben" }] : []),
     ...(canManageAccess ? [{ href: "/admin/access", label: "Zutritte" }] : []),
     ...(canManageUsers
       ? [
           { href: "/admin/settings/calendar", label: "Einstellungen" },
-          { href: "/admin/buildings", label: "Gebaeude" },
-          { href: "/admin/rooms", label: "Raeume" },
+          { href: "/admin/buildings", label: "Gebäude" },
+          { href: "/admin/rooms", label: "Räume" },
           { href: "/admin/organizations", label: "Organisationen" },
           { href: "/admin/users", label: "Benutzer" },
           { href: "/admin/roles", label: "Rollen/Rechte" },

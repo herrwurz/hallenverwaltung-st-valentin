@@ -11,7 +11,7 @@ export const handoverEventSchema = z.object({
   notes: z
     .string()
     .trim()
-    .max(2000, "Notizen duerfen maximal 2000 Zeichen lang sein.")
+    .max(2000, "Notizen dürfen maximal 2000 Zeichen lang sein.")
     .optional()
     .or(z.literal("")),
 });
@@ -34,15 +34,15 @@ type HandoverActor = {
 type HandoverBookingScope = Parameters<typeof isAssignedCaretakerUserForBooking>[1];
 
 const handoverActionLabels: Record<HandoverAction, string> = {
-  KEY_RECEIVED: "Schluessel erhalten",
-  ROOM_ACCEPTED: "Halle uebernommen",
+  KEY_RECEIVED: "Schlüssel erhalten",
+  ROOM_ACCEPTED: "Halle übernommen",
   ROOM_RETURNED: "Halle retourniert",
 };
 
 const handoverStatusLabels: Record<HandoverStatus, string> = {
   OPEN: "Offen",
-  KEY_RECEIVED: "Schluessel erhalten",
-  ROOM_ACCEPTED: "Halle uebernommen",
+  KEY_RECEIVED: "Schlüssel erhalten",
+  ROOM_ACCEPTED: "Halle übernommen",
   ROOM_RETURNED: "Halle retourniert",
 };
 
@@ -80,7 +80,7 @@ export function assertHandoverTransition(handover: HandoverSnapshot | null | und
   };
 
   if (!allowed[currentStatus].includes(action)) {
-    throw new BookingValidationError("Dieser Hallenuebergabe-Schritt ist in der aktuellen Reihenfolge nicht erlaubt.");
+    throw new BookingValidationError("Dieser Hallenübergabe-Schritt ist in der aktuellen Reihenfolge nicht erlaubt.");
   }
 }
 
@@ -107,7 +107,7 @@ function assertHandoverPermission({
   booking: HandoverBookingScope;
 }) {
   if (!permissions.canManageHandovers) {
-    throw new BookingValidationError("Fuer Hallenuebergaben fehlt das Recht MANAGE_HANDOVERS.");
+    throw new BookingValidationError("Für Hallenübergaben fehlt das Recht MANAGE_HANDOVERS.");
   }
 
   if (permissions.canViewBookings) {
@@ -115,7 +115,7 @@ function assertHandoverPermission({
   }
 
   if (!isAssignedCaretakerUserForBooking(actorUserId, booking) && !isAssignedCaretakerForBooking(actorEmail, booking)) {
-    throw new BookingValidationError("Hallenuebergaben duerfen nur fuer zugeordnete Raeume oder Gebaeude erfasst werden.");
+    throw new BookingValidationError("Hallenübergaben dürfen nur für zugeordnete Räume oder Gebäude erfasst werden.");
   }
 }
 
@@ -146,7 +146,7 @@ export async function getAdminHandoverData(actorUserId: string) {
   const permissions = await resolveHandoverPermissions(actorUserId);
 
   if (!permissions.canManageHandovers) {
-    throw new BookingValidationError("Fuer Hallenuebergaben fehlt das Recht MANAGE_HANDOVERS.");
+    throw new BookingValidationError("Für Hallenübergaben fehlt das Recht MANAGE_HANDOVERS.");
   }
 
   const bookings = await prisma.booking.findMany({
@@ -210,7 +210,7 @@ export async function applyHandoverTransition(
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        throw new BookingValidationError("Dieser Hallenuebergabe-Schritt wurde bereits erfasst.");
+        throw new BookingValidationError("Dieser Hallenübergabe-Schritt wurde bereits erfasst.");
       }
 
       throw error;
@@ -238,12 +238,12 @@ export async function applyHandoverTransition(
   });
 
   if (result.count !== 1) {
-    throw new BookingValidationError("Dieser Hallenuebergabe-Schritt ist nicht mehr im erwarteten Zustand.");
+    throw new BookingValidationError("Dieser Hallenübergabe-Schritt ist nicht mehr im erwarteten Zustand.");
   }
 
   const handover = await client.handover.findUnique({ where: { bookingId } });
   if (!handover) {
-    throw new BookingValidationError("Die Hallenuebergabe wurde nicht gefunden.");
+    throw new BookingValidationError("Die Hallenübergabe wurde nicht gefunden.");
   }
 
   return handover;
@@ -275,7 +275,7 @@ export async function recordHandoverEvent(input: unknown, actorUserId: string, n
   assertHandoverPermission({ permissions, actorUserId: actor.id, actorEmail: actor.email, booking });
 
   if (booking.status !== "APPROVED") {
-    throw new BookingValidationError("Hallenuebergaben koennen nur fuer genehmigte Buchungen erfasst werden.");
+    throw new BookingValidationError("Hallenübergaben können nur für genehmigte Buchungen erfasst werden.");
   }
 
   const notes = data.notes?.trim() || undefined;

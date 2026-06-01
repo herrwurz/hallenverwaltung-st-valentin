@@ -12,7 +12,7 @@ export const damageReportSchema = z.object({
 });
 
 export const damageStatusSchema = z.object({
-  damageReportId: z.string().trim().min(1, "Die Schadensmeldung ist ungueltig."),
+  damageReportId: z.string().trim().min(1, "Die Schadensmeldung ist ungültig."),
   status: z.enum(["REPORTED", "IN_REVIEW", "RESOLVED"] satisfies DamageStatus[]),
 });
 
@@ -64,7 +64,7 @@ export async function getAdminDamageData(status?: string) {
 export async function reportDamage(input: unknown, actorUserId: string) {
   const canReportDamage = await hasPermission(actorUserId, "REPORT_DAMAGE");
   if (!canReportDamage) {
-    throw new BookingValidationError("Fuer Schadensmeldungen fehlt das Recht REPORT_DAMAGE.");
+    throw new BookingValidationError("Für Schadensmeldungen fehlt das Recht REPORT_DAMAGE.");
   }
 
   const data = damageReportSchema.parse(input);
@@ -74,7 +74,7 @@ export async function reportDamage(input: unknown, actorUserId: string) {
   });
 
   if (!room || room.status === "OUT_OF_SERVICE" || !room.building.isActive) {
-    throw new BookingValidationError("Der ausgewaehlte Raum kann fuer Schadensmeldungen nicht verwendet werden.");
+    throw new BookingValidationError("Der ausgewählte Raum kann für Schadensmeldungen nicht verwendet werden.");
   }
 
   return prisma.$transaction(async (transaction) => {
@@ -112,7 +112,7 @@ export function assertDamageTransition(currentStatus: DamageStatus, nextStatus: 
   }
 
   if (!allowedDamageTransitions[currentStatus].includes(nextStatus)) {
-    throw new BookingValidationError("Dieser Statuswechsel fuer die Schadensmeldung ist nicht erlaubt.");
+    throw new BookingValidationError("Dieser Statuswechsel für die Schadensmeldung ist nicht erlaubt.");
   }
 }
 
@@ -146,7 +146,7 @@ async function writeDamageStatusAudit({
 export async function updateDamageStatus(input: unknown, actorUserId: string) {
   const canManageDamage = await hasPermission(actorUserId, "MANAGE_DAMAGE");
   if (!canManageDamage) {
-    throw new BookingValidationError("Fuer die Schadensbearbeitung fehlt das Recht MANAGE_DAMAGE.");
+    throw new BookingValidationError("Für die Schadensbearbeitung fehlt das Recht MANAGE_DAMAGE.");
   }
 
   const data = damageStatusSchema.parse(input);

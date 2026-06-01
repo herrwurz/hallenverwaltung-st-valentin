@@ -36,16 +36,16 @@ export default async function PortalCalendarPage({ searchParams }: { searchParam
     <AreaShell
       eyebrow="Portal"
       title="Kalender"
-      description="Lesende Tages-, Wochen-, Monats- und Jahresansicht mit eigenen Details sowie eingeschraenkter Sicht auf fremde Belegungen."
+      description="Lesende Tages-, Wochen-, Monats- und Jahresansicht mit eigenen Details sowie eingeschränkter Sicht auf fremde Belegungen."
       userName={user.name}
     >
       <CalendarView
         basePath="/portal/calendar"
         calendar={calendar}
         freeSlots={freeSlots}
-        detailHint="Eigene Buchungen voll sichtbar, fremde Buchungen eingeschraenkt."
+        detailHint="Eigene Buchungen voll sichtbar, fremde Buchungen eingeschränkt."
         backHref="/portal"
-        backLabel="Zurueck zum Portal"
+        backLabel="Zurück zum Portal"
       />
     </AreaShell>
   );

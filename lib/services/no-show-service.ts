@@ -11,7 +11,7 @@ export const noShowReportSchema = z.object({
 });
 
 export const noShowAcknowledgeSchema = z.object({
-  noShowReportId: z.string().trim().min(1, "Die No-Show-Meldung ist ungueltig."),
+  noShowReportId: z.string().trim().min(1, "Die No-Show-Meldung ist ungültig."),
 });
 
 type NoShowPermissionState = {
@@ -70,7 +70,7 @@ export function assertNoShowReportPermission({
   booking: NoShowBookingScope;
 }) {
   if (!permissions.canReportNoShow) {
-    throw new BookingValidationError("Fuer No-Show-Meldungen fehlt das Recht REPORT_NO_SHOW.");
+    throw new BookingValidationError("Für No-Show-Meldungen fehlt das Recht REPORT_NO_SHOW.");
   }
 
   if (permissions.canViewBookings) {
@@ -78,7 +78,7 @@ export function assertNoShowReportPermission({
   }
 
   if (!isAssignedCaretakerUserForBooking(actorUserId, booking) && !isAssignedCaretakerForBooking(actorEmail, booking)) {
-    throw new BookingValidationError("No-Shows duerfen nur fuer zugeordnete Raeume oder Gebaeude gemeldet werden.");
+    throw new BookingValidationError("No-Shows dürfen nur für zugeordnete Räume oder Gebäude gemeldet werden.");
   }
 }
 
@@ -133,7 +133,7 @@ export async function getAdminNoShowData(actorUserId: string, status?: string) {
   const permissions = await resolveNoShowPermissions(actorUserId);
 
   if (!permissions.canReportNoShow && !permissions.canViewBookings) {
-    throw new BookingValidationError("Fuer No-Show-Workflows fehlt eine passende Berechtigung.");
+    throw new BookingValidationError("Für No-Show-Workflows fehlt eine passende Berechtigung.");
   }
 
   const statusFilter = status === "REPORTED" || status === "ACKNOWLEDGED" ? status : undefined;
@@ -200,15 +200,15 @@ export async function reportNoShow(input: unknown, actorUserId: string, now = ne
   assertNoShowReportPermission({ permissions, actorUserId: actor.id, actorEmail: actor.email, booking });
 
   if (booking.status !== "APPROVED") {
-    throw new BookingValidationError("No-Shows koennen nur fuer genehmigte Buchungen gemeldet werden.");
+    throw new BookingValidationError("No-Shows können nur für genehmigte Buchungen gemeldet werden.");
   }
 
   if (booking.endsAt > now) {
-    throw new BookingValidationError("No-Shows koennen erst nach dem Ende der Buchung gemeldet werden.");
+    throw new BookingValidationError("No-Shows können erst nach dem Ende der Buchung gemeldet werden.");
   }
 
   if (booking.noShowReport) {
-    throw new BookingValidationError("Fuer diese Buchung wurde bereits ein No-Show gemeldet.");
+    throw new BookingValidationError("Für diese Buchung wurde bereits ein No-Show gemeldet.");
   }
 
   return prisma.$transaction(async (transaction) => {
@@ -244,14 +244,14 @@ export async function reportNoShow(input: unknown, actorUserId: string, now = ne
 
 export function assertNoShowAcknowledgeTransition(status: NoShowStatus) {
   if (status !== "REPORTED") {
-    throw new BookingValidationError("Nur gemeldete No-Shows koennen zur Kenntnis genommen werden.");
+    throw new BookingValidationError("Nur gemeldete No-Shows können zur Kenntnis genommen werden.");
   }
 }
 
 export async function acknowledgeNoShow(input: unknown, actorUserId: string) {
   const canViewBookings = await hasPermission(actorUserId, "VIEW_BOOKINGS");
   if (!canViewBookings) {
-    throw new BookingValidationError("Fuer die Bearbeitung von No-Shows fehlt das Recht VIEW_BOOKINGS.");
+    throw new BookingValidationError("Für die Bearbeitung von No-Shows fehlt das Recht VIEW_BOOKINGS.");
   }
 
   const data = noShowAcknowledgeSchema.parse(input);

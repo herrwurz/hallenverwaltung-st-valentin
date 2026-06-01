@@ -290,7 +290,7 @@ test("rejects conflicting overlapping tariffs", async () => {
     ],
   });
 
-  await assert.rejects(calculateBillingEntry("booking-1", harness.client as never), /widerspruechliche Tarife/);
+  await assert.rejects(calculateBillingEntry("booking-1", harness.client as never), /widersprüchliche Tarife/);
 });
 
 test("non-billing-relevant organizations do not create billing entries", async () => {

@@ -18,7 +18,7 @@ export default async function OrganizationsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Organisationen</p>
       <h2 className="mt-3 text-3xl font-semibold">Organisationen-Verwaltung</h2>
       <p className="mt-3 text-slate-300">
-        Organisationstyp, Aktivitaet und verwaltungsseitige Sperre pflegen.
+        Organisationstyp, Aktivität und verwaltungsseitige Sperre pflegen.
       </p>
       <div className="mt-8">
         <AdminFeedback {...params} />
@@ -76,7 +76,7 @@ function OrganizationForm({
           className={inputClass}
         >
           <option value="" disabled>
-            Bitte waehlen
+            Bitte wählen
           </option>
           {organizationTypes.map((type) => (
             <option key={type.id} value={type.id}>
@@ -99,7 +99,7 @@ function OrganizationForm({
       </label>
       <div className="lg:col-span-4 lg:text-right">
         <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          {organization ? "Aenderungen speichern" : "Organisation anlegen"}
+          {organization ? "Änderungen speichern" : "Organisation anlegen"}
         </button>
       </div>
     </form>

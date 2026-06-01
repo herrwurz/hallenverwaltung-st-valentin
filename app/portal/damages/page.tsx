@@ -22,11 +22,11 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Portal</p>
       <h2 className="mt-3 text-3xl font-semibold">Schadensmeldungen</h2>
       <p className="mt-3 text-slate-300">
-        Melden Sie Schaeden mit Beschreibung und optionalem Foto-Ablagepfad. Die Gemeinde bearbeitet den Status.
+        Melden Sie Schäden mit Beschreibung und optionalem Foto-Ablagepfad. Die Gemeinde bearbeitet den Status.
       </p>
       <div className="mt-8 flex items-center justify-between">
         <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Portal
+          Zurück zum Portal
         </Link>
       </div>
       {params.error ? (
@@ -59,7 +59,7 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
       <section className="mt-8 space-y-3">
         {data.reports.length === 0 ? (
           <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Sie haben noch keine Schaeden gemeldet.
+            Sie haben noch keine Schäden gemeldet.
           </p>
         ) : (
           data.reports.map((report) => (

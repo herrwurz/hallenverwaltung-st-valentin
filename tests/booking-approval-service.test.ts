@@ -410,7 +410,7 @@ test("moves a booking from REQUESTED to IN_REVIEW", async () => {
     actorUserId: "admin-1",
     oldStatus: "REQUESTED",
     newStatus: "IN_REVIEW",
-    reason: "Zur Pruefung uebernommen.",
+    reason: "Zur Prüfung übernommen.",
     oldStartAt: start,
     oldEndAt: end,
     newStartAt: start,
@@ -438,7 +438,7 @@ test("does not allow direct approval from REQUESTED", async () => {
         },
         harness.client,
       ),
-    /in Pruefung/,
+    /in Prüfung/,
   );
 });
 
@@ -591,7 +591,7 @@ test("prevents approval when the booking status changed in parallel", async () =
         },
         harness.client,
       ),
-    /zwischenzeitlich geaendert/,
+    /zwischenzeitlich geändert/,
   );
 });
 

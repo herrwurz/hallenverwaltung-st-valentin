@@ -24,7 +24,7 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Hallenwart</p>
       <h2 className="mt-3 text-3xl font-semibold">Zutrittsverwaltung</h2>
       <p className="mt-3 text-slate-300">
-        Schluessel, RFID-Karten und elektronische Zutritte verwalten. Noch keine Kopplung an ein externes Tuer- oder
+        Schlüssel, RFID-Karten und elektronische Zutritte verwalten. Noch keine Kopplung an ein externes Tür- oder
         Schliesssystem.
       </p>
 
@@ -41,10 +41,10 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
         <h3 className="text-lg font-medium">Zutrittsmedium anlegen</h3>
         <form action={createAccessMediumAction} className="mt-5 grid gap-4 lg:grid-cols-2">
           <label className="text-sm text-slate-300">
-            Gebaeude
+            Gebäude
             <select name="buildingId" required defaultValue="" className={inputClass}>
               <option value="" disabled>
-                Bitte waehlen
+                Bitte wählen
               </option>
               {data.buildings.map((building) => (
                 <option key={building.id} value={building.id}>
@@ -56,7 +56,7 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
           <label className="text-sm text-slate-300">
             Raum optional
             <select name="roomId" defaultValue="" className={inputClass}>
-              <option value="">Gebaeudeweit</option>
+              <option value="">Gebäudeweit</option>
               {data.rooms.map((room) => (
                 <option key={room.id} value={room.id}>
                   {room.building.name} - {room.name}
@@ -104,7 +104,7 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                     </h3>
                     <p className="mt-1 text-sm text-slate-400">
                       {medium.building.name}
-                      {medium.room ? ` - ${medium.room.name}` : " | gebaeudeweit"}
+                      {medium.room ? ` - ${medium.room.name}` : " | gebäudeweit"}
                     </p>
                   </div>
                   <span className={`rounded-full px-3 py-1 text-sm ${medium.isActive ? "bg-emerald-950 text-emerald-200" : "bg-slate-800 text-slate-300"}`}>
@@ -122,7 +122,7 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                     <form action={returnAccessAssignmentAction} className="mt-3">
                       <input type="hidden" name="assignmentId" value={activeAssignment.id} />
                       <button className="rounded-lg border border-sky-700 px-4 py-2 text-sm text-sky-200 hover:bg-sky-950">
-                        Rueckgabe erfassen
+                        Rückgabe erfassen
                       </button>
                     </form>
                   </div>
@@ -141,7 +141,7 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                       </select>
                     </label>
                     <label className="text-sm text-slate-300">
-                      Empfaenger
+                      Empfänger
                       <input name="issuedToName" required maxLength={150} className={inputClass} />
                     </label>
                     <div className="self-end">

@@ -23,8 +23,8 @@ test("portal forms expose cancel actions and back navigation", () => {
   const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
   const portalWaitlist = readFileSync("app/portal/waitlist/page.tsx", "utf8");
 
-  assert.match(portalDocuments, /Zurueck zum Portal/);
-  assert.match(portalDamages, /Zurueck zum Portal/);
+  assert.match(portalDocuments, /Zurück zum Portal/);
+  assert.match(portalDamages, /Zurück zum Portal/);
   assert.match(portalBookings, /FormActions/);
   assert.match(portalWaitlist, /FormActions/);
   assert.match(portalDocuments, /FormActions/);

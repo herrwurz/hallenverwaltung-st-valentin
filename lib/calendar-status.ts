@@ -10,7 +10,7 @@ export function getCalendarEventStatusLabel(status: CalendarEventStatus) {
     case "REQUESTED":
       return "Beantragt";
     case "IN_REVIEW":
-      return "In Pruefung";
+      return "In Prüfung";
     case "APPROVED":
       return "Genehmigt";
     case "CANCELLED":

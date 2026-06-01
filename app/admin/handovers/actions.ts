@@ -9,14 +9,14 @@ import { recordHandoverEvent } from "@/lib/services/handover-service";
 
 function handoverErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind nicht gueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
   }
 
   if (error instanceof BookingValidationError) {
     return error.message;
   }
 
-  return "Die Hallenuebergabe konnte nicht verarbeitet werden.";
+  return "Die Hallenübergabe konnte nicht verarbeitet werden.";
 }
 
 export async function recordHandoverEventAction(formData: FormData) {

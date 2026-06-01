@@ -119,7 +119,7 @@ async function createBookingRequestWithClient(
   ]);
 
   if (!organization || organization.status !== "ACTIVE" || !organization.canRequestBookings) {
-    throw new BookingValidationError("Die Organisation ist gesperrt oder fuer Buchungen nicht aktiv.");
+    throw new BookingValidationError("Die Organisation ist gesperrt oder für Buchungen nicht aktiv.");
   }
 
   assertOrganizationBookingAccess({
@@ -128,11 +128,11 @@ async function createBookingRequestWithClient(
   });
 
   if (!room || room.status !== "ACTIVE" || !room.building.isActive) {
-    throw new BookingValidationError("Der ausgewaehlte Raum ist nicht aktiv buchbar.");
+    throw new BookingValidationError("Der ausgewählte Raum ist nicht aktiv buchbar.");
   }
 
   if (!usageType) {
-    throw new BookingValidationError("Der ausgewaehlte Nutzungstyp ist nicht gueltig.");
+    throw new BookingValidationError("Der ausgewählte Nutzungstyp ist nicht gültig.");
   }
 
   const { blockedFrom, blockedUntil } = resolveBookingBlockedWindow({

@@ -9,7 +9,7 @@ import { acknowledgeNoShow, reportNoShow } from "@/lib/services/no-show-service"
 
 function noShowErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind nicht gueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
   }
 
   if (error instanceof BookingValidationError) {

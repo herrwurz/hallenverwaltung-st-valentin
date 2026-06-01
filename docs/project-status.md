@@ -183,6 +183,15 @@ Zusammengefasste UI-Politur aus Pilotfeedback: Kalender-Termin-Details als
 Dialog, sichtbare Umlautkorrekturen in den beruehrten Kalenderflaechen und ein
 konservativer Verwaltungsstil mit eckigeren, sachlicheren Kalender-Elementen.
 
+## Phase 21.8
+
+UTF-8-/Text-Härtung für sichtbare App-, Service- und Testtexte: zentrale
+deutsche Umlaute in Portal, Verwaltung, Public-Bereich, Statuslabels und
+Fehlermeldungen wurden auf echte UTF-8-Zeichen umgestellt. Der lokale Dev-Start
+wurde erneut geprüft; in der Codex-Umgebung bleibt eine Next/SWC-Lockfile-
+Warnung mit Netzwerk-/EACCES-Abbruch bestehen, während der Produktionsbuild
+weiterhin erfolgreich läuft.
+
 ---
 
 # Wichtigste Architekturentscheidungen

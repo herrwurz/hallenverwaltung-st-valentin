@@ -132,12 +132,12 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
         <div>
           <h2 className="text-3xl font-semibold">Abrechnungsvorbereitung</h2>
           <p className="mt-3 max-w-3xl text-slate-300">
-            Genehmigte Buchungen werden gesammelt, tarifiert und fuer einen spaeteren Excel- oder PDF-Export
+            Genehmigte Buchungen werden gesammelt, tarifiert und für einen späteren Excel- oder PDF-Export
             vorbereitet. Es wird keine Rechnung erzeugt und keine Zahlung verarbeitet.
           </p>
         </div>
         <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Dashboard
+          Zurück zum Dashboard
         </Link>
       </div>
 
@@ -146,12 +146,12 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
       ) : null}
       {params.created ? (
         <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          {params.created} Abrechnungseintraege erzeugt. {params.skipped ?? "0"} Buchungen wurden uebersprungen.
+          {params.created} Abrechnungseinträge erzeugt. {params.skipped ?? "0"} Buchungen wurden übersprungen.
         </p>
       ) : null}
       {params.exported ? (
         <p className="mt-6 rounded-lg border border-sky-800 bg-sky-950/40 p-4 text-sm text-sky-200">
-          {params.exported} Eintraege wurden als exportiert markiert.
+          {params.exported} Einträge wurden als exportiert markiert.
         </p>
       ) : null}
 
@@ -186,7 +186,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
             </select>
           </label>
           <label className="text-sm text-slate-300">
-            Gebaeude
+            Gebäude
             <select name="buildingId" defaultValue={params.buildingId ?? ""} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2">
               <option value="">Alle</option>
               {filterOptions.buildings.map((building) => (
@@ -221,21 +221,21 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-medium">Abrechnungsfaehige Buchungen</h3>
+            <h3 className="text-xl font-medium">Abrechnungsfähige Buchungen</h3>
             <p className="mt-2 text-sm text-slate-400">Nur genehmigte Buchungen ohne bestehenden Eintrag.</p>
           </div>
           <form action={createBillingEntriesAction}>
             <input type="hidden" name="periodStart" value={formatInputDate(periodStart)} />
             <input type="hidden" name="periodEnd" value={formatInputDate(periodEnd)} />
             <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-              Eintraege erzeugen
+              Einträge erzeugen
             </button>
           </form>
         </div>
 
         {bookings.length === 0 ? (
           <p className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-400">
-            Keine offenen abrechnungsfaehigen Buchungen im Zeitraum.
+            Keine offenen abrechnungsfähigen Buchungen im Zeitraum.
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">
@@ -270,8 +270,8 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-medium">Abrechnungseintraege</h3>
-            <p className="mt-2 text-sm text-slate-400">Erzeugte Eintraege koennen exportiert oder als exportiert markiert werden.</p>
+            <h3 className="text-xl font-medium">Abrechnungseinträge</h3>
+            <p className="mt-2 text-sm text-slate-400">Erzeugte Einträge können exportiert oder als exportiert markiert werden.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <a href={exportParams({ periodStart, periodEnd, params, format: "csv" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
@@ -287,7 +287,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
               PDF Vereine
             </a>
             <a href={exportParams({ periodStart, periodEnd, params, format: "pdf", report: "roomUsage" })} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
-              PDF Raeume
+              PDF Räume
             </a>
             <a href={`${exportParams({ periodStart, periodEnd, params, format: "csv" })}&markExported=1`} className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
               CSV + exportiert
@@ -297,7 +297,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
 
         {entries.length === 0 ? (
           <p className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-400">
-            Noch keine Abrechnungseintraege im Zeitraum.
+            Noch keine Abrechnungseinträge im Zeitraum.
           </p>
         ) : (
           <form action={markBillingEntriesExportedAction} className="mt-5">
@@ -345,7 +345,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
               disabled={openEntries.length === 0}
               className="mt-5 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
             >
-              Ausgewaehlte als exportiert markieren
+              Ausgewählte als exportiert markieren
             </button>
           </form>
         )}

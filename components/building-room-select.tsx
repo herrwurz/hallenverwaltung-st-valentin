@@ -34,7 +34,7 @@ export function BuildingRoomSelect({
   buildings,
   roomName = "roomId",
   defaultRoomId,
-  buildingLabel = "Gebaeude",
+  buildingLabel = "Gebäude",
   roomLabel = "Raum",
   inputClassName,
 }: BuildingRoomSelectProps) {
@@ -59,7 +59,7 @@ export function BuildingRoomSelect({
           className={inputClassName}
         >
           {buildings.length === 0 ? (
-            <option value="">Keine aktiven Gebaeude vorhanden</option>
+            <option value="">Keine aktiven Gebäude vorhanden</option>
           ) : null}
           {buildings.map((building) => (
             <option key={building.id} value={building.id} disabled={building.rooms.length === 0}>
@@ -79,7 +79,7 @@ export function BuildingRoomSelect({
           className={inputClassName}
         >
           <option value="" disabled>
-            Bitte waehlen
+            Bitte wählen
           </option>
           {availableRooms.map((room) => (
             <option key={room.id} value={room.id}>

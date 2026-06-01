@@ -7,7 +7,7 @@ import { BookingValidationError } from "@/lib/services/booking-rules";
 export const accessMediumTypes = ["KEY", "RFID_CARD", "ELECTRONIC_ACCESS"] as const satisfies AccessMediumType[];
 
 export const accessMediumSchema = z.object({
-  buildingId: z.string().trim().min(1, "Ein Gebaeude ist erforderlich."),
+  buildingId: z.string().trim().min(1, "Ein Gebäude ist erforderlich."),
   roomId: z.string().trim().optional().or(z.literal("")),
   type: z.enum(accessMediumTypes),
   identifier: z.string().trim().min(2, "Eine Kennung ist erforderlich.").max(100),
@@ -16,15 +16,15 @@ export const accessMediumSchema = z.object({
 export const accessAssignmentSchema = z.object({
   accessMediumId: z.string().trim().min(1, "Ein Zutrittsmedium ist erforderlich."),
   organizationId: z.string().trim().optional().or(z.literal("")),
-  issuedToName: z.string().trim().min(2, "Ein Empfaenger ist erforderlich.").max(150),
+  issuedToName: z.string().trim().min(2, "Ein Empfänger ist erforderlich.").max(150),
 });
 
 export const accessReturnSchema = z.object({
-  assignmentId: z.string().trim().min(1, "Die Ausgabe ist ungueltig."),
+  assignmentId: z.string().trim().min(1, "Die Ausgabe ist ungültig."),
 });
 
 export const accessDeactivateSchema = z.object({
-  accessMediumId: z.string().trim().min(1, "Das Zutrittsmedium ist ungueltig."),
+  accessMediumId: z.string().trim().min(1, "Das Zutrittsmedium ist ungültig."),
 });
 
 type AccessClient = Prisma.TransactionClient | typeof prisma;
@@ -37,7 +37,7 @@ function normalizeOptionalId(value?: string | null) {
 async function assertManageAccess(actorUserId: string) {
   const canManageAccess = await hasPermission(actorUserId, "MANAGE_ACCESS");
   if (!canManageAccess) {
-    throw new BookingValidationError("Fuer die Zutrittsverwaltung fehlt das Recht MANAGE_ACCESS.");
+    throw new BookingValidationError("Für die Zutrittsverwaltung fehlt das Recht MANAGE_ACCESS.");
   }
 }
 
@@ -46,7 +46,7 @@ export function assertMediumCanBeIssued(input: {
   activeAssignment?: { id: string } | null;
 }) {
   if (!input.isActive) {
-    throw new BookingValidationError("Inaktive Zutrittsmedien koennen nicht ausgegeben werden.");
+    throw new BookingValidationError("Inaktive Zutrittsmedien können nicht ausgegeben werden.");
   }
 
   if (input.activeAssignment) {
@@ -61,7 +61,7 @@ async function assertMediumTarget(data: z.infer<typeof accessMediumSchema>, clie
   });
 
   if (!building?.isActive) {
-    throw new BookingValidationError("Das Gebaeude wurde nicht gefunden oder ist inaktiv.");
+    throw new BookingValidationError("Das Gebäude wurde nicht gefunden oder ist inaktiv.");
   }
 
   if (data.roomId) {
@@ -75,7 +75,7 @@ async function assertMediumTarget(data: z.infer<typeof accessMediumSchema>, clie
     }
 
     if (room.buildingId !== data.buildingId) {
-      throw new BookingValidationError("Der Raum gehoert nicht zum ausgewaehlten Gebaeude.");
+      throw new BookingValidationError("Der Raum gehoert nicht zum ausgewählten Gebäude.");
     }
   }
 }
@@ -91,7 +91,7 @@ async function assertActiveOrganization(organizationId: string | undefined, clie
   });
 
   if (!organization || organization.status !== "ACTIVE") {
-    throw new BookingValidationError("Zutrittsmedien duerfen nur aktiven Organisationen ausgegeben werden.");
+    throw new BookingValidationError("Zutrittsmedien dürfen nur aktiven Organisationen ausgegeben werden.");
   }
 }
 
@@ -270,7 +270,7 @@ export async function deactivateAccessMedium(input: unknown, actorUserId: string
     });
 
     if (activeAssignment) {
-      throw new BookingValidationError("Aktiv ausgegebene Zutrittsmedien koennen nicht deaktiviert werden.");
+      throw new BookingValidationError("Aktiv ausgegebene Zutrittsmedien können nicht deaktiviert werden.");
     }
 
     const result = await transaction.accessMedium.updateMany({

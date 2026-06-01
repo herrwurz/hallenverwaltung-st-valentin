@@ -27,7 +27,7 @@ function getErrorMessage(error: unknown) {
   }
 
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind ungueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind ungültig.";
   }
 
   return "Die Abrechnung konnte nicht verarbeitet werden.";

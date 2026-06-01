@@ -18,8 +18,8 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Ferienlogik</p>
       <h2 className="mt-3 text-3xl font-semibold">Ferien und Feiertage</h2>
       <p className="mt-3 text-slate-300">
-        Konfigurierbare Ferien-, Feiertags- und schulautonome Zeitraeume fuer Serienbuchungen. Geschlossene
-        Zeitraeume werden bei neuen Serienantraegen uebersprungen, eingeschraenkte Zeitraeume als Hinweis angezeigt.
+        Konfigurierbare Ferien-, Feiertags- und schulautonome Zeiträume für Serienbuchungen. Geschlossene
+        Zeiträume werden bei neuen Serienanträgen übersprungen, eingeschränkte Zeiträume als Hinweis angezeigt.
       </p>
 
       {params.error ? (
@@ -41,8 +41,8 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
           <label className="text-sm text-slate-300">
             Status
             <select name="defaultStatus" required defaultValue="CLOSED" className={inputClass}>
-              <option value="OPEN">Geoeffnet</option>
-              <option value="RESTRICTED">Eingeschraenkt</option>
+              <option value="OPEN">Geöffnet</option>
+              <option value="RESTRICTED">Eingeschränkt</option>
               <option value="CLOSED">Gesperrt</option>
             </select>
           </label>
@@ -60,7 +60,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
           </label>
           <label className="inline-flex items-center gap-2 text-sm text-slate-300 lg:col-span-2">
             <input name="isPublic" type="checkbox" defaultChecked className="rounded border-slate-700 bg-slate-950" />
-            Fuer Benutzer sichtbar
+            Für Benutzer sichtbar
           </label>
           <div className="lg:col-span-2 lg:text-right">
             <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">

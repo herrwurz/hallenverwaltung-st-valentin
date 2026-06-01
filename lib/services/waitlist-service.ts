@@ -183,7 +183,7 @@ async function assertWaitlistActorAccess(
   ]);
 
   if (!organization || organization.status !== "ACTIVE" || !organization.canRequestBookings) {
-    throw new BookingValidationError("Die Organisation ist gesperrt oder fuer Wartelistenplaetze nicht aktiv.");
+    throw new BookingValidationError("Die Organisation ist gesperrt oder für Wartelistenplätze nicht aktiv.");
   }
 
   assertOrganizationBookingAccess({ isAdmin, hasActiveMembership: Boolean(membership) });
@@ -223,11 +223,11 @@ async function validateWaitlistSlot(
   ]);
 
   if (!room || room.status !== "ACTIVE" || !room.building.isActive) {
-    throw new BookingValidationError("Der ausgewaehlte Raum ist nicht aktiv buchbar.");
+    throw new BookingValidationError("Der ausgewählte Raum ist nicht aktiv buchbar.");
   }
 
   if (!usageType) {
-    throw new BookingValidationError("Der ausgewaehlte Nutzungstyp ist nicht gueltig.");
+    throw new BookingValidationError("Der ausgewählte Nutzungstyp ist nicht gültig.");
   }
 
   const { blockedFrom, blockedUntil } = resolveBookingBlockedWindow({
@@ -437,7 +437,7 @@ export async function createWaitlistEntry(
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         throw new BookingValidationError(
-          "Fuer diese Organisation existiert bereits ein aktiver Wartelistenplatz fuer denselben Slot.",
+          "Für diese Organisation existiert bereits ein aktiver Wartelistenplatz für denselben Slot.",
         );
       }
 
@@ -587,7 +587,7 @@ export async function acceptWaitlistOffer(
     });
 
     if (entry.status !== "OFFERED" || !entry.offerExpiresAt || entry.offerExpiresAt <= now) {
-      throw new BookingValidationError("Das Wartelistenangebot ist nicht mehr gueltig.");
+      throw new BookingValidationError("Das Wartelistenangebot ist nicht mehr gültig.");
     }
 
     const updated = await transaction.waitlistEntry.updateMany({
@@ -602,7 +602,7 @@ export async function acceptWaitlistOffer(
     });
 
     if (updated.count === 0) {
-      throw new BookingValidationError("Das Wartelistenangebot wurde zwischenzeitlich geaendert.");
+      throw new BookingValidationError("Das Wartelistenangebot wurde zwischenzeitlich geändert.");
     }
 
     const bookingResult = await createBookingRequest(
@@ -685,7 +685,7 @@ export async function declineWaitlistOffer(
     });
 
     if (entry.status !== "OFFERED" || !entry.offerExpiresAt || entry.offerExpiresAt <= now) {
-      throw new BookingValidationError("Das Wartelistenangebot ist nicht mehr gueltig.");
+      throw new BookingValidationError("Das Wartelistenangebot ist nicht mehr gültig.");
     }
 
     const updated = await transaction.waitlistEntry.updateMany({
@@ -700,7 +700,7 @@ export async function declineWaitlistOffer(
     });
 
     if (updated.count === 0) {
-      throw new BookingValidationError("Das Wartelistenangebot wurde zwischenzeitlich geaendert.");
+      throw new BookingValidationError("Das Wartelistenangebot wurde zwischenzeitlich geändert.");
     }
 
     await activateNextWaitlistEntryForSlotWithClient(transaction, {

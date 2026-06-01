@@ -42,7 +42,7 @@ function getMailEnv() {
 export function getSmtpConfig() {
   const env = getMailEnv();
   if (!env.host || !env.port || !env.fromEmail) {
-    throw new MailDeliveryError("SMTP ist nicht vollstaendig konfiguriert.");
+    throw new MailDeliveryError("SMTP ist nicht vollständig konfiguriert.");
   }
 
   return smtpConfigSchema.parse(env);

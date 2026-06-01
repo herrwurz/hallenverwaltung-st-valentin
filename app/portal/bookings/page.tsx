@@ -33,13 +33,13 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
   return (
     <AreaShell
       eyebrow="Portal"
-      title="Buchungsantraege"
-      description="Neue Einzeltermine beantragen und Antraege Ihrer Organisationen einsehen."
+      title="Buchungsanträge"
+      description="Neue Einzeltermine beantragen und Anträge Ihrer Organisationen einsehen."
       userName={user.name}
     >
       <div className="mt-8 flex items-center justify-between">
         <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Portal
+          Zurück zum Portal
         </Link>
       </div>
 
@@ -84,7 +84,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Organisation
               <select name="organizationId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {options.organizations.map((organization) => (
                   <option key={organization.id} value={organization.id}>
@@ -102,7 +102,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Nutzungstyp
               <select name="usageTypeId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {options.usageTypes.map((usageType) => (
                   <option key={usageType.id} value={usageType.id}>
@@ -134,7 +134,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
         <h2 className="text-xl font-medium">Neuer Serienantrag</h2>
         <p className="mt-2 text-sm text-slate-400">
           Erzeugt woechentliche Einzeltermine. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden
-          uebersprungen.
+          übersprungen.
         </p>
         {options.organizations.length === 0 ? (
           <p className="mt-4 text-sm text-amber-200">
@@ -146,7 +146,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Organisation
               <select name="organizationId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {options.organizations.map((organization) => (
                   <option key={organization.id} value={organization.id}>
@@ -164,7 +164,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Nutzungstyp
               <select name="usageTypeId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {options.usageTypes.map((usageType) => (
                   <option key={usageType.id} value={usageType.id}>
@@ -206,11 +206,11 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
       </section>
 
       <section className="mt-8">
-        <h2 className="text-xl font-medium">Antraege Ihrer Organisationen</h2>
+        <h2 className="text-xl font-medium">Anträge Ihrer Organisationen</h2>
         <div className="mt-4 space-y-3">
           {bookings.length === 0 ? (
             <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-              Noch keine Buchungsantraege vorhanden.
+              Noch keine Buchungsanträge vorhanden.
             </p>
           ) : (
             bookings.map((booking) => (
@@ -290,7 +290,7 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                   {dateFormatter.format(item.startsOn)} bis {dateFormatter.format(item.endsOn)} | {item.bookings.length} Termine
                 </p>
                 <p className="mt-2 text-xs text-slate-500">
-                  Ganze Serien werden nicht gesammelt geaendert; einzelne Termine koennen ueber Verschiebungsantraege behandelt werden.
+                  Ganze Serien werden nicht gesammelt geändert; einzelne Termine können über Verschiebungsanträge behandelt werden.
                 </p>
               </article>
             ))
@@ -299,11 +299,11 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
       </section>
 
       <section className="mt-8">
-        <h2 className="text-xl font-medium">Verschiebungs- und Tauschantraege</h2>
+        <h2 className="text-xl font-medium">Verschiebungs- und Tauschanträge</h2>
         <div className="mt-4 space-y-3">
           {changeRequests.length === 0 ? (
             <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-              Noch keine Aenderungsantraege vorhanden.
+              Noch keine Änderungsanträge vorhanden.
             </p>
           ) : (
             changeRequests.map((request) => (

@@ -140,7 +140,7 @@ test("PDF export supports organization and room usage reports", async () => {
     { canExport: true },
   );
 
-  assert.match(organizationReport.content.toString("utf8"), /Vereinsuebersicht/);
+  assert.match(organizationReport.content.toString("utf8"), /Vereinsübersicht/);
   assert.match(roomReport.content.toString("utf8"), /Raumbelegung/);
 });
 

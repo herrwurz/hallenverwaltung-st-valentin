@@ -14,10 +14,10 @@ export default async function AdminSeriesPage() {
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Serienbuchungen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Serienantraege</h2>
+      <h2 className="mt-3 text-3xl font-semibold">Serienanträge</h2>
       <p className="mt-3 text-slate-300">
-        Lesende Uebersicht der woechentlichen Serien. Ganze Serien werden in Version 1 nicht gesammelt geaendert;
-        einzelne Termine bleiben normale Buchungsantraege im Genehmigungsworkflow.
+        Lesende Übersicht der wöchentlichen Serien. Ganze Serien werden in Version 1 nicht gesammelt geändert;
+        einzelne Termine bleiben normale Buchungsanträge im Genehmigungsworkflow.
       </p>
 
       <section className="mt-8 space-y-3">

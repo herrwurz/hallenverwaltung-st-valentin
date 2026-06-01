@@ -54,7 +54,7 @@ export async function exportPublicCalendarIcs(
       `DTSTART:${formatIcsDate(event.startsAt)}`,
       `DTEND:${formatIcsDate(event.endsAt)}`,
       `SUMMARY:${escapeIcsText(event.title)}`,
-      `DESCRIPTION:${escapeIcsText(event.subtitle ?? "Oeffentliche Hallenbelegung")}`,
+      `DESCRIPTION:${escapeIcsText(event.subtitle ?? "Öffentliche Hallenbelegung")}`,
       `LOCATION:${escapeIcsText(location)}`,
       `STATUS:${event.status === "CLOSURE" ? "CONFIRMED" : "BUSY"}`,
       "END:VEVENT",

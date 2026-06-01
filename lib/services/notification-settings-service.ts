@@ -7,7 +7,7 @@ export const notificationEventSettingsKey = "notifications.events.enabled";
 
 export const notificationEventLabels: Record<NotificationEventCode, string> = {
   BOOKING_REQUESTED: "Buchung beantragt",
-  BOOKING_IN_REVIEW: "Buchung in Pruefung",
+  BOOKING_IN_REVIEW: "Buchung in Prüfung",
   BOOKING_APPROVED: "Buchung genehmigt",
   BOOKING_REJECTED: "Buchung abgelehnt",
   BOOKING_CANCELLED: "Buchung storniert",

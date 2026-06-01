@@ -16,17 +16,17 @@ function optionalValue(formData: FormData, name: string) {
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
-    return error.issues[0]?.message ?? "Die Eingaben sind nicht gueltig.";
+    return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
   }
 
   const expectedMessages = new Set([
     "Ein Raum kann nicht sein eigener Teilbereich sein.",
-    "Parent-Room und Teilbereich muessen demselben Gebaeude zugeordnet sein.",
+    "Parent-Room und Teilbereich müssen demselben Gebäude zugeordnet sein.",
     "Die Parent-Room-Zuordnung darf keinen Zyklus bilden.",
-    "Neue Benutzer benoetigen ein Passwort.",
+    "Neue Benutzer benötigen ein Passwort.",
     "Das Passwort muss mindestens 12 Zeichen enthalten.",
-    "Die primaere Organisation muss dem Benutzer zugewiesen sein.",
-    "Nur Super-Admins duerfen Super-Admin-Benutzer verwalten.",
+    "Die primäre Organisation muss dem Benutzer zugewiesen sein.",
+    "Nur Super-Admins dürfen Super-Admin-Benutzer verwalten.",
   ]);
 
   if (error instanceof Error && expectedMessages.has(error.message)) {

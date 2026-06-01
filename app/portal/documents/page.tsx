@@ -21,12 +21,12 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Portal</p>
       <h2 className="mt-3 text-3xl font-semibold">Dokumente</h2>
       <p className="mt-3 text-slate-300">
-        Dokumente werden in Phase 16 als sichere Metadaten erfasst. Ein echter Datei-Storage kann spaeter angebunden
+        Dokumente werden in Phase 16 als sichere Metadaten erfasst. Ein echter Datei-Storage kann später angebunden
         werden.
       </p>
       <div className="mt-8 flex items-center justify-between">
         <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurueck zum Portal
+          Zurück zum Portal
         </Link>
       </div>
       {params.error ? (
@@ -48,7 +48,7 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
               Organisation
               <select name="organizationId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {data.organizations.map((organization) => (
                   <option key={organization.id} value={organization.id}>

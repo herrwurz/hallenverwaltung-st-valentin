@@ -24,7 +24,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
       <h2 className="mt-3 text-3xl font-semibold">No-Show-Meldungen</h2>
       <p className="mt-3 text-slate-300">
         Nichtnutzungen genehmigter Buchungen protokollieren. Keine Sanktionen, keine automatische Abrechnung und keine
-        Statusaenderung der Buchung in dieser Phase.
+        Statusänderung der Buchung in dieser Phase.
       </p>
 
       {params.error ? (
@@ -45,7 +45,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
         <h3 className="text-lg font-medium">No-Show melden</h3>
         {data.reportableBookings.length === 0 ? (
           <p className="mt-4 text-sm text-slate-400">
-            Aktuell sind keine abgeschlossenen genehmigten Buchungen fuer eine neue Meldung verfuegbar.
+            Aktuell sind keine abgeschlossenen genehmigten Buchungen für eine neue Meldung verfügbar.
           </p>
         ) : (
           <form action={reportNoShowAction} className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -53,7 +53,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
               Buchung
               <select name="bookingId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
-                  Bitte waehlen
+                  Bitte wählen
                 </option>
                 {data.reportableBookings.map((booking) => (
                   <option key={booking.id} value={booking.id}>
@@ -85,7 +85,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
       <section className="mt-8 space-y-3">
         {data.reports.length === 0 ? (
           <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Fuer den gewaehlten Filter sind keine No-Show-Meldungen vorhanden.
+            Für den gewählten Filter sind keine No-Show-Meldungen vorhanden.
           </p>
         ) : (
           data.reports.map((report) => (

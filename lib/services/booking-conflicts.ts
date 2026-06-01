@@ -97,7 +97,7 @@ export function evaluateBookingConflicts({
         severity: approved ? "blocking" : "soft",
         message: approved
           ? `Der Zeitraum kollidiert mit der genehmigten Buchung "${booking.title}".`
-          : `Soft-Konflikt: Der Zeitraum ueberschneidet sich mit dem Antrag "${booking.title}".`,
+          : `Soft-Konflikt: Der Zeitraum überschneidet sich mit dem Antrag "${booking.title}".`,
       });
     }
   }

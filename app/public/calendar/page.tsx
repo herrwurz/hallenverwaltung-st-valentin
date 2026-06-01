@@ -53,24 +53,24 @@ export default async function PublicCalendarPage({ searchParams }: { searchParam
   ]);
   const detailHint =
     visibilityMode === "event"
-      ? "Aktive Oeffentlichkeitsstufe: Veranstaltungsname, sofern der Raum dies erlaubt."
+      ? "Aktive Öffentlichkeitsstufe: Veranstaltungsname, sofern der Raum dies erlaubt."
       : visibilityMode === "organization"
-        ? "Aktive Oeffentlichkeitsstufe: Vereinsname, sofern der Raum dies erlaubt."
-        : "Aktive Oeffentlichkeitsstufe: nur belegt oder frei.";
+        ? "Aktive Öffentlichkeitsstufe: Vereinsname, sofern der Raum dies erlaubt."
+        : "Aktive Öffentlichkeitsstufe: nur belegt oder frei.";
 
   return (
     <AreaShell
-      eyebrow="Oeffentlich"
-      title="Oeffentlicher Kalender"
-      description="Lesende Tages-, Wochen-, Monats- und Jahresansicht fuer Hallenbelegung und freie Zeiten. Die sichtbaren Details richten sich nach der Datenschutzkonfiguration."
+      eyebrow="Öffentlich"
+      title="Öffentlicher Kalender"
+      description="Lesende Tages-, Wochen-, Monats- und Jahresansicht für Hallenbelegung und freie Zeiten. Die sichtbaren Details richten sich nach der Datenschutzkonfiguration."
       authenticated={false}
     >
       <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-medium">Oeffentlicher Export</h2>
+            <h2 className="text-lg font-medium">Öffentlicher Export</h2>
             <p className="mt-2 text-sm text-slate-400">
-              iCal enthaelt nur die Details, die laut Datenschutzkonfiguration oeffentlich sichtbar sind.
+              iCal enthält nur die Details, die laut Datenschutzkonfiguration öffentlich sichtbar sind.
             </p>
           </div>
           <a
@@ -87,7 +87,7 @@ export default async function PublicCalendarPage({ searchParams }: { searchParam
         freeSlots={freeSlots}
         detailHint={detailHint}
         backHref="/public"
-        backLabel="Zurueck zur Oeffentlichkeit"
+        backLabel="Zurück zur Öffentlichkeit"
       />
     </AreaShell>
   );

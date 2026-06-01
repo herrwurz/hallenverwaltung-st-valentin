@@ -6,7 +6,7 @@ const roomStatusSchema = z.enum(["ACTIVE", "RESTRICTED", "OUT_OF_SERVICE"]);
 
 const roomSchema = z.object({
   id: z.string().trim().optional(),
-  buildingId: z.string().trim().min(1, "Ein Gebaeude ist erforderlich."),
+  buildingId: z.string().trim().min(1, "Ein Gebäude ist erforderlich."),
   parentRoomId: z.string().trim().optional(),
   code: z
     .string()
@@ -18,8 +18,8 @@ const roomSchema = z.object({
   description: z.string().trim().max(500).optional(),
   status: roomStatusSchema,
   isCombinable: z.boolean(),
-  openingTime: z.string().regex(/^\d{2}:\d{2}$/, "Bitte eine gueltige Oeffnungszeit angeben."),
-  closingTime: z.string().regex(/^\d{2}:\d{2}$/, "Bitte eine gueltige Schliesszeit angeben."),
+  openingTime: z.string().regex(/^\d{2}:\d{2}$/, "Bitte eine gültige Öffnungszeit angeben."),
+  closingTime: z.string().regex(/^\d{2}:\d{2}$/, "Bitte eine gültige Schliesszeit angeben."),
   setupBufferMinutes: z.coerce.number().int().min(0).max(1440),
   teardownBufferMinutes: z.coerce.number().int().min(0).max(1440),
 });
@@ -99,7 +99,7 @@ export async function saveRoom(input: unknown) {
       });
 
       if (!parentRoom || parentRoom.buildingId !== room.buildingId) {
-        throw new Error("Parent-Room und Teilbereich muessen demselben Gebaeude zugeordnet sein.");
+        throw new Error("Parent-Room und Teilbereich müssen demselben Gebäude zugeordnet sein.");
       }
 
       const compositionLinks = await transaction.roomComposition.findMany({

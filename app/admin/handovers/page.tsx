@@ -30,15 +30,15 @@ export default async function AdminHandoversPage({ searchParams }: PageProps) {
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Hallenwart</p>
-      <h2 className="mt-3 text-3xl font-semibold">Hallenuebergaben</h2>
+      <h2 className="mt-3 text-3xl font-semibold">Hallenübergaben</h2>
       <p className="mt-3 text-slate-300">
-        Schluesselerhalt, Hallenuebernahme und Retournierung fuer genehmigte Buchungen erfassen. Die Buchung selbst wird
-        dadurch nicht veraendert.
+        Schlüsselerhalt, Hallenübernahme und Retournierung für genehmigte Buchungen erfassen. Die Buchung selbst wird
+        dadurch nicht verändert.
       </p>
 
       {!data.canViewAll ? (
         <p className="mt-4 rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">
-          Es werden nur Buchungen fuer Raeume oder Gebaeude angezeigt, denen dein Hallenwart-Profil zugeordnet ist.
+          Es werden nur Buchungen für Räume oder Gebäude angezeigt, denen dein Hallenwart-Profil zugeordnet ist.
         </p>
       ) : null}
 
@@ -47,14 +47,14 @@ export default async function AdminHandoversPage({ searchParams }: PageProps) {
       ) : null}
       {params.saved ? (
         <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Hallenuebergabe wurde aktualisiert.
+          Hallenübergabe wurde aktualisiert.
         </p>
       ) : null}
 
       <section className="mt-8 space-y-3">
         {data.bookings.length === 0 ? (
           <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Aktuell sind keine genehmigten Buchungen fuer Hallenuebergaben vorhanden.
+            Aktuell sind keine genehmigten Buchungen für Hallenübergaben vorhanden.
           </p>
         ) : (
           data.bookings.map((booking) => {
@@ -81,11 +81,11 @@ export default async function AdminHandoversPage({ searchParams }: PageProps) {
 
                 <dl className="mt-4 grid gap-3 text-sm text-slate-300 md:grid-cols-3">
                   <div>
-                    <dt className="text-slate-500">Schluessel erhalten</dt>
+                    <dt className="text-slate-500">Schlüssel erhalten</dt>
                     <dd>{booking.handover?.keyReceivedAt ? dateFormatter.format(booking.handover.keyReceivedAt) : "-"}</dd>
                   </div>
                   <div>
-                    <dt className="text-slate-500">Halle uebernommen</dt>
+                    <dt className="text-slate-500">Halle übernommen</dt>
                     <dd>{booking.handover?.roomAcceptedAt ? dateFormatter.format(booking.handover.roomAcceptedAt) : "-"}</dd>
                   </div>
                   <div>
@@ -111,7 +111,7 @@ export default async function AdminHandoversPage({ searchParams }: PageProps) {
                     </div>
                   </form>
                 ) : (
-                  <p className="mt-5 text-sm text-emerald-300">Uebergabe abgeschlossen.</p>
+                  <p className="mt-5 text-sm text-emerald-300">Übergabe abgeschlossen.</p>
                 )}
               </article>
             );

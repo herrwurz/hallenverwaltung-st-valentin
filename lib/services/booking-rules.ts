@@ -18,37 +18,37 @@ export function assertOrganizationBookingAccess({
   hasActiveMembership: boolean;
 }) {
   if (!isAdmin && !hasActiveMembership) {
-    throw new BookingValidationError("Sie duerfen fuer diese Organisation keine Buchung beantragen.");
+    throw new BookingValidationError("Sie dürfen für diese Organisation keine Buchung beantragen.");
   }
 }
 
 export function assertBookingRequestPermission(hasRequestBookingPermission: boolean) {
   if (!hasRequestBookingPermission) {
-    throw new BookingValidationError("Sie duerfen keine Buchungen beantragen.");
+    throw new BookingValidationError("Sie dürfen keine Buchungen beantragen.");
   }
 }
 
 export function assertBookingViewPermission(hasViewBookingPermission: boolean) {
   if (!hasViewBookingPermission) {
-    throw new BookingValidationError("Sie duerfen Buchungsantraege nicht einsehen.");
+    throw new BookingValidationError("Sie dürfen Buchungsanträge nicht einsehen.");
   }
 }
 
 export function assertBookingApprovalPermission(hasApprovalPermission: boolean) {
   if (!hasApprovalPermission) {
-    throw new BookingValidationError("Sie duerfen Buchungsantraege nicht genehmigen.");
+    throw new BookingValidationError("Sie dürfen Buchungsanträge nicht genehmigen.");
   }
 }
 
 export function assertBookingRejectionPermission(hasRejectionPermission: boolean) {
   if (!hasRejectionPermission) {
-    throw new BookingValidationError("Sie duerfen Buchungsantraege nicht ablehnen.");
+    throw new BookingValidationError("Sie dürfen Buchungsanträge nicht ablehnen.");
   }
 }
 
 export function assertBookingDecisionNote(value: string | undefined | null) {
   if (!value?.trim()) {
-    throw new BookingValidationError("Bitte geben Sie eine Begruendung oder einen Kommentar an.");
+    throw new BookingValidationError("Bitte geben Sie eine Begründung oder einen Kommentar an.");
   }
 }
 
@@ -100,7 +100,7 @@ export function validateBookingAvailability({
   const blockedUntilMinutes = getLocalMinutes(blockedUntil);
 
   if (blockedFromMinutes < openingMinutes) {
-    throw new BookingValidationError("Der Zeitraum liegt vor der Oeffnungszeit des Raums.");
+    throw new BookingValidationError("Der Zeitraum liegt vor der Öffnungszeit des Raums.");
   }
 
   if (blockedUntilMinutes > closingMinutes) {
@@ -109,7 +109,7 @@ export function validateBookingAvailability({
 
   const bookingDurationMinutes = (endsAt.getTime() - startsAt.getTime()) / 60_000;
   if (maximumBookingMinutes !== null && bookingDurationMinutes > maximumBookingMinutes) {
-    throw new BookingValidationError("Die maximale Buchungsdauer des Raums wurde ueberschritten.");
+    throw new BookingValidationError("Die maximale Buchungsdauer des Raums wurde überschritten.");
   }
 
   const latestAllowedStart = new Date(now.getTime() + singleBookingLeadDays * 24 * 60 * 60 * 1000);
