@@ -26,6 +26,8 @@ konsistenter und verwaltungsgeeignet wirken.
 - Sekundaeraktionen: weiss/grau mit Rahmen.
 - Abbrechen und Zurueck muessen sichtbar bleiben, wenn ein Formular oder
   Detailbereich verlassen werden kann.
+- Zurueck-Navigation verwendet nach Moeglichkeit die gemeinsame helle
+  `AppBackLink`-Darstellung.
 - Formulare verwenden helle Eingabefelder mit klarer Fokusmarkierung.
 - Karten und Panels verwenden dezente Rahmen statt starker Schatten.
 - Keine fachlich wichtigen Entscheidungen nur ueber Farbe darstellen.
@@ -39,6 +41,7 @@ konsistenter und verwaltungsgeeignet wirken.
   Public.
 - `app/globals.css` enthaelt die gemeinsamen Windows-Surface-Regeln.
 - `components/form-actions.tsx` standardisiert Speichern/Abbrechen.
+- `components/app-back-link.tsx` standardisiert Zurueck-Navigation.
 - `components/app-feedback.tsx` standardisiert Rueckmeldungen nach Aktionen.
 - `components/calendar-view.tsx` buendelt die gemeinsame Kalenderbedienung.
 

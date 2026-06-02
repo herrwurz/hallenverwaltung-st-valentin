@@ -28,6 +28,29 @@ test("shared form actions expose light Windows-style primary and secondary actio
   assert.match(formActions, /Abbrechen/);
 });
 
+test("navigation back links use the shared light Windows-style component", () => {
+  const appBackLink = readFileSync("components/app-back-link.tsx", "utf8");
+  const pages = [
+    "app/portal/bookings/page.tsx",
+    "app/portal/waitlist/page.tsx",
+    "app/portal/documents/page.tsx",
+    "app/portal/damages/page.tsx",
+    "app/admin/waitlist/page.tsx",
+    "app/admin/notifications/page.tsx",
+    "app/admin/system/jobs/page.tsx",
+    "app/admin/billing/page.tsx",
+    "app/admin/settings/calendar/page.tsx",
+  ];
+
+  assert.match(appBackLink, /border border-slate-300 bg-white/);
+
+  for (const page of pages) {
+    const source = readFileSync(page, "utf8");
+    assert.match(source, /AppBackLink/, `${page} should use AppBackLink`);
+    assert.doesNotMatch(source, /text-sky-300 hover:text-sky-200/, `${page} should not use dark text back links`);
+  }
+});
+
 test("action feedback uses the shared light status component", () => {
   const appFeedback = readFileSync("components/app-feedback.tsx", "utf8");
   const adminFeedback = readFileSync("components/admin-feedback.tsx", "utf8");

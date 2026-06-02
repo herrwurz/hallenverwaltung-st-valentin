@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { createOrganizationDocumentAction } from "@/app/portal/documents/actions";
 import { AppFeedback } from "@/components/app-feedback";
 import { FormActions } from "@/components/form-actions";
@@ -27,9 +27,7 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
         werden.
       </p>
       <div className="mt-8 flex items-center justify-between">
-        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Portal
-        </Link>
+        <AppBackLink href="/portal" label="Zurück zum Portal" />
       </div>
       <AppFeedback
         messages={[

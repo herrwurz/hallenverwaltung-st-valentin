@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { reportDamageAction } from "@/app/portal/damages/actions";
 import { AppFeedback } from "@/components/app-feedback";
 import { BuildingRoomSelect } from "@/components/building-room-select";
@@ -26,9 +26,7 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
         Melden Sie Schäden mit Beschreibung und optionalem Foto-Ablagepfad. Die Gemeinde bearbeitet den Status.
       </p>
       <div className="mt-8 flex items-center justify-between">
-        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Portal
-        </Link>
+        <AppBackLink href="/portal" label="Zurück zum Portal" />
       </div>
       <AppFeedback
         messages={[

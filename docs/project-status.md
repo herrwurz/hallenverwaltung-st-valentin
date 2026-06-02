@@ -287,6 +287,13 @@ Basis.
 Admin-Buchungsworkflow-Meldungen ebenfalls auf `AppFeedback` umgestellt. Damit
 ist der offene UI-Restpunkt aus Phase 24.3 erledigt.
 
+## Phase 24.5
+
+Zurueck-Navigation weiter vereinheitlicht: Portal-Buchungen, Warteliste,
+Dokumente, Schadensmeldungen sowie Admin-Warteliste, Benachrichtigungen,
+System-Jobs, Abrechnung und Kalender-Einstellungen verwenden nun
+`AppBackLink` statt dunkler Textlinks.
+
 ---
 
 # Wichtigste Architekturentscheidungen

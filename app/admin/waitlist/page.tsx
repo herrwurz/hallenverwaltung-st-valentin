@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { AdminShell } from "@/components/admin-shell";
 import { StatusFilterSelect } from "@/components/status-filter-select";
 import { requirePermission } from "@/lib/permissions";
@@ -36,9 +36,7 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
             unverändert und richtet sich nach dem Eingangszeitpunkt.
           </p>
         </div>
-        <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Dashboard
-        </Link>
+        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
       </div>
 
       <StatusFilterSelect

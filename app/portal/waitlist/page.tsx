@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
@@ -43,9 +43,7 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
       userName={user.name}
     >
       <div className="mt-8 flex items-center justify-between">
-        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Portal
-        </Link>
+        <AppBackLink href="/portal" label="Zurück zum Portal" />
       </div>
 
       <AppFeedback
