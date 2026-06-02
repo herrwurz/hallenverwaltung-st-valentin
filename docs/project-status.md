@@ -294,6 +294,13 @@ Dokumente, Schadensmeldungen sowie Admin-Warteliste, Benachrichtigungen,
 System-Jobs, Abrechnung und Kalender-Einstellungen verwenden nun
 `AppBackLink` statt dunkler Textlinks.
 
+## Phase 24.6
+
+Vorbereitung auf das Test-Deployment: zentrale Windows-Shell-Regeln wurden fuer
+alte Dark-Theme-Statusflaechen erweitert, Statusfilter und Abmeldebutton sind
+helle Verwaltungs-Controls, und Start-/Berechtigungsseite wirken nicht mehr wie
+ein Phase-1-Prototyp.
+
 ---
 
 # Wichtigste Architekturentscheidungen

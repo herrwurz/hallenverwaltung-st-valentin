@@ -30,6 +30,11 @@ konsistenter und verwaltungsgeeignet wirken.
   `AppBackLink`-Darstellung.
 - Formulare verwenden helle Eingabefelder mit klarer Fokusmarkierung.
 - Karten und Panels verwenden dezente Rahmen statt starker Schatten.
+- Alte Dark-Theme-Flächen innerhalb der App-Shell werden zentral auf helle
+  Verwaltungsflächen normalisiert, damit bestehende Fachseiten vor dem
+  Test-Deployment einheitlich wirken.
+- Status- und Fehlermeldungen verwenden helle semantische Farben: gruen fuer
+  Erfolg, rot fuer Fehler, gelb fuer Hinweise, blau fuer Information.
 - Keine fachlich wichtigen Entscheidungen nur ueber Farbe darstellen.
 - Erfolgs-, Fehler- und Hinweismeldungen verwenden die gemeinsame helle
   `AppFeedback`-Darstellung.
@@ -44,6 +49,8 @@ konsistenter und verwaltungsgeeignet wirken.
 - `components/app-back-link.tsx` standardisiert Zurueck-Navigation.
 - `components/app-feedback.tsx` standardisiert Rueckmeldungen nach Aktionen.
 - `components/calendar-view.tsx` buendelt die gemeinsame Kalenderbedienung.
+- `components/status-filter-select.tsx` und `components/logout-button.tsx`
+  verwenden helle Windows-Controls.
 
 ## Offene UI-Punkte
 

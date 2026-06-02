@@ -12,6 +12,18 @@
   --app-muted: #475569;
   --app-accent: #2563eb;
   --app-accent-strong: #1d4ed8;
+  --app-success-bg: #ecfdf5;
+  --app-success-border: #86efac;
+  --app-success-text: #14532d;
+  --app-error-bg: #fef2f2;
+  --app-error-border: #fca5a5;
+  --app-error-text: #7f1d1d;
+  --app-warning-bg: #fffbeb;
+  --app-warning-border: #fcd34d;
+  --app-warning-text: #78350f;
+  --app-info-bg: #eff6ff;
+  --app-info-border: #93c5fd;
+  --app-info-text: #1e3a8a;
 }
 
 * {
@@ -75,8 +87,69 @@ textarea {
 }
 
 .windows-shell [class*="text-sky-400"],
+.windows-shell [class*="text-sky-300"],
+.windows-shell [class*="text-sky-200"],
 .windows-shell [class*="text-blue-700"] {
   color: var(--app-accent) !important;
+}
+
+.windows-shell [class*="bg-emerald-950"],
+.windows-shell [class*="bg-emerald-500/20"] {
+  background-color: var(--app-success-bg) !important;
+}
+
+.windows-shell [class*="border-emerald-800"],
+.windows-shell [class*="border-emerald-900"] {
+  border-color: var(--app-success-border) !important;
+}
+
+.windows-shell [class*="text-emerald-200"] {
+  color: var(--app-success-text) !important;
+}
+
+.windows-shell [class*="bg-red-950"],
+.windows-shell [class*="bg-rose-950"],
+.windows-shell [class*="bg-rose-500/20"] {
+  background-color: var(--app-error-bg) !important;
+}
+
+.windows-shell [class*="border-red-800"],
+.windows-shell [class*="border-rose-800"],
+.windows-shell [class*="border-rose-900"] {
+  border-color: var(--app-error-border) !important;
+}
+
+.windows-shell [class*="text-red-200"],
+.windows-shell [class*="text-red-300"],
+.windows-shell [class*="text-rose-200"] {
+  color: var(--app-error-text) !important;
+}
+
+.windows-shell [class*="bg-amber-950"],
+.windows-shell [class*="bg-amber-500/20"] {
+  background-color: var(--app-warning-bg) !important;
+}
+
+.windows-shell [class*="border-amber-800"],
+.windows-shell [class*="border-amber-900"] {
+  border-color: var(--app-warning-border) !important;
+}
+
+.windows-shell [class*="text-amber-200"] {
+  color: var(--app-warning-text) !important;
+}
+
+.windows-shell [class*="bg-sky-950"] {
+  background-color: var(--app-info-bg) !important;
+}
+
+.windows-shell [class*="border-sky-700"],
+.windows-shell [class*="border-sky-800"] {
+  border-color: var(--app-info-border) !important;
+}
+
+.windows-shell [class*="text-sky-200"] {
+  color: var(--app-info-text) !important;
 }
 
 .windows-shell [class*="rounded-xl"],
@@ -106,6 +179,52 @@ textarea {
 .windows-shell a[class*="bg-sky-500"],
 .windows-shell a[class*="bg-blue-600"] {
   border-radius: 2px !important;
+}
+
+.windows-shell button:not(:disabled),
+.windows-shell a[class*="px-4"][class*="py-2"],
+.windows-shell a[class*="px-5"][class*="py-3"] {
+  box-shadow: 0 1px 1px rgb(15 23 42 / 0.08);
+}
+
+.windows-shell button[class*="bg-sky-500"],
+.windows-shell a[class*="bg-sky-500"],
+.windows-shell button[class*="bg-blue-600"],
+.windows-shell a[class*="bg-blue-600"] {
+  border: 1px solid var(--app-accent-strong) !important;
+  background-color: var(--app-accent) !important;
+  color: #ffffff !important;
+}
+
+.windows-shell button[class*="bg-slate-700"],
+.windows-shell a[class*="border-slate-700"],
+.windows-shell a[class*="border-slate-600"],
+.windows-shell button[class*="border-slate-600"] {
+  border-color: var(--app-border-strong) !important;
+  background-color: #ffffff !important;
+  color: var(--app-text) !important;
+}
+
+.windows-shell button[class*="bg-slate-700"]:hover,
+.windows-shell a[class*="border-slate-700"]:hover,
+.windows-shell a[class*="border-slate-600"]:hover,
+.windows-shell button[class*="border-slate-600"]:hover {
+  background-color: var(--app-panel-muted) !important;
+}
+
+.windows-shell table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.windows-shell thead {
+  background: var(--app-panel-muted);
+  color: var(--app-muted) !important;
+}
+
+.windows-shell th,
+.windows-shell td {
+  border-bottom: 1px solid var(--app-border);
 }
 
 .admin-desktop {

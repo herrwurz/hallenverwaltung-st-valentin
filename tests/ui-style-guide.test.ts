@@ -22,10 +22,14 @@ test("application shells use the documented Windows style foundation", () => {
 
 test("shared form actions expose light Windows-style primary and secondary actions", () => {
   const formActions = readFileSync("components/form-actions.tsx", "utf8");
+  const statusFilterSelect = readFileSync("components/status-filter-select.tsx", "utf8");
+  const logoutButton = readFileSync("components/logout-button.tsx", "utf8");
 
   assert.match(formActions, /bg-white/);
   assert.match(formActions, /border-blue-700 bg-blue-600/);
   assert.match(formActions, /Abbrechen/);
+  assert.match(statusFilterSelect, /border-slate-400 bg-white/);
+  assert.match(logoutButton, /border-slate-400 bg-white/);
 });
 
 test("navigation back links use the shared light Windows-style component", () => {
@@ -70,4 +74,32 @@ test("action feedback uses the shared light status component", () => {
   assert.match(portalWaitlist, /AppFeedback/);
   assert.match(portalDocuments, /AppFeedback/);
   assert.match(portalDamages, /AppFeedback/);
+});
+
+test("windows shell neutralizes old dark semantic status surfaces", () => {
+  const globals = readFileSync("app/globals.css", "utf8");
+
+  assert.match(globals, /--app-success-bg/);
+  assert.match(globals, /--app-error-bg/);
+  assert.match(globals, /--app-warning-bg/);
+  assert.match(globals, /--app-info-bg/);
+  assert.match(globals, /\[class\*="bg-emerald-950"\]/);
+  assert.match(globals, /\[class\*="bg-red-950"\]/);
+  assert.match(globals, /\[class\*="bg-rose-950"\]/);
+  assert.match(globals, /\[class\*="bg-amber-950"\]/);
+  assert.match(globals, /\[class\*="bg-sky-950"\]/);
+});
+
+test("entry and authorization pages use the deployment-ready light shell", () => {
+  const homePage = readFileSync("app/page.tsx", "utf8");
+  const unauthorizedPage = readFileSync("app/unauthorized/page.tsx", "utf8");
+
+  assert.match(homePage, /windows-shell/);
+  assert.match(homePage, /Öffentlicher Bereich/);
+  assert.match(homePage, /Vereinsportal/);
+  assert.match(homePage, /Verwaltung/);
+  assert.doesNotMatch(homePage, /Phase 1/);
+  assert.match(unauthorizedPage, /windows-shell/);
+  assert.match(unauthorizedPage, /AppBackLink/);
+  assert.doesNotMatch(unauthorizedPage, /bg-slate-950/);
 });
