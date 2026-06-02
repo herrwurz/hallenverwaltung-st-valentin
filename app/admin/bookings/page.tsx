@@ -1,3 +1,4 @@
+import { AppFeedback } from "@/components/app-feedback";
 import { getBookingStatusBadgeClass, getBookingStatusLabel, type AdminBookingFilterKey } from "@/lib/booking-status";
 import { hasPermission, requirePermission } from "@/lib/permissions";
 import {
@@ -67,24 +68,14 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
         Offene und bearbeitete Buchungsanträge mit Konflikthinweisen, Historie und serverseitig gesicherten
         Entscheidungsaktionen.
       </p>
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.reviewed ? (
-        <p className="mt-6 rounded-lg border border-sky-800 bg-sky-950/40 p-4 text-sm text-sky-200">
-          Der Antrag wurde in Prüfung übernommen.
-        </p>
-      ) : null}
-      {params.approved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Die Buchung wurde genehmigt.
-        </p>
-      ) : null}
-      {params.rejected ? (
-        <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">
-          Die Buchung wurde abgelehnt.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "info", text: params.reviewed ? "Der Antrag wurde in Prüfung übernommen." : undefined },
+          { tone: "success", text: params.approved ? "Die Buchung wurde genehmigt." : undefined },
+          { tone: "success", text: params.rejected ? "Die Buchung wurde abgelehnt." : undefined },
+        ]}
+      />
 
       <form className="mt-8 flex flex-wrap items-end gap-3" aria-label="Statusfilter">
         <label className="text-sm text-slate-300">

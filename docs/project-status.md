@@ -280,8 +280,12 @@ ist nun als sichtbarer heller Windows-Button gestaltet.
 Feedback-Meldungen vereinheitlicht: `components/app-feedback.tsx` stellt helle
 Erfolgs-, Fehler-, Hinweis- und Informationsmeldungen bereit. Portal-Buchungen,
 Warteliste, Dokumente und Schadensmeldungen sowie Admin-Stammdaten nutzen diese
-Basis. Offener UI-Restpunkt: Admin-Buchungsworkflow-Meldungen noch auf dieselbe
-Komponente umstellen.
+Basis.
+
+## Phase 24.4
+
+Admin-Buchungsworkflow-Meldungen ebenfalls auf `AppFeedback` umgestellt. Damit
+ist der offene UI-Restpunkt aus Phase 24.3 erledigt.
 
 ---
 
