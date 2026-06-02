@@ -261,6 +261,14 @@ getrennte Betriebsstufen. Der Gemeinde-Server bleibt als finaler
 Go-Live-Blocker offen; lokale Tests und ein eigener Testserver koennen als
 Vorbereitung weiterlaufen.
 
+## Phase 24.1
+
+UI-Style-Basis vor Deployment: `docs/ui-style-guide.md` dokumentiert die
+Windows-/Desktop-Anmutung. AdminShell, AreaShell, globale Surface-Regeln und
+FormActions wurden auf helle, eckigere Verwaltungsoberflaechen umgestellt. Der
+Kalender bleibt funktional Google-Kalender-aehnlich, waehrend die restlichen
+Bereiche sachlicher und konsistenter wirken.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -565,6 +573,7 @@ Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 * `docs/go-live-runbook.md`
 * `docs/go-live-evidence.md`
 * `docs/installation-options.md`
+* `docs/ui-style-guide.md`
 
 Hoch priorisierte Go-Live-Blocker muessen vor Produktivstart erledigt oder
 ausdruecklich mit Risikoakzeptanz freigegeben werden. Mittlere Pilotpunkte

@@ -25,7 +25,7 @@ type AdminShellProps = {
 
 export function AdminShell({ children, navigationItems = navigation, userName }: AdminShellProps) {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="windows-shell admin-desktop min-h-screen text-slate-100">
       <div className="mx-auto flex min-h-screen max-w-7xl">
         <aside className="w-64 shrink-0 border-r border-slate-800 px-5 py-8">
           <p className="text-xs font-medium uppercase tracking-[0.3em] text-sky-400">Verwaltung</p>
