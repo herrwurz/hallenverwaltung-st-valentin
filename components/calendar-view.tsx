@@ -22,6 +22,26 @@ const viewLabels: Record<CalendarResult["view"], string> = {
   year: "Jahr",
 };
 
+function formatDateInput(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function shiftCalendarDate(selectedDate: string, view: CalendarResult["view"], direction: -1 | 1) {
+  const date = new Date(`${selectedDate}T12:00:00`);
+
+  if (view === "day") {
+    date.setDate(date.getDate() + direction);
+  } else if (view === "week") {
+    date.setDate(date.getDate() + direction * 7);
+  } else if (view === "month") {
+    date.setMonth(date.getMonth() + direction);
+  } else {
+    date.setFullYear(date.getFullYear() + direction);
+  }
+
+  return formatDateInput(date);
+}
+
 function getEventDialogId(sourceType: string, id: string) {
   return `termin-${sourceType}-${id}`.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
@@ -48,6 +68,13 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
   if (calendar.filters.roomId) {
     shareParams.set("roomId", calendar.filters.roomId);
   }
+
+  const buildHref = (date: string, view = calendar.view) => {
+    const params = new URLSearchParams(shareParams);
+    params.set("date", date);
+    params.set("view", view);
+    return `${basePath}?${params.toString()}`;
+  };
 
   const groupedEvents = calendar.days.map((day) => ({
     ...day,
@@ -84,6 +111,9 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
         : calendar.view === "month"
           ? "Monatsansicht"
           : "Jahresansicht";
+  const previousHref = buildHref(shiftCalendarDate(calendar.selectedDate, calendar.view, -1));
+  const nextHref = buildHref(shiftCalendarDate(calendar.selectedDate, calendar.view, 1));
+  const todayHref = buildHref(formatDateInput(new Date()));
 
   return (
     <>
@@ -95,8 +125,8 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
       </div>
 
       <section className="mt-8 rounded-sm border border-slate-300 bg-white p-5 shadow-sm">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex rounded-sm border border-slate-300 bg-slate-100 p-1">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div className="inline-flex items-center rounded-sm border border-slate-300 bg-slate-100 p-1">
             {viewLinks.map((item) => (
               <Link
                 key={item.view}
@@ -111,10 +141,30 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
               </Link>
             ))}
           </div>
-          <p className="text-sm text-slate-600">
-            Zeitraum: {dateTimeFormatter.format(calendar.rangeStart)} bis {dateTimeFormatter.format(calendar.rangeEnd)}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={previousHref}
+              className="rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Zurück
+            </Link>
+            <Link
+              href={todayHref}
+              className="rounded-sm border border-blue-700 bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Heute
+            </Link>
+            <Link
+              href={nextHref}
+              className="rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Weiter
+            </Link>
+          </div>
         </div>
+        <p className="mb-5 text-sm text-slate-600">
+          Zeitraum: {dateTimeFormatter.format(calendar.rangeStart)} bis {dateTimeFormatter.format(calendar.rangeEnd)}
+        </p>
 
         <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,220px,200px,auto]">
           <label className="text-sm text-slate-700">
@@ -183,7 +233,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             Ansicht teilen
           </Link>
         </div>
-        <div className={`mt-4 grid gap-3 ${gridClass}`}>
+        <div className={`google-calendar-grid mt-4 grid gap-3 ${gridClass}`}>
           {groupedEvents.map((day) => (
             <section key={day.key} className="min-h-40 rounded-sm border border-slate-300 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-3">

@@ -11,7 +11,10 @@ export function AdminBackLink({
 }: AdminBackLinkProps) {
   return (
     <div className="mt-8">
-      <Link href={href} className="text-sm text-sky-300 hover:text-sky-200">
+      <Link
+        href={href}
+        className="inline-flex rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-slate-50 hover:text-blue-900"
+      >
         {label}
       </Link>
     </div>

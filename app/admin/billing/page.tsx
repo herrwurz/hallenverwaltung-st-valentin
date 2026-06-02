@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { requirePermission } from "@/lib/permissions";
 import { getBillableBookings } from "@/lib/services/billing-service";
 import { getBillingFilterOptions, getBillingReportData } from "@/lib/services/reporting-service";
@@ -136,9 +136,7 @@ export default async function AdminBillingPage({ searchParams }: { searchParams:
             vorbereitet. Es wird keine Rechnung erzeugt und keine Zahlung verarbeitet.
           </p>
         </div>
-        <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Dashboard
-        </Link>
+        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
       </div>
 
       {params.error ? (

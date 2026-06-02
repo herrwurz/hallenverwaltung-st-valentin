@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { requirePermission } from "@/lib/permissions";
 import {
   getPublicCalendarVisibilityMode,
@@ -44,9 +44,7 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
       </p>
 
       <div className="mt-8 flex items-center justify-between gap-4">
-        <Link href="/admin/calendar" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Kalender
-        </Link>
+        <AppBackLink href="/admin/calendar" label="Zurück zum Kalender" />
       </div>
 
       {saved ? (

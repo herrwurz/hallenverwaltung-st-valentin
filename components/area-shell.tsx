@@ -19,7 +19,7 @@ export function AreaShell({
   authenticated = true,
 }: AreaShellProps) {
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
+    <main className="windows-shell app-area-shell min-h-screen px-6 py-10 text-slate-100">
       <div className="mx-auto max-w-5xl">
         <header className="flex items-start justify-between gap-6 border-b border-slate-800 pb-8">
           <div>

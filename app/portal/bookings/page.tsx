@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
+import { AppFeedback } from "@/components/app-feedback";
 import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
@@ -39,39 +40,19 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
       userName={user.name}
     >
       <div className="mt-8 flex items-center justify-between">
-        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Portal
-        </Link>
+        <AppBackLink href="/portal" label="Zurück zum Portal" />
       </div>
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Buchungsantrag wurde gespeichert.
-        </p>
-      ) : null}
-      {params.seriesSaved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Serienantrag wurde gespeichert.
-        </p>
-      ) : null}
-      {params.cancelled ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Buchungsantrag wurde storniert.
-        </p>
-      ) : null}
-      {params.changeRequested ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Verschiebungsantrag wurde gespeichert.
-        </p>
-      ) : null}
-      {params.warning ? (
-        <p className="mt-4 rounded-lg border border-amber-700 bg-amber-950/40 p-4 text-sm text-amber-200">
-          {params.warning}
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Der Buchungsantrag wurde gespeichert." : undefined },
+          { tone: "success", text: params.seriesSaved ? "Der Serienantrag wurde gespeichert." : undefined },
+          { tone: "success", text: params.cancelled ? "Der Buchungsantrag wurde storniert." : undefined },
+          { tone: "success", text: params.changeRequested ? "Der Verschiebungsantrag wurde gespeichert." : undefined },
+          { tone: "warning", text: params.warning },
+        ]}
+      />
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <h2 className="text-xl font-medium">Neuer Buchungsantrag</h2>

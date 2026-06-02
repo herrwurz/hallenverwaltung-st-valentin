@@ -1,20 +1,17 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 
 export default function UnauthorizedPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-slate-100">
-      <section className="max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-10">
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-red-300">Kein Zugriff</p>
-        <h1 className="mt-4 text-3xl font-semibold">Berechtigung fehlt</h1>
-        <p className="mt-4 text-slate-300">
+    <main className="windows-shell flex min-h-screen items-center justify-center px-6 py-10">
+      <section className="w-full max-w-lg rounded-sm border border-red-300 bg-red-50 p-8 shadow-sm">
+        <p className="text-sm font-medium uppercase tracking-[0.3em] text-red-900">Kein Zugriff</p>
+        <h1 className="mt-4 text-3xl font-semibold text-slate-950">Berechtigung fehlt</h1>
+        <p className="mt-4 text-slate-700">
           Ihr Benutzerkonto besitzt nicht die erforderliche Berechtigung für diesen Bereich.
         </p>
-        <Link
-          href="/dashboard"
-          className="mt-8 inline-flex rounded-lg border border-slate-600 px-5 py-3 text-sm transition hover:border-sky-400"
-        >
-          Zum Dashboard
-        </Link>
+        <div className="mt-8">
+          <AppBackLink href="/dashboard" label="Zurück zum Dashboard" />
+        </div>
       </section>
     </main>
   );

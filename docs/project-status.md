@@ -246,6 +246,80 @@ Vorlage fuer echte Zielumgebungsnachweise, Risikoakzeptanzen, mittlere
 Pilotentscheidungen und finale Freigabe ergaenzt. Runbook, Abnahmeplan,
 README und Readiness-Dokumente verweisen darauf.
 
+## Phase 23.5
+
+Produktionskonfigurationscheck: `npm run production:check` prueft
+`.env.production` auf fehlende Pflichtwerte, Platzhalter, unsichere
+Basiswerte und optional fehlende TLS-Dateien, ohne Secret-Werte auszugeben.
+Runbook, Readiness, README und Nachweisprotokoll verweisen auf den Check.
+
+## Phase 23.6
+
+Flexible Installationsoptionen: `docs/installation-options.md` dokumentiert
+lokalen Teststand, eigenen Testserver und spaeteren Gemeinde-Server als
+getrennte Betriebsstufen. Der Gemeinde-Server bleibt als finaler
+Go-Live-Blocker offen; lokale Tests und ein eigener Testserver koennen als
+Vorbereitung weiterlaufen.
+
+## Phase 24.1
+
+UI-Style-Basis vor Deployment: `docs/ui-style-guide.md` dokumentiert die
+Windows-/Desktop-Anmutung. AdminShell, AreaShell, globale Surface-Regeln und
+FormActions wurden auf helle, eckigere Verwaltungsoberflaechen umgestellt. Der
+Kalender bleibt funktional Google-Kalender-aehnlich, waehrend die restlichen
+Bereiche sachlicher und konsistenter wirken.
+
+## Phase 24.2
+
+Kalenderbedienung sichtbarer gemacht: Tages-/Wochen-/Monats-/Jahresansicht
+haben eine gemeinsame Heute-/Zurueck-/Weiter-Navigation. Der Admin-Zurueck-Link
+ist nun als sichtbarer heller Windows-Button gestaltet.
+
+## Phase 24.3
+
+Feedback-Meldungen vereinheitlicht: `components/app-feedback.tsx` stellt helle
+Erfolgs-, Fehler-, Hinweis- und Informationsmeldungen bereit. Portal-Buchungen,
+Warteliste, Dokumente und Schadensmeldungen sowie Admin-Stammdaten nutzen diese
+Basis.
+
+## Phase 24.4
+
+Admin-Buchungsworkflow-Meldungen ebenfalls auf `AppFeedback` umgestellt. Damit
+ist der offene UI-Restpunkt aus Phase 24.3 erledigt.
+
+## Phase 24.5
+
+Zurueck-Navigation weiter vereinheitlicht: Portal-Buchungen, Warteliste,
+Dokumente, Schadensmeldungen sowie Admin-Warteliste, Benachrichtigungen,
+System-Jobs, Abrechnung und Kalender-Einstellungen verwenden nun
+`AppBackLink` statt dunkler Textlinks.
+
+## Phase 24.6
+
+Vorbereitung auf das Test-Deployment: zentrale Windows-Shell-Regeln wurden fuer
+alte Dark-Theme-Statusflaechen erweitert, Statusfilter und Abmeldebutton sind
+helle Verwaltungs-Controls, und Start-/Berechtigungsseite wirken nicht mehr wie
+ein Phase-1-Prototyp.
+
+## Phase 24.7
+
+Lokaler Klicktest vorbereitet: `.env` kann lokal mit der PostgreSQL-Testdatenbank
+auf Port 55435 genutzt werden, Migrationen, Stammdaten und Demo-Daten wurden
+eingespielt, und `scripts/start-local-standalone.ps1` startet die stabile
+Standalone-Variante fuer `http://localhost:3000`. Der angedachte Testserver auf
+all-inkl.com ist als technische Hosting-Klaerung dokumentiert.
+
+## Phase 25 (geplant, aktuell pausiert)
+
+UI-Neuaufbau mit shadcn/ui als generellem Komponentenstandard. Tabellen fuer
+Gebaeude, Raeume, Benutzer, Organisationen, Buchungen, Warteliste,
+Benachrichtigungen, Abrechnung und weitere Verwaltungsdaten sollen als
+shadcn/ui Data-Table-/Grid-Komponenten umgesetzt werden. Kalender und
+Hallenplanung sollen als Ressourcenraster mit Raeumen/Hallen als Spalten,
+30-Minuten-Zeitslots, Status-Badges und shadcn/ui Dialogen neu aufgebaut
+werden. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
+Option.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -549,6 +623,8 @@ Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 * `docs/go-live-open-points.md`
 * `docs/go-live-runbook.md`
 * `docs/go-live-evidence.md`
+* `docs/installation-options.md`
+* `docs/ui-style-guide.md`
 
 Hoch priorisierte Go-Live-Blocker muessen vor Produktivstart erledigt oder
 ausdruecklich mit Risikoakzeptanz freigegeben werden. Mittlere Pilotpunkte

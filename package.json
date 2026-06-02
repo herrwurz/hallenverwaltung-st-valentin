@@ -15,6 +15,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "demo:seed": "node ./node_modules/tsx/dist/cli.mjs scripts/seed-demo.ts",
+    "production:check": "node ./node_modules/tsx/dist/cli.mjs scripts/check-production-env.ts",
     "worker:run": "node ./node_modules/tsx/dist/cli.mjs scripts/run-worker.ts"
   },
   "dependencies": {

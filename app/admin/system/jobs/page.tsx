@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { requirePermission } from "@/lib/permissions";
 import { getWorkerJobRuns } from "@/lib/services/worker-service";
 import {
@@ -43,9 +43,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
             Serverbetrieb kann derselbe Ablauf per CLI/Cron gestartet werden.
           </p>
         </div>
-        <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Dashboard
-        </Link>
+        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
       </div>
 
       {params.job ? (

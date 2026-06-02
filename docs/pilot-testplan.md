@@ -19,6 +19,18 @@ npm run dev
 
 Danach ist die Anwendung unter `http://localhost:3000` erreichbar.
 
+Falls `npm run dev` in der lokalen Windows-/Codex-Umgebung wegen der bekannten
+Next/SWC-Lockfile-Problematik nicht stabil offen bleibt, kann fuer den
+Klicktest die gebaute Standalone-Variante verwendet werden:
+
+```powershell
+npm run build
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-local-standalone.ps1
+```
+
+Das PowerShell-Fenster muss waehrend des Klicktests offen bleiben und kann mit
+`Ctrl+C` beendet werden.
+
 ## Demo-Logins
 
 Die Demo-Logins sind nur fuer lokale Tests gedacht und duerfen nicht in

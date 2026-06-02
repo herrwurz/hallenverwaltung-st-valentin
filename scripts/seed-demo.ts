@@ -1,7 +1,21 @@
+import "dotenv/config";
 import { hash } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+async function hideLocalTestArtifacts() {
+  const testBuildingCodes = ["E2E_BUILDING", "TEST_ANDI"];
+
+  await prisma.room.updateMany({
+    where: { building: { code: { in: testBuildingCodes } } },
+    data: { status: "OUT_OF_SERVICE" },
+  });
+  await prisma.building.updateMany({
+    where: { code: { in: testBuildingCodes } },
+    data: { isActive: false },
+  });
+}
 
 const demoUsers = {
   admin: {
@@ -142,11 +156,14 @@ async function ensureDemoBookingData(organizationId: string, adminUserId: string
   const room = await prisma.room.findUnique({
     where: { code: "VS_LANGENHART_TURNSAAL" },
   });
+  const reviewRoom = await prisma.room.findUnique({
+    where: { code: "VS_LANGENHART_BEWEGUNGSRAUM" },
+  });
   const usageType = await prisma.usageType.findUnique({
     where: { code: "CLUB_TRAINING" },
   });
 
-  if (!room || !usageType) {
+  if (!room || !reviewRoom || !usageType) {
     return;
   }
 
@@ -197,6 +214,59 @@ async function ensureDemoBookingData(organizationId: string, adminUserId: string
       reason: "Demo-Seed",
       newStartAt: startsAt,
       newEndAt: endsAt,
+    },
+  });
+
+  const reviewStartsAt = new Date("2026-07-09T16:00:00.000Z");
+  const reviewEndsAt = new Date("2026-07-09T18:00:00.000Z");
+  const inReviewBooking = await prisma.booking.upsert({
+    where: { id: "demo-booking-in-review" },
+    update: {
+      organizationId,
+      roomId: reviewRoom.id,
+      usageTypeId: usageType.id,
+      requestedByUserId: portalUserId,
+      processedByUserId: adminUserId,
+      status: "IN_REVIEW",
+      title: "Demo Antrag in Prüfung",
+      startsAt: reviewStartsAt,
+      endsAt: reviewEndsAt,
+      blockedFrom: new Date("2026-07-09T15:45:00.000Z"),
+      blockedUntil: new Date("2026-07-09T18:15:00.000Z"),
+      processedAt: new Date("2026-06-01T13:00:00.000Z"),
+    },
+    create: {
+      id: "demo-booking-in-review",
+      organizationId,
+      roomId: reviewRoom.id,
+      usageTypeId: usageType.id,
+      requestedByUserId: portalUserId,
+      processedByUserId: adminUserId,
+      status: "IN_REVIEW",
+      title: "Demo Antrag in Prüfung",
+      description: "Demo-Buchung fuer die sichtbare Pruefung im Verwaltungsportal.",
+      startsAt: reviewStartsAt,
+      endsAt: reviewEndsAt,
+      blockedFrom: new Date("2026-07-09T15:45:00.000Z"),
+      blockedUntil: new Date("2026-07-09T18:15:00.000Z"),
+      processedAt: new Date("2026-06-01T13:00:00.000Z"),
+    },
+  });
+
+  await prisma.bookingStatusHistory.upsert({
+    where: { id: "demo-booking-in-review-history" },
+    update: {},
+    create: {
+      id: "demo-booking-in-review-history",
+      bookingId: inReviewBooking.id,
+      actorUserId: adminUserId,
+      oldStatus: "REQUESTED",
+      newStatus: "IN_REVIEW",
+      reason: "Demo-Seed",
+      oldStartAt: reviewStartsAt,
+      oldEndAt: reviewEndsAt,
+      newStartAt: reviewStartsAt,
+      newEndAt: reviewEndsAt,
     },
   });
 
@@ -261,6 +331,7 @@ async function main() {
   const adminUser = await upsertUserWithRole(demoUsers.admin);
   const portalUser = await upsertUserWithRole(demoUsers.portal);
   const caretakerUser = await upsertUserWithRole(demoUsers.caretaker);
+  await hideLocalTestArtifacts();
   const organization = await ensureDemoOrganization(portalUser.id);
   await linkCaretakerUser(caretakerUser.id);
   await ensureDemoBookingData(organization.id, adminUser.id, portalUser.id);

@@ -4,6 +4,14 @@ Diese Liste sammelt Punkte, die vor dem Go-Live bewusst entschieden werden
 muessen. Sie basiert auf Pilotfeedback, Produktions-Readiness und dem aktuellen
 Version-1-Umfang.
 
+Aktuelle Betriebsentscheidung: Der finale Produktivbetrieb soll spaeter auf
+einem Gemeinde-Server erfolgen. Bis dieser bereitsteht, bleiben lokale Tests
+und ein eigener Testserver als vorbereitende Betriebsstufen moeglich. Der
+angedachte eigene Testserver bei all-inkl.com ist eine gesonderte technische
+Klaerung, weil Node.js-, PostgreSQL-, Worker-/Cron- und Prozessbetrieb vom
+konkreten Hosting-Tarif abhaengen. Details stehen in
+`docs/installation-options.md`.
+
 ## Go-Live-Blocker mit Prioritaet hoch
 
 Diese Punkte blockieren einen echten Produktivstart. Sie duerfen nicht nur
@@ -17,7 +25,7 @@ Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 
 | Blocker | Status | Entscheidung / Nachweis | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |
-| Zielserver und Domain festgelegt | offen |  |  |  |
+| Gemeinde-Server, Zielserver und Domain festgelegt | offen | Gemeinde-Server bleibt finaler Zielpunkt; lokaler Teststand ist vorbereitet. Eigener Testserver bei all-inkl.com muss technisch auf Node.js, PostgreSQL, Worker/Cron und Prozessbetrieb geklaert werden. |  |  |
 | TLS-Zertifikate vorhanden und eingebunden | offen |  |  |  |
 | `.env.production` ohne Platzhalterwerte | offen |  |  |  |
 | Produktiver Admin-Initialbenutzer angelegt | offen |  |  |  |

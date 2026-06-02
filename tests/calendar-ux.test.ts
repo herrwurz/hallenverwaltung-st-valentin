@@ -29,6 +29,16 @@ test("calendar UI exposes event detail dialogs and localized labels", () => {
   assert.doesNotMatch(calendarView, /Gebaeude|Raeume|Eintraege|auswaehlen|gewaehl/);
 });
 
+test("calendar UI exposes Google-like period navigation", () => {
+  const calendarView = readFileSync("components/calendar-view.tsx", "utf8");
+
+  assert.match(calendarView, /shiftCalendarDate/);
+  assert.match(calendarView, /Heute/);
+  assert.match(calendarView, /Zurück/);
+  assert.match(calendarView, /Weiter/);
+  assert.match(calendarView, /google-calendar-grid/);
+});
+
 test("admin navigation uses localized umlauts for core master data", () => {
   const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
 

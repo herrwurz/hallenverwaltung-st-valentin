@@ -4,6 +4,11 @@ Diese Checkliste beschreibt die produktionsnahe Inbetriebnahme der
 Hallenverwaltung St. Valentin. Sie ersetzt kein echtes Server-Hardening, macht
 aber die Schritte vor Abnahme und Go-Live nachvollziehbar.
 
+Flexible Installationswege fuer lokalen Teststand, eigenen Testserver und den
+spaeteren Gemeinde-Server sind in `docs/installation-options.md`
+dokumentiert. Der Gemeinde-Server bleibt bis zur finalen Klaerung ein offener
+Go-Live-Blocker.
+
 ## 1. Zielumgebung vorbereiten
 
 - Server mit Docker und Docker Compose bereitstellen.
@@ -54,11 +59,13 @@ Regeln:
 ## 3. Konfiguration pruefen
 
 ```bash
+npm run production:check
 docker compose --env-file .env.production -f docker-compose.production.yml config
 ```
 
 Erfolgskriterium:
 
+- `npm run production:check` meldet keine Fehler.
 - Compose rendert ohne Fehler.
 - Keine Platzhalterwerte wie `replace-with-*` bleiben in der echten
   `.env.production`.

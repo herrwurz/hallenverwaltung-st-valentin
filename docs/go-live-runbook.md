@@ -5,6 +5,9 @@ Dieses Runbook beschreibt die konkrete Ausfuehrung der Hoch-Blocker aus
 aber dafuer, dass Go-Live-Schritte, Nachweise und Stop-Kriterien einheitlich
 dokumentiert werden.
 
+Flexible Installationswege fuer lokalen Teststand, eigenen Testserver und
+spaeteren Gemeinde-Server stehen in `docs/installation-options.md`.
+
 Die Ergebnisse der echten Zielumgebungs-Abnahme werden in
 `docs/go-live-evidence.md` protokolliert. Dort duerfen keine Secrets, privaten
 Schluessel oder echten Passwoerter eingetragen werden.
@@ -110,6 +113,7 @@ Pflichtwerte in `.env.production` setzen:
 Konfiguration pruefen:
 
 ```bash
+npm run production:check
 docker compose --env-file .env.production -f docker-compose.production.yml config
 ```
 
@@ -119,6 +123,12 @@ Stop-Kriterium:
   `example.org`.
 - `AUTH_SECRET` ist kurz, wiederverwendet oder in Logs/Tickets sichtbar.
 - `.env.production` ist versehentlich fuer Git vorgemerkt.
+
+Optional koennen Zertifikatsdateien direkt mitgeprueft werden:
+
+```bash
+npm run production:check -- --check-files
+```
 
 ## 4. Start, Migration und Dienste
 

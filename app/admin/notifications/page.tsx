@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { StatusFilterSelect } from "@/components/status-filter-select";
 import { requirePermission } from "@/lib/permissions";
 import { getNotificationsForAdmin } from "@/lib/services/notification-service";
@@ -67,9 +67,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
             Queue verarbeiten
           </button>
         </form>
-        <Link href="/admin" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Dashboard
-        </Link>
+        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
       </div>
 
       {params.retried ? (

@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { AppBackLink } from "@/components/app-back-link";
 import { reportDamageAction } from "@/app/portal/damages/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
 import { getDamageStatusBadgeClass, getDamageStatusLabel } from "@/lib/document-damage-labels";
@@ -25,18 +26,14 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
         Melden Sie Schäden mit Beschreibung und optionalem Foto-Ablagepfad. Die Gemeinde bearbeitet den Status.
       </p>
       <div className="mt-8 flex items-center justify-between">
-        <Link href="/portal" className="text-sm text-sky-300 hover:text-sky-200">
-          Zurück zum Portal
-        </Link>
+        <AppBackLink href="/portal" label="Zurück zum Portal" />
       </div>
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Schadensmeldung wurde gespeichert.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Schadensmeldung wurde gespeichert." : undefined },
+        ]}
+      />
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <h3 className="text-lg font-medium">Neuen Schaden melden</h3>
