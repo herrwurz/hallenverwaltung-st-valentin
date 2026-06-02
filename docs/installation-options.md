@@ -74,6 +74,15 @@ Geeignet fuer:
 - Vorfuehrung fuer Verwaltung oder Vereine
 - technische Vorbereitung vor Gemeinde-Server
 
+Aktueller Hinweis:
+
+- Der geplante eigene Testserver soll voraussichtlich auf all-inkl.com laufen.
+- Das ist eine eigene technische Huerde, weil vorab geklaert werden muss, ob
+  der konkrete Tarif dauerhaft Node.js, PostgreSQL, Worker/Cron, Umgebungs-
+  variablen, Prozessbetrieb und optional Docker/Reverse Proxy unterstuetzt.
+- Bis diese Hosting-Fragen geklaert sind, bleibt der lokale Teststand die
+  verlaessliche Umgebung fuer Klicktests.
+
 Empfohlene Variante:
 
 - Docker Compose verwenden

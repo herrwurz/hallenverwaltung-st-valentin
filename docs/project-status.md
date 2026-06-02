@@ -301,6 +301,14 @@ alte Dark-Theme-Statusflaechen erweitert, Statusfilter und Abmeldebutton sind
 helle Verwaltungs-Controls, und Start-/Berechtigungsseite wirken nicht mehr wie
 ein Phase-1-Prototyp.
 
+## Phase 24.7
+
+Lokaler Klicktest vorbereitet: `.env` kann lokal mit der PostgreSQL-Testdatenbank
+auf Port 55435 genutzt werden, Migrationen, Stammdaten und Demo-Daten wurden
+eingespielt, und `scripts/start-local-standalone.ps1` startet die stabile
+Standalone-Variante fuer `http://localhost:3000`. Der angedachte Testserver auf
+all-inkl.com ist als technische Hosting-Klaerung dokumentiert.
+
 ---
 
 # Wichtigste Architekturentscheidungen
