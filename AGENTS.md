@@ -60,20 +60,61 @@ Phase 25 ist wegen Credit-Budget aktuell bewusst zurueckgestellt.
 
 Wenn Phase 25 startet, gilt:
 
+## UI/UX Stack & Component Guidelines
+
+### Core Technology Stack
+
+- Styling Framework: Tailwind CSS, utility-first, responsive und mit
+  semantischen Farben.
+- Component Library: shadcn/ui mit Radix UI Primitives und Copy-Paste-
+  Architektur.
+- Icons: Lucide React fuer klare, minimale Outline-Icons.
+- Table Engine: TanStack Table (`@tanstack/react-table`), visuell umgesetzt mit
+  shadcn/ui Table-Komponenten.
+- Validierung: Zod bleibt verbindlich. React Hook Form darf fuer komplexe
+  Client-Formulare mit shadcn/ui Form verwendet werden, darf aber die
+  serverseitige Validierung in Services und Server Actions nicht ersetzen.
+
+### Required Component Mapping
+
 - shadcn/ui ist nicht nur punktuell, sondern als genereller UI-Stack zu
   verwenden.
 - Vorhandene Eigenbau-Controls sollen schrittweise durch passende shadcn/ui-
   Komponenten ersetzt werden, sofern fachlich sinnvoll und wartbar.
-- Fuer alle tabellarischen Daten ist die shadcn/ui Data-Table-/Grid-Logik zu
-  verwenden, z. B. Gebaeude, Raeume, Benutzer, Organisationen, Rollen,
-  Buchungen, Warteliste, Benachrichtigungen, Abrechnung, Dokumente, Schaeden,
-  No-Shows, Hallenuebergaben und Zutritt.
+- Main Layout & Overview: Bento-Grid-Pattern mit custom `div` grids und
+  Flaechen wie `rounded-xl border border-slate-200 bg-white shadow-sm`.
+- Data Display: Fuer alle tabellarischen Daten ist das shadcn/ui Data-Table-
+  Pattern zu verwenden, also shadcn/ui `table` plus TanStack Table mit
+  Sortierung, Filterung ueber shadcn/ui `input` und Pagination. Das betrifft
+  u. a. Gebaeude, Raeume, Benutzer, Organisationen, Rollen, Buchungen,
+  Warteliste, Benachrichtigungen, Abrechnung, Dokumente, Schaeden, No-Shows,
+  Hallenuebergaben und Zutritt.
+- New Bookings / Actions: shadcn/ui `dialog`, ausgeloest ueber shadcn/ui
+  `button`.
+- Time/Date Inputs: shadcn/ui `calendar` kombiniert mit shadcn/ui `popover`.
+  Fuer Zeitraeume ein klares Date-/Time-Range-Pattern verwenden.
+- Form Controls: shadcn/ui `form` fuer komplexe Client-Formulare, aufgebaut auf
+  React Hook Form und Zod. Server Actions und Services muessen weiterhin
+  unabhaengig validieren.
+- Status Indicators: shadcn/ui `badge` mit semantischer Farbcodierung:
+  emerald fuer bestaetigt/genehmigt, amber fuer pending/Option/in Pruefung,
+  rose fuer blockiert/Sperre/Wartung, slate fuer storniert/inaktiv.
 - Kalender und Hallenplanung sollen als echte Ressourcenansicht umgesetzt
   werden: Raeume/Hallen als Spalten, Zeitraster in 30-Minuten-Schritten,
   Status-Badges und Buchungsdialoge.
-- shadcn/ui Dialog ist fuer Buchungs- und Detaildialoge zu verwenden.
 - shadcn/ui Select, Combobox/Command, Popover, Calendar/Date-Picker, Button,
-  Card, Badge, Table, Tabs und Form-Patterns sollen bevorzugt werden.
+  Card, Badge, Table, Tabs, Skeleton, Dialog und Form-Patterns sollen
+  bevorzugt werden.
+- Loading States: shadcn/ui `skeleton` fuer Tabellen, Statistik-Karten und
+  datenreiche Panels verwenden, wenn Daten clientseitig oder ueber Suspense
+  nachgeladen werden.
+- Feedback: shadcn/ui Toast/Sonner fuer unmittelbare Rueckmeldungen nach
+  erfolgreichen Mutationen verwenden. Bei Server Actions muss die
+  Rueckmeldung sauber ueber Redirect-Query, Action-State oder Client-Bridge
+  ausgeloest werden; kein reiner Frontend-Erfolg ohne serverseitigen Erfolg.
+- Dark Mode: Keine manuellen Dark-Mode-Variablen erfinden. Falls Dark Mode
+  spaeter umgesetzt wird, dann ueber Tailwind `dark:` Klassen und shadcn-
+  Theme-Variablen.
 - Drag-and-drop darf zunaechst nur lokal/visuell vorbereitet werden. Persistente
   Terminverschiebungen muessen weiterhin ueber die vorhandene
   Verschiebungs-/Genehmigungslogik laufen.
