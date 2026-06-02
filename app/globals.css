@@ -1,29 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: light;
-  --app-bg: #eef2f7;
-  --app-panel: #ffffff;
-  --app-panel-muted: #f8fafc;
-  --app-panel-selected: #eaf2ff;
-  --app-border: #cbd5e1;
-  --app-border-strong: #94a3b8;
-  --app-text: #0f172a;
-  --app-muted: #475569;
-  --app-accent: #2563eb;
-  --app-accent-strong: #1d4ed8;
-  --app-success-bg: #ecfdf5;
-  --app-success-border: #86efac;
-  --app-success-text: #14532d;
-  --app-error-bg: #fef2f2;
-  --app-error-border: #fca5a5;
-  --app-error-text: #7f1d1d;
-  --app-warning-bg: #fffbeb;
-  --app-warning-border: #fcd34d;
-  --app-warning-text: #78350f;
-  --app-info-bg: #eff6ff;
-  --app-info-border: #93c5fd;
-  --app-info-text: #1e3a8a;
+@layer base {
+  :root {
+    color-scheme: light;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Bento-Grid-Karten und Tabellen */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* GEMEINDE-BLAU: Das Fundament für Buttons & aktive Menüs */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Neutrale Elemente */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    /* GEMEINDE-GELB: Akzentfarbe für offene/schwebende Buchungen */
+    --warning: 47.9 95.8% 53.1%;
+    --warning-foreground: 26 83.3% 14.1%;
+
+    /* Status-Meldungen */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+
+    /* Grenzen und Fokusringe (Slate-Stil) */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+
+    /* Uebergangs-Aliase fuer die bestehende Pre-Phase-25-Oberflaeche. */
+    --app-bg: hsl(var(--secondary));
+    --app-panel: hsl(var(--card));
+    --app-panel-muted: hsl(var(--muted));
+    --app-panel-selected: hsl(var(--primary) / 0.08);
+    --app-border: hsl(var(--border));
+    --app-border-strong: hsl(215 20.2% 65.1%);
+    --app-text: hsl(var(--foreground));
+    --app-muted: hsl(var(--muted-foreground));
+    --app-accent: hsl(var(--primary));
+    --app-accent-strong: hsl(224.3 76.3% 48%);
+    --app-success-bg: hsl(var(--success) / 0.1);
+    --app-success-border: hsl(var(--success) / 0.25);
+    --app-success-text: hsl(142.8 64.2% 24.1%);
+    --app-error-bg: hsl(var(--destructive) / 0.1);
+    --app-error-border: hsl(var(--destructive) / 0.25);
+    --app-error-text: hsl(0 72.2% 26.1%);
+    --app-warning-bg: hsl(var(--warning) / 0.15);
+    --app-warning-border: hsl(var(--warning) / 0.35);
+    --app-warning-text: hsl(var(--warning-foreground));
+    --app-info-bg: hsl(var(--primary) / 0.08);
+    --app-info-border: hsl(var(--primary) / 0.18);
+    --app-info-text: hsl(var(--primary));
+  }
 }
 
 * {

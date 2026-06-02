@@ -115,6 +115,17 @@ Wenn Phase 25 startet, gilt:
 - Dark Mode: Keine manuellen Dark-Mode-Variablen erfinden. Falls Dark Mode
   spaeter umgesetzt wird, dann ueber Tailwind `dark:` Klassen und shadcn-
   Theme-Variablen.
+- Corporate Identity & Color Tokens:
+  - Primary Color (Gemeinde-Blau): `bg-primary` / `text-primary` fuer
+    Hauptaktionen wie "+ Neue Buchung", aktive Sidebar-Zustaende,
+    Navigationskoepfe und ausgewaehlte Kalenderdaten verwenden.
+  - Accent/Warning Color (Gemeinde-Gelb): `bg-warning` / `text-warning` nur
+    fuer offene oder schwebende Buchungsantraege, Warnbanner und gezielte
+    Hervorhebungen verwenden. Gelb nicht als vollflaechigen Seitenhintergrund
+    oder fuer normalen Haupttext einsetzen.
+  - Card Styling: Bento-Grid-Module und Verwaltungs-Karten grundsaetzlich mit
+    `bg-card border-border rounded-xl shadow-sm` aufbauen, damit eine moderne,
+    ruhige Verwaltungssoftware-Anmutung entsteht.
 - Drag-and-drop darf zunaechst nur lokal/visuell vorbereitet werden. Persistente
   Terminverschiebungen muessen weiterhin ueber die vorhandene
   Verschiebungs-/Genehmigungslogik laufen.
