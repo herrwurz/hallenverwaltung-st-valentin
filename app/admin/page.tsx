@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import { getAdminDashboardData } from "@/lib/services/admin/dashboard-service";
 
@@ -21,9 +22,9 @@ export default async function AdminPage() {
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Dashboard</p>
-      <h2 className="mt-3 text-3xl font-semibold">Stammdatenverwaltung</h2>
-      <p className="mt-3 max-w-2xl text-slate-300">
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Dashboard</p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Stammdatenverwaltung</h2>
+      <p className="mt-3 max-w-2xl text-muted-foreground">
         Gebäude, Räume, Organisationen, Benutzer und Berechtigungszuordnungen verwalten.
       </p>
       <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -31,17 +32,17 @@ export default async function AdminPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-sky-700"
+            className="rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/60"
           >
-            <p className="text-sm text-slate-400">{card.label}</p>
+            <p className="text-sm text-muted-foreground">{card.label}</p>
             <p className="mt-2 text-3xl font-semibold">{card.value}</p>
           </Link>
         ))}
       </div>
-      <p className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-300">
+      <Card className="mt-10 p-5 text-sm text-muted-foreground">
         Buchungsanträge, Warteliste, Kalender, Mailversand und Abrechnungsvorbereitung sind angebunden. Automatische
         Rechnungslegung und Zahlungsabwicklung sind weiterhin nicht enthalten.
-      </p>
+      </Card>
     </>
   );
 }

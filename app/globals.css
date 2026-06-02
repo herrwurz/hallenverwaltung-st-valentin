@@ -130,41 +130,47 @@ textarea {
   color: hsl(var(--foreground));
 }
 
+.windows-shell [class*="bg-background"],
+.windows-shell [class*="bg-card"],
 .windows-shell [class*="bg-slate-950"],
 .windows-shell [class*="bg-slate-900"] {
   background-color: var(--app-panel) !important;
 }
 
+.windows-shell [class*="bg-muted/40"],
 .windows-shell [class*="bg-slate-950/60"] {
   background-color: var(--app-panel-muted) !important;
 }
 
+.windows-shell [class*="border-border"],
+.windows-shell [class*="border-input"],
 .windows-shell [class*="border-slate-800"],
 .windows-shell [class*="border-slate-700"] {
   border-color: var(--app-border) !important;
 }
 
 .windows-shell [class*="text-slate-100"],
-.windows-shell [class*="text-slate-200"],
-.windows-shell [class*="text-slate-300"] {
+.windows-shell [class*="text-slate-200"] {
   color: var(--app-text) !important;
 }
 
+.windows-shell [class*="text-muted-foreground"],
+.windows-shell [class*="text-slate-300"],
 .windows-shell [class*="text-slate-400"],
 .windows-shell [class*="text-slate-500"],
 .windows-shell [class*="text-slate-600"] {
   color: var(--app-muted) !important;
 }
 
-.windows-shell [class*="text-sky-400"],
+.windows-shell [class*="text-primary"],
 .windows-shell [class*="text-sky-300"],
-.windows-shell [class*="text-sky-200"],
+.windows-shell [class*="text-sky-400"],
 .windows-shell [class*="text-blue-700"] {
   color: var(--app-accent) !important;
 }
 
 .windows-shell [class*="bg-emerald-950"],
-.windows-shell [class*="bg-emerald-500/20"] {
+.windows-shell [class*="bg-success/20"] {
   background-color: var(--app-success-bg) !important;
 }
 
@@ -179,7 +185,7 @@ textarea {
 
 .windows-shell [class*="bg-red-950"],
 .windows-shell [class*="bg-rose-950"],
-.windows-shell [class*="bg-rose-500/20"] {
+.windows-shell [class*="bg-destructive/20"] {
   background-color: var(--app-error-bg) !important;
 }
 
@@ -213,7 +219,7 @@ textarea {
   background-color: var(--app-info-bg) !important;
 }
 
-.windows-shell [class*="border-sky-700"],
+.windows-shell [class*="border-primary"],
 .windows-shell [class*="border-sky-800"] {
   border-color: var(--app-info-border) !important;
 }
@@ -241,8 +247,9 @@ textarea {
 }
 
 .windows-shell button,
-.windows-shell a[class*="bg-sky-500"],
-.windows-shell a[class*="bg-blue-600"] {
+.windows-shell a[class*="bg-primary"],
+.windows-shell a[class*="bg-blue-600"],
+.windows-shell a[class*="bg-primary"] {
   border-radius: 0.5rem !important;
 }
 
@@ -252,28 +259,32 @@ textarea {
   box-shadow: 0 1px 1px rgb(15 23 42 / 0.08);
 }
 
-.windows-shell button[class*="bg-sky-500"],
-.windows-shell a[class*="bg-sky-500"],
+.windows-shell button[class*="bg-primary"],
+.windows-shell a[class*="bg-primary"],
 .windows-shell button[class*="bg-blue-600"],
-.windows-shell a[class*="bg-blue-600"] {
+.windows-shell a[class*="bg-blue-600"],
+.windows-shell button[class*="bg-primary"],
+.windows-shell a[class*="bg-primary"] {
   border: 1px solid var(--app-accent-strong) !important;
   background-color: var(--app-accent) !important;
   color: #ffffff !important;
 }
 
 .windows-shell button[class*="bg-slate-700"],
+.windows-shell a[class*="border-input"],
 .windows-shell a[class*="border-slate-700"],
 .windows-shell a[class*="border-slate-600"],
-.windows-shell button[class*="border-slate-600"] {
+.windows-shell button[class*="border-input"] {
   border-color: var(--app-border-strong) !important;
   background-color: #ffffff !important;
   color: var(--app-text) !important;
 }
 
 .windows-shell button[class*="bg-slate-700"]:hover,
+.windows-shell a[class*="border-input"]:hover,
 .windows-shell a[class*="border-slate-700"]:hover,
 .windows-shell a[class*="border-slate-600"]:hover,
-.windows-shell button[class*="border-slate-600"]:hover {
+.windows-shell button[class*="border-input"]:hover {
   background-color: var(--app-panel-muted) !important;
 }
 

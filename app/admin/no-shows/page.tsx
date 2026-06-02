@@ -6,7 +6,7 @@ import { requirePermission } from "@/lib/permissions";
 import { getAdminNoShowData } from "@/lib/services/no-show-service";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
-const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
 const filterButtons = ["ALL", "REPORTED", "ACKNOWLEDGED"] as const;
 
 type PageProps = {
@@ -20,9 +20,9 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Hallenwart</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Hallenwart</p>
       <h2 className="mt-3 text-3xl font-semibold">No-Show-Meldungen</h2>
-      <p className="mt-3 text-slate-300">
+      <p className="mt-3 text-muted-foreground">
         Nichtnutzungen genehmigter Buchungen protokollieren. Keine Sanktionen, keine automatische Abrechnung und keine
         Statusänderung der Buchung in dieser Phase.
       </p>
@@ -41,15 +41,15 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
         </p>
       ) : null}
 
-      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
+      <section className="mt-8 rounded-xl border border-border bg-card p-5">
         <h3 className="text-lg font-medium">No-Show melden</h3>
         {data.reportableBookings.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-4 text-sm text-muted-foreground">
             Aktuell sind keine abgeschlossenen genehmigten Buchungen für eine neue Meldung verfügbar.
           </p>
         ) : (
           <form action={reportNoShowAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-            <label className="text-sm text-slate-300 lg:col-span-2">
+            <label className="text-sm text-muted-foreground lg:col-span-2">
               Buchung
               <select name="bookingId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
@@ -63,7 +63,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-slate-300 lg:col-span-2">
+            <label className="text-sm text-muted-foreground lg:col-span-2">
               Beschreibung
               <textarea name="description" rows={3} required maxLength={2000} className={inputClass} />
             </label>
@@ -84,19 +84,19 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
 
       <section className="mt-8 space-y-3">
         {data.reports.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+          <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
             Für den gewählten Filter sind keine No-Show-Meldungen vorhanden.
           </p>
         ) : (
           data.reports.map((report) => (
-            <article key={report.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <article key={report.id} className="rounded-xl border border-border bg-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h3 className="font-medium">{report.booking.title}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {report.organization.name} | {report.room.building.name} - {report.room.name}
                   </p>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Buchung: {dateFormatter.format(report.booking.startsAt)} bis{" "}
                     {dateFormatter.format(report.booking.endsAt)}
                   </p>
@@ -109,7 +109,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
                   {getNoShowStatusLabel(report.status)}
                 </span>
               </div>
-              <p className="mt-4 text-sm text-slate-300">{report.description}</p>
+              <p className="mt-4 text-sm text-muted-foreground">{report.description}</p>
               {report.acknowledgedAt ? (
                 <p className="mt-2 text-sm text-slate-500">
                   Zur Kenntnis genommen am {dateFormatter.format(report.acknowledgedAt)} von{" "}
@@ -121,7 +121,7 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
                 <form action={acknowledgeNoShowAction} className="mt-5">
                   <input type="hidden" name="noShowReportId" value={report.id} />
                   <input type="hidden" name="status" value={params.status ?? ""} />
-                  <button className="rounded-lg border border-sky-700 px-4 py-2 text-sm text-sky-200 hover:bg-sky-950">
+                  <button className="rounded-lg border border-primary px-4 py-2 text-sm text-primary hover:bg-accent">
                     Zur Kenntnis nehmen
                   </button>
                 </form>

@@ -29,8 +29,10 @@ test("shared form actions expose shadcn-style primary and secondary actions", ()
   assert.match(formActions, /Button/);
   assert.match(formActions, /variant="outline"/);
   assert.match(formActions, /Abbrechen/);
-  assert.match(statusFilterSelect, /border-slate-400 bg-white/);
-  assert.match(logoutButton, /border-slate-400 bg-white/);
+  assert.match(statusFilterSelect, /Button/);
+  assert.match(statusFilterSelect, /border-input bg-background/);
+  assert.match(logoutButton, /Button/);
+  assert.match(logoutButton, /variant="outline"/);
 });
 
 test("navigation back links use the shared light Windows-style component", () => {

@@ -2,7 +2,7 @@ import { createHolidayPeriodAction } from "@/app/admin/holidays/actions";
 import { requirePermission } from "@/lib/permissions";
 import { getHolidayAdministrationData, getHolidayStatusLabel } from "@/lib/services/holiday-service";
 
-const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
 
 type PageProps = {
@@ -15,9 +15,9 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Ferienlogik</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Ferienlogik</p>
       <h2 className="mt-3 text-3xl font-semibold">Ferien und Feiertage</h2>
-      <p className="mt-3 text-slate-300">
+      <p className="mt-3 text-muted-foreground">
         Konfigurierbare Ferien-, Feiertags- und schulautonome Zeiträume für Serienbuchungen. Geschlossene
         Zeiträume werden bei neuen Serienanträgen übersprungen, eingeschränkte Zeiträume als Hinweis angezeigt.
       </p>
@@ -31,14 +31,14 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
         </p>
       ) : null}
 
-      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
+      <section className="mt-8 rounded-xl border border-border bg-card p-5">
         <h3 className="text-lg font-medium">Zeitraum erfassen</h3>
         <form action={createHolidayPeriodAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-          <label className="text-sm text-slate-300">
+          <label className="text-sm text-muted-foreground">
             Name
             <input name="name" required maxLength={160} className={inputClass} />
           </label>
-          <label className="text-sm text-slate-300">
+          <label className="text-sm text-muted-foreground">
             Status
             <select name="defaultStatus" required defaultValue="CLOSED" className={inputClass}>
               <option value="OPEN">Geöffnet</option>
@@ -46,24 +46,24 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
               <option value="CLOSED">Gesperrt</option>
             </select>
           </label>
-          <label className="text-sm text-slate-300">
+          <label className="text-sm text-muted-foreground">
             Beginn
             <input name="startsOn" type="datetime-local" required className={inputClass} />
           </label>
-          <label className="text-sm text-slate-300">
+          <label className="text-sm text-muted-foreground">
             Ende
             <input name="endsOn" type="datetime-local" required className={inputClass} />
           </label>
-          <label className="text-sm text-slate-300 lg:col-span-2">
+          <label className="text-sm text-muted-foreground lg:col-span-2">
             Grund
             <textarea name="reason" rows={3} required maxLength={1000} className={inputClass} />
           </label>
-          <label className="inline-flex items-center gap-2 text-sm text-slate-300 lg:col-span-2">
-            <input name="isPublic" type="checkbox" defaultChecked className="rounded border-slate-700 bg-slate-950" />
+          <label className="inline-flex items-center gap-2 text-sm text-muted-foreground lg:col-span-2">
+            <input name="isPublic" type="checkbox" defaultChecked className="rounded border-input bg-background" />
             Für Benutzer sichtbar
           </label>
           <div className="lg:col-span-2 lg:text-right">
-            <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+            <button className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
               Zeitraum speichern
             </button>
           </div>
@@ -72,22 +72,22 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
 
       <section className="mt-8 space-y-3">
         {holidays.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+          <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
             Noch keine Ferien- oder Feiertagszeitraeume vorhanden.
           </p>
         ) : (
           holidays.map((holiday) => (
-            <article key={holiday.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <article key={holiday.id} className="rounded-xl border border-border bg-card p-5">
               <div className="flex flex-wrap justify-between gap-4">
                 <div>
                   <h3 className="font-medium">{holiday.name}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {dateFormatter.format(holiday.startsOn)} bis {dateFormatter.format(holiday.endsOn)}
                   </p>
-                  <p className="mt-2 text-sm text-slate-300">{holiday.reason}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{holiday.reason}</p>
                 </div>
                 <div className="text-right text-sm">
-                  <p className="font-medium text-sky-200">{getHolidayStatusLabel(holiday.defaultStatus)}</p>
+                  <p className="font-medium text-primary">{getHolidayStatusLabel(holiday.defaultStatus)}</p>
                   <p className="mt-1 text-slate-500">{holiday.isPublic ? "Sichtbar" : "Intern"}</p>
                 </div>
               </div>

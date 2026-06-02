@@ -167,7 +167,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                           key={`${booking.id}-conflict-${index}`}
                           className={`rounded-lg border px-3 py-2 ${
                             conflict.severity === "blocking"
-                              ? "border-rose-500/20 bg-rose-500/10 text-rose-700"
+                              ? "border-rose-500/20 bg-destructive/10 text-rose-700"
                               : "border-warning/35 bg-warning/15 text-warning-foreground"
                           }`}
                         >

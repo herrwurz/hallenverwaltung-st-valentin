@@ -41,7 +41,7 @@ const filterButtons: BookingChangeFilterKey[] = [
   "ALL",
 ];
 
-const textareaClass = "mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const textareaClass = "mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
 
 type PageProps = {
   searchParams: Promise<{
@@ -82,9 +82,9 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Buchungen</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Buchungen</p>
       <h2 className="mt-3 text-3xl font-semibold">Änderungsanträge</h2>
-      <p className="mt-3 text-slate-300">
+      <p className="mt-3 text-muted-foreground">
         Terminverschiebungen und vorbereitete Tauschanträge. Genehmigte Verschiebungen behalten die alte Buchung als
         `MOVED` und erzeugen einen neuen genehmigten Ersatztermin.
       </p>
@@ -95,7 +95,7 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
         </p>
       ) : null}
       {params.reviewed ? (
-        <p className="mt-6 rounded-lg border border-sky-800 bg-sky-950/40 p-4 text-sm text-sky-200">
+        <p className="mt-6 rounded-lg border border-sky-800 bg-sky-950/40 p-4 text-sm text-primary">
           Der Änderungsantrag wurde in Prüfung übernommen.
         </p>
       ) : null}
@@ -120,17 +120,17 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
 
       <section className="mt-8 space-y-3">
         {requests.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+          <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
             Für den gewählten Statusfilter sind keine Änderungsanträge vorhanden.
           </p>
         ) : (
           requests.map((request) => (
-            <article key={request.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <article key={request.id} className="rounded-xl border border-border bg-card p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-sm text-sky-300">{getBookingChangeTypeLabel(request.type)}</p>
                   <h3 className="mt-1 font-medium">{request.booking.title}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {request.booking.organization.name} | beantragt von{" "}
                     {request.requestedBy.displayName ?? request.requestedBy.email}
                   </p>
@@ -144,31 +144,31 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
               </div>
 
               <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                <section className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
+                <section className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
                   <h4 className="font-medium text-slate-200">Bisheriger Termin</h4>
-                  <p className="mt-2 text-slate-300">
+                  <p className="mt-2 text-muted-foreground">
                     {request.oldRoom.building.name} - {request.oldRoom.name}
                   </p>
-                  <p className="mt-1 text-slate-400">
+                  <p className="mt-1 text-muted-foreground">
                     {dateFormatter.format(request.oldStartAt)} bis {dateFormatter.format(request.oldEndAt)}
                   </p>
                 </section>
-                <section className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
+                <section className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
                   <h4 className="font-medium text-slate-200">Gewünschter Termin</h4>
-                  <p className="mt-2 text-slate-300">
+                  <p className="mt-2 text-muted-foreground">
                     {request.newRoom.building.name} - {request.newRoom.name}
                   </p>
-                  <p className="mt-1 text-slate-400">
+                  <p className="mt-1 text-muted-foreground">
                     {dateFormatter.format(request.newStartAt)} bis {dateFormatter.format(request.newEndAt)}
                   </p>
                 </section>
               </div>
 
-              <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
+              <section className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-sm">
                 <h4 className="font-medium text-slate-200">Begründung</h4>
-                <p className="mt-2 text-slate-300">{request.reason}</p>
+                <p className="mt-2 text-muted-foreground">{request.reason}</p>
                 {request.decisionNote ? (
-                  <p className="mt-3 text-slate-400">
+                  <p className="mt-3 text-muted-foreground">
                     Entscheidung: {request.decisionNote}
                     {request.decidedBy ? ` | ${request.decidedBy.displayName ?? request.decidedBy.email}` : ""}
                     {request.decidedAt ? ` | ${dateFormatter.format(request.decidedAt)}` : ""}
@@ -176,7 +176,7 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
                 ) : null}
               </section>
 
-              <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+              <section className="mt-4 rounded-lg border border-border bg-muted/40 p-4">
                 <h4 className="text-sm font-medium text-slate-200">Konflikthinweise neuer Termin</h4>
                 {request.conflicts.length === 0 ? (
                   <p className="mt-3 text-sm text-emerald-200">Aktuell keine harten Konflikte erkannt.</p>
@@ -202,19 +202,19 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
               </section>
 
               {canApprove || canReject ? (
-                <section className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+                <section className="mt-5 rounded-lg border border-border bg-muted/40 p-4">
                   <h4 className="text-sm font-medium text-slate-200">Entscheidung</h4>
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     Verschiebung: Beantragt {"->"} In Prüfung {"->"} Genehmigt oder Abgelehnt. Tausch ist aktuell nur
                     vorbereitet.
                   </p>
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
                     {canApprove && request.status === "REQUESTED" ? (
-                      <form action={markChangeRequestInReviewAction} className="rounded-lg border border-slate-800 p-4">
+                      <form action={markChangeRequestInReviewAction} className="rounded-lg border border-border p-4">
                         <input type="hidden" name="requestId" value={request.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <p className="text-sm text-slate-300">Antrag zur fachlichen Prüfung übernehmen.</p>
-                        <button className="mt-4 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+                        <p className="text-sm text-muted-foreground">Antrag zur fachlichen Prüfung übernehmen.</p>
+                        <button className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
                           In Prüfung setzen
                         </button>
                       </form>
@@ -224,10 +224,10 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
                       <form action={approveChangeRequestAction} className="rounded-lg border border-emerald-900 p-4">
                         <input type="hidden" name="requestId" value={request.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <p className="text-sm text-slate-300">
+                        <p className="text-sm text-muted-foreground">
                           Genehmigt die Verschiebung, setzt die alte Buchung auf MOVED und legt den Ersatztermin an.
                         </p>
-                        <button className="mt-4 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400">
+                        <button className="mt-4 rounded-lg bg-success px-4 py-2 text-sm font-medium text-success-foreground hover:bg-success/90">
                           Genehmigen
                         </button>
                       </form>
@@ -237,11 +237,11 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
                       <form action={rejectChangeRequestAction} className="rounded-lg border border-rose-900 p-4">
                         <input type="hidden" name="requestId" value={request.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <label className="text-sm text-slate-300">
+                        <label className="text-sm text-muted-foreground">
                           Begründung (erforderlich)
                           <textarea name="decisionNote" rows={3} required className={textareaClass} />
                         </label>
-                        <button className="mt-4 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-rose-400">
+                        <button className="mt-4 rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">
                           Ablehnen
                         </button>
                       </form>

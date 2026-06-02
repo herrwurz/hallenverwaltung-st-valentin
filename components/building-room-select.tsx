@@ -50,7 +50,7 @@ export function BuildingRoomSelect({
 
   return (
     <>
-      <label className="text-sm text-slate-300">
+      <label className="text-sm font-medium text-foreground">
         {buildingLabel}
         <select
           name={`${roomName}BuildingFilter`}
@@ -69,7 +69,7 @@ export function BuildingRoomSelect({
         </select>
       </label>
 
-      <label className="text-sm text-slate-300">
+      <label className="text-sm font-medium text-foreground">
         {roomLabel}
         <select
           name={roomName}

@@ -24,7 +24,7 @@ export default function Home() {
           </Link>
           <Link
             href="/admin"
-            className="rounded-sm border border-blue-700 bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-sm border border-primary bg-primary px-4 py-3 text-sm font-medium text-white hover:bg-primary/90"
           >
             Verwaltung
           </Link>

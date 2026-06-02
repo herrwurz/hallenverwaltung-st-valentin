@@ -293,7 +293,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
                   </p>
                 ) : (
                   freeSlots.freeSlots.map((slot, index) => (
-                    <p key={`${slot.startsAt.toISOString()}-${index}`} className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-700">
+                    <p key={`${slot.startsAt.toISOString()}-${index}`} className="rounded-lg border border-emerald-500/20 bg-success/10 p-3 text-sm text-emerald-700">
                       {timeFormatter.format(slot.startsAt)} bis {timeFormatter.format(slot.endsAt)}
                     </p>
                   ))
@@ -449,7 +449,7 @@ function EventDialogs({ events }: { events: CalendarEvent[] }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby={`${dialogId}-title`}
-            className="fixed inset-0 z-50 hidden place-items-center bg-slate-950/70 p-6 target:grid"
+            className="fixed inset-0 z-50 hidden place-items-center bg-black/40 p-6 target:grid"
           >
             <div className="w-full max-w-xl rounded-xl border border-border bg-card p-6 text-card-foreground shadow-2xl">
               <div className="flex items-start justify-between gap-4 border-b border-border pb-4">

@@ -17,7 +17,7 @@ import {
   declineWaitlistOfferAction,
 } from "@/app/portal/waitlist/actions";
 
-const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -58,7 +58,7 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
+      <section className="mt-8 rounded-xl border border-border bg-card p-5">
         <h2 className="text-xl font-medium">Neuer Wartelistenplatz</h2>
         {options.organizations.length === 0 ? (
           <p className="mt-4 text-sm text-amber-200">
@@ -68,11 +68,11 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
           <form action={createWaitlistEntryAction} className="mt-5 grid gap-4 lg:grid-cols-2">
             <PortalOrganizationField organizations={options.organizations} inputClassName={inputClass} />
             <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
-            <label className="text-sm text-slate-300">
+            <label className="text-sm text-muted-foreground">
               Titel
               <input name="title" required maxLength={160} className={inputClass} />
             </label>
-            <label className="text-sm text-slate-300">
+            <label className="text-sm text-muted-foreground">
               Nutzungstyp
               <select name="usageTypeId" required defaultValue="" className={inputClass}>
                 <option value="" disabled>
@@ -85,11 +85,11 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-slate-300">
+            <label className="text-sm text-muted-foreground">
               Beginn
               <input name="startsAt" type="datetime-local" required className={inputClass} />
             </label>
-            <label className="text-sm text-slate-300">
+            <label className="text-sm text-muted-foreground">
               Ende
               <input name="endsAt" type="datetime-local" required className={inputClass} />
             </label>
@@ -104,19 +104,19 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
         <h2 className="text-xl font-medium">Wartelistenplätze Ihrer Organisationen</h2>
         <div className="mt-4 space-y-3">
           {entries.length === 0 ? (
-            <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+            <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
               Noch keine Wartelistenplätze vorhanden.
             </p>
           ) : (
             entries.map((entry) => (
-              <article key={entry.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+              <article key={entry.id} className="rounded-xl border border-border bg-card p-5">
                 <div className="flex flex-wrap justify-between gap-4">
                   <div>
                     <h3 className="font-medium">{entry.title}</h3>
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {entry.organization.name} | {entry.room.building.name} - {entry.room.name}
                     </p>
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {dateFormatter.format(entry.startsAt)} bis {dateFormatter.format(entry.endsAt)} |{" "}
                       {entry.usageType.name}
                     </p>

@@ -36,9 +36,9 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Einstellungen</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Einstellungen</p>
       <h2 className="mt-3 text-3xl font-semibold">Öffentlicher Kalender</h2>
-      <p className="mt-3 max-w-3xl text-slate-300">
+      <p className="mt-3 max-w-3xl text-muted-foreground">
         Hier wird festgelegt, welche Details die Öffentlichkeit im Kalender sehen darf. Ohne passende Raumfreigabe
         bleibt die sichere Anzeige immer bei belegt oder frei.
       </p>
@@ -56,30 +56,30 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
         <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{error}</p>
       ) : null}
 
-      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
+      <section className="mt-8 rounded-xl border border-border bg-card p-6">
         <h3 className="text-xl font-medium">Datenschutzeinstellung</h3>
         <form action={updateCalendarVisibilitySettingAction} className="mt-5 space-y-4">
           {publicCalendarVisibilityModes.map((option) => (
             <label
               key={option}
-              className="flex cursor-pointer items-start gap-4 rounded-xl border border-slate-800 bg-slate-950/60 p-4"
+              className="flex cursor-pointer items-start gap-4 rounded-xl border border-border bg-muted/40 p-4"
             >
               <input
                 type="radio"
                 name="mode"
                 value={option}
                 defaultChecked={mode === option}
-                className="mt-1 h-4 w-4 border-slate-600 bg-slate-900 text-sky-500"
+                className="mt-1 h-4 w-4 border-input bg-card text-primary"
               />
               <span>
                 <span className="block font-medium">{optionLabels[option].title}</span>
-                <span className="mt-1 block text-sm text-slate-400">{optionLabels[option].description}</span>
+                <span className="mt-1 block text-sm text-muted-foreground">{optionLabels[option].description}</span>
               </span>
             </label>
           ))}
 
           <div className="flex justify-end">
-            <button className="rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
+            <button className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
               Einstellung speichern
             </button>
           </div>
