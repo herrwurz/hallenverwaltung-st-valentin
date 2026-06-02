@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppFeedback } from "@/components/app-feedback";
 import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
@@ -47,24 +48,17 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
         </Link>
       </div>
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Wartelistenplatz wurde gespeichert.
-        </p>
-      ) : null}
-      {params.accepted ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Das Angebot wurde angenommen und als neuer Buchungsantrag angelegt.
-        </p>
-      ) : null}
-      {params.declined ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Das Angebot wurde abgelehnt.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Der Wartelistenplatz wurde gespeichert." : undefined },
+          {
+            tone: "success",
+            text: params.accepted ? "Das Angebot wurde angenommen und als neuer Buchungsantrag angelegt." : undefined,
+          },
+          { tone: "success", text: params.declined ? "Das Angebot wurde abgelehnt." : undefined },
+        ]}
+      />
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <h2 className="text-xl font-medium">Neuer Wartelistenplatz</h2>

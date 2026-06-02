@@ -27,3 +27,22 @@ test("shared form actions expose light Windows-style primary and secondary actio
   assert.match(formActions, /border-blue-700 bg-blue-600/);
   assert.match(formActions, /Abbrechen/);
 });
+
+test("action feedback uses the shared light status component", () => {
+  const appFeedback = readFileSync("components/app-feedback.tsx", "utf8");
+  const adminFeedback = readFileSync("components/admin-feedback.tsx", "utf8");
+  const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
+  const portalWaitlist = readFileSync("app/portal/waitlist/page.tsx", "utf8");
+  const portalDocuments = readFileSync("app/portal/documents/page.tsx", "utf8");
+  const portalDamages = readFileSync("app/portal/damages/page.tsx", "utf8");
+
+  assert.match(appFeedback, /role="status"/);
+  assert.match(appFeedback, /aria-live="polite"/);
+  assert.match(appFeedback, /bg-emerald-50/);
+  assert.match(appFeedback, /bg-red-50/);
+  assert.match(adminFeedback, /AppFeedback/);
+  assert.match(portalBookings, /AppFeedback/);
+  assert.match(portalWaitlist, /AppFeedback/);
+  assert.match(portalDocuments, /AppFeedback/);
+  assert.match(portalDamages, /AppFeedback/);
+});

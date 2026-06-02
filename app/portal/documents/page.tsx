@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createOrganizationDocumentAction } from "@/app/portal/documents/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { FormActions } from "@/components/form-actions";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
 import { getDocumentTypeLabel } from "@/lib/document-damage-labels";
@@ -30,14 +31,12 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
           Zurück zum Portal
         </Link>
       </div>
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Dokument wurde gespeichert.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Dokument wurde gespeichert." : undefined },
+        ]}
+      />
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <h3 className="text-lg font-medium">Dokument erfassen</h3>

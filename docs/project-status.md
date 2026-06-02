@@ -275,6 +275,14 @@ Kalenderbedienung sichtbarer gemacht: Tages-/Wochen-/Monats-/Jahresansicht
 haben eine gemeinsame Heute-/Zurueck-/Weiter-Navigation. Der Admin-Zurueck-Link
 ist nun als sichtbarer heller Windows-Button gestaltet.
 
+## Phase 24.3
+
+Feedback-Meldungen vereinheitlicht: `components/app-feedback.tsx` stellt helle
+Erfolgs-, Fehler-, Hinweis- und Informationsmeldungen bereit. Portal-Buchungen,
+Warteliste, Dokumente und Schadensmeldungen sowie Admin-Stammdaten nutzen diese
+Basis. Offener UI-Restpunkt: Admin-Buchungsworkflow-Meldungen noch auf dieselbe
+Komponente umstellen.
+
 ---
 
 # Wichtigste Architekturentscheidungen

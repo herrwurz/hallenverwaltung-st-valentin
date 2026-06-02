@@ -29,6 +29,8 @@ konsistenter und verwaltungsgeeignet wirken.
 - Formulare verwenden helle Eingabefelder mit klarer Fokusmarkierung.
 - Karten und Panels verwenden dezente Rahmen statt starker Schatten.
 - Keine fachlich wichtigen Entscheidungen nur ueber Farbe darstellen.
+- Erfolgs-, Fehler- und Hinweismeldungen verwenden die gemeinsame helle
+  `AppFeedback`-Darstellung.
 
 ## Umsetzung
 
@@ -37,6 +39,7 @@ konsistenter und verwaltungsgeeignet wirken.
   Public.
 - `app/globals.css` enthaelt die gemeinsamen Windows-Surface-Regeln.
 - `components/form-actions.tsx` standardisiert Speichern/Abbrechen.
+- `components/app-feedback.tsx` standardisiert Rueckmeldungen nach Aktionen.
 - `components/calendar-view.tsx` buendelt die gemeinsame Kalenderbedienung.
 
 ## Offene UI-Punkte
