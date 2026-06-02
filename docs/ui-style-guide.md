@@ -12,6 +12,28 @@ konsistenter und verwaltungsgeeignet wirken.
 - Die restliche Oberflaeche verwendet klare Verwaltungsoberflaechen:
   helle Flaechen, dezente Rahmen, eckige Controls, klare Aktionsbereiche.
 
+## Zielstandard ab Phase 25
+
+Phase 25 ist aktuell zurueckgestellt und soll erst mit ausreichendem
+Credit-Budget gestartet werden.
+
+- shadcn/ui wird dann als genereller Komponentenstandard eingefuehrt.
+- Alle tabellarischen Daten sollen ueber eine shadcn/ui Data-Table-/Grid-
+  Komponente dargestellt werden: Gebaeude, Raeume, Benutzer, Organisationen,
+  Rollen/Rechte, Buchungen, Warteliste, Benachrichtigungen, Abrechnung,
+  Dokumente, Schaeden, No-Shows, Hallenuebergaben und Zutrittsmedien.
+- Fuer Formulare, Filter und Aktionen sind bevorzugt shadcn/ui Button, Input,
+  Select, Combobox/Command, Popover, Dialog, Calendar/Date-Picker, Badge,
+  Card, Table, Tabs und Form-Patterns zu verwenden.
+- Der Kalender soll als Ressourcenraster gestaltet werden: Raeume/Hallen als
+  Spalten, 30-Minuten-Zeitslots als Zeilen, Status-Badges als visuelle Anker
+  und Buchungsdetails im Dialog.
+- FullCalendar Resource Timeline bleibt eine Option, benoetigt aber vor
+  Produktiveinsatz eine Lizenzklaerung. Ohne Lizenz wird ein eigenes
+  shadcn/Tailwind-Ressourcenraster bevorzugt.
+- Drag-and-drop darf zunaechst nur lokal/visuell vorbereitet werden. Speichern
+  von Verschiebungen muss weiter ueber die vorhandene Workflowlogik laufen.
+
 ## Bereichslogik
 
 | Bereich | Stil |

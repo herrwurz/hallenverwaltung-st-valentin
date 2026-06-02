@@ -49,7 +49,40 @@ project-status.md dient ausschließlich als Projektkontext und soll Credits spar
 - Prisma
 - Auth.js
 - Tailwind CSS
+- shadcn/ui als kuenftiger primaerer UI-Komponentenstandard ab Phase 25
 - Docker
+
+---
+
+# UI-Komponentenstandard ab Phase 25
+
+Phase 25 ist wegen Credit-Budget aktuell bewusst zurueckgestellt.
+
+Wenn Phase 25 startet, gilt:
+
+- shadcn/ui ist nicht nur punktuell, sondern als genereller UI-Stack zu
+  verwenden.
+- Vorhandene Eigenbau-Controls sollen schrittweise durch passende shadcn/ui-
+  Komponenten ersetzt werden, sofern fachlich sinnvoll und wartbar.
+- Fuer alle tabellarischen Daten ist die shadcn/ui Data-Table-/Grid-Logik zu
+  verwenden, z. B. Gebaeude, Raeume, Benutzer, Organisationen, Rollen,
+  Buchungen, Warteliste, Benachrichtigungen, Abrechnung, Dokumente, Schaeden,
+  No-Shows, Hallenuebergaben und Zutritt.
+- Kalender und Hallenplanung sollen als echte Ressourcenansicht umgesetzt
+  werden: Raeume/Hallen als Spalten, Zeitraster in 30-Minuten-Schritten,
+  Status-Badges und Buchungsdialoge.
+- shadcn/ui Dialog ist fuer Buchungs- und Detaildialoge zu verwenden.
+- shadcn/ui Select, Combobox/Command, Popover, Calendar/Date-Picker, Button,
+  Card, Badge, Table, Tabs und Form-Patterns sollen bevorzugt werden.
+- Drag-and-drop darf zunaechst nur lokal/visuell vorbereitet werden. Persistente
+  Terminverschiebungen muessen weiterhin ueber die vorhandene
+  Verschiebungs-/Genehmigungslogik laufen.
+- FullCalendar Resource Timeline ist fachlich passend, aber erst nach
+  Lizenzklaerung einsetzen. Ohne Lizenz wird eine eigene shadcn/Tailwind-
+  Ressourcenraster-Komponente bevorzugt.
+- Vor dem UI-Neuaufbau muessen fachliche Datenprobleme sichtbar korrigiert
+  sein: Gebaeude/Raum-Relationen, Statusfilter und Demo-Daten duerfen keine
+  falsche Bedienlogik vortaeuschen.
 
 ---
 

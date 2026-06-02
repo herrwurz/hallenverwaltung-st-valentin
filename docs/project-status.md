@@ -309,6 +309,17 @@ eingespielt, und `scripts/start-local-standalone.ps1` startet die stabile
 Standalone-Variante fuer `http://localhost:3000`. Der angedachte Testserver auf
 all-inkl.com ist als technische Hosting-Klaerung dokumentiert.
 
+## Phase 25 (geplant, aktuell pausiert)
+
+UI-Neuaufbau mit shadcn/ui als generellem Komponentenstandard. Tabellen fuer
+Gebaeude, Raeume, Benutzer, Organisationen, Buchungen, Warteliste,
+Benachrichtigungen, Abrechnung und weitere Verwaltungsdaten sollen als
+shadcn/ui Data-Table-/Grid-Komponenten umgesetzt werden. Kalender und
+Hallenplanung sollen als Ressourcenraster mit Raeumen/Hallen als Spalten,
+30-Minuten-Zeitslots, Status-Badges und shadcn/ui Dialogen neu aufgebaut
+werden. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
+Option.
+
 ---
 
 # Wichtigste Architekturentscheidungen
