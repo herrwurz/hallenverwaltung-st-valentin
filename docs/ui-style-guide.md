@@ -8,7 +8,7 @@ konsistenter und verwaltungsgeeignet wirken.
 - Die Anwendung orientiert sich an einer sachlichen Windows-/Desktop-Anmutung.
 - Der Kalender bleibt in der Bedienlogik Google-Kalender-aehnlich:
   Tages-, Wochen-, Monats- und Jahresansicht, Filter, Datumsauswahl und
-  Detaildialoge.
+  Detaildialoge sowie Heute-/Zurueck-/Weiter-Navigation.
 - Die restliche Oberflaeche verwendet klare Verwaltungsoberflaechen:
   helle Flaechen, dezente Rahmen, eckige Controls, klare Aktionsbereiche.
 
@@ -37,6 +37,7 @@ konsistenter und verwaltungsgeeignet wirken.
   Public.
 - `app/globals.css` enthaelt die gemeinsamen Windows-Surface-Regeln.
 - `components/form-actions.tsx` standardisiert Speichern/Abbrechen.
+- `components/calendar-view.tsx` buendelt die gemeinsame Kalenderbedienung.
 
 ## Offene UI-Punkte
 

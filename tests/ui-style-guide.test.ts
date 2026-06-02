@@ -6,6 +6,7 @@ test("application shells use the documented Windows style foundation", () => {
   const globals = readFileSync("app/globals.css", "utf8");
   const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
   const areaShell = readFileSync("components/area-shell.tsx", "utf8");
+  const adminBackLink = readFileSync("components/admin-back-link.tsx", "utf8");
   const loginPage = readFileSync("app/login/page.tsx", "utf8");
   const styleGuide = readFileSync("docs/ui-style-guide.md", "utf8");
 
@@ -13,6 +14,7 @@ test("application shells use the documented Windows style foundation", () => {
   assert.match(globals, /\.admin-desktop/);
   assert.match(adminShell, /windows-shell admin-desktop/);
   assert.match(areaShell, /windows-shell app-area-shell/);
+  assert.match(adminBackLink, /border border-slate-300 bg-white/);
   assert.match(loginPage, /windows-shell/);
   assert.match(styleGuide, /Windows-\/Desktop-Anmutung/);
   assert.match(styleGuide, /Google-Kalender/);

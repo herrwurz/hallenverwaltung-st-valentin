@@ -269,6 +269,12 @@ FormActions wurden auf helle, eckigere Verwaltungsoberflaechen umgestellt. Der
 Kalender bleibt funktional Google-Kalender-aehnlich, waehrend die restlichen
 Bereiche sachlicher und konsistenter wirken.
 
+## Phase 24.2
+
+Kalenderbedienung sichtbarer gemacht: Tages-/Wochen-/Monats-/Jahresansicht
+haben eine gemeinsame Heute-/Zurueck-/Weiter-Navigation. Der Admin-Zurueck-Link
+ist nun als sichtbarer heller Windows-Button gestaltet.
+
 ---
 
 # Wichtigste Architekturentscheidungen
