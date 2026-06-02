@@ -16,6 +16,7 @@ Enthalten sind:
 - Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
 - Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
 - Produktions-Readiness-Checkliste unter `docs/production-readiness.md`
+- Flexible Installationsoptionen unter `docs/installation-options.md`
 - Abnahmetestplan und Kurzanleitungen unter `docs/acceptance-testplan.md`,
   `docs/user-guide-admin.md` und `docs/user-guide-portal.md`
 - Go-Live-Runbook, Nachweisprotokoll und Entscheidungsliste unter
@@ -128,6 +129,8 @@ nutzbar:
 - Hallenwart-Funktionen nach Login: `/admin/handovers`
 
 Ein manueller Testleitfaden liegt in `docs/pilot-testplan.md`.
+Flexible lokale und serverseitige Installationsoptionen stehen in
+`docs/installation-options.md`.
 Der finale Abnahmetestplan liegt in `docs/acceptance-testplan.md`.
 Kurzanleitungen fuer Verwaltung und Vereine liegen in
 `docs/user-guide-admin.md` und `docs/user-guide-portal.md`.
@@ -228,6 +231,8 @@ gespeichert.
 Phase 22 stellt eine produktionsnahe, aber bewusst noch nicht
 umgebungsspezifisch ausgerollte Grundlage bereit:
 
+- `docs/installation-options.md` fuer lokalen Teststand, eigenen Testserver
+  und spaeteren Gemeinde-Server
 - `docker-compose.production.yml` fuer PostgreSQL, Migrationen, Web,
   Worker und Nginx Reverse Proxy
 - `.env.production.example` als Vorlage fuer Produktionsvariablen

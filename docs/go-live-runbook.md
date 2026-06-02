@@ -5,6 +5,9 @@ Dieses Runbook beschreibt die konkrete Ausfuehrung der Hoch-Blocker aus
 aber dafuer, dass Go-Live-Schritte, Nachweise und Stop-Kriterien einheitlich
 dokumentiert werden.
 
+Flexible Installationswege fuer lokalen Teststand, eigenen Testserver und
+spaeteren Gemeinde-Server stehen in `docs/installation-options.md`.
+
 Die Ergebnisse der echten Zielumgebungs-Abnahme werden in
 `docs/go-live-evidence.md` protokolliert. Dort duerfen keine Secrets, privaten
 Schluessel oder echten Passwoerter eingetragen werden.

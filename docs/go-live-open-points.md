@@ -4,6 +4,11 @@ Diese Liste sammelt Punkte, die vor dem Go-Live bewusst entschieden werden
 muessen. Sie basiert auf Pilotfeedback, Produktions-Readiness und dem aktuellen
 Version-1-Umfang.
 
+Aktuelle Betriebsentscheidung: Der finale Produktivbetrieb soll spaeter auf
+einem Gemeinde-Server erfolgen. Bis dieser bereitsteht, bleiben lokale Tests
+und ein eigener Testserver als vorbereitende Betriebsstufen moeglich. Details
+stehen in `docs/installation-options.md`.
+
 ## Go-Live-Blocker mit Prioritaet hoch
 
 Diese Punkte blockieren einen echten Produktivstart. Sie duerfen nicht nur
@@ -17,7 +22,7 @@ Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 
 | Blocker | Status | Entscheidung / Nachweis | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |
-| Zielserver und Domain festgelegt | offen |  |  |  |
+| Gemeinde-Server, Zielserver und Domain festgelegt | offen | Gemeinde-Server bleibt finaler Zielpunkt; lokaler Teststand und eigener Testserver sind vorbereitende Zwischenstufen. |  |  |
 | TLS-Zertifikate vorhanden und eingebunden | offen |  |  |  |
 | `.env.production` ohne Platzhalterwerte | offen |  |  |  |
 | Produktiver Admin-Initialbenutzer angelegt | offen |  |  |  |

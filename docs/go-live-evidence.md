@@ -5,6 +5,11 @@ Es dokumentiert Nachweise zu den Hoch-Blockern aus
 `docs/go-live-open-points.md` und zur Schrittfolge aus
 `docs/go-live-runbook.md`.
 
+Hinweis: Lokale Tests und ein eigener Testserver duerfen hier als vorbereitende
+Nachweise dokumentiert werden. Die finale Go-Live-Freigabe benoetigt trotzdem
+die echte Zielumgebung auf dem Gemeinde-Server oder eine ausdruecklich
+freigegebene Ersatzentscheidung.
+
 Statuswerte:
 
 - `offen`
@@ -20,6 +25,7 @@ Statuswerte:
 | Zielumgebung |  |
 | Ziel-Domain |  |
 | Zielserver |  |
+| Betriebsstufe | lokal / eigener Testserver / Gemeinde-Server |
 | Abnahme-Datum |  |
 | Technisch verantwortlich |  |
 | Fachlich verantwortlich |  |

@@ -253,6 +253,14 @@ Produktionskonfigurationscheck: `npm run production:check` prueft
 Basiswerte und optional fehlende TLS-Dateien, ohne Secret-Werte auszugeben.
 Runbook, Readiness, README und Nachweisprotokoll verweisen auf den Check.
 
+## Phase 23.6
+
+Flexible Installationsoptionen: `docs/installation-options.md` dokumentiert
+lokalen Teststand, eigenen Testserver und spaeteren Gemeinde-Server als
+getrennte Betriebsstufen. Der Gemeinde-Server bleibt als finaler
+Go-Live-Blocker offen; lokale Tests und ein eigener Testserver koennen als
+Vorbereitung weiterlaufen.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -556,6 +564,7 @@ Abnahme und Go-Live-Vorbereitung ist dokumentarisch vorbereitet:
 * `docs/go-live-open-points.md`
 * `docs/go-live-runbook.md`
 * `docs/go-live-evidence.md`
+* `docs/installation-options.md`
 
 Hoch priorisierte Go-Live-Blocker muessen vor Produktivstart erledigt oder
 ausdruecklich mit Risikoakzeptanz freigegeben werden. Mittlere Pilotpunkte
