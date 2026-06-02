@@ -41,8 +41,10 @@ test("calendar UI exposes Google-like period navigation", () => {
 
 test("admin navigation uses localized umlauts for core master data", () => {
   const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
+  const adminNavigation = readFileSync("components/admin-navigation.tsx", "utf8");
 
-  assert.match(adminShell, /Buchungsanträge/);
-  assert.match(adminShell, /Gebäude/);
-  assert.match(adminShell, /Räume/);
+  assert.match(adminShell, /AdminNavigation/);
+  assert.match(adminNavigation, /Buchungen|Buchungsanträge/);
+  assert.match(adminNavigation, /Gebäude/);
+  assert.match(adminNavigation, /Räume/);
 });
