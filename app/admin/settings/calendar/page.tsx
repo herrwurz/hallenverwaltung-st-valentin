@@ -1,11 +1,13 @@
+import { updateCalendarVisibilitySettingAction } from "@/app/admin/settings/calendar/actions";
 import { AppBackLink } from "@/components/app-back-link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import {
   getPublicCalendarVisibilityMode,
   publicCalendarVisibilityModes,
   type PublicCalendarVisibilityMode,
 } from "@/lib/services/calendar-settings-service";
-import { updateCalendarVisibilitySettingAction } from "@/app/admin/settings/calendar/actions";
 
 const optionLabels: Record<PublicCalendarVisibilityMode, { title: string; description: string }> = {
   occupied_only: {
@@ -48,43 +50,51 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
       </div>
 
       {saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+        <p className="mt-6 rounded-lg border border-emerald-500/20 bg-success/10 p-4 text-sm text-emerald-700">
           Die Einstellung wurde gespeichert.
         </p>
       ) : null}
       {error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{error}</p>
+        <p className="mt-6 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </p>
       ) : null}
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-6">
-        <h3 className="text-xl font-medium">Datenschutzeinstellung</h3>
-        <form action={updateCalendarVisibilitySettingAction} className="mt-5 space-y-4">
-          {publicCalendarVisibilityModes.map((option) => (
-            <label
-              key={option}
-              className="flex cursor-pointer items-start gap-4 rounded-xl border border-border bg-muted/40 p-4"
-            >
-              <input
-                type="radio"
-                name="mode"
-                value={option}
-                defaultChecked={mode === option}
-                className="mt-1 h-4 w-4 border-input bg-card text-primary"
-              />
-              <span>
-                <span className="block font-medium">{optionLabels[option].title}</span>
-                <span className="mt-1 block text-sm text-muted-foreground">{optionLabels[option].description}</span>
-              </span>
-            </label>
-          ))}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Datenschutzeinstellung</CardTitle>
+          <CardDescription>
+            Die sichere Standardeinstellung bleibt belegt/frei. Mehr Details werden nur angezeigt, wenn die Räume das
+            zulassen.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={updateCalendarVisibilitySettingAction} className="space-y-4">
+            {publicCalendarVisibilityModes.map((option) => (
+              <label
+                key={option}
+                className="flex cursor-pointer items-start gap-4 rounded-xl border border-border bg-muted/40 p-4 transition hover:border-primary/40"
+              >
+                <input
+                  type="radio"
+                  name="mode"
+                  value={option}
+                  defaultChecked={mode === option}
+                  className="mt-1 h-4 w-4 border-input bg-card text-primary"
+                />
+                <span>
+                  <span className="block font-medium">{optionLabels[option].title}</span>
+                  <span className="mt-1 block text-sm text-muted-foreground">{optionLabels[option].description}</span>
+                </span>
+              </label>
+            ))}
 
-          <div className="flex justify-end">
-            <button className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-              Einstellung speichern
-            </button>
-          </div>
-        </form>
-      </section>
+            <div className="flex justify-end">
+              <Button>Einstellung speichern</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </>
   );
 }

@@ -1,5 +1,8 @@
-import { requirePermission } from "@/lib/permissions";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getBookingStatusBadgeClass, getBookingStatusLabel } from "@/lib/booking-status";
+import { requirePermission } from "@/lib/permissions";
 import { getBookingSeriesForAdmin } from "@/lib/services/booking-series-service";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -14,51 +17,72 @@ export default async function AdminSeriesPage() {
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Serienbuchungen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Serienanträge</h2>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Serienanträge</h2>
       <p className="mt-3 text-muted-foreground">
         Lesende Übersicht der wöchentlichen Serien. Ganze Serien werden in Version 1 nicht gesammelt geändert;
         einzelne Termine bleiben normale Buchungsanträge im Genehmigungsworkflow.
       </p>
 
-      <section className="mt-8 space-y-3">
-        {series.length === 0 ? (
-          <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-            Noch keine Serien vorhanden.
-          </p>
-        ) : (
-          series.map((item) => (
-            <article key={item.id} className="rounded-xl border border-border bg-card p-5">
-              <div className="flex flex-wrap justify-between gap-4">
-                <div>
-                  <h3 className="font-medium">{item.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {item.organization.name} | {item.room.building.name} - {item.room.name} | {item.usageType.name}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {dateFormatter.format(item.startsOn)} bis {dateFormatter.format(item.endsOn)} |{" "}
-                    {item.bookings.length} Termine
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">{item.recurrenceRule}</p>
-                </div>
-              </div>
-              {item.bookings.length ? (
-                <ul className="mt-4 grid gap-2 text-sm md:grid-cols-2">
-                  {item.bookings.map((booking) => (
-                    <li key={booking.id} className="rounded-lg border border-border bg-muted/40 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span>{dateFormatter.format(booking.startsAt)}</span>
-                        <span className={`rounded-full px-2 py-1 text-xs ${getBookingStatusBadgeClass(booking.status)}`}>
-                          {getBookingStatusLabel(booking.status)}
-                        </span>
-                      </div>
-                    </li>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Serienübersicht</CardTitle>
+          <CardDescription>Organisation, Standort, Zeitraum und erzeugte Einzeltermine.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {series.length === 0 ? (
+            <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
+              Noch keine Serien vorhanden.
+            </p>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <Table className="min-w-[1000px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Serie</TableHead>
+                    <TableHead>Organisation</TableHead>
+                    <TableHead>Gebäude / Raum</TableHead>
+                    <TableHead>Zeitraum</TableHead>
+                    <TableHead>Einzeltermine</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {series.map((item) => (
+                    <TableRow key={item.id} className="align-top">
+                      <TableCell>
+                        <p className="font-medium">{item.title}</p>
+                        <p className="mt-1 max-w-sm truncate text-xs text-muted-foreground">{item.recurrenceRule}</p>
+                      </TableCell>
+                      <TableCell>{item.organization.name}</TableCell>
+                      <TableCell>
+                        <p>{item.room.building.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.room.name}</p>
+                        <p className="text-xs text-muted-foreground">{item.usageType.name}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p>{dateFormatter.format(item.startsOn)}</p>
+                        <p className="text-xs text-muted-foreground">bis {dateFormatter.format(item.endsOn)}</p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex max-w-md flex-wrap gap-2">
+                          {item.bookings.length === 0 ? (
+                            <Badge variant="outline">Keine Termine</Badge>
+                          ) : (
+                            item.bookings.map((booking) => (
+                              <span key={booking.id} className={`rounded-full px-2 py-1 text-xs ${getBookingStatusBadgeClass(booking.status)}`}>
+                                {dateFormatter.format(booking.startsAt)} · {getBookingStatusLabel(booking.status)}
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </ul>
-              ) : null}
-            </article>
-          ))
-        )}
-      </section>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

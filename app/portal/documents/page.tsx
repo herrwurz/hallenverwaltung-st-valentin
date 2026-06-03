@@ -1,13 +1,15 @@
-import { AppBackLink } from "@/components/app-back-link";
 import { createOrganizationDocumentAction } from "@/app/portal/documents/actions";
+import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { FormActions } from "@/components/form-actions";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getDocumentTypeLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { documentTypes, getPortalDocumentData } from "@/lib/services/document-service";
 
-const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
+const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
 
 type PageProps = {
@@ -17,11 +19,14 @@ type PageProps = {
 export default async function PortalDocumentsPage({ searchParams }: PageProps) {
   const user = await requirePermission("REQUEST_BOOKING");
   const [params, data] = await Promise.all([searchParams, getPortalDocumentData(user.id)]);
+  const documents = data.organizations.flatMap((organization) =>
+    organization.documents.map((document) => ({ ...document, organizationName: organization.name })),
+  );
 
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Portal</p>
-      <h2 className="mt-3 text-3xl font-semibold">Dokumente</h2>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Dokumente</h2>
       <p className="mt-3 text-muted-foreground">
         Dokumente werden in Phase 16 als sichere Metadaten erfasst. Ein echter Datei-Storage kann später angebunden
         werden.
@@ -36,59 +41,80 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-5">
-        <h3 className="text-lg font-medium">Dokument erfassen</h3>
-        {data.organizations.length === 0 ? (
-          <p className="mt-4 text-sm text-amber-200">Keine aktive Organisation ist Ihrem Benutzer zugeordnet.</p>
-        ) : (
-          <form action={createOrganizationDocumentAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-            <PortalOrganizationField organizations={data.organizations} inputClassName={inputClass} />
-            <label className="text-sm text-muted-foreground">
-              Dokumenttyp
-              <select name="type" required defaultValue="OTHER" className={inputClass}>
-                {documentTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {getDocumentTypeLabel(type)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="text-sm text-muted-foreground">
-              Dateiname
-              <input name="fileName" required className={inputClass} placeholder="hallenordnung.pdf" />
-            </label>
-            <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
-              Der interne Storage-Key wird serverseitig erzeugt und nicht manuell eingegeben.
-            </p>
-            <div className="lg:col-span-2">
-              <FormActions submitLabel="Dokument speichern" cancelHref="/portal" />
-            </div>
-          </form>
-        )}
-      </section>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Dokument erfassen</CardTitle>
+          <CardDescription>Metadaten speichern; der interne Storage-Key wird serverseitig erzeugt.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {data.organizations.length === 0 ? (
+            <p className="text-sm text-warning-foreground">Keine aktive Organisation ist Ihrem Benutzer zugeordnet.</p>
+          ) : (
+            <form action={createOrganizationDocumentAction} className="grid gap-4 lg:grid-cols-2">
+              <PortalOrganizationField organizations={data.organizations} inputClassName={inputClass} />
+              <label className="text-sm font-medium">
+                Dokumenttyp
+                <select name="type" required defaultValue="OTHER" className={inputClass}>
+                  {documentTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {getDocumentTypeLabel(type)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm font-medium">
+                Dateiname
+                <input name="fileName" required className={inputClass} placeholder="hallenordnung.pdf" />
+              </label>
+              <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+                Der interne Storage-Key wird serverseitig erzeugt und nicht manuell eingegeben.
+              </p>
+              <div className="lg:col-span-2">
+                <FormActions submitLabel="Dokument speichern" cancelHref="/portal" />
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
 
-      <section className="mt-8 space-y-4">
-        {data.organizations.map((organization) => (
-          <article key={organization.id} className="rounded-xl border border-border bg-card p-5">
-            <h3 className="font-medium">{organization.name}</h3>
-            {organization.documents.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">Noch keine Dokumente erfasst.</p>
-            ) : (
-              <ul className="mt-4 space-y-3 text-sm">
-                {organization.documents.map((document) => (
-                  <li key={document.id} className="rounded-lg border border-border bg-muted/40 p-3">
-                    <p className="font-medium text-slate-200">{document.fileName}</p>
-                    <p className="mt-1 text-muted-foreground">
-                      {getDocumentTypeLabel(document.type)} | {dateFormatter.format(document.uploadedAt)}
-                    </p>
-                    <p className="mt-1 text-slate-500">{document.storageKey}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </article>
-        ))}
-      </section>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Dokumente Ihrer Organisationen</CardTitle>
+          <CardDescription>Alle gespeicherten Dokument-Metadaten in einer kompakten Tabellenansicht.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {documents.length === 0 ? (
+            <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
+              Noch keine Dokumente erfasst.
+            </p>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <Table className="min-w-[780px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Dateiname</TableHead>
+                    <TableHead>Organisation</TableHead>
+                    <TableHead>Typ</TableHead>
+                    <TableHead>Hochgeladen</TableHead>
+                    <TableHead>Storage-Key</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {documents.map((document) => (
+                    <TableRow key={document.id}>
+                      <TableCell className="font-medium">{document.fileName}</TableCell>
+                      <TableCell>{document.organizationName}</TableCell>
+                      <TableCell>{getDocumentTypeLabel(document.type)}</TableCell>
+                      <TableCell className="text-muted-foreground">{dateFormatter.format(document.uploadedAt)}</TableCell>
+                      <TableCell className="max-w-md truncate text-xs text-muted-foreground">{document.storageKey}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

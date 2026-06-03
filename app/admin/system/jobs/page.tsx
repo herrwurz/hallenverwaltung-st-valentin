@@ -1,11 +1,10 @@
+import { processExpiredWaitlistOffersJobAction, processNotificationQueueJobAction, runMaintenanceJobsAction } from "@/app/admin/system/jobs/actions";
 import { AppBackLink } from "@/components/app-back-link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requirePermission } from "@/lib/permissions";
 import { getWorkerJobRuns } from "@/lib/services/worker-service";
-import {
-  processExpiredWaitlistOffersJobAction,
-  processNotificationQueueJobAction,
-  runMaintenanceJobsAction,
-} from "@/app/admin/system/jobs/actions";
 
 type SearchParams = Promise<{
   job?: string;
@@ -37,7 +36,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">System</p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-semibold">System-Jobs</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">System-Jobs</h2>
           <p className="mt-3 max-w-3xl text-muted-foreground">
             Manuelle Ausführung der Hintergrundjobs für Benachrichtigungen und Wartelistenangebote. Für den
             Serverbetrieb kann derselbe Ablauf per CLI/Cron gestartet werden.
@@ -56,70 +55,68 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
       ) : null}
 
       <section className="mt-8 grid gap-4 lg:grid-cols-3">
-        <form action={processNotificationQueueJobAction} className="rounded-xl border border-border bg-card p-6">
+        <form action={processNotificationQueueJobAction} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-lg font-medium">Notification Queue</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Verarbeitet fällige PENDING/FAILED E-Mail-Benachrichtigungen unter Beachtung von Backoff und maxAttempts.
           </p>
-          <button className="mt-5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-            Queue verarbeiten
-          </button>
+          <Button className="mt-5">Queue verarbeiten</Button>
         </form>
 
-        <form action={processExpiredWaitlistOffersJobAction} className="rounded-xl border border-border bg-card p-6">
+        <form action={processExpiredWaitlistOffersJobAction} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-lg font-medium">Wartelistenablauf</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Laesst abgelaufene OFFERED-Einträge auslaufen und aktiviert servicekonform den nächsten passenden Platz.
+            Lässt abgelaufene OFFERED-Einträge auslaufen und aktiviert servicekonform den nächsten passenden Platz.
           </p>
-          <button className="mt-5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-            Angebote verarbeiten
-          </button>
+          <Button className="mt-5">Angebote verarbeiten</Button>
         </form>
 
-        <form action={runMaintenanceJobsAction} className="rounded-xl border border-border bg-card p-6">
+        <form action={runMaintenanceJobsAction} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-lg font-medium">Maintenance</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Führt Notification Queue und Wartelistenablauf in einem Wartungslauf aus und protokolliert das Ergebnis.
           </p>
-          <button className="mt-5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-            Maintenance ausführen
-          </button>
+          <Button className="mt-5">Maintenance ausführen</Button>
         </form>
       </section>
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-6">
-        <h3 className="text-xl font-medium">Letzte Ausführungen</h3>
-        {runs.length === 0 ? (
-          <p className="mt-5 rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-            Noch keine Job-Protokolle vorhanden.
-          </p>
-        ) : (
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[780px] text-left text-sm">
-              <thead className="text-muted-foreground">
-                <tr>
-                  <th className="py-2 pr-4">Zeitpunkt</th>
-                  <th className="py-2 pr-4">Job</th>
-                  <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Verarbeitet</th>
-                  <th className="py-2 pr-4">Fehler</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {runs.map((run) => (
-                  <tr key={run.id}>
-                    <td className="py-3 pr-4 text-muted-foreground">{dateFormatter.format(run.createdAt)}</td>
-                    <td className="py-3 pr-4 font-medium">{run.entityId}</td>
-                    <td className="py-3 pr-4 text-muted-foreground">{run.action}</td>
-                    <td className="py-3 pr-4 text-muted-foreground">{payloadValue(run.payload, "processedCount") ?? "0"}</td>
-                    <td className="py-3 pr-4 text-rose-200">{payloadValue(run.payload, "errorMessage") ?? "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Letzte Ausführungen</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {runs.length === 0 ? (
+            <p className="rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+              Noch keine Job-Protokolle vorhanden.
+            </p>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <Table className="min-w-[780px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Zeitpunkt</TableHead>
+                    <TableHead>Job</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Verarbeitet</TableHead>
+                    <TableHead>Fehler</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {runs.map((run) => (
+                    <TableRow key={run.id}>
+                      <TableCell className="text-muted-foreground">{dateFormatter.format(run.createdAt)}</TableCell>
+                      <TableCell className="font-medium">{run.entityId}</TableCell>
+                      <TableCell className="text-muted-foreground">{run.action}</TableCell>
+                      <TableCell className="text-muted-foreground">{payloadValue(run.payload, "processedCount") ?? "0"}</TableCell>
+                      <TableCell className="text-destructive">{payloadValue(run.payload, "errorMessage") ?? "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

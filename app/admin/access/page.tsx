@@ -4,11 +4,14 @@ import {
   issueAccessMediumAction,
   returnAccessAssignmentAction,
 } from "@/app/admin/access/actions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAccessMediumTypeLabel } from "@/lib/access-labels";
 import { requirePermission } from "@/lib/permissions";
 import { accessMediumTypes, getAdminAccessData } from "@/lib/services/access-service";
 
-const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
+const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
 
 type PageProps = {
@@ -25,78 +28,81 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
       <h2 className="mt-3 text-3xl font-semibold">Zutrittsverwaltung</h2>
       <p className="mt-3 text-muted-foreground">
         Schlüssel, RFID-Karten und elektronische Zutritte verwalten. Noch keine Kopplung an ein externes Tür- oder
-        Schliesssystem.
+        Schließsystem.
       </p>
 
       {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
+        <p className="mt-6 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+          {params.error}
+        </p>
       ) : null}
       {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
+        <p className="mt-6 rounded-lg border border-emerald-500/20 bg-success/10 p-4 text-sm text-emerald-700">
           Zutrittsdaten wurden gespeichert.
         </p>
       ) : null}
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-5">
-        <h3 className="text-lg font-medium">Zutrittsmedium anlegen</h3>
-        <form action={createAccessMediumAction} className="mt-5 grid gap-4 lg:grid-cols-2">
-          <label className="text-sm text-muted-foreground">
-            Gebäude
-            <select name="buildingId" required defaultValue="" className={inputClass}>
-              <option value="" disabled>
-                Bitte wählen
-              </option>
-              {data.buildings.map((building) => (
-                <option key={building.id} value={building.id}>
-                  {building.name}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Zutrittsmedium anlegen</CardTitle>
+          <CardDescription>Ein Medium wird einem Gebäude und optional einem konkreten Raum zugeordnet.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={createAccessMediumAction} className="grid gap-4 lg:grid-cols-2">
+            <label className="text-sm text-muted-foreground">
+              Gebäude
+              <select name="buildingId" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Bitte wählen
                 </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm text-muted-foreground">
-            Raum optional
-            <select name="roomId" defaultValue="" className={inputClass}>
-              <option value="">Gebäudeweit</option>
-              {data.rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.building.name} - {room.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm text-muted-foreground">
-            Typ
-            <select name="type" required defaultValue="KEY" className={inputClass}>
-              {accessMediumTypes.map((type) => (
-                <option key={type} value={type}>
-                  {getAccessMediumTypeLabel(type)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm text-muted-foreground">
-            Kennung / Nummer
-            <input name="identifier" required maxLength={100} className={inputClass} />
-          </label>
-          <div className="lg:col-span-2 lg:text-right">
-            <button className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-              Medium anlegen
-            </button>
-          </div>
-        </form>
-      </section>
+                {data.buildings.map((building) => (
+                  <option key={building.id} value={building.id}>
+                    {building.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-muted-foreground">
+              Raum optional
+              <select name="roomId" defaultValue="" className={inputClass}>
+                <option value="">Gebäudeweit</option>
+                {data.rooms.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.building.name} - {room.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-muted-foreground">
+              Typ
+              <select name="type" required defaultValue="KEY" className={inputClass}>
+                {accessMediumTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {getAccessMediumTypeLabel(type)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm text-muted-foreground">
+              Kennung / Nummer
+              <input name="identifier" required maxLength={100} className={inputClass} />
+            </label>
+            <div className="lg:col-span-2 lg:text-right">
+              <Button>Medium anlegen</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <section className="mt-8 space-y-3">
         {data.accessMedia.length === 0 ? (
-          <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-            Noch keine Zutrittsmedien vorhanden.
-          </p>
+          <Card className="p-5 text-sm text-muted-foreground">Noch keine Zutrittsmedien vorhanden.</Card>
         ) : (
           data.accessMedia.map((medium) => {
             const activeAssignment = medium.assignments.find((assignment) => !assignment.returnedAt);
 
             return (
-              <article key={medium.id} className="rounded-xl border border-border bg-card p-5">
+              <Card key={medium.id} className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <h3 className="font-medium">
@@ -107,9 +113,9 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                       {medium.room ? ` - ${medium.room.name}` : " | gebäudeweit"}
                     </p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-sm ${medium.isActive ? "bg-emerald-950 text-emerald-200" : "bg-muted text-muted-foreground"}`}>
+                  <Badge variant={medium.isActive ? "success" : "secondary"}>
                     {medium.isActive ? "Aktiv" : "Inaktiv"}
-                  </span>
+                  </Badge>
                 </div>
 
                 {activeAssignment ? (
@@ -121,9 +127,9 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                     </p>
                     <form action={returnAccessAssignmentAction} className="mt-3">
                       <input type="hidden" name="assignmentId" value={activeAssignment.id} />
-                      <button className="rounded-lg border border-primary px-4 py-2 text-sm text-primary hover:bg-accent">
+                      <Button variant="outline" size="sm">
                         Rückgabe erfassen
-                      </button>
+                      </Button>
                     </form>
                   </div>
                 ) : medium.isActive ? (
@@ -145,9 +151,7 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                       <input name="issuedToName" required maxLength={150} className={inputClass} />
                     </label>
                     <div className="self-end">
-                      <button className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                        Ausgeben
-                      </button>
+                      <Button>Ausgeben</Button>
                     </div>
                   </form>
                 ) : null}
@@ -155,12 +159,12 @@ export default async function AdminAccessPage({ searchParams }: PageProps) {
                 {!activeAssignment && medium.isActive ? (
                   <form action={deactivateAccessMediumAction} className="mt-4">
                     <input type="hidden" name="accessMediumId" value={medium.id} />
-                    <button className="rounded-lg border border-input px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
+                    <Button variant="outline" size="sm">
                       Medium deaktivieren
-                    </button>
+                    </Button>
                   </form>
                 ) : null}
-              </article>
+              </Card>
             );
           })
         )}
