@@ -25,7 +25,7 @@ export async function getBuildingAdministrationData() {
           include: { caretaker: true },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: [{ isActive: "desc" }, { name: "asc" }],
     }),
     prisma.caretaker.findMany({
       where: { isActive: true },
@@ -46,7 +46,6 @@ export async function saveBuilding(input: unknown) {
       ? await transaction.building.update({
           where: { id: data.id },
           data: {
-            code: data.code,
             name: data.name,
             address,
             isActive: data.isActive,

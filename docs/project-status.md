@@ -619,6 +619,35 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 
 # Empfohlene nächste Phasen
 
+## Aktuelle Pilot-Hotfixes / Phase 26.4
+
+Bearbeitet wurden die sofort sichtbaren Befunde aus `png/befundliste.txt`:
+
+* Admin-Dashboard-Kacheln bleiben reine, zentrierte Navigationsbuttons.
+* Buchungsstatus-Badges in der Admin-Detailansicht sind als stabile Inline-
+  Badges ausgerichtet.
+* Gebäude-Codes sind beim Bearbeiten read-only und werden service-seitig nicht
+  mehr überschrieben.
+* Gebäude werden in der Verwaltung aktiv vor inaktiv sortiert.
+* Räume werden nach Aktiv, Eingeschränkt, Außer Betrieb sortiert.
+* Organisationstypen wie Katastrophenschutz/E2E werden in der Auswahl nicht
+  mehr angeboten.
+* Nutzungstyp `CLUB_TRAINING` wird als `Training` geseedet.
+* Einstellungsnahe Admin-Navigation ist deutlicher gekennzeichnet.
+
+Bewusst offen bleiben größere Folgeblöcke:
+
+* echte Google-Kalender-artige Ressourcenansicht
+* Serienbuchungsdialog nach den Referenzbildern
+* Serien-Gesamtprüfung/Gesamtgenehmigung
+* Löschen von Gebäuden/Räumen nur bei fehlenden Abhängigkeiten
+* Sperren von Gebäuden/Räumen über Zeitraum oder Ferienauswahl
+* Passwort-vergessen-Prozess
+* Hallenwart-Zuordnung über Benutzerverwaltung
+* Rollen-/Rechte-Zuordnung als bearbeitbare Oberfläche
+
+---
+
 ## Phase 21
 
 Fachlicher Pilot-Review mit echten Testlaeufen

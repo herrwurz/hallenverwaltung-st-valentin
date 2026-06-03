@@ -97,7 +97,15 @@ function BuildingForm({ caretakers, building }: BuildingFormProps) {
       {building ? <input type="hidden" name="id" value={building.id} /> : null}
       <label className="text-sm font-medium">
         Code
-        <input name="code" required defaultValue={building?.code} className={inputClass} placeholder="VS_HAUPTPLATZ" />
+        <input
+          name="code"
+          required
+          readOnly={Boolean(building)}
+          defaultValue={building?.code}
+          className={building ? `${inputClass} bg-muted text-muted-foreground` : inputClass}
+          placeholder="VS_HAUPTPLATZ"
+        />
+        {building ? <span className="mt-1 block text-xs text-muted-foreground">Der Code bleibt nach dem Anlegen unverändert.</span> : null}
       </label>
       <label className="text-sm font-medium">
         Name

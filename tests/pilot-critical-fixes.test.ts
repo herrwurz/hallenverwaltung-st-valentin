@@ -54,3 +54,20 @@ test("phase 26 pilot UI hotfixes hide technical labels in key pages", () => {
   assert.match(publicPage, /href="\/login"/);
   assert.doesNotMatch(publicPage, /Standorte/);
 });
+
+test("phase 26.4 pilot master data fixes protect codes and settings navigation", () => {
+  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
+  const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
+  const adminLayout = readFileSync("app/admin/layout.tsx", "utf8");
+  const seed = readFileSync("prisma/seed.ts", "utf8");
+  const updateBlock = buildingService.split("transaction.building.update")[1]?.split("transaction.building.create")[0] ?? "";
+
+  assert.match(buildingPage, /readOnly=\{Boolean\(building\)\}/);
+  assert.doesNotMatch(updateBlock, /code: data\.code/);
+  assert.match(organizationService, /notIn: \["EMERGENCY_SERVICE", "E2E_ASSOCIATION"\]/);
+  assert.match(adminLayout, /Einstellungen: Öffentlicher Kalender/);
+  assert.match(adminLayout, /Einstellungen: System-Jobs/);
+  assert.match(seed, /\["CLUB_TRAINING", "Training"/);
+  assert.doesNotMatch(seed, /\["EMERGENCY_SERVICE", "Katastrophenschutz"\]/);
+});

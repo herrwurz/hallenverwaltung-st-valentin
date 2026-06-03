@@ -170,7 +170,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                     {dateFormatter.format(booking.startsAt)} bis {dateFormatter.format(booking.endsAt)}
                   </CardDescription>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-sm ${getBookingStatusBadgeClass(booking.status)}`}>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm leading-none ${getBookingStatusBadgeClass(booking.status)}`}>
                   {getBookingStatusLabel(booking.status)}
                 </span>
               </div>
