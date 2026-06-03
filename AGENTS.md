@@ -49,16 +49,15 @@ project-status.md dient ausschließlich als Projektkontext und soll Credits spar
 - Prisma
 - Auth.js
 - Tailwind CSS
-- shadcn/ui als kuenftiger primaerer UI-Komponentenstandard ab Phase 25
+- shadcn/ui als primaerer UI-Komponentenstandard ab Phase 25
 - Docker
 
 ---
 
 # UI-Komponentenstandard ab Phase 25
 
-Phase 25 ist wegen Credit-Budget aktuell bewusst zurueckgestellt.
-
-Wenn Phase 25 startet, gilt:
+Phase 25 ist gestartet und bildet den verbindlichen UI-Standard fuer weitere
+Oberflaechenarbeiten.
 
 ## UI/UX Stack & Component Guidelines
 
@@ -89,6 +88,9 @@ Wenn Phase 25 startet, gilt:
   u. a. Gebaeude, Raeume, Benutzer, Organisationen, Rollen, Buchungen,
   Warteliste, Benachrichtigungen, Abrechnung, Dokumente, Schaeden, No-Shows,
   Hallenuebergaben und Zutritt.
+- Ausnahme: Tabellenzellen mit eingebetteten Server-Action-Formularen duerfen
+  serverseitig als shadcn/ui `Table` bleiben, solange eine Client-DataTable die
+  Server-Action-Stabilitaet oder Berechtigungslogik riskieren wuerde.
 - New Bookings / Actions: shadcn/ui `dialog`, ausgeloest ueber shadcn/ui
   `button`.
 - Time/Date Inputs: shadcn/ui `calendar` kombiniert mit shadcn/ui `popover`.

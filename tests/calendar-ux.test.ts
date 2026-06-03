@@ -18,13 +18,14 @@ test("calendar UI exposes day week month and year views", () => {
   assert.match(publicCalendar, /view === "month" \|\| view === "year"/);
 });
 
-test("calendar UI exposes event detail dialogs and localized labels", () => {
+test("calendar UI exposes shadcn event detail dialogs and localized labels", () => {
   const calendarView = readFileSync("components/calendar-view.tsx", "utf8");
+  const calendarDialog = readFileSync("components/calendar-event-dialog.tsx", "utf8");
 
-  assert.match(calendarView, /role="dialog"/);
+  assert.match(calendarDialog, /DialogContent/);
+  assert.match(calendarDialog, /Termin-Details/);
+  assert.match(calendarDialog, /Gebäude/);
   assert.match(calendarView, /Details anzeigen/);
-  assert.match(calendarView, /Termin-Details/);
-  assert.match(calendarView, /Gebäude/);
   assert.match(calendarView, /Alle Räume/);
   assert.doesNotMatch(calendarView, /Gebaeude|Raeume|Eintraege|auswaehlen|gewaehl/);
 });
@@ -37,6 +38,7 @@ test("calendar UI exposes Google-like period navigation", () => {
   assert.match(calendarView, /Zurück/);
   assert.match(calendarView, /Weiter/);
   assert.match(calendarView, /google-calendar-grid/);
+  assert.match(calendarView, /Wochenplan nach Räumen/);
 });
 
 test("admin navigation uses localized umlauts for core master data", () => {

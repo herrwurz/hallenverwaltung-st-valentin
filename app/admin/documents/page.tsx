@@ -1,7 +1,8 @@
 import { createAdminDocumentAction } from "@/app/admin/documents/actions";
+import { AppFeedback } from "@/components/app-feedback";
+import { DocumentsDataTable, type DocumentTableRow } from "@/components/phase25-data-tables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getDocumentTypeLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { documentTypes, getAdminDocumentData } from "@/lib/services/document-service";
@@ -32,6 +33,14 @@ function documentTargetLabel(document: Awaited<ReturnType<typeof getAdminDocumen
 export default async function AdminDocumentsPage({ searchParams }: PageProps) {
   await requirePermission("MANAGE_DOCUMENTS");
   const [params, data] = await Promise.all([searchParams, getAdminDocumentData()]);
+  const documentRows: DocumentTableRow[] = data.documents.map((document) => ({
+    id: document.id,
+    fileName: document.fileName,
+    target: documentTargetLabel(document),
+    type: getDocumentTypeLabel(document.type),
+    uploadedAt: dateFormatter.format(document.uploadedAt),
+    storageKey: document.storageKey,
+  }));
 
   return (
     <>
@@ -41,14 +50,12 @@ export default async function AdminDocumentsPage({ searchParams }: PageProps) {
         Verwaltung von Dokument-Metadaten für Organisationen, Gebäude und Räume. Dateiablage wird über Storage-Key
         vorbereitet.
       </p>
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Dokument wurde gespeichert.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Dokument wurde gespeichert." : undefined },
+        ]}
+      />
 
       <Card className="mt-8">
         <CardHeader>
@@ -125,30 +132,7 @@ export default async function AdminDocumentsPage({ searchParams }: PageProps) {
               Noch keine Dokumente vorhanden.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <Table className="min-w-[900px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Dateiname</TableHead>
-                    <TableHead>Ziel</TableHead>
-                    <TableHead>Typ</TableHead>
-                    <TableHead>Hochgeladen</TableHead>
-                    <TableHead>Storage-Key</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.documents.map((document) => (
-                    <TableRow key={document.id}>
-                      <TableCell className="font-medium">{document.fileName}</TableCell>
-                      <TableCell>{documentTargetLabel(document)}</TableCell>
-                      <TableCell>{getDocumentTypeLabel(document.type)}</TableCell>
-                      <TableCell className="text-muted-foreground">{dateFormatter.format(document.uploadedAt)}</TableCell>
-                      <TableCell className="max-w-md truncate text-xs text-muted-foreground">{document.storageKey}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <DocumentsDataTable rows={documentRows} />
           )}
         </CardContent>
       </Card>

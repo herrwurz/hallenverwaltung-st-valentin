@@ -1,4 +1,5 @@
 import { approveChangeRequestAction, markChangeRequestInReviewAction, rejectChangeRequestAction } from "@/app/admin/booking-changes/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { StatusFilterSelect } from "@/components/status-filter-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,24 +85,14 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
         `MOVED` und erzeugen einen neuen genehmigten Ersatztermin.
       </p>
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.reviewed ? (
-        <p className="mt-6 rounded-lg border border-primary/20 bg-primary/10 p-4 text-sm text-primary">
-          Der Änderungsantrag wurde in Prüfung übernommen.
-        </p>
-      ) : null}
-      {params.approved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Änderungsantrag wurde genehmigt.
-        </p>
-      ) : null}
-      {params.rejected ? (
-        <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">
-          Der Änderungsantrag wurde abgelehnt.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "info", text: params.reviewed ? "Der Änderungsantrag wurde in Prüfung übernommen." : undefined },
+          { tone: "success", text: params.approved ? "Der Änderungsantrag wurde genehmigt." : undefined },
+          { tone: "success", text: params.rejected ? "Der Änderungsantrag wurde abgelehnt." : undefined },
+        ]}
+      />
 
       <StatusFilterSelect
         selectedValue={selectedFilter}

@@ -1,7 +1,8 @@
 import { createHolidayPeriodAction } from "@/app/admin/holidays/actions";
+import { AppFeedback } from "@/components/app-feedback";
+import { HolidaysDataTable, type HolidayTableRow } from "@/components/phase25-data-tables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requirePermission } from "@/lib/permissions";
 import { getHolidayAdministrationData, getHolidayStatusLabel } from "@/lib/services/holiday-service";
 
@@ -15,6 +16,14 @@ type PageProps = {
 export default async function AdminHolidaysPage({ searchParams }: PageProps) {
   await requirePermission("BLOCK_ROOM");
   const [params, holidays] = await Promise.all([searchParams, getHolidayAdministrationData()]);
+  const holidayRows: HolidayTableRow[] = holidays.map((holiday) => ({
+    id: holiday.id,
+    name: holiday.name,
+    period: `${dateFormatter.format(holiday.startsOn)} bis ${dateFormatter.format(holiday.endsOn)}`,
+    status: getHolidayStatusLabel(holiday.defaultStatus),
+    visibility: holiday.isPublic ? "Sichtbar" : "Intern",
+    reason: holiday.reason,
+  }));
 
   return (
     <>
@@ -25,14 +34,12 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
         werden bei neuen Serienanträgen übersprungen, eingeschränkte Zeiträume als Hinweis angezeigt.
       </p>
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Ferienzeitraum wurde gespeichert.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Ferienzeitraum wurde gespeichert." : undefined },
+        ]}
+      />
 
       <Card className="mt-8">
         <CardHeader>
@@ -87,33 +94,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
               Noch keine Ferien- oder Feiertagszeiträume vorhanden.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <Table className="min-w-[760px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Zeitraum</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Sichtbarkeit</TableHead>
-                    <TableHead>Grund</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {holidays.map((holiday) => (
-                    <TableRow key={holiday.id}>
-                      <TableCell className="font-medium">{holiday.name}</TableCell>
-                      <TableCell>
-                        <p>{dateFormatter.format(holiday.startsOn)}</p>
-                        <p className="text-xs text-muted-foreground">bis {dateFormatter.format(holiday.endsOn)}</p>
-                      </TableCell>
-                      <TableCell className="font-medium text-primary">{getHolidayStatusLabel(holiday.defaultStatus)}</TableCell>
-                      <TableCell>{holiday.isPublic ? "Sichtbar" : "Intern"}</TableCell>
-                      <TableCell className="max-w-md text-muted-foreground">{holiday.reason}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <HolidaysDataTable rows={holidayRows} />
           )}
         </CardContent>
       </Card>

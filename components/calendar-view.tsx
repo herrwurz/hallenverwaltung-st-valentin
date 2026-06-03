@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarClock } from "lucide-react";
+import { CalendarEventDialog } from "@/components/calendar-event-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,10 @@ import type { CalendarEvent, CalendarResult, FreeSlotResult } from "@/lib/servic
 const dateTimeFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
   timeStyle: "short",
+});
+
+const dateFormatter = new Intl.DateTimeFormat("de-AT", {
+  dateStyle: "medium",
 });
 
 const timeFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -44,10 +49,6 @@ function shiftCalendarDate(selectedDate: string, view: CalendarResult["view"], d
   }
 
   return formatDateInput(date);
-}
-
-function getEventDialogId(sourceType: string, id: string) {
-  return `termin-${sourceType}-${id}`.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
 function getMinutesFromDayStart(date: Date) {
@@ -175,7 +176,11 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
           <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,220px,200px,auto]">
             <label className="text-sm font-medium text-foreground">
               Gebäude
-              <select name="buildingId" defaultValue={calendar.filters.buildingId ?? ""} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm">
+              <select
+                name="buildingId"
+                defaultValue={calendar.filters.buildingId ?? ""}
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
                 <option value="">Alle Gebäude</option>
                 {calendar.buildings.map((building) => (
                   <option key={building.id} value={building.id}>
@@ -187,7 +192,11 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
 
             <label className="text-sm font-medium text-foreground">
               Raum
-              <select name="roomId" defaultValue={calendar.filters.roomId ?? ""} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm">
+              <select
+                name="roomId"
+                defaultValue={calendar.filters.roomId ?? ""}
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
                 <option value="">Alle Räume</option>
                 {calendar.buildings
                   .filter((building) => !calendar.filters.buildingId || building.id === calendar.filters.buildingId)
@@ -213,7 +222,11 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
 
             <label className="text-sm font-medium text-foreground">
               Ansicht
-              <select name="view" defaultValue={calendar.view} className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm">
+              <select
+                name="view"
+                defaultValue={calendar.view}
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
                 <option value="day">Tag</option>
                 <option value="week">Woche</option>
                 <option value="month">Monat</option>
@@ -228,7 +241,9 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
         </CardContent>
       </Card>
 
-      {calendar.view === "day" ? <ResourceDayGrid calendar={calendar} events={calendar.events} rooms={visibleRooms} /> : null}
+      {calendar.view === "day" || calendar.view === "week" ? (
+        <ResourceScheduleGrid calendar={calendar} events={calendar.events} rooms={visibleRooms} />
+      ) : null}
 
       <section className="mt-8">
         <div className="flex items-center justify-between gap-3">
@@ -236,7 +251,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             {calendar.view === "day"
               ? "Terminliste"
               : calendar.view === "week"
-                ? "Wochenansicht"
+                ? "Wochenübersicht"
                 : calendar.view === "month"
                   ? "Monatsansicht"
                   : "Jahresansicht"}
@@ -245,7 +260,11 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             <Link href={`${basePath}?${shareParams.toString()}`}>Ansicht teilen</Link>
           </Button>
         </div>
-        <div className={`mt-4 grid gap-3 ${calendar.view === "week" ? "lg:grid-cols-7" : calendar.view === "month" ? "sm:grid-cols-2 lg:grid-cols-7" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
+        <div
+          className={`mt-4 grid gap-3 ${
+            calendar.view === "week" ? "lg:grid-cols-7" : calendar.view === "month" ? "sm:grid-cols-2 lg:grid-cols-7" : "sm:grid-cols-2 lg:grid-cols-3"
+          }`}
+        >
           {groupedEvents.map((day) => (
             <Card key={day.key} className="min-h-40">
               <CardHeader className="border-b border-border pb-3">
@@ -283,8 +302,8 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
           ) : (
             <>
               <p className="text-sm text-muted-foreground">
-                {freeSlots.room.buildingName} - {freeSlots.room.name} | Öffnungszeit {timeFormatter.format(freeSlots.openingStartsAt)} bis{" "}
-                {timeFormatter.format(freeSlots.openingEndsAt)}
+                {freeSlots.room.buildingName} - {freeSlots.room.name} | Öffnungszeit{" "}
+                {timeFormatter.format(freeSlots.openingStartsAt)} bis {timeFormatter.format(freeSlots.openingEndsAt)}
               </p>
               <div className="mt-4 space-y-2">
                 {freeSlots.freeSlots.length === 0 ? (
@@ -293,7 +312,10 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
                   </p>
                 ) : (
                   freeSlots.freeSlots.map((slot, index) => (
-                    <p key={`${slot.startsAt.toISOString()}-${index}`} className="rounded-lg border border-emerald-500/20 bg-success/10 p-3 text-sm text-emerald-700">
+                    <p
+                      key={`${slot.startsAt.toISOString()}-${index}`}
+                      className="rounded-lg border border-emerald-500/20 bg-success/10 p-3 text-sm text-emerald-700"
+                    >
                       {timeFormatter.format(slot.startsAt)} bis {timeFormatter.format(slot.endsAt)}
                     </p>
                   ))
@@ -307,7 +329,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
   );
 }
 
-function ResourceDayGrid({
+function ResourceScheduleGrid({
   calendar,
   events,
   rooms,
@@ -324,6 +346,7 @@ function ResourceDayGrid({
     const minutes = schedulerStartMinutes + index * 30;
     return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
   });
+  const isWeek = calendar.view === "week";
 
   return (
     <Card className="mt-8 overflow-hidden">
@@ -332,9 +355,12 @@ function ResourceDayGrid({
           <div>
             <CardTitle className="flex items-center gap-2">
               <CalendarClock className="h-5 w-5 text-primary" aria-hidden="true" />
-              Tagesplan nach Räumen
+              {isWeek ? "Wochenplan nach Räumen" : "Tagesplan nach Räumen"}
             </CardTitle>
-            <CardDescription>Räume als Spalten, Zeitfenster in 30-Minuten-Schritten.</CardDescription>
+            <CardDescription>
+              Räume als Spalten, Zeitfenster in 30-Minuten-Schritten. In der Wochenansicht zeigt jeder Termin zusätzlich
+              den Wochentag.
+            </CardDescription>
           </div>
           <Badge variant="outline">{rooms.length} Räume</Badge>
         </div>
@@ -343,7 +369,7 @@ function ResourceDayGrid({
         <div className="overflow-x-auto">
           <div
             className="google-calendar-grid grid min-w-[900px]"
-            style={{ gridTemplateColumns: `88px repeat(${Math.max(rooms.length, 1)}, minmax(220px, 1fr))` }}
+            style={{ gridTemplateColumns: `88px repeat(${Math.max(rooms.length, 1)}, minmax(240px, 1fr))` }}
           >
             <div className="sticky left-0 z-20 border-b border-r border-border bg-card p-3 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Zeit
@@ -385,10 +411,11 @@ function ResourceDayGrid({
                     const height = Math.max(((blockedEnd - blockedStart) / 30) * slotHeight - 6, 28);
 
                     return (
-                      <a
+                      <CalendarEventDialog
                         key={`${event.sourceType}-${event.id}-${room.id}`}
-                        href={`#${getEventDialogId(event.sourceType, event.id)}`}
+                        event={event}
                         className="absolute left-2 right-2 overflow-hidden rounded-lg border-l-4 border-l-primary bg-primary/10 p-2 text-xs shadow-sm transition hover:bg-primary/15"
+                        triggerLabel={`Details zu ${event.title} öffnen`}
                         style={{ top: `${top + 3}px`, height: `${height}px` }}
                       >
                         <span className={`mb-1 inline-flex rounded-full px-2 py-0.5 text-[11px] ${getCalendarEventStatusBadgeClass(event.status)}`}>
@@ -396,9 +423,10 @@ function ResourceDayGrid({
                         </span>
                         <span className="block truncate font-semibold text-foreground">{event.title}</span>
                         <span className="block truncate text-muted-foreground">
+                          {isWeek ? `${dateFormatter.format(event.startsAt)}, ` : ""}
                           {timeFormatter.format(event.startsAt)} bis {timeFormatter.format(event.endsAt)}
                         </span>
-                      </a>
+                      </CalendarEventDialog>
                     );
                   })}
                 </div>
@@ -407,7 +435,6 @@ function ResourceDayGrid({
           </div>
         </div>
       </CardContent>
-      <EventDialogs events={calendar.events} />
     </Card>
   );
 }
@@ -429,66 +456,13 @@ function EventCard({ event }: { event: CalendarEvent }) {
           {getCalendarEventStatusLabel(event.status)}
         </span>
       </div>
-      <Button className="mt-3" variant="outline" size="sm" asChild>
-        <a href={`#${getEventDialogId(event.sourceType, event.id)}`}>Details anzeigen</a>
-      </Button>
+      <CalendarEventDialog
+        event={event}
+        className="mt-3 inline-flex h-9 items-center justify-center rounded-md border border-border bg-card px-3 text-sm font-medium shadow-sm transition hover:bg-accent"
+        triggerLabel={`Details zu ${event.title} anzeigen`}
+      >
+        Details anzeigen
+      </CalendarEventDialog>
     </article>
-  );
-}
-
-function EventDialogs({ events }: { events: CalendarEvent[] }) {
-  return (
-    <>
-      {events.map((event) => {
-        const dialogId = getEventDialogId(event.sourceType, event.id);
-
-        return (
-          <div
-            key={`${event.sourceType}-${event.id}-dialog`}
-            id={dialogId}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`${dialogId}-title`}
-            className="fixed inset-0 z-50 hidden place-items-center bg-black/40 p-6 target:grid"
-          >
-            <div className="w-full max-w-xl rounded-xl border border-border bg-card p-6 text-card-foreground shadow-2xl">
-              <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
-                <div>
-                  <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Termin-Details</p>
-                  <h3 id={`${dialogId}-title`} className="mt-2 text-2xl font-semibold tracking-tight">
-                    {event.title}
-                  </h3>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <a href="#">Schließen</a>
-                </Button>
-              </div>
-
-              <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-                <Detail label="Status" value={getCalendarEventStatusLabel(event.status)} />
-                <Detail label="Art" value={event.sourceType === "closure" ? "Sperre" : "Buchung"} />
-                <Detail label="Gebäude" value={event.buildingName} />
-                <Detail label="Raum" value={event.roomName ?? "Gesamtes Gebäude"} />
-                <Detail label="Beginn" value={dateTimeFormatter.format(event.startsAt)} />
-                <Detail label="Ende" value={dateTimeFormatter.format(event.endsAt)} />
-                <Detail label="Blockiert ab" value={dateTimeFormatter.format(event.blockedFrom)} />
-                <Detail label="Blockiert bis" value={dateTimeFormatter.format(event.blockedUntil)} />
-                {event.organizationName ? <Detail className="sm:col-span-2" label="Organisation" value={event.organizationName} /> : null}
-                {event.subtitle ? <Detail className="sm:col-span-2" label="Hinweis" value={event.subtitle} /> : null}
-              </dl>
-            </div>
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
-function Detail({ label, value, className }: { label: string; value: string; className?: string }) {
-  return (
-    <div className={className}>
-      <dt className="font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-1">{value}</dd>
-    </div>
   );
 }

@@ -3,9 +3,9 @@ import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
+import { DamageReportsDataTable, type DamageReportTableRow } from "@/components/phase25-data-tables";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getDamageStatusBadgeClass, getDamageStatusLabel } from "@/lib/document-damage-labels";
+import { getDamageStatusLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { getPortalDamageData } from "@/lib/services/damage-service";
 
@@ -19,6 +19,14 @@ type PageProps = {
 export default async function PortalDamagesPage({ searchParams }: PageProps) {
   const user = await requirePermission("REPORT_DAMAGE");
   const [params, data] = await Promise.all([searchParams, getPortalDamageData(user.id)]);
+  const reportRows: DamageReportTableRow[] = data.reports.map((report) => ({
+    id: report.id,
+    room: `${report.room.building.name} - ${report.room.name}`,
+    description: report.photoStorageKey ? `${report.description} (${report.photoStorageKey})` : report.description,
+    reportedAt: dateFormatter.format(report.reportedAt),
+    status: getDamageStatusLabel(report.status),
+    resolution: report.processedBy ? report.processedBy.displayName ?? report.processedBy.email : "Noch offen",
+  }));
 
   return (
     <>
@@ -71,42 +79,7 @@ export default async function PortalDamagesPage({ searchParams }: PageProps) {
               Sie haben noch keine Schäden gemeldet.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <Table className="min-w-[820px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Gebäude / Raum</TableHead>
-                    <TableHead>Beschreibung</TableHead>
-                    <TableHead>Gemeldet</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Bearbeitung</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.reports.map((report) => (
-                    <TableRow key={report.id} className="align-top">
-                      <TableCell>
-                        <p className="font-medium">{report.room.building.name}</p>
-                        <p className="text-xs text-muted-foreground">{report.room.name}</p>
-                      </TableCell>
-                      <TableCell className="max-w-md">
-                        <p>{report.description}</p>
-                        {report.photoStorageKey ? <p className="mt-2 text-xs text-muted-foreground">{report.photoStorageKey}</p> : null}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{dateFormatter.format(report.reportedAt)}</TableCell>
-                      <TableCell>
-                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${getDamageStatusBadgeClass(report.status)}`}>
-                          {getDamageStatusLabel(report.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {report.processedBy ? report.processedBy.displayName ?? report.processedBy.email : "Noch offen"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <DamageReportsDataTable rows={reportRows} />
           )}
         </CardContent>
       </Card>

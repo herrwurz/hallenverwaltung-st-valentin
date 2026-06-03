@@ -309,15 +309,21 @@ eingespielt, und `scripts/start-local-standalone.ps1` startet die stabile
 Standalone-Variante fuer `http://localhost:3000`. Der angedachte Testserver auf
 all-inkl.com ist als technische Hosting-Klaerung dokumentiert.
 
-## Phase 25 (geplant, aktuell pausiert)
+## Phase 25
 
-UI-Neuaufbau mit shadcn/ui als generellem Komponentenstandard. Tabellen fuer
-Gebaeude, Raeume, Benutzer, Organisationen, Buchungen, Warteliste,
-Benachrichtigungen, Abrechnung und weitere Verwaltungsdaten sollen als
-shadcn/ui Data-Table-/Grid-Komponenten umgesetzt werden. Kalender und
-Hallenplanung sollen als Ressourcenraster mit Raeumen/Hallen als Spalten,
-30-Minuten-Zeitslots, Status-Badges und shadcn/ui Dialogen neu aufgebaut
-werden. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
+UI-Neuaufbau mit shadcn/ui als generellem Komponentenstandard umgesetzt und
+weiter gehaertet. Zentrale Stammdaten-, Buchungs-, Benachrichtigungs-,
+Abrechnungs-, Dokument-, Ferien-, Serien- und Betriebslisten nutzen nun
+shadcn/ui Cards, Buttons, Badges und DataTable-/Table-Patterns. Tabellen ohne
+eingebettete Server-Action-Zellen verwenden TanStack-basierte DataTables mit
+Filter, Sortierung und Pagination. Tabellen mit Server-Action-Formularen
+bleiben bewusst serverseitige shadcn/ui Tables, um Mutations- und
+Berechtigungslogik nicht in fragile Client-Zellen zu verschieben.
+
+Der Kalender nutzt ein eigenes shadcn/Tailwind-Ressourcenraster fuer Tages-
+und Wochenansicht mit Raeumen als Spalten, 30-Minuten-Zeitslots und
+Status-Badges. Termin-Details werden ueber eine Radix/shadcn-Dialogkomponente
+angezeigt. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
 Option.
 
 ---

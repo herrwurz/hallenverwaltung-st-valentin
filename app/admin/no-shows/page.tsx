@@ -1,4 +1,5 @@
 import { acknowledgeNoShowAction, reportNoShowAction } from "@/app/admin/no-shows/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { FormActions } from "@/components/form-actions";
 import { StatusFilterSelect } from "@/components/status-filter-select";
 import { Button } from "@/components/ui/button";
@@ -30,19 +31,13 @@ export default async function AdminNoShowsPage({ searchParams }: PageProps) {
         Statusänderung der Buchung in dieser Phase.
       </p>
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          No-Show wurde gemeldet.
-        </p>
-      ) : null}
-      {params.acknowledged ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          No-Show wurde zur Kenntnis genommen.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "No-Show wurde gemeldet." : undefined },
+          { tone: "success", text: params.acknowledged ? "No-Show wurde zur Kenntnis genommen." : undefined },
+        ]}
+      />
 
       <Card className="mt-8">
         <CardHeader>

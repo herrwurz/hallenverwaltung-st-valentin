@@ -1,4 +1,5 @@
 import { updateDamageStatusAction } from "@/app/admin/damages/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { StatusFilterSelect } from "@/components/status-filter-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +29,12 @@ export default async function AdminDamagesPage({ searchParams }: PageProps) {
         Schadensmeldungen einsehen und den Bearbeitungsstatus aktualisieren. Hallenübergaben und Zutrittsverwaltung
         werden in eigenen Verwaltungsbereichen geführt.
       </p>
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Schadensmeldung wurde aktualisiert.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Schadensmeldung wurde aktualisiert." : undefined },
+        ]}
+      />
 
       <StatusFilterSelect
         selectedValue={data.selectedStatus ?? "ALL"}

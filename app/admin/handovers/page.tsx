@@ -1,4 +1,5 @@
 import { recordHandoverEventAction } from "@/app/admin/handovers/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -45,14 +46,12 @@ export default async function AdminHandoversPage({ searchParams }: PageProps) {
         </p>
       ) : null}
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">{params.error}</p>
-      ) : null}
-      {params.saved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Hallenübergabe wurde aktualisiert.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "success", text: params.saved ? "Hallenübergabe wurde aktualisiert." : undefined },
+        ]}
+      />
 
       <Card className="mt-8">
         <CardHeader>

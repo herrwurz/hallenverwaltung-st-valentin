@@ -2,9 +2,9 @@ import { createOrganizationDocumentAction } from "@/app/portal/documents/actions
 import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { FormActions } from "@/components/form-actions";
+import { DocumentsDataTable, type DocumentTableRow } from "@/components/phase25-data-tables";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getDocumentTypeLabel } from "@/lib/document-damage-labels";
 import { requirePermission } from "@/lib/permissions";
 import { documentTypes, getPortalDocumentData } from "@/lib/services/document-service";
@@ -22,6 +22,14 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
   const documents = data.organizations.flatMap((organization) =>
     organization.documents.map((document) => ({ ...document, organizationName: organization.name })),
   );
+  const documentRows: DocumentTableRow[] = documents.map((document) => ({
+    id: document.id,
+    fileName: document.fileName,
+    target: document.organizationName,
+    type: getDocumentTypeLabel(document.type),
+    uploadedAt: dateFormatter.format(document.uploadedAt),
+    storageKey: document.storageKey,
+  }));
 
   return (
     <>
@@ -88,30 +96,7 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
               Noch keine Dokumente erfasst.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <Table className="min-w-[780px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Dateiname</TableHead>
-                    <TableHead>Organisation</TableHead>
-                    <TableHead>Typ</TableHead>
-                    <TableHead>Hochgeladen</TableHead>
-                    <TableHead>Storage-Key</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {documents.map((document) => (
-                    <TableRow key={document.id}>
-                      <TableCell className="font-medium">{document.fileName}</TableCell>
-                      <TableCell>{document.organizationName}</TableCell>
-                      <TableCell>{getDocumentTypeLabel(document.type)}</TableCell>
-                      <TableCell className="text-muted-foreground">{dateFormatter.format(document.uploadedAt)}</TableCell>
-                      <TableCell className="max-w-md truncate text-xs text-muted-foreground">{document.storageKey}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <DocumentsDataTable rows={documentRows} portal />
           )}
         </CardContent>
       </Card>

@@ -14,20 +14,25 @@ konsistenter und verwaltungsgeeignet wirken.
 
 ## Zielstandard ab Phase 25
 
-Phase 25 ist aktuell zurueckgestellt und soll erst mit ausreichendem
-Credit-Budget gestartet werden.
+Phase 25 ist gestartet und setzt shadcn/ui als generellen Komponentenstandard.
 
-- shadcn/ui wird dann als genereller Komponentenstandard eingefuehrt.
+- shadcn/ui ist als genereller Komponentenstandard eingefuehrt.
 - Alle tabellarischen Daten sollen ueber eine shadcn/ui Data-Table-/Grid-
   Komponente dargestellt werden: Gebaeude, Raeume, Benutzer, Organisationen,
   Rollen/Rechte, Buchungen, Warteliste, Benachrichtigungen, Abrechnung,
   Dokumente, Schaeden, No-Shows, Hallenuebergaben und Zutrittsmedien.
+- Tabellen mit eingebetteten Server-Action-Formularen duerfen als serverseitige
+  shadcn/ui Table umgesetzt bleiben, wenn eine Client-DataTable die stabile
+  Mutationsausfuehrung gefaehrden wuerde.
 - Fuer Formulare, Filter und Aktionen sind bevorzugt shadcn/ui Button, Input,
   Select, Combobox/Command, Popover, Dialog, Calendar/Date-Picker, Badge,
   Card, Table, Tabs und Form-Patterns zu verwenden.
 - Der Kalender soll als Ressourcenraster gestaltet werden: Raeume/Hallen als
   Spalten, 30-Minuten-Zeitslots als Zeilen, Status-Badges als visuelle Anker
   und Buchungsdetails im Dialog.
+- Tages- und Wochenansicht nutzen ein eigenes shadcn/Tailwind-
+  Ressourcenraster. Monat und Jahr bleiben bewusst kompaktere
+  Uebersichtsansichten.
 - FullCalendar Resource Timeline bleibt eine Option, benoetigt aber vor
   Produktiveinsatz eine Lizenzklaerung. Ohne Lizenz wird ein eigenes
   shadcn/Tailwind-Ressourcenraster bevorzugt.

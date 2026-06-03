@@ -1,8 +1,9 @@
 import { processExpiredWaitlistOffersJobAction, processNotificationQueueJobAction, runMaintenanceJobsAction } from "@/app/admin/system/jobs/actions";
 import { AppBackLink } from "@/components/app-back-link";
+import { AppFeedback } from "@/components/app-feedback";
+import { SystemJobsDataTable, type SystemJobTableRow } from "@/components/phase25-data-tables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { requirePermission } from "@/lib/permissions";
 import { getWorkerJobRuns } from "@/lib/services/worker-service";
 
@@ -30,6 +31,14 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
   await requirePermission("MANAGE_SYSTEM_JOBS");
   const params = await searchParams;
   const runs = await getWorkerJobRuns(20);
+  const runRows: SystemJobTableRow[] = runs.map((run) => ({
+    id: run.id,
+    createdAt: dateFormatter.format(run.createdAt),
+    job: run.entityId,
+    status: run.action,
+    processedCount: payloadValue(run.payload, "processedCount") ?? "0",
+    errorMessage: payloadValue(run.payload, "errorMessage") ?? "-",
+  }));
 
   return (
     <>
@@ -45,14 +54,15 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
         <AppBackLink href="/admin" label="Zurück zum Dashboard" />
       </div>
 
-      {params.job ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Job {params.job} ausgeführt. Verarbeitete Einträge: {params.processed ?? "0"}.
-        </p>
-      ) : null}
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">{params.error}</p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          {
+            tone: "success",
+            text: params.job ? `Job ${params.job} ausgeführt. Verarbeitete Einträge: ${params.processed ?? "0"}.` : undefined,
+          },
+          { tone: "error", text: params.error },
+        ]}
+      />
 
       <section className="mt-8 grid gap-4 lg:grid-cols-3">
         <form action={processNotificationQueueJobAction} className="rounded-xl border border-border bg-card p-6 shadow-sm">
@@ -90,30 +100,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
               Noch keine Job-Protokolle vorhanden.
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <Table className="min-w-[780px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Zeitpunkt</TableHead>
-                    <TableHead>Job</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Verarbeitet</TableHead>
-                    <TableHead>Fehler</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {runs.map((run) => (
-                    <TableRow key={run.id}>
-                      <TableCell className="text-muted-foreground">{dateFormatter.format(run.createdAt)}</TableCell>
-                      <TableCell className="font-medium">{run.entityId}</TableCell>
-                      <TableCell className="text-muted-foreground">{run.action}</TableCell>
-                      <TableCell className="text-muted-foreground">{payloadValue(run.payload, "processedCount") ?? "0"}</TableCell>
-                      <TableCell className="text-destructive">{payloadValue(run.payload, "errorMessage") ?? "-"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <SystemJobsDataTable rows={runRows} />
           )}
         </CardContent>
       </Card>
