@@ -243,6 +243,9 @@ Abschluss immer anhand überprüfbarer Kriterien bewerten.
 - Alle Buchungen benötigen Genehmigung.
 - Buchungen werden niemals physisch gelöscht.
 - Historisierung erfolgt über Statusänderungen.
+- Standardweg der Verwaltung ist `REQUESTED -> APPROVED` oder `REQUESTED ->
+  REJECTED`. `IN_REVIEW` bleibt optional, wenn ein Antrag intern vorgemerkt
+  oder von einer Person zur Pruefung uebernommen werden soll.
 - Terminverschiebungen laufen ueber `BookingChangeRequest`. Der bestehende
   genehmigte Termin wird bei Antragstellung nicht veraendert. Bei Genehmigung
   wird die alte Buchung auf `MOVED` gesetzt und ein neuer genehmigter

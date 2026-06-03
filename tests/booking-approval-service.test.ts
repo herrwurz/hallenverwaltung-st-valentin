@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   approveBookingForAdmin,
@@ -410,7 +410,7 @@ test("moves a booking from REQUESTED to IN_REVIEW", async () => {
     actorUserId: "admin-1",
     oldStatus: "REQUESTED",
     newStatus: "IN_REVIEW",
-    reason: "Zur Prüfung übernommen.",
+    reason: "Zur PrÃ¼fung Ã¼bernommen.",
     oldStartAt: start,
     oldEndAt: end,
     newStartAt: start,
@@ -418,30 +418,38 @@ test("moves a booking from REQUESTED to IN_REVIEW", async () => {
   });
 });
 
-test("does not allow direct approval from REQUESTED", async () => {
+test("approves a booking directly from REQUESTED and writes history", async () => {
   const harness = createWorkflowClient({
     currentBooking: makeWorkflowBooking({ status: "REQUESTED" }),
-    updatedBooking: makeWorkflowBooking({ status: "APPROVED" }),
+    updatedBooking: makeWorkflowBooking({ status: "APPROVED", processedByUserId: "admin-1", processedAt: end }),
   });
 
-  await assert.rejects(
-    () =>
-      approveBooking(
-        {
-          bookingId: "booking-1",
-          actorUserId: "admin-1",
-          decisionNote: "Bitte freigeben",
-          roomId: "room-child",
-          buildingId: "building-1",
-          blockedFrom: start,
-          blockedUntil: end,
-        },
-        harness.client,
-      ),
-    /in Prüfung/,
+  const updated = await approveBooking(
+    {
+      bookingId: "booking-1",
+      actorUserId: "admin-1",
+      decisionNote: "Bitte freigeben",
+      roomId: "room-child",
+      buildingId: "building-1",
+      blockedFrom: start,
+      blockedUntil: end,
+    },
+    harness.client,
   );
-});
 
+  assert.equal(updated.status, "APPROVED");
+  assert.deepEqual(harness.writes[0], {
+    bookingId: "booking-1",
+    actorUserId: "admin-1",
+    oldStatus: "REQUESTED",
+    newStatus: "APPROVED",
+    reason: "Bitte freigeben",
+    oldStartAt: start,
+    oldEndAt: end,
+    newStartAt: start,
+    newEndAt: end,
+  });
+});
 test("approves a booking from IN_REVIEW and writes history", async () => {
   const harness = createWorkflowClient({
     currentBooking: makeWorkflowBooking({ status: "IN_REVIEW" }),
@@ -497,6 +505,35 @@ test("rejects a booking from IN_REVIEW and writes history", async () => {
     oldStatus: "IN_REVIEW",
     newStatus: "REJECTED",
     reason: "Termin kollidiert mit einer internen Veranstaltung.",
+    oldStartAt: start,
+    oldEndAt: end,
+    newStartAt: start,
+    newEndAt: end,
+  });
+});
+
+test("rejects a booking directly from REQUESTED and writes history", async () => {
+  const harness = createWorkflowClient({
+    currentBooking: makeWorkflowBooking({ status: "REQUESTED" }),
+    updatedBooking: makeWorkflowBooking({ status: "REJECTED", processedByUserId: "admin-1", processedAt: end }),
+  });
+
+  const updated = await rejectBooking(
+    {
+      bookingId: "booking-1",
+      actorUserId: "admin-1",
+      decisionNote: "Termin ist fachlich nicht möglich.",
+    },
+    harness.client,
+  );
+
+  assert.equal(updated.status, "REJECTED");
+  assert.deepEqual(harness.writes[0], {
+    bookingId: "booking-1",
+    actorUserId: "admin-1",
+    oldStatus: "REQUESTED",
+    newStatus: "REJECTED",
+    reason: "Termin ist fachlich nicht möglich.",
     oldStartAt: start,
     oldEndAt: end,
     newStartAt: start,
@@ -790,3 +827,4 @@ test("allows serialized approvals to succeed when no hard conflict exists", asyn
   assert.equal(approvedLate.status, "APPROVED");
   assert.equal(harness.history.length, 2);
 });
+

@@ -43,6 +43,9 @@ export type SystemJobTableRow = {
 export type SeriesTableRow = {
   id: string;
   title: string;
+  recurrence: string;
+  statusLabel: string;
+  statusTone: "success" | "destructive" | "warning" | "secondary";
   organization: string;
   room: string;
   period: string;
@@ -106,7 +109,13 @@ const systemJobColumns: ColumnDef<SystemJobTableRow>[] = [
 ];
 
 const seriesColumns: ColumnDef<SeriesTableRow>[] = [
-  { accessorKey: "title", header: "Serie" },
+  { accessorKey: "title", header: "Titel" },
+  { accessorKey: "recurrence", header: "Serie" },
+  {
+    accessorKey: "statusLabel",
+    header: "Serienstatus",
+    cell: ({ row }) => <Badge variant={row.original.statusTone}>{row.original.statusLabel}</Badge>,
+  },
   { accessorKey: "organization", header: "Organisation" },
   { accessorKey: "room", header: "Gebäude / Raum" },
   { accessorKey: "period", header: "Zeitraum" },

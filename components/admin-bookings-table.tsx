@@ -65,7 +65,7 @@ const columns: ColumnDef<AdminBookingTableRow>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <span className={`rounded-full px-3 py-1 text-xs font-medium ${getBookingStatusBadgeClass(row.original.status)}`}>
+      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium leading-none ${getBookingStatusBadgeClass(row.original.status)}`}>
         {getBookingStatusLabel(row.original.status)}
       </span>
     ),

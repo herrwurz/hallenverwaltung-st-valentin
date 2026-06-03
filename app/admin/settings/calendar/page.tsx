@@ -38,16 +38,15 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
 
   return (
     <>
+      <div className="mb-6">
+        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
+      </div>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Einstellungen</p>
       <h2 className="mt-3 text-3xl font-semibold">Öffentlicher Kalender</h2>
       <p className="mt-3 max-w-3xl text-muted-foreground">
         Hier wird festgelegt, welche Details die Öffentlichkeit im Kalender sehen darf. Ohne passende Raumfreigabe
         bleibt die sichere Anzeige immer bei belegt oder frei.
       </p>
-
-      <div className="mt-8 flex items-center justify-between gap-4">
-        <AppBackLink href="/admin/calendar" label="Zurück zum Kalender" />
-      </div>
 
       {saved ? (
         <p className="mt-6 rounded-lg border border-emerald-500/20 bg-success/10 p-4 text-sm text-emerald-700">

@@ -11,13 +11,19 @@ import {
 } from "@/lib/services/booking-approval-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
+const optionalFormString = z.preprocess(
+  (value) => (value === null || value === "" ? undefined : value),
+  z.string().trim().optional(),
+);
+
 const transitionSchema = z.object({
   bookingId: z.string().trim().min(1, "Die Buchung ist ungültig."),
-  status: z.string().trim().optional(),
+  status: optionalFormString,
+  organizationId: optionalFormString,
 });
 
 const decisionSchema = transitionSchema.extend({
-  decisionNote: z.string().trim().optional(),
+  decisionNote: optionalFormString,
 });
 
 function workflowErrorMessage(error: unknown) {
@@ -32,8 +38,12 @@ function workflowErrorMessage(error: unknown) {
   return "Die Buchung konnte nicht bearbeitet werden.";
 }
 
-function buildRedirect(pathname: string, status: string | undefined, params: string) {
+function buildRedirect(pathname: string, status: string | undefined, organizationId: string | undefined, params: string) {
   const query = new URLSearchParams(status ? { status } : undefined);
+
+  if (organizationId) {
+    query.set("organizationId", organizationId);
+  }
 
   for (const [key, value] of new URLSearchParams(params)) {
     query.set(key, value);
@@ -57,6 +67,7 @@ async function executeBookingWorkflowAction(
       bookingId: formData.get("bookingId"),
       decisionNote: formData.get("decisionNote"),
       status: formData.get("status"),
+      organizationId: formData.get("organizationId"),
     });
     await operation(input, actor.id);
   } catch (error) {
@@ -65,6 +76,7 @@ async function executeBookingWorkflowAction(
       bookingId: String(formData.get("bookingId") ?? ""),
       decisionNote: String(formData.get("decisionNote") ?? ""),
       status: String(formData.get("status") ?? ""),
+      organizationId: String(formData.get("organizationId") ?? ""),
     };
   }
 
@@ -73,6 +85,7 @@ async function executeBookingWorkflowAction(
   buildRedirect(
     "/admin/bookings",
     errorMessage ? input.status : successStatus ?? input.status,
+    input.organizationId,
     errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=1`,
   );
 }

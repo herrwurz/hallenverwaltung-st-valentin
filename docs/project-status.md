@@ -563,6 +563,19 @@ Version 1:
 
 ---
 
+# Aktuelle Pilot-Hotfixes
+
+## Phase 26.3
+
+Der Genehmigungsworkflow wurde fuer die Verwaltung vereinfacht:
+
+* `REQUESTED -> APPROVED` ist erlaubt.
+* `REQUESTED -> REJECTED` ist erlaubt.
+* `IN_REVIEW` bleibt als optionaler Zwischenstatus bestehen, wenn ein Antrag
+  intern vorgemerkt oder zur Pruefung uebernommen werden soll.
+
+---
+
 # Aktuelle Produktionsrisiken
 
 ## Worker-Betrieb muss produktiv aktiviert bleiben

@@ -59,9 +59,9 @@ werden.
   verhindert `UPDATE` und `DELETE` an Historieneintraegen.
 - Bei der Erstanlage eines Buchungsantrags ist `BookingStatusHistory.oldStatus`
   bewusst `null`; erst danach werden echte Statusuebergaenge historisiert.
-- Die Verwaltungsfreigabe folgt in Version 1 dem Weg `REQUESTED ->
-  IN_REVIEW -> APPROVED/REJECTED`; direkte Genehmigung oder Ablehnung aus
-  `REQUESTED` ist nicht vorgesehen.
+- Die Verwaltungsfreigabe erlaubt in Version 1 den einfachen Weg `REQUESTED ->
+  APPROVED/REJECTED`. Der Zwischenstatus `IN_REVIEW` bleibt optional, wenn ein
+  Antrag intern zur Pruefung vorgemerkt werden soll.
 - Vor `APPROVED` wird der konfliktrelevante Raumkontext per transaktionalem
   PostgreSQL-Advisory-Lock serialisiert. Der Lock umfasst den angefragten Raum
   sowie alle ueber `RoomComposition` verbundenen Parent- und Teilraeume.
@@ -77,8 +77,10 @@ werden.
   Antragstellung, sofern kein Verwaltungsrecht vorliegt.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
 - `VIEW_BOOKINGS` ist ebenfalls Voraussetzung fuer die Admin-Wartelistenuebersicht.
-- `APPROVE_BOOKING` erlaubt die Genehmigung eines Antrags in Pruefung.
-- `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
+- `APPROVE_BOOKING` erlaubt das optionale Uebernehmen in Pruefung und die
+  Genehmigung beantragter oder in Pruefung befindlicher Antraege.
+- `REJECT_BOOKING` erlaubt die Ablehnung beantragter oder in Pruefung
+  befindlicher Antraege.
 - Wartelistenplaetze werden nach `placedAt` gereiht. Wenn ein passender Slot
   frei wird, erhaelt genau ein Eintrag gleichzeitig den Status `OFFERED` mit
   einer Frist von 48 Stunden (`offerExpiresAt`).

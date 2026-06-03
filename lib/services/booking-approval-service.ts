@@ -41,6 +41,10 @@ type AdminWorkflowPermissions = {
   canReject?: boolean;
 };
 
+type AdminBookingFilters = {
+  organizationId?: string;
+};
+
 async function resolvePermission(override: boolean | undefined, permissionPromiseFactory: () => Promise<boolean>) {
   if (typeof override === "boolean") {
     return override;
@@ -65,6 +69,7 @@ export async function getBookingsForAdmin(
   actorUserId: string,
   filter: AdminBookingFilterKey | undefined,
   permissions: AdminWorkflowPermissions = {},
+  filters: AdminBookingFilters = {},
 ) {
   const canView = await resolvePermission(permissions.canView, () => hasPermission(actorUserId, "VIEW_BOOKINGS"));
   assertBookingViewPermission(canView);
@@ -73,6 +78,7 @@ export async function getBookingsForAdmin(
   const bookings = await prisma.booking.findMany({
     where: {
       status: { in: statuses },
+      organizationId: filters.organizationId || undefined,
     },
     include: {
       organization: true,
@@ -126,6 +132,24 @@ export async function getBookingsForAdmin(
         : [],
     })),
   );
+}
+
+export async function getAdminBookingOrganizations(actorUserId: string, permissions: AdminWorkflowPermissions = {}) {
+  const canView = await resolvePermission(permissions.canView, () => hasPermission(actorUserId, "VIEW_BOOKINGS"));
+  assertBookingViewPermission(canView);
+
+  return prisma.organization.findMany({
+    where: {
+      bookings: {
+        some: {},
+      },
+    },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
 }
 
 export async function markBookingInReviewForAdmin(

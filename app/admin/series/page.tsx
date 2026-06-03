@@ -9,28 +9,66 @@ const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   timeStyle: "short",
 });
 
+function formatRecurrenceRule(rule: string) {
+  const parts = new URLSearchParams(rule.replaceAll(";", "&"));
+  const frequency = parts.get("FREQ");
+  const interval = Number(parts.get("INTERVAL") ?? "1");
+  const intervalLabel = Number.isFinite(interval) && interval > 1 ? `alle ${interval} Wochen` : "wöchentlich";
+  const excluded = parts.get("EXDATE")?.split(",").filter(Boolean).length ?? 0;
+  const excludedLabel = excluded > 0 ? `, ${excluded} Ausnahmedaten` : "";
+
+  if (frequency === "WEEKLY") {
+    return `${intervalLabel}${excludedLabel}`;
+  }
+
+  return "Serienregel";
+}
+
+function getSeriesStatus(bookings: Array<{ status: string }>) {
+  if (bookings.length === 0) {
+    return { label: "Keine Termine", tone: "secondary" as const };
+  }
+
+  if (bookings.every((booking) => booking.status === "APPROVED")) {
+    return { label: "Komplett genehmigt", tone: "success" as const };
+  }
+
+  if (bookings.every((booking) => booking.status === "CANCELLED" || booking.status === "REJECTED")) {
+    return { label: "Komplett storniert/abgelehnt", tone: "destructive" as const };
+  }
+
+  return { label: "Teilweise offen", tone: "warning" as const };
+}
+
 export default async function AdminSeriesPage() {
   await requirePermission("VIEW_BOOKINGS");
   const series = await getBookingSeriesForAdmin();
-  const rows: SeriesTableRow[] = series.map((item) => ({
-    id: item.id,
-    title: `${item.title} (${item.recurrenceRule})`,
-    organization: item.organization.name,
-    room: `${item.room.building.name} - ${item.room.name} / ${item.usageType.name}`,
-    period: `${dateFormatter.format(item.startsOn)} bis ${dateFormatter.format(item.endsOn)}`,
-    occurrences:
-      item.bookings.length === 0
-        ? "Keine Termine"
-        : item.bookings.map((booking) => `${dateFormatter.format(booking.startsAt)} · ${getBookingStatusLabel(booking.status)}`).join(", "),
-  }));
+  const rows: SeriesTableRow[] = series.map((item) => {
+    const status = getSeriesStatus(item.bookings);
+
+    return {
+      id: item.id,
+      title: item.title,
+      recurrence: formatRecurrenceRule(item.recurrenceRule),
+      statusLabel: status.label,
+      statusTone: status.tone,
+      organization: item.organization.name,
+      room: `${item.room.building.name} - ${item.room.name} / ${item.usageType.name}`,
+      period: `${dateFormatter.format(item.startsOn)} bis ${dateFormatter.format(item.endsOn)}`,
+      occurrences:
+        item.bookings.length === 0
+          ? "Keine Termine"
+          : item.bookings.map((booking) => `${dateFormatter.format(booking.startsAt)} · ${getBookingStatusLabel(booking.status)}`).join(", "),
+    };
+  });
 
   return (
     <>
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Serienbuchungen</p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight">Serienanträge</h2>
       <p className="mt-3 text-muted-foreground">
-        Lesende Übersicht der wöchentlichen Serien. Ganze Serien werden in Version 1 nicht gesammelt geändert; einzelne
-        Termine bleiben normale Buchungsanträge im Genehmigungsworkflow.
+        Lesende Übersicht der Serien. Ganze Serien werden in der nächsten Ausbaustufe fachlich zusammenhängend geprüft;
+        einzelne erzeugte Termine bleiben bis dahin normale Buchungsanträge im Genehmigungsworkflow.
       </p>
 
       <Card className="mt-8">

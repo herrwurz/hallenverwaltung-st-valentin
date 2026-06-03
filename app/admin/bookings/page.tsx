@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBookingStatusBadgeClass, getBookingStatusLabel, type AdminBookingFilterKey } from "@/lib/booking-status";
 import { hasPermission, requirePermission } from "@/lib/permissions";
-import { getBookingsForAdmin, resolveAdminBookingFilter } from "@/lib/services/booking-approval-service";
+import {
+  getAdminBookingOrganizations,
+  getBookingsForAdmin,
+  resolveAdminBookingFilter,
+} from "@/lib/services/booking-approval-service";
 import { approveBookingAction, markBookingInReviewAction, rejectBookingAction } from "@/app/admin/bookings/actions";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -31,6 +35,7 @@ type PageProps = {
     reviewed?: string;
     approved?: string;
     rejected?: string;
+    organizationId?: string;
     error?: string;
   }>;
 };
@@ -49,10 +54,12 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
     requestedFilter === "CANCELLED"
       ? requestedFilter
       : "OPEN";
-  const [canApprove, canReject, bookings] = await Promise.all([
+  const selectedOrganizationId = typeof params.organizationId === "string" && params.organizationId ? params.organizationId : "";
+  const [canApprove, canReject, organizationOptions, bookings] = await Promise.all([
     hasPermission(user.id, "APPROVE_BOOKING"),
     hasPermission(user.id, "REJECT_BOOKING"),
-    getBookingsForAdmin(user.id, selectedFilter),
+    getAdminBookingOrganizations(user.id),
+    getBookingsForAdmin(user.id, selectedFilter, {}, { organizationId: selectedOrganizationId || undefined }),
   ]);
   const activeStatuses = new Set(resolveAdminBookingFilter(selectedFilter));
   const filterOptions: AdminBookingFilterKey[] = ["OPEN", "REQUESTED", "IN_REVIEW", "APPROVED", "REJECTED", "CANCELLED", "ALL"];
@@ -93,7 +100,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
           <CardDescription>Standard ist die Arbeitsliste aus beantragten und in Prüfung befindlichen Anträgen.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="flex flex-wrap items-end gap-3" aria-label="Statusfilter">
+          <form className="flex flex-wrap items-end gap-3" aria-label="Buchungsfilter">
             <label className="text-sm font-medium text-foreground">
               Status filtern
               <select
@@ -104,6 +111,21 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                 {filterOptions.map((filterKey) => (
                   <option key={filterKey} value={filterKey}>
                     {statusLabels[filterKey]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium text-foreground">
+              Organisation filtern
+              <select
+                name="organizationId"
+                defaultValue={selectedOrganizationId}
+                className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
+                <option value="">Alle Organisationen</option>
+                {organizationOptions.map((organization) => (
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
                   </option>
                 ))}
               </select>
@@ -202,41 +224,45 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                 <section className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
                   <h4 className="text-sm font-medium">Entscheidung</h4>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Workflow: Beantragt {"->"} In Prüfung {"->"} Genehmigt oder Abgelehnt.
+                    Beantragte Buchungen können direkt genehmigt oder abgelehnt werden. &quot;In Prüfung&quot; bleibt optional,
+                    wenn ein Antrag intern vorgemerkt werden soll.
                   </p>
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
                     {canApprove && booking.status === "REQUESTED" ? (
                       <form action={markBookingInReviewAction} className="rounded-xl border border-border bg-card p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
                         <p className="text-sm text-muted-foreground">Antrag zur fachlichen Prüfung übernehmen.</p>
-                        <Button className="mt-4">In Prüfung setzen</Button>
+                        <Button type="submit" className="mt-4">In Prüfung setzen</Button>
                       </form>
                     ) : null}
 
-                    {canApprove && booking.status === "IN_REVIEW" ? (
+                    {canApprove && (booking.status === "REQUESTED" || booking.status === "IN_REVIEW") ? (
                       <form action={approveBookingAction} className="rounded-xl border border-emerald-500/20 bg-card p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
                         <label className="text-sm font-medium">
                           Kommentar (optional)
                           <textarea name="decisionNote" rows={3} className={textareaClass} />
                         </label>
-                        <Button className="mt-4" variant="success">
+                        <Button type="submit" className="mt-4" variant="success">
                           Genehmigen
                         </Button>
                       </form>
                     ) : null}
 
-                    {canReject && booking.status === "IN_REVIEW" ? (
+                    {canReject && (booking.status === "REQUESTED" || booking.status === "IN_REVIEW") ? (
                       <form action={rejectBookingAction} className="rounded-xl border border-rose-500/20 bg-card p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
                         <label className="text-sm font-medium">
                           Begründung (erforderlich)
                           <textarea name="decisionNote" rows={3} required className={textareaClass} />
                         </label>
-                        <Button className="mt-4" variant="destructive">
+                        <Button type="submit" className="mt-4" variant="destructive">
                           Ablehnen
                         </Button>
                       </form>

@@ -1,0 +1,83 @@
+# Login: ok
+# Verwaltung
+## Dashboard: 
+	p.text-sm.text-muted-foreground soll groß und zentriert im Button sein, p.mt-2.text-3xl.font-semibold nicht anzeigen
+## Buchungsanträge: der blaue runde "In Prüfung" span.rounded-full.px ist zeilenversetzt
+	neben dem Filtern nach Status soll auch nach Organisation gefiltert werden können
+	Serientermine dürfen nicht jeweils einzeln in Prüfung gesetzt und genehmigt/abgelehnt werden müssen sondern einmal gesamt
+   	Fehler: wenn eine Buchung in Prüfung gesetzt wird, kommt es zu einem Invalid Input Fehler
+## Änderungsanträge:
+## Serien: in der Spalte "Serie" steht (FREQ=WEEKLY;INTERVAL=1) das ist unschön (deutsche Bezeichnung)
+      	wenn eine Serie komplett stattfindet, soll die Spalte "Serie" grün sein
+	wenn eine Serie komplett storniert ist, soll die Spalte "Serie" rot sein
+## Kalender: 
+	mit der Kalender Komponente bin ich nicht zufrieden, es soll wie der Google Kalender aussehen
+## Benachrichtigungen: 
+	Englische Bezeichnung muss nicht angezeigt werden
+## Ferien: 
+	standardmäßig müssen die Österreichischen Ferien (auch je Bundesland) vor konfiguriert sein	
+## Abrechnung: 
+	geklickt, sonst noch keine Tests durchgeführt
+## System Jobs: 
+	geklickt, sonst noch keine Tests durchgeführt  
+## Dokumente: 
+	geklickt, sonst noch keine Tests durchgeführt 
+## Schäden: 
+	geklickt, sonst noch keine Tests durchgeführt 
+## No-Shows: 
+	geklickt, sonst noch keine Tests durchgeführt 
+## Hallenübergaben: 
+	geklickt, sonst noch keine Tests durchgeführt 
+## Zutritte:  
+	geklickt, sonst noch keine Tests durchgeführt 
+## Einstellungen: 
+	"zurück zum Kalender" ist überflüssig
+	der aktuelle Eintrag "Öffentlicher Kalender" soll ein eigener Untermenüpunkt sein
+	unter Einstellungen sollen auch die Menüeinträge "System-Jobs", "No-Shows", "Benachrichtigungen" als Untermenüeinträge sein
+## Gebäude:
+	Test: Gebäude angelegt, bearbeitet
+	Code muss eindeutig sein und darf nicht mehr geändert werden beim bearbeiten (read-only)
+	Gebäude müssen gelöscht werden können, wenn sie keine Abhängigkeiten (Räume, Buchungen) haben
+	Sortierung des Status nach Aktiv, dann Inaktiv	
+	es soll die Möglichkeit geben, Gebäude in einem gewissen Zeitraum (selbst definierbar) oder in Ferien (Auswahl der Ferien aus einer Liste) sperren zu können 	
+## Räume
+	Test: Raum angelegt, bearbeitet
+	Räume müssen gelöscht werden können, wenn sie keine Abhängigkeiten (Gebäude, Buchungen) haben
+	Sortierung des Status nach Aktiv, dann Eingeschränkt, dann Außer Betrieb
+	es soll die Möglichkeit geben, Räume in einem gewissen Zeitraum (selbst definierbar) oder in Ferien (Auswahl der Ferien aus einer Liste) sperren zu können 		
+## Organisationen
+	Test: Organisation angelegt
+	folgende Organisationstypen entfernen: Katastrophenschutz, E2E Verein
+## Benutzer
+	ist eine Routine für "Passwort vergessen" implementiert?
+	Test: Benutzer angelegt, bearbeitet
+	zusätzliche Felder der Benutzerverwaltung: Nachname, Vorname, Straße, PLZ, Ort 
+	Funktion in zugeordneter Organisation entfernen
+	Fehler: die Hallenwarte sind nirgends sichtbar in den Benutzern, nur in der Auswahl der Gebäude
+	Fehler: wird einem Benutzer, der bereits eine Rolle hat, die Rolle des Hallenverwalters zugeteilt, wird der Benutzer nicht als primärer Hallenwart bei den Gebäuden angezeigt
+## Rollen/Rechte
+	Rollen sind nicht zuordbar
+	Rollen ist nicht verfügbar
+
+# Organisationsportal
+## Buchungsanträge:
+	Nutzungstyp E2E Training entfernen, Training hinzufügen
+	bei Anfrage absenden muss überprüft werden, ob der Termin noch frei ist und ein Hinweisfenster gegeben werden.
+	Serienbuchungen müssen eine andere Logik haben wegen mehrmaligem Training in der Woche (zum Beispiel Fußball Montag und Mittwoch 18:30-20:00)
+	- Serienbuchung: baue diese Logik auf den Bildern nach, dass alle verschiedenen Kombinationen abgebildet werden könne, siehe Serie_Tag.pnd, Serie_Woche.pnd, Serie_Monat.png, Serie_Jahr.png
+	Einzelne Buchung: in Ordnung vorerst mal 
+## Kalender:  
+	mit der Kalender Komponente bin ich nicht zufrieden, es soll wie der Google Kalender aussehen
+## Dokumente: 
+	geklickt, sonst noch keine Tests durchgeführt 
+## Schadensmeldungen: 
+	geklickt, sonst noch keine Tests durchgeführt 
+## Warteliste: 
+	geklickt, sonst noch keine Tests durchgeführt
+# öffentlicher Bereich
+	im öffentlichen Bereich soll nur ein Kalender angezeigt werden und ein zum Login 
+	
+
+	
+	
+ 

@@ -254,8 +254,10 @@ erDiagram
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
 - `VIEW_BOOKINGS` ist auch Voraussetzung fuer die Admin-Wartelistenuebersicht.
-- `APPROVE_BOOKING` erlaubt das Uebernehmen in Pruefung und die Genehmigung.
-- `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
+- `APPROVE_BOOKING` erlaubt das optionale Uebernehmen in Pruefung und die
+  Genehmigung beantragter oder in Pruefung befindlicher Antraege.
+- `REJECT_BOOKING` erlaubt die Ablehnung beantragter oder in Pruefung
+  befindlicher Antraege.
 - Offensichtliche Dubletten derselben Organisation fuer denselben Raum und
   denselben Slot werden in Phase 7.5 zusaetzlich per partiellem Unique-Index
   fuer `ACTIVE`/`OFFERED` abgefangen. Uebergreifende Parent-/Teilraum-Dubletten

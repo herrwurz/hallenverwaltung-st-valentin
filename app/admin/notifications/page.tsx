@@ -106,7 +106,6 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
               <label key={eventCode} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 p-4">
                 <span>
                   <span className="block font-medium">{notificationEventLabels[eventCode]}</span>
-                  <span className="mt-1 block text-sm text-muted-foreground">{eventCode}</span>
                 </span>
                 <input type="checkbox" name={eventCode} defaultChecked={eventSettings[eventCode]} className="h-5 w-5" />
               </label>
