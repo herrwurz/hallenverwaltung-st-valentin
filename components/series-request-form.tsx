@@ -181,7 +181,8 @@ function buildPreview({
     for (let cursor = new Date(firstStartsAt.getFullYear(), firstStartsAt.getMonth(), 1); cursor <= repeatUntil && dates.length < 50; cursor = addMonths(cursor, 1)) {
       if (monthDistance(firstStartsAt, cursor) % interval !== 0) continue;
       if (monthlyMode === "NTH_WEEKDAY") {
-        push(nthWeekday(cursor.getFullYear(), cursor.getMonth(), weekday, ordinal));
+        const candidate = nthWeekday(cursor.getFullYear(), cursor.getMonth(), weekday, ordinal);
+        push(candidate ? withTime(candidate, firstStartsAt) : null);
       } else {
         push(new Date(cursor.getFullYear(), cursor.getMonth(), Math.min(dayOfMonth, daysInMonth(cursor.getFullYear(), cursor.getMonth())), firstStartsAt.getHours(), firstStartsAt.getMinutes()));
       }
@@ -221,6 +222,19 @@ export function SeriesRequestForm({
   const [ordinal, setOrdinal] = useState("FIRST");
   const [weekday, setWeekday] = useState(3);
   const [month, setMonth] = useState(1);
+
+  const applyFirstStartDefaults = (value: string) => {
+    setFirstStartsAt(value);
+    const parsed = parseDateTime(value);
+    if (!parsed) {
+      return;
+    }
+
+    setDayOfMonth(parsed.getDate());
+    setWeekday(parsed.getDay());
+    setMonth(parsed.getMonth() + 1);
+    setSelectedWeekdays((current) => (current.length === 0 ? [parsed.getDay()] : current));
+  };
 
   const preview = useMemo(
     () =>
@@ -393,7 +407,7 @@ export function SeriesRequestForm({
               type="datetime-local"
               required
               value={firstStartsAt}
-              onChange={(event) => setFirstStartsAt(event.target.value)}
+              onChange={(event) => applyFirstStartDefaults(event.target.value)}
               className={inputClassName}
             />
           </label>

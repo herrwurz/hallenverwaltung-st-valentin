@@ -669,6 +669,21 @@ Weiterhin offen:
 
 ---
 
+## Aktuelle Pilot-Hotfixes / Phase 26.6
+
+Review und Haertung der Serienbuchungen nach dem groesseren Serienumbau:
+
+* Vorschau fuer monatliche n-ter-Wochentag-Muster verwendet nun dieselbe Uhrzeit
+  wie der erste Serientermin.
+* Monats-/Jahresmuster uebernehmen beim Setzen des ersten Beginns sinnvolle
+  Defaults fuer Tag, Wochentag und Monat.
+* Woechentliche Muster markieren initial den Wochentag des ersten Beginns.
+* Ungueltige Wochentagswerte werden serverseitig abgelehnt statt still
+  ignoriert.
+* Grenzfaelle fuer Monatsende und maximal 80 Serientermine sind getestet.
+
+---
+
 ## Phase 21
 
 Fachlicher Pilot-Review mit echten Testlaeufen

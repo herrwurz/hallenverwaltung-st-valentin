@@ -9,6 +9,7 @@ import {
   generateWeeklyOccurrences,
   isExcludedOccurrence,
   parseExcludedDates,
+  parseWeekdays,
 } from "../lib/services/booking-series-service";
 import { assertHolidayPeriodRange, getHolidayStatusLabel } from "../lib/services/holiday-service";
 
@@ -115,6 +116,54 @@ test("generates daily weekly monthly and yearly series patterns", () => {
   assert.deepEqual(
     yearly.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
     ["2027-06-03", "2028-06-03"],
+  );
+});
+
+test("hardens series edge cases for month ends weekdays and occurrence limits", () => {
+  assert.deepEqual(parseWeekdays(["1", "3", "3"]), [1, 3]);
+  assert.throws(() => parseWeekdays(["9"]), BookingValidationError);
+
+  const monthEnd = generateSeriesOccurrences({
+    firstStartsAt: new Date("2026-01-31T18:00:00Z"),
+    firstEndsAt: new Date("2026-01-31T20:00:00Z"),
+    repeatUntil: new Date("2026-03-31T23:59:59Z"),
+    recurrenceType: "MONTHLY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    dayOfMonth: 31,
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    monthEnd.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
+    ["2026-01-31", "2026-02-28", "2026-03-31"],
+  );
+
+  const exactlyEighty = generateSeriesOccurrences({
+    firstStartsAt: new Date("2026-01-01T18:00:00Z"),
+    firstEndsAt: new Date("2026-01-01T20:00:00Z"),
+    repeatUntil: new Date("2026-03-21T23:59:59Z"),
+    recurrenceType: "DAILY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+  assert.equal(exactlyEighty.length, 80);
+
+  assert.throws(
+    () =>
+      generateSeriesOccurrences({
+        firstStartsAt: new Date("2026-01-01T18:00:00Z"),
+        firstEndsAt: new Date("2026-01-01T20:00:00Z"),
+        repeatUntil: new Date("2026-03-22T23:59:59Z"),
+        recurrenceType: "DAILY",
+        interval: 1,
+        weekdays: [],
+        monthlyMode: "DAY_OF_MONTH",
+        excludedDates: [],
+      }),
+    /Maximal 80 Termine/,
   );
 });
 

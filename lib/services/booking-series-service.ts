@@ -149,10 +149,18 @@ export function parseExcludedDates(value: unknown): Date[] {
 
 export function parseWeekdays(value: unknown): Weekday[] {
   const values = Array.isArray(value) ? value : String(value ?? "").split(/[,;]+/);
+  const normalized = values.map((entry) => String(entry).trim()).filter(Boolean);
+
+  for (const entry of normalized) {
+    if (!weekdays.includes(Number(entry) as Weekday)) {
+      throw new BookingValidationError(`Der Wochentag "${entry}" ist ungültig.`);
+    }
+  }
+
   return Array.from(
     new Set(
-      values
-        .map((entry) => Number(String(entry).trim()))
+      normalized
+        .map((entry) => Number(entry))
         .filter((entry): entry is Weekday => weekdays.includes(entry as Weekday)),
     ),
   ).sort((a, b) => a - b);
