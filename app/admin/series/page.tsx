@@ -13,11 +13,25 @@ function formatRecurrenceRule(rule: string) {
   const parts = new URLSearchParams(rule.replaceAll(";", "&"));
   const frequency = parts.get("FREQ");
   const interval = Number(parts.get("INTERVAL") ?? "1");
-  const intervalLabel = Number.isFinite(interval) && interval > 1 ? `alle ${interval} Wochen` : "wöchentlich";
   const excluded = parts.get("EXDATE")?.split(",").filter(Boolean).length ?? 0;
   const excludedLabel = excluded > 0 ? `, ${excluded} Ausnahmedaten` : "";
 
+  if (frequency === "DAILY") {
+    return `${Number.isFinite(interval) && interval > 1 ? `alle ${interval} Tage` : "täglich"}${excludedLabel}`;
+  }
+
   if (frequency === "WEEKLY") {
+    const intervalLabel = Number.isFinite(interval) && interval > 1 ? `alle ${interval} Wochen` : "wöchentlich";
+    return `${intervalLabel}${excludedLabel}`;
+  }
+
+  if (frequency === "MONTHLY") {
+    const intervalLabel = Number.isFinite(interval) && interval > 1 ? `alle ${interval} Monate` : "monatlich";
+    return `${intervalLabel}${excludedLabel}`;
+  }
+
+  if (frequency === "YEARLY") {
+    const intervalLabel = Number.isFinite(interval) && interval > 1 ? `alle ${interval} Jahre` : "jährlich";
     return `${intervalLabel}${excludedLabel}`;
   }
 

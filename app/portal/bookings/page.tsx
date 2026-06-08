@@ -5,6 +5,7 @@ import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
 import { PortalBookingsTable, type PortalBookingTableRow } from "@/components/portal-bookings-table";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
+import { SeriesRequestForm } from "@/components/series-request-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBookingChangeStatusBadgeClass, getBookingChangeStatusLabel, getBookingChangeTypeLabel } from "@/lib/booking-change-status";
@@ -145,50 +146,13 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
             </p>
           ) : (
-            <form action={createBookingSeriesRequestAction} className="grid gap-4 lg:grid-cols-2">
-              <PortalOrganizationField organizations={options.organizations} inputClassName={inputClass} />
-              <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
-              <label className="text-sm font-medium">
-                Titel
-                <input name="title" required maxLength={160} className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Nutzungstyp
-                <select name="usageTypeId" required defaultValue="" className={inputClass}>
-                  <option value="" disabled>
-                    Bitte wählen
-                  </option>
-                  {options.usageTypes.map((usageType) => (
-                    <option key={usageType.id} value={usageType.id}>
-                      {usageType.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-sm font-medium">
-                Erster Beginn
-                <input name="firstStartsAt" type="datetime-local" required className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Erstes Ende
-                <input name="firstEndsAt" type="datetime-local" required className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Wiederholen bis
-                <input name="repeatUntil" type="date" required className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Beschreibung (optional)
-                <input name="description" maxLength={1000} className={inputClass} />
-              </label>
-              <label className="text-sm font-medium lg:col-span-2">
-                Ausnahmedaten (optional, ein Datum pro Zeile)
-                <textarea name="excludedDates" rows={3} placeholder="2026-10-26" className={inputClass} />
-              </label>
-              <div className="lg:col-span-2">
-                <FormActions submitLabel="Serienantrag absenden" cancelHref="/portal" />
-              </div>
-            </form>
+            <SeriesRequestForm
+              action={createBookingSeriesRequestAction}
+              organizations={options.organizations}
+              buildings={options.buildings}
+              usageTypes={options.usageTypes}
+              inputClassName={inputClass}
+            />
           )}
         </CardContent>
       </Card>

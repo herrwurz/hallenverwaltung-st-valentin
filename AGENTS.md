@@ -273,8 +273,10 @@ Status:
 
 ## Serienbuchungen
 
-- Serienbuchungen erzeugen woechentliche Einzeltermine als normale
+- Serienbuchungen erzeugen wiederkehrende Einzeltermine als normale
   Buchungsantraege im Status `REQUESTED`.
+- Unterstuetzte Muster in Version 1: taeglich, woechentlich, monatlich und
+  jaehrlich. Woechentliche Serien duerfen mehrere Wochentage enthalten.
 - Jede erzeugte Einzelbuchung durchlaeuft den normalen Genehmigungsworkflow.
 - Einzeltermine verschiebbar
 - Ganze Serien nicht nachträglich änderbar

@@ -648,6 +648,27 @@ Bewusst offen bleiben größere Folgeblöcke:
 
 ---
 
+## Aktuelle Pilot-Hotfixes / Phase 26.5
+
+Serienbuchungen wurden nach den Pilot-Referenzbildern erweitert:
+
+* Portal-Serienantrag nutzt einen eigenen Serienmuster-Dialog.
+* Unterstützt werden tägliche, wöchentliche, monatliche und jährliche Muster.
+* Wöchentliche Serien können mehrere Wochentage enthalten, z. B. Montag und
+  Mittwoch für Fußballtraining.
+* Monatliche und jährliche Serien unterstützen Tag-des-Monats sowie
+  n-ter-Wochentag-Muster.
+* Die Maske zeigt eine Vorschau mit maximal 50 Einträgen.
+* Serientermine werden weiterhin als normale `REQUESTED`-Einzelbuchungen
+  erzeugt und durchlaufen den vorhandenen Genehmigungsworkflow.
+
+Weiterhin offen:
+
+* Serien-Gesamtprüfung/Gesamtgenehmigung in der Verwaltung.
+* Nachträgliche Änderung ganzer Serien bleibt bewusst nicht umgesetzt.
+
+---
+
 ## Phase 21
 
 Fachlicher Pilot-Review mit echten Testlaeufen

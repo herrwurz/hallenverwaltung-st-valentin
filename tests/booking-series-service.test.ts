@@ -5,6 +5,7 @@ import { BookingValidationError } from "../lib/services/booking-rules";
 import {
   bookingSeriesRequestSchema,
   evaluateHolidayOverlap,
+  generateSeriesOccurrences,
   generateWeeklyOccurrences,
   isExcludedOccurrence,
   parseExcludedDates,
@@ -51,6 +52,69 @@ test("rejects invalid weekly series ranges", () => {
         repeatUntil: new Date("2026-09-01T00:00:00Z"),
       }),
     BookingValidationError,
+  );
+});
+
+test("generates daily weekly monthly and yearly series patterns", () => {
+  const daily = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2026-09-10T23:59:59Z"),
+    recurrenceType: "DAILY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+  assert.equal(daily.length, 4);
+
+  const weekly = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2026-09-16T23:59:59Z"),
+    recurrenceType: "WEEKLY",
+    interval: 1,
+    weekdays: [1, 3],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    weekly.map((occurrence) => occurrence.startsAt.getDay()),
+    [1, 3, 1, 3],
+  );
+
+  const monthly = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2026-12-31T23:59:59Z"),
+    recurrenceType: "MONTHLY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "NTH_WEEKDAY",
+    ordinal: "FIRST",
+    weekday: 3,
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    monthly.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
+    ["2026-10-07", "2026-11-04", "2026-12-02"],
+  );
+
+  const yearly = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2028-12-31T23:59:59Z"),
+    recurrenceType: "YEARLY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    month: 6,
+    dayOfMonth: 3,
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    yearly.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
+    ["2027-06-03", "2028-06-03"],
   );
 });
 

@@ -17,7 +17,7 @@ Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
 Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
 vorbereitete Tauschantraege. Phase 16 nutzt `Document` und `DamageReport`
 fuer Dokumentenmetadaten und Schadensmeldungen. Phase 17 nutzt `BookingSeries`
-und `HolidayPeriod` fuer woechentliche Serienantraege und Ferienregeln. Phase
+und `HolidayPeriod` fuer Serienantraege und Ferienregeln. Phase
 18 ergaenzt `NoShowReport` fuer Hallenwart- und Verwaltungsprotokolle. Phase
 19.1 haertet die Hallenwart-Zuordnung mit `Caretaker.userId`. Die in Phase 3 vorhandene
 Authentifizierung verwendet `User.passwordHash`.
@@ -111,8 +111,10 @@ werden.
 - Schadensstatuswechsel sind vorwaertsgerichtet (`REPORTED -> IN_REVIEW ->
   RESOLVED`) und werden ueber `AuditEntry` protokolliert. Neue Meldungen
   koennen das Notification-Event `DAMAGE_REPORTED` erzeugen.
-- `BookingSeries` erzeugt in Phase 17 woechentliche `Booking`-Einzeltermine
-  mit `kind = SERIES_OCCURRENCE`. Jeder Termin bleibt ein normaler
+- `BookingSeries` erzeugt wiederkehrende `Booking`-Einzeltermine mit
+  `kind = SERIES_OCCURRENCE`. Unterstuetzt werden taegliche, woechentliche,
+  monatliche und jaehrliche Muster; das konkrete Muster wird in
+  `recurrenceRule` gespeichert. Jeder Termin bleibt ein normaler
   Buchungsantrag mit Statushistorie und Genehmigungsworkflow.
 - `HolidayPeriod.defaultStatus` steuert die Serienanlage: `CLOSED` fuehrt zum
   Ueberspringen des betroffenen Termins, `RESTRICTED` erzeugt einen Hinweis,
