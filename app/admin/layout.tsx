@@ -67,11 +67,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           { href: "/admin/organizations", label: "Organisationen" },
           { href: "/admin/users", label: "Benutzer" },
           { href: "/admin/roles", label: "Rollen/Rechte" },
-          { href: "/admin/settings/calendar", label: "Einstellungen: Öffentlicher Kalender" },
-          ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "Einstellungen: System-Jobs" }] : []),
-          ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "Einstellungen: No-Shows" }] : []),
+          { href: "/admin/settings/calendar", label: "Öffentlicher Kalender", groupLabel: "Einstellungen" },
+          ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "System-Jobs", groupLabel: "Einstellungen" }] : []),
+          ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "No-Shows", groupLabel: "Einstellungen" }] : []),
           ...(canViewBookings || canApproveBookings || canRejectBookings
-            ? [{ href: "/admin/notifications", label: "Einstellungen: Benachrichtigungen" }]
+            ? [{ href: "/admin/notifications", label: "Benachrichtigungen", groupLabel: "Einstellungen" }]
             : []),
         ]
       : []),

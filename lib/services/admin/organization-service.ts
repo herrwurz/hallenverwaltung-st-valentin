@@ -31,7 +31,7 @@ export async function getOrganizationAdministrationData() {
 
 export async function saveOrganization(input: unknown) {
   const data = organizationSchema.parse(input);
-  const blockedReason = data.status === "BLOCKED" ? data.blockedReason || "Gesperrt durch Verwaltung" : null;
+  const blockedReason = data.status !== "ACTIVE" ? data.blockedReason || "Gesperrt oder stillgelegt durch Verwaltung" : null;
   const canRequestBookings = data.status === "ACTIVE";
 
   const updateData = {
@@ -43,9 +43,34 @@ export async function saveOrganization(input: unknown) {
   };
 
   if (data.id) {
-    await prisma.organization.update({
-      where: { id: data.id },
-      data: updateData,
+    await prisma.$transaction(async (transaction) => {
+      await transaction.organization.update({
+        where: { id: data.id },
+        data: updateData,
+      });
+
+      if (data.status !== "ACTIVE") {
+        const now = new Date();
+        const affectedMemberships = await transaction.organizationMember.findMany({
+          where: {
+            organizationId: data.id,
+            OR: [{ activeUntil: null }, { activeUntil: { gt: now } }],
+          },
+          select: { id: true, userId: true },
+        });
+        const userIds = Array.from(new Set(affectedMemberships.map((membership) => membership.userId)));
+
+        if (userIds.length > 0) {
+          await transaction.user.updateMany({
+            where: { id: { in: userIds } },
+            data: { isActive: false },
+          });
+          await transaction.organizationMember.updateMany({
+            where: { id: { in: affectedMemberships.map((membership) => membership.id) } },
+            data: { activeUntil: now },
+          });
+        }
+      }
     });
     return;
   }

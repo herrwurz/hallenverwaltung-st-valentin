@@ -66,10 +66,26 @@ test("phase 26.4 pilot master data fixes protect codes and settings navigation",
   assert.match(buildingPage, /readOnly=\{Boolean\(building\)\}/);
   assert.doesNotMatch(updateBlock, /code: data\.code/);
   assert.match(organizationService, /notIn: \["EMERGENCY_SERVICE", "E2E_ASSOCIATION"\]/);
-  assert.match(adminLayout, /Einstellungen: Öffentlicher Kalender/);
-  assert.match(adminLayout, /Einstellungen: System-Jobs/);
+  assert.match(adminLayout, /groupLabel: "Einstellungen"/);
+  assert.doesNotMatch(adminLayout, /Einstellungen: /);
   assert.match(seed, /\["CLUB_TRAINING", "Training"/);
   assert.doesNotMatch(seed, /\["EMERGENCY_SERVICE", "Katastrophenschutz"\]/);
+});
+
+
+test("phase 26.8 organization blocking deactivates users and preserves reasons", () => {
+  const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
+  const loginAction = readFileSync("app/login/actions.ts", "utf8");
+  const organizationPage = readFileSync("app/admin/organizations/page.tsx", "utf8");
+
+  assert.match(organizationService, /data\.status !== "ACTIVE"/);
+  assert.match(organizationService, /blockedReason/);
+  assert.match(organizationService, /user\.updateMany/);
+  assert.match(organizationService, /isActive: false/);
+  assert.match(organizationService, /organizationMember\.updateMany/);
+  assert.match(loginAction, /compare\(password, user\.passwordHash\)/);
+  assert.match(loginAction, /Der Login ist gesperrt/);
+  assert.match(organizationPage, /Stilllegungsgrund/);
 });
 
 test("phase 26.5 series form exposes daily weekly monthly yearly patterns and preview", () => {

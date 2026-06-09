@@ -25,6 +25,7 @@ export type AdminNavigationItem = {
   href: string;
   label: string;
   icon?: LucideIcon;
+  groupLabel?: string;
 };
 
 const defaultIconByHref: Record<string, LucideIcon> = {
@@ -51,8 +52,8 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/bookings", label: "Buchungen", icon: ClipboardList },
   { href: "/admin/calendar", label: "Kalender", icon: CalendarDays },
   { href: "/admin/billing", label: "Abrechnung", icon: CreditCard },
-  { href: "/admin/notifications", label: "Benachrichtigungen", icon: Bell },
-  { href: "/admin/settings/calendar", label: "Einstellungen", icon: Settings },
+  { href: "/admin/settings/calendar", label: "Öffentlicher Kalender", icon: Settings, groupLabel: "Einstellungen" },
+  { href: "/admin/notifications", label: "Benachrichtigungen", icon: Bell, groupLabel: "Einstellungen" },
   { href: "/admin/waitlist", label: "Warteliste", icon: ListChecks },
   { href: "/admin/buildings", label: "Gebäude", icon: Building2 },
   { href: "/admin/rooms", label: "Räume", icon: Warehouse },
@@ -69,26 +70,38 @@ type AdminNavigationProps = {
 
 export function AdminNavigation({ items = adminNavigation }: AdminNavigationProps) {
   const pathname = usePathname();
+  const groupedItems = items.map((item, index) => ({
+    item,
+    showGroup: Boolean(item.groupLabel && item.groupLabel !== items[index - 1]?.groupLabel),
+  }));
 
   return (
     <nav className="mt-8 space-y-1" aria-label="Admin-Navigation">
-      {items.map((item) => {
+      {groupedItems.map(({ item, showGroup }) => {
         const Icon = item.icon ?? defaultIconByHref[item.href] ?? LayoutDashboard;
         const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
 
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition",
-              "hover:bg-accent hover:text-accent-foreground",
-              active && "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <Icon className="h-4 w-4" aria-hidden="true" />
-            <span>{item.label}</span>
-          </Link>
+          <div key={item.href}>
+            {showGroup ? (
+              <div className="mt-4 flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Settings className="h-3.5 w-3.5" aria-hidden="true" />
+                {item.groupLabel}
+              </div>
+            ) : null}
+            <Link
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition",
+                "hover:bg-accent hover:text-accent-foreground",
+                item.groupLabel && "ml-3 py-2 text-xs",
+                active && "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground",
+              )}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              <span>{item.label}</span>
+            </Link>
+          </div>
         );
       })}
     </nav>
