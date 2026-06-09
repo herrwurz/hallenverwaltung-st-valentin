@@ -1,11 +1,14 @@
 import { saveOrganizationAction } from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminFeedback } from "@/components/admin-feedback";
+import { OrganizationsTable, type OrganizationTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import { getOrganizationAdministrationData } from "@/lib/services/admin/organization-service";
 
-const inputClass = "mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
 type PageProps = {
   searchParams: Promise<{ saved?: string; error?: string }>;
@@ -14,40 +17,68 @@ type PageProps = {
 export default async function OrganizationsPage({ searchParams }: PageProps) {
   await requirePermission("MANAGE_USERS");
   const [params, data] = await Promise.all([searchParams, getOrganizationAdministrationData()]);
+  const tableRows: OrganizationTableRow[] = data.organizations.map((organization) => ({
+    id: organization.id,
+    name: organization.name,
+    organizationTypeName: organization.organizationType.name,
+    memberCount: organization.members.length,
+    status: organization.status,
+    blockedReason: organization.blockedReason ?? "-",
+  }));
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Organisationen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Organisationen-Verwaltung</h2>
-      <p className="mt-3 text-slate-300">
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Organisationen</p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Organisationen-Verwaltung</h2>
+      <p className="mt-3 max-w-3xl text-muted-foreground">
         Organisationstyp, Aktivität und verwaltungsseitige Sperre pflegen.
       </p>
       <AdminBackLink />
       <div className="mt-8">
         <AdminFeedback {...params} />
       </div>
-      <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-        <h3 className="text-lg font-medium">Neue Organisation</h3>
-        <OrganizationForm organizationTypes={data.organizationTypes} />
-      </section>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Neue Organisation</CardTitle>
+          <CardDescription>Organisationen können aktiv, inaktiv oder für Buchungsanträge gesperrt sein.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <OrganizationForm organizationTypes={data.organizationTypes} />
+        </CardContent>
+      </Card>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Organisationsübersicht</CardTitle>
+          <CardDescription>Filterbare Tabelle aller Organisationen und Mitgliederzahlen.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <OrganizationsTable rows={tableRows} />
+        </CardContent>
+      </Card>
+
       <section className="mt-8 space-y-4">
+        <h3 className="text-xl font-semibold tracking-tight">Organisationen bearbeiten</h3>
         {data.organizations.map((organization) => (
-          <details key={organization.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <summary className="cursor-pointer list-none">
+          <Card key={organization.id}>
+            <CardHeader>
               <div className="flex justify-between gap-4">
                 <div>
-                  <h3 className="font-medium">{organization.name}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <CardTitle>{organization.name}</CardTitle>
+                  <CardDescription>
                     {organization.organizationType.name} | {organization.members.length} Mitglieder
-                  </p>
+                  </CardDescription>
                 </div>
-                <span className={organization.status === "ACTIVE" ? "text-emerald-300" : "text-amber-300"}>
-                  {organization.status}
-                </span>
+                <Badge variant={organization.status === "ACTIVE" ? "success" : organization.status === "BLOCKED" ? "destructive" : "secondary"}>
+                  {organization.status === "ACTIVE" ? "Aktiv" : organization.status === "BLOCKED" ? "Gesperrt" : "Inaktiv"}
+                </Badge>
               </div>
-            </summary>
-            <OrganizationForm organizationTypes={data.organizationTypes} organization={organization} />
-          </details>
+            </CardHeader>
+            <CardContent>
+              <OrganizationForm organizationTypes={data.organizationTypes} organization={organization} />
+            </CardContent>
+          </Card>
         ))}
       </section>
     </>
@@ -64,20 +95,15 @@ function OrganizationForm({
   organization?: OrganizationData["organizations"][number];
 }) {
   return (
-    <form action={saveOrganizationAction} className="mt-5 grid gap-4 lg:grid-cols-4">
+    <form action={saveOrganizationAction} className="grid gap-4 lg:grid-cols-4">
       {organization ? <input type="hidden" name="id" value={organization.id} /> : null}
-      <label className="text-sm text-slate-300">
+      <label className="text-sm font-medium">
         Name
         <input name="name" required defaultValue={organization?.name} className={inputClass} />
       </label>
-      <label className="text-sm text-slate-300">
+      <label className="text-sm font-medium">
         Organisationstyp
-        <select
-          name="organizationTypeId"
-          required
-          defaultValue={organization?.organizationTypeId ?? ""}
-          className={inputClass}
-        >
+        <select name="organizationTypeId" required defaultValue={organization?.organizationTypeId ?? ""} className={inputClass}>
           <option value="" disabled>
             Bitte wählen
           </option>
@@ -88,7 +114,7 @@ function OrganizationForm({
           ))}
         </select>
       </label>
-      <label className="text-sm text-slate-300">
+      <label className="text-sm font-medium">
         Status
         <select name="status" defaultValue={organization?.status ?? "ACTIVE"} className={inputClass}>
           <option value="ACTIVE">Aktiv / entsperrt</option>
@@ -96,15 +122,12 @@ function OrganizationForm({
           <option value="INACTIVE">Inaktiv</option>
         </select>
       </label>
-      <label className="text-sm text-slate-300">
+      <label className="text-sm font-medium">
         Sperrgrund
         <input name="blockedReason" defaultValue={organization?.blockedReason ?? ""} className={inputClass} />
       </label>
       <div className="lg:col-span-4">
-        <FormActions
-          submitLabel={organization ? "Änderungen speichern" : "Organisation anlegen"}
-          cancelHref="/admin/organizations"
-        />
+        <FormActions submitLabel={organization ? "Änderungen speichern" : "Organisation anlegen"} cancelHref="/admin/organizations" />
       </div>
     </form>
   );

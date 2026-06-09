@@ -41,6 +41,9 @@ export async function getRoomAdministrationData() {
     }),
   ]);
 
+  const statusRank = { ACTIVE: 0, RESTRICTED: 1, OUT_OF_SERVICE: 2 } as const;
+  rooms.sort((a, b) => statusRank[a.status] - statusRank[b.status] || a.building.name.localeCompare(b.building.name) || a.name.localeCompare(b.name));
+
   return { rooms, buildings };
 }
 

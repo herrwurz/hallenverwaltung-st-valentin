@@ -1,29 +1,96 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: light;
-  --app-bg: #eef2f7;
-  --app-panel: #ffffff;
-  --app-panel-muted: #f8fafc;
-  --app-panel-selected: #eaf2ff;
-  --app-border: #cbd5e1;
-  --app-border-strong: #94a3b8;
-  --app-text: #0f172a;
-  --app-muted: #475569;
-  --app-accent: #2563eb;
-  --app-accent-strong: #1d4ed8;
-  --app-success-bg: #ecfdf5;
-  --app-success-border: #86efac;
-  --app-success-text: #14532d;
-  --app-error-bg: #fef2f2;
-  --app-error-border: #fca5a5;
-  --app-error-text: #7f1d1d;
-  --app-warning-bg: #fffbeb;
-  --app-warning-border: #fcd34d;
-  --app-warning-text: #78350f;
-  --app-info-bg: #eff6ff;
-  --app-info-border: #93c5fd;
-  --app-info-text: #1e3a8a;
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Bento-Grid-Karten und Tabellen */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* GEMEINDE-BLAU: Das Fundament für Buttons & aktive Menüs */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Neutrale Elemente */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    /* GEMEINDE-GELB: Akzentfarbe für offene/schwebende Buchungen */
+    --warning: 47.9 95.8% 53.1%;
+    --warning-foreground: 26 83.3% 14.1%;
+
+    /* Status-Meldungen */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+
+    /* Grenzen und Fokusringe (Slate-Stil) */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+
+    /* Uebergangs-Aliase fuer die bestehende Pre-Phase-25-Oberflaeche. */
+    --app-bg: hsl(var(--secondary));
+    --app-panel: hsl(var(--card));
+    --app-panel-muted: hsl(var(--muted));
+    --app-panel-selected: hsl(var(--primary) / 0.08);
+    --app-border: hsl(var(--border));
+    --app-border-strong: hsl(215 20.2% 65.1%);
+    --app-text: hsl(var(--foreground));
+    --app-muted: hsl(var(--muted-foreground));
+    --app-accent: hsl(var(--primary));
+    --app-accent-strong: hsl(224.3 76.3% 48%);
+    --app-success-bg: hsl(var(--success) / 0.1);
+    --app-success-border: hsl(var(--success) / 0.25);
+    --app-success-text: hsl(142.8 64.2% 24.1%);
+    --app-error-bg: hsl(var(--destructive) / 0.1);
+    --app-error-border: hsl(var(--destructive) / 0.25);
+    --app-error-text: hsl(0 72.2% 26.1%);
+    --app-warning-bg: hsl(var(--warning) / 0.15);
+    --app-warning-border: hsl(var(--warning) / 0.35);
+    --app-warning-text: hsl(var(--warning-foreground));
+    --app-info-bg: hsl(var(--primary) / 0.08);
+    --app-info-border: hsl(var(--primary) / 0.18);
+    --app-info-text: hsl(var(--primary));
+  }
 }
 
 * {
@@ -34,9 +101,11 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--app-bg);
-  color: var(--app-text);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family:
+    "Inter",
+    "Geist Sans",
     "Segoe UI",
     system-ui,
     -apple-system,
@@ -56,45 +125,52 @@ textarea {
 .windows-shell {
   min-height: 100vh;
   background:
-    linear-gradient(180deg, #f8fafc 0%, #e8eef7 100%);
-  color: var(--app-text);
+    radial-gradient(circle at top left, hsl(var(--primary) / 0.08), transparent 32rem),
+    linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%);
+  color: hsl(var(--foreground));
 }
 
+.windows-shell [class*="bg-background"],
+.windows-shell [class*="bg-card"],
 .windows-shell [class*="bg-slate-950"],
 .windows-shell [class*="bg-slate-900"] {
   background-color: var(--app-panel) !important;
 }
 
+.windows-shell [class*="bg-muted/40"],
 .windows-shell [class*="bg-slate-950/60"] {
   background-color: var(--app-panel-muted) !important;
 }
 
+.windows-shell [class*="border-border"],
+.windows-shell [class*="border-input"],
 .windows-shell [class*="border-slate-800"],
 .windows-shell [class*="border-slate-700"] {
   border-color: var(--app-border) !important;
 }
 
 .windows-shell [class*="text-slate-100"],
-.windows-shell [class*="text-slate-200"],
-.windows-shell [class*="text-slate-300"] {
+.windows-shell [class*="text-slate-200"] {
   color: var(--app-text) !important;
 }
 
+.windows-shell [class*="text-muted-foreground"],
+.windows-shell [class*="text-slate-300"],
 .windows-shell [class*="text-slate-400"],
 .windows-shell [class*="text-slate-500"],
 .windows-shell [class*="text-slate-600"] {
   color: var(--app-muted) !important;
 }
 
-.windows-shell [class*="text-sky-400"],
+.windows-shell [class*="text-primary"],
 .windows-shell [class*="text-sky-300"],
-.windows-shell [class*="text-sky-200"],
+.windows-shell [class*="text-sky-400"],
 .windows-shell [class*="text-blue-700"] {
   color: var(--app-accent) !important;
 }
 
 .windows-shell [class*="bg-emerald-950"],
-.windows-shell [class*="bg-emerald-500/20"] {
+.windows-shell [class*="bg-success/20"] {
   background-color: var(--app-success-bg) !important;
 }
 
@@ -109,7 +185,7 @@ textarea {
 
 .windows-shell [class*="bg-red-950"],
 .windows-shell [class*="bg-rose-950"],
-.windows-shell [class*="bg-rose-500/20"] {
+.windows-shell [class*="bg-destructive/20"] {
   background-color: var(--app-error-bg) !important;
 }
 
@@ -143,7 +219,7 @@ textarea {
   background-color: var(--app-info-bg) !important;
 }
 
-.windows-shell [class*="border-sky-700"],
+.windows-shell [class*="border-primary"],
 .windows-shell [class*="border-sky-800"] {
   border-color: var(--app-info-border) !important;
 }
@@ -152,16 +228,11 @@ textarea {
   color: var(--app-info-text) !important;
 }
 
-.windows-shell [class*="rounded-xl"],
-.windows-shell [class*="rounded-lg"] {
-  border-radius: 3px !important;
-}
-
 .windows-shell input,
 .windows-shell select,
 .windows-shell textarea {
   border: 1px solid var(--app-border-strong) !important;
-  border-radius: 2px !important;
+  border-radius: 0.5rem !important;
   background: #ffffff !important;
   color: var(--app-text) !important;
   box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.06);
@@ -176,9 +247,10 @@ textarea {
 }
 
 .windows-shell button,
-.windows-shell a[class*="bg-sky-500"],
-.windows-shell a[class*="bg-blue-600"] {
-  border-radius: 2px !important;
+.windows-shell a[class*="bg-primary"],
+.windows-shell a[class*="bg-blue-600"],
+.windows-shell a[class*="bg-primary"] {
+  border-radius: 0.5rem !important;
 }
 
 .windows-shell button:not(:disabled),
@@ -187,28 +259,32 @@ textarea {
   box-shadow: 0 1px 1px rgb(15 23 42 / 0.08);
 }
 
-.windows-shell button[class*="bg-sky-500"],
-.windows-shell a[class*="bg-sky-500"],
+.windows-shell button[class*="bg-primary"],
+.windows-shell a[class*="bg-primary"],
 .windows-shell button[class*="bg-blue-600"],
-.windows-shell a[class*="bg-blue-600"] {
+.windows-shell a[class*="bg-blue-600"],
+.windows-shell button[class*="bg-primary"],
+.windows-shell a[class*="bg-primary"] {
   border: 1px solid var(--app-accent-strong) !important;
   background-color: var(--app-accent) !important;
   color: #ffffff !important;
 }
 
 .windows-shell button[class*="bg-slate-700"],
+.windows-shell a[class*="border-input"],
 .windows-shell a[class*="border-slate-700"],
 .windows-shell a[class*="border-slate-600"],
-.windows-shell button[class*="border-slate-600"] {
+.windows-shell button[class*="border-input"] {
   border-color: var(--app-border-strong) !important;
   background-color: #ffffff !important;
   color: var(--app-text) !important;
 }
 
 .windows-shell button[class*="bg-slate-700"]:hover,
+.windows-shell a[class*="border-input"]:hover,
 .windows-shell a[class*="border-slate-700"]:hover,
 .windows-shell a[class*="border-slate-600"]:hover,
-.windows-shell button[class*="border-slate-600"]:hover {
+.windows-shell button[class*="border-input"]:hover {
   background-color: var(--app-panel-muted) !important;
 }
 
@@ -228,13 +304,13 @@ textarea {
 }
 
 .admin-desktop {
-  background: #dfe7f2;
+  background: transparent;
 }
 
 .admin-desktop aside {
-  background: #f3f6fb;
-  border-right: 1px solid var(--app-border-strong);
-  box-shadow: 1px 0 0 #ffffff inset;
+  background: hsl(var(--card) / 0.9);
+  border-right: 1px solid hsl(var(--border));
+  box-shadow: 1px 0 0 #ffffff inset, 0 24px 80px rgb(15 23 42 / 0.06);
 }
 
 .admin-desktop nav a {
@@ -249,9 +325,9 @@ textarea {
 
 .admin-desktop header {
   min-height: 44px;
-  background: #f8fafc;
-  border: 1px solid var(--app-border);
-  border-radius: 2px;
+  background: hsl(var(--card) / 0.92);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
   padding: 0.75rem 1rem;
 }
 

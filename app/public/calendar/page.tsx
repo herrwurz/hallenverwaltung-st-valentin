@@ -1,5 +1,7 @@
 import { CalendarView } from "@/components/calendar-view";
 import { AreaShell } from "@/components/area-shell";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getPublicCalendarVisibilityMode } from "@/lib/services/calendar-settings-service";
 import { getFreeSlots, getPublicCalendarEvents, type CalendarQuery } from "@/lib/services/calendar-service";
 
@@ -65,22 +67,19 @@ export default async function PublicCalendarPage({ searchParams }: { searchParam
       description="Lesende Tages-, Wochen-, Monats- und Jahresansicht für Hallenbelegung und freie Zeiten. Die sichtbaren Details richten sich nach der Datenschutzkonfiguration."
       authenticated={false}
     >
-      <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <Card className="mt-8">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-4 space-y-0">
           <div>
-            <h2 className="text-lg font-medium">Öffentlicher Export</h2>
-            <p className="mt-2 text-sm text-slate-400">
+            <CardTitle>Öffentlicher Export</CardTitle>
+            <CardDescription className="mt-2">
               iCal enthält nur die Details, die laut Datenschutzkonfiguration öffentlich sichtbar sind.
-            </p>
+            </CardDescription>
           </div>
-          <a
-            href={buildIcalHref(query)}
-            className="rounded-lg border border-sky-700 px-4 py-2 text-sm font-medium text-sky-200 hover:bg-sky-950"
-          >
-            iCal herunterladen
-          </a>
-        </div>
-      </div>
+          <Button asChild variant="outline">
+            <a href={buildIcalHref(query)}>iCal herunterladen</a>
+          </Button>
+        </CardHeader>
+      </Card>
       <CalendarView
         basePath="/public/calendar"
         calendar={calendar}

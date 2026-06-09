@@ -49,16 +49,15 @@ project-status.md dient ausschließlich als Projektkontext und soll Credits spar
 - Prisma
 - Auth.js
 - Tailwind CSS
-- shadcn/ui als kuenftiger primaerer UI-Komponentenstandard ab Phase 25
+- shadcn/ui als primaerer UI-Komponentenstandard ab Phase 25
 - Docker
 
 ---
 
 # UI-Komponentenstandard ab Phase 25
 
-Phase 25 ist wegen Credit-Budget aktuell bewusst zurueckgestellt.
-
-Wenn Phase 25 startet, gilt:
+Phase 25 ist gestartet und bildet den verbindlichen UI-Standard fuer weitere
+Oberflaechenarbeiten.
 
 ## UI/UX Stack & Component Guidelines
 
@@ -89,6 +88,9 @@ Wenn Phase 25 startet, gilt:
   u. a. Gebaeude, Raeume, Benutzer, Organisationen, Rollen, Buchungen,
   Warteliste, Benachrichtigungen, Abrechnung, Dokumente, Schaeden, No-Shows,
   Hallenuebergaben und Zutritt.
+- Ausnahme: Tabellenzellen mit eingebetteten Server-Action-Formularen duerfen
+  serverseitig als shadcn/ui `Table` bleiben, solange eine Client-DataTable die
+  Server-Action-Stabilitaet oder Berechtigungslogik riskieren wuerde.
 - New Bookings / Actions: shadcn/ui `dialog`, ausgeloest ueber shadcn/ui
   `button`.
 - Time/Date Inputs: shadcn/ui `calendar` kombiniert mit shadcn/ui `popover`.
@@ -115,6 +117,17 @@ Wenn Phase 25 startet, gilt:
 - Dark Mode: Keine manuellen Dark-Mode-Variablen erfinden. Falls Dark Mode
   spaeter umgesetzt wird, dann ueber Tailwind `dark:` Klassen und shadcn-
   Theme-Variablen.
+- Corporate Identity & Color Tokens:
+  - Primary Color (Gemeinde-Blau): `bg-primary` / `text-primary` fuer
+    Hauptaktionen wie "+ Neue Buchung", aktive Sidebar-Zustaende,
+    Navigationskoepfe und ausgewaehlte Kalenderdaten verwenden.
+  - Accent/Warning Color (Gemeinde-Gelb): `bg-warning` / `text-warning` nur
+    fuer offene oder schwebende Buchungsantraege, Warnbanner und gezielte
+    Hervorhebungen verwenden. Gelb nicht als vollflaechigen Seitenhintergrund
+    oder fuer normalen Haupttext einsetzen.
+  - Card Styling: Bento-Grid-Module und Verwaltungs-Karten grundsaetzlich mit
+    `bg-card border-border rounded-xl shadow-sm` aufbauen, damit eine moderne,
+    ruhige Verwaltungssoftware-Anmutung entsteht.
 - Drag-and-drop darf zunaechst nur lokal/visuell vorbereitet werden. Persistente
   Terminverschiebungen muessen weiterhin ueber die vorhandene
   Verschiebungs-/Genehmigungslogik laufen.
@@ -230,6 +243,9 @@ Abschluss immer anhand überprüfbarer Kriterien bewerten.
 - Alle Buchungen benötigen Genehmigung.
 - Buchungen werden niemals physisch gelöscht.
 - Historisierung erfolgt über Statusänderungen.
+- Standardweg der Verwaltung ist `REQUESTED -> APPROVED` oder `REQUESTED ->
+  REJECTED`. `IN_REVIEW` bleibt optional, wenn ein Antrag intern vorgemerkt
+  oder von einer Person zur Pruefung uebernommen werden soll.
 - Terminverschiebungen laufen ueber `BookingChangeRequest`. Der bestehende
   genehmigte Termin wird bei Antragstellung nicht veraendert. Bei Genehmigung
   wird die alte Buchung auf `MOVED` gesetzt und ein neuer genehmigter
@@ -257,8 +273,10 @@ Status:
 
 ## Serienbuchungen
 
-- Serienbuchungen erzeugen woechentliche Einzeltermine als normale
+- Serienbuchungen erzeugen wiederkehrende Einzeltermine als normale
   Buchungsantraege im Status `REQUESTED`.
+- Unterstuetzte Muster in Version 1: taeglich, woechentlich, monatlich und
+  jaehrlich. Woechentliche Serien duerfen mehrere Wochentage enthalten.
 - Jede erzeugte Einzelbuchung durchlaeuft den normalen Genehmigungsworkflow.
 - Einzeltermine verschiebbar
 - Ganze Serien nicht nachträglich änderbar

@@ -5,6 +5,29 @@ Demo- oder Pilotumgebung.
 
 ## Lokaler Start
 
+### Komfortstart fuer den Klicktest
+
+Fuer den lokalen Klicktest kann das Test-Deployment jederzeit per Batch
+gestartet werden:
+
+```cmd
+start-test-deployment.bat
+```
+
+Der Batch fuehrt aus:
+
+1. Migrationen anwenden
+2. Stammdaten seeden
+3. Demo-Daten seeden
+4. Produktionsbuild erstellen
+5. Standalone-Testserver starten
+6. `http://localhost:3000` im Browser oeffnen
+
+Das Fenster "Hallenverwaltung Testserver" muss waehrend des Klicktests offen
+bleiben und kann mit `Ctrl+C` beendet werden.
+
+### Manueller Start
+
 1. `.env` aus `.env.example` erstellen.
 2. PostgreSQL starten.
 3. Migrationen, Stammdaten und Demo-Daten einspielen.

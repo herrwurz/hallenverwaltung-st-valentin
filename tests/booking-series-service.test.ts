@@ -5,9 +5,11 @@ import { BookingValidationError } from "../lib/services/booking-rules";
 import {
   bookingSeriesRequestSchema,
   evaluateHolidayOverlap,
+  generateSeriesOccurrences,
   generateWeeklyOccurrences,
   isExcludedOccurrence,
   parseExcludedDates,
+  parseWeekdays,
 } from "../lib/services/booking-series-service";
 import { assertHolidayPeriodRange, getHolidayStatusLabel } from "../lib/services/holiday-service";
 
@@ -51,6 +53,117 @@ test("rejects invalid weekly series ranges", () => {
         repeatUntil: new Date("2026-09-01T00:00:00Z"),
       }),
     BookingValidationError,
+  );
+});
+
+test("generates daily weekly monthly and yearly series patterns", () => {
+  const daily = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2026-09-10T23:59:59Z"),
+    recurrenceType: "DAILY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+  assert.equal(daily.length, 4);
+
+  const weekly = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2026-09-16T23:59:59Z"),
+    recurrenceType: "WEEKLY",
+    interval: 1,
+    weekdays: [1, 3],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    weekly.map((occurrence) => occurrence.startsAt.getDay()),
+    [1, 3, 1, 3],
+  );
+
+  const monthly = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2026-12-31T23:59:59Z"),
+    recurrenceType: "MONTHLY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "NTH_WEEKDAY",
+    ordinal: "FIRST",
+    weekday: 3,
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    monthly.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
+    ["2026-10-07", "2026-11-04", "2026-12-02"],
+  );
+
+  const yearly = generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: new Date("2028-12-31T23:59:59Z"),
+    recurrenceType: "YEARLY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    month: 6,
+    dayOfMonth: 3,
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    yearly.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
+    ["2027-06-03", "2028-06-03"],
+  );
+});
+
+test("hardens series edge cases for month ends weekdays and occurrence limits", () => {
+  assert.deepEqual(parseWeekdays(["1", "3", "3"]), [1, 3]);
+  assert.throws(() => parseWeekdays(["9"]), BookingValidationError);
+
+  const monthEnd = generateSeriesOccurrences({
+    firstStartsAt: new Date("2026-01-31T18:00:00Z"),
+    firstEndsAt: new Date("2026-01-31T20:00:00Z"),
+    repeatUntil: new Date("2026-03-31T23:59:59Z"),
+    recurrenceType: "MONTHLY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    dayOfMonth: 31,
+    excludedDates: [],
+  });
+  assert.deepEqual(
+    monthEnd.map((occurrence) => occurrence.startsAt.toISOString().slice(0, 10)),
+    ["2026-01-31", "2026-02-28", "2026-03-31"],
+  );
+
+  const exactlyEighty = generateSeriesOccurrences({
+    firstStartsAt: new Date("2026-01-01T18:00:00Z"),
+    firstEndsAt: new Date("2026-01-01T20:00:00Z"),
+    repeatUntil: new Date("2026-03-21T23:59:59Z"),
+    recurrenceType: "DAILY",
+    interval: 1,
+    weekdays: [],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+  assert.equal(exactlyEighty.length, 80);
+
+  assert.throws(
+    () =>
+      generateSeriesOccurrences({
+        firstStartsAt: new Date("2026-01-01T18:00:00Z"),
+        firstEndsAt: new Date("2026-01-01T20:00:00Z"),
+        repeatUntil: new Date("2026-03-22T23:59:59Z"),
+        recurrenceType: "DAILY",
+        interval: 1,
+        weekdays: [],
+        monthlyMode: "DAY_OF_MONTH",
+        excludedDates: [],
+      }),
+    /Maximal 80 Termine/,
   );
 });
 
@@ -148,6 +261,32 @@ test("validates exception dates in the series schema", () => {
       }),
     BookingValidationError,
   );
+});
+
+test("accepts action-style null values for optional series fields", () => {
+  const parsed = bookingSeriesRequestSchema.parse({
+    organizationId: "organization-1",
+    roomId: "room-1",
+    usageTypeId: "usage-1",
+    title: "Serientraining",
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: "2026-09-30",
+    recurrenceType: "WEEKLY",
+    interval: "1",
+    weekdays: ["1"],
+    monthlyMode: null,
+    dayOfMonth: null,
+    ordinal: null,
+    weekday: null,
+    month: null,
+  });
+
+  assert.equal(parsed.monthlyMode, "DAY_OF_MONTH");
+  assert.equal(parsed.dayOfMonth, undefined);
+  assert.equal(parsed.ordinal, undefined);
+  assert.equal(parsed.weekday, undefined);
+  assert.equal(parsed.month, undefined);
 });
 
 test("validates holiday period ranges and labels", () => {

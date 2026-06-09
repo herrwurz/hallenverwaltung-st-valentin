@@ -19,6 +19,9 @@ export async function getOrganizationAdministrationData() {
       orderBy: { name: "asc" },
     }),
     prisma.organizationType.findMany({
+      where: {
+        code: { notIn: ["EMERGENCY_SERVICE", "E2E_ASSOCIATION"] },
+      },
       orderBy: { name: "asc" },
     }),
   ]);

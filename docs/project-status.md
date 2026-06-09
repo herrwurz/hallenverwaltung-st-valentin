@@ -309,15 +309,21 @@ eingespielt, und `scripts/start-local-standalone.ps1` startet die stabile
 Standalone-Variante fuer `http://localhost:3000`. Der angedachte Testserver auf
 all-inkl.com ist als technische Hosting-Klaerung dokumentiert.
 
-## Phase 25 (geplant, aktuell pausiert)
+## Phase 25
 
-UI-Neuaufbau mit shadcn/ui als generellem Komponentenstandard. Tabellen fuer
-Gebaeude, Raeume, Benutzer, Organisationen, Buchungen, Warteliste,
-Benachrichtigungen, Abrechnung und weitere Verwaltungsdaten sollen als
-shadcn/ui Data-Table-/Grid-Komponenten umgesetzt werden. Kalender und
-Hallenplanung sollen als Ressourcenraster mit Raeumen/Hallen als Spalten,
-30-Minuten-Zeitslots, Status-Badges und shadcn/ui Dialogen neu aufgebaut
-werden. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
+UI-Neuaufbau mit shadcn/ui als generellem Komponentenstandard umgesetzt und
+weiter gehaertet. Zentrale Stammdaten-, Buchungs-, Benachrichtigungs-,
+Abrechnungs-, Dokument-, Ferien-, Serien- und Betriebslisten nutzen nun
+shadcn/ui Cards, Buttons, Badges und DataTable-/Table-Patterns. Tabellen ohne
+eingebettete Server-Action-Zellen verwenden TanStack-basierte DataTables mit
+Filter, Sortierung und Pagination. Tabellen mit Server-Action-Formularen
+bleiben bewusst serverseitige shadcn/ui Tables, um Mutations- und
+Berechtigungslogik nicht in fragile Client-Zellen zu verschieben.
+
+Der Kalender nutzt ein eigenes shadcn/Tailwind-Ressourcenraster fuer Tages-
+und Wochenansicht mit Raeumen als Spalten, 30-Minuten-Zeitslots und
+Status-Badges. Termin-Details werden ueber eine Radix/shadcn-Dialogkomponente
+angezeigt. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
 Option.
 
 ---
@@ -557,6 +563,19 @@ Version 1:
 
 ---
 
+# Aktuelle Pilot-Hotfixes
+
+## Phase 26.3
+
+Der Genehmigungsworkflow wurde fuer die Verwaltung vereinfacht:
+
+* `REQUESTED -> APPROVED` ist erlaubt.
+* `REQUESTED -> REJECTED` ist erlaubt.
+* `IN_REVIEW` bleibt als optionaler Zwischenstatus bestehen, wenn ein Antrag
+  intern vorgemerkt oder zur Pruefung uebernommen werden soll.
+
+---
+
 # Aktuelle Produktionsrisiken
 
 ## Worker-Betrieb muss produktiv aktiviert bleiben
@@ -599,6 +618,71 @@ PDFs sind funktional, aber keine finalen Design-/Layoutreports.
 ---
 
 # Empfohlene nächste Phasen
+
+## Aktuelle Pilot-Hotfixes / Phase 26.4
+
+Bearbeitet wurden die sofort sichtbaren Befunde aus `png/befundliste.txt`:
+
+* Admin-Dashboard-Kacheln bleiben reine, zentrierte Navigationsbuttons.
+* Buchungsstatus-Badges in der Admin-Detailansicht sind als stabile Inline-
+  Badges ausgerichtet.
+* Gebäude-Codes sind beim Bearbeiten read-only und werden service-seitig nicht
+  mehr überschrieben.
+* Gebäude werden in der Verwaltung aktiv vor inaktiv sortiert.
+* Räume werden nach Aktiv, Eingeschränkt, Außer Betrieb sortiert.
+* Organisationstypen wie Katastrophenschutz/E2E werden in der Auswahl nicht
+  mehr angeboten.
+* Nutzungstyp `CLUB_TRAINING` wird als `Training` geseedet.
+* Einstellungsnahe Admin-Navigation ist deutlicher gekennzeichnet.
+
+Bewusst offen bleiben größere Folgeblöcke:
+
+* echte Google-Kalender-artige Ressourcenansicht
+* Serienbuchungsdialog nach den Referenzbildern
+* Serien-Gesamtprüfung/Gesamtgenehmigung
+* Löschen von Gebäuden/Räumen nur bei fehlenden Abhängigkeiten
+* Sperren von Gebäuden/Räumen über Zeitraum oder Ferienauswahl
+* Passwort-vergessen-Prozess
+* Hallenwart-Zuordnung über Benutzerverwaltung
+* Rollen-/Rechte-Zuordnung als bearbeitbare Oberfläche
+
+---
+
+## Aktuelle Pilot-Hotfixes / Phase 26.5
+
+Serienbuchungen wurden nach den Pilot-Referenzbildern erweitert:
+
+* Portal-Serienantrag nutzt einen eigenen Serienmuster-Dialog.
+* Unterstützt werden tägliche, wöchentliche, monatliche und jährliche Muster.
+* Wöchentliche Serien können mehrere Wochentage enthalten, z. B. Montag und
+  Mittwoch für Fußballtraining.
+* Monatliche und jährliche Serien unterstützen Tag-des-Monats sowie
+  n-ter-Wochentag-Muster.
+* Die Maske zeigt eine Vorschau mit maximal 50 Einträgen.
+* Serientermine werden weiterhin als normale `REQUESTED`-Einzelbuchungen
+  erzeugt und durchlaufen den vorhandenen Genehmigungsworkflow.
+
+Weiterhin offen:
+
+* Serien-Gesamtprüfung/Gesamtgenehmigung in der Verwaltung.
+* Nachträgliche Änderung ganzer Serien bleibt bewusst nicht umgesetzt.
+
+---
+
+## Aktuelle Pilot-Hotfixes / Phase 26.6
+
+Review und Haertung der Serienbuchungen nach dem groesseren Serienumbau:
+
+* Vorschau fuer monatliche n-ter-Wochentag-Muster verwendet nun dieselbe Uhrzeit
+  wie der erste Serientermin.
+* Monats-/Jahresmuster uebernehmen beim Setzen des ersten Beginns sinnvolle
+  Defaults fuer Tag, Wochentag und Monat.
+* Woechentliche Muster markieren initial den Wochentag des ersten Beginns.
+* Ungueltige Wochentagswerte werden serverseitig abgelehnt statt still
+  ignoriert.
+* Grenzfaelle fuer Monatsende und maximal 80 Serientermine sind getestet.
+
+---
 
 ## Phase 21
 

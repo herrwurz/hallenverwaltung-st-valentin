@@ -33,9 +33,9 @@ export default async function AdminCalendarPage({ searchParams }: { searchParams
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Kalender</p>
-      <h2 className="mt-3 text-3xl font-semibold">Verwaltungskalender</h2>
-      <p className="mt-3 max-w-3xl text-slate-300">
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Kalender</p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Verwaltungskalender</h2>
+      <p className="mt-3 max-w-3xl text-muted-foreground">
         Lesende Tages-, Wochen-, Monats- und Jahresansicht für Buchungsanträge, genehmigte Termine und
         Hallensperren inklusive Pufferzeiten.
       </p>

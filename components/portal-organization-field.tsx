@@ -17,7 +17,7 @@ export function PortalOrganizationField({
   }
 
   return (
-    <label className="text-sm text-slate-300">
+    <label className="text-sm font-medium text-foreground">
       Organisation
       <select name="organizationId" required defaultValue="" className={inputClassName}>
         <option value="" disabled>

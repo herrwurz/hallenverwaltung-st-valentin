@@ -1,15 +1,16 @@
 import { AppFeedback } from "@/components/app-feedback";
+import { AdminBookingsTable, type AdminBookingTableRow } from "@/components/admin-bookings-table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBookingStatusBadgeClass, getBookingStatusLabel, type AdminBookingFilterKey } from "@/lib/booking-status";
 import { hasPermission, requirePermission } from "@/lib/permissions";
 import {
+  getAdminBookingOrganizations,
   getBookingsForAdmin,
   resolveAdminBookingFilter,
 } from "@/lib/services/booking-approval-service";
-import {
-  approveBookingAction,
-  markBookingInReviewAction,
-  rejectBookingAction,
-} from "@/app/admin/bookings/actions";
+import { approveBookingAction, markBookingInReviewAction, rejectBookingAction } from "@/app/admin/bookings/actions";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
@@ -26,7 +27,7 @@ const statusLabels: Record<AdminBookingFilterKey, string> = {
   CANCELLED: "Storniert",
 };
 
-const textareaClass = "mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const textareaClass = "mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
 type PageProps = {
   searchParams: Promise<{
@@ -34,6 +35,7 @@ type PageProps = {
     reviewed?: string;
     approved?: string;
     rejected?: string;
+    organizationId?: string;
     error?: string;
   }>;
 };
@@ -52,19 +54,34 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
     requestedFilter === "CANCELLED"
       ? requestedFilter
       : "OPEN";
-  const [canApprove, canReject, bookings] = await Promise.all([
+  const selectedOrganizationId = typeof params.organizationId === "string" && params.organizationId ? params.organizationId : "";
+  const [canApprove, canReject, organizationOptions, bookings] = await Promise.all([
     hasPermission(user.id, "APPROVE_BOOKING"),
     hasPermission(user.id, "REJECT_BOOKING"),
-    getBookingsForAdmin(user.id, selectedFilter),
+    getAdminBookingOrganizations(user.id),
+    getBookingsForAdmin(user.id, selectedFilter, {}, { organizationId: selectedOrganizationId || undefined }),
   ]);
   const activeStatuses = new Set(resolveAdminBookingFilter(selectedFilter));
   const filterOptions: AdminBookingFilterKey[] = ["OPEN", "REQUESTED", "IN_REVIEW", "APPROVED", "REJECTED", "CANCELLED", "ALL"];
+  const bookingTableRows: AdminBookingTableRow[] = bookings.map((booking) => ({
+    id: booking.id,
+    title: booking.title,
+    usageTypeName: booking.usageType.name,
+    organizationName: booking.organization.name,
+    buildingName: booking.room.building.name,
+    roomName: booking.room.name,
+    startsAtLabel: dateFormatter.format(booking.startsAt),
+    endsAtLabel: dateFormatter.format(booking.endsAt),
+    status: booking.status,
+    conflictCount: booking.conflicts.length,
+    hasBlockingConflict: booking.conflicts.some((conflict) => conflict.severity === "blocking"),
+  }));
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Buchungen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Buchungsanträge</h2>
-      <p className="mt-3 text-slate-300">
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Buchungen</p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Buchungsanträge</h2>
+      <p className="mt-3 max-w-3xl text-muted-foreground">
         Offene und bearbeitete Buchungsanträge mit Konflikthinweisen, Historie und serverseitig gesicherten
         Entscheidungsaktionen.
       </p>
@@ -77,67 +94,94 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <form className="mt-8 flex flex-wrap items-end gap-3" aria-label="Statusfilter">
-        <label className="text-sm text-slate-300">
-          Status filtern
-          <select
-            name="status"
-            defaultValue={selectedFilter}
-            className="mt-1 min-w-72 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
-          >
-            {filterOptions.map((filterKey) => (
-              <option key={filterKey} value={filterKey}>
-                {statusLabels[filterKey]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-          Anwenden
-        </button>
-      </form>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Filter</CardTitle>
+          <CardDescription>Standard ist die Arbeitsliste aus beantragten und in Prüfung befindlichen Anträgen.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="flex flex-wrap items-end gap-3" aria-label="Buchungsfilter">
+            <label className="text-sm font-medium text-foreground">
+              Status filtern
+              <select
+                name="status"
+                defaultValue={selectedFilter}
+                className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
+                {filterOptions.map((filterKey) => (
+                  <option key={filterKey} value={filterKey}>
+                    {statusLabels[filterKey]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium text-foreground">
+              Organisation filtern
+              <select
+                name="organizationId"
+                defaultValue={selectedOrganizationId}
+                className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
+                <option value="">Alle Organisationen</option>
+                {organizationOptions.map((organization) => (
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button>Anwenden</Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <section className="mt-8 space-y-3">
-        {bookings.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Für den gewählten Statusfilter sind keine Buchungen vorhanden.
-          </p>
-        ) : (
-          bookings.map((booking) => (
-            <article key={booking.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+      <Card className="mt-8">
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle>Buchungsliste</CardTitle>
+              <CardDescription>
+                Aktiver Statusfilter: {Array.from(activeStatuses).map(getBookingStatusLabel).join(", ")}
+              </CardDescription>
+            </div>
+            <Badge variant="outline">{bookings.length} Einträge</Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {bookings.length === 0 ? (
+            <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
+              Für den gewählten Statusfilter sind keine Buchungen vorhanden.
+            </p>
+          ) : (
+            <AdminBookingsTable rows={bookingTableRows} />
+          )}
+        </CardContent>
+      </Card>
+
+      <section className="mt-8 space-y-4">
+        {bookings.map((booking) => (
+          <Card key={`${booking.id}-details`}>
+            <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="font-medium">{booking.title}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {booking.organization.name} | {booking.room.building.name} - {booking.room.name}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {dateFormatter.format(booking.startsAt)} bis {dateFormatter.format(booking.endsAt)} |{" "}
-                    {booking.usageType.name}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Beantragt von {booking.requestedBy?.displayName ?? "Unbekannt"}
-                    {booking.processedBy ? ` | Zuletzt bearbeitet von ${booking.processedBy.displayName}` : ""}
-                  </p>
-                  {booking.description ? (
-                    <p className="mt-3 max-w-3xl text-sm text-slate-300">{booking.description}</p>
-                  ) : null}
+                  <CardTitle>{booking.title}</CardTitle>
+                  <CardDescription>
+                    {booking.organization.name} | {booking.room.building.name} - {booking.room.name} |{" "}
+                    {dateFormatter.format(booking.startsAt)} bis {dateFormatter.format(booking.endsAt)}
+                  </CardDescription>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-sm ${getBookingStatusBadgeClass(booking.status)}`}>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm leading-none ${getBookingStatusBadgeClass(booking.status)}`}>
                   {getBookingStatusLabel(booking.status)}
                 </span>
               </div>
-
-              <div className="mt-5 grid gap-4 xl:grid-cols-[1.4fr,1fr]">
-                <section className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <h4 className="text-sm font-medium text-slate-200">Konflikthinweise</h4>
-                    <span className="text-xs text-slate-500">
-                      Filter aktiv: {Array.from(activeStatuses).map(getBookingStatusLabel).join(", ")}
-                    </span>
-                  </div>
+              {booking.description ? <p className="pt-3 text-sm text-muted-foreground">{booking.description}</p> : null}
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 xl:grid-cols-[1.4fr,1fr]">
+                <section className="rounded-xl border border-border bg-muted/40 p-4">
+                  <h4 className="text-sm font-medium">Konflikthinweise</h4>
                   {booking.conflicts.length === 0 ? (
-                    <p className="mt-3 text-sm text-emerald-200">Aktuell keine Konflikte erkannt.</p>
+                    <p className="mt-3 text-sm text-emerald-700">Aktuell keine Konflikte erkannt.</p>
                   ) : (
                     <ul className="mt-3 space-y-2 text-sm">
                       {booking.conflicts.map((conflict, index) => (
@@ -145,13 +189,11 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                           key={`${booking.id}-conflict-${index}`}
                           className={`rounded-lg border px-3 py-2 ${
                             conflict.severity === "blocking"
-                              ? "border-rose-900 bg-rose-950/40 text-rose-200"
-                              : "border-amber-900 bg-amber-950/40 text-amber-200"
+                              ? "border-rose-500/20 bg-destructive/10 text-rose-700"
+                              : "border-warning/35 bg-warning/15 text-warning-foreground"
                           }`}
                         >
-                          <p className="font-medium">
-                            {conflict.severity === "blocking" ? "Blockierend" : "Soft-Konflikt"}
-                          </p>
+                          <p className="font-medium">{conflict.severity === "blocking" ? "Blockierend" : "Soft-Konflikt"}</p>
                           <p className="mt-1">{conflict.message}</p>
                         </li>
                       ))}
@@ -159,19 +201,19 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                   )}
                 </section>
 
-                <section className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-                  <h4 className="text-sm font-medium text-slate-200">Historie</h4>
-                  <ul className="mt-3 space-y-3 text-sm text-slate-300">
+                <section className="rounded-xl border border-border bg-muted/40 p-4">
+                  <h4 className="text-sm font-medium">Historie</h4>
+                  <ul className="mt-3 space-y-3 text-sm">
                     {booking.statusHistory.map((entry) => (
-                      <li key={entry.id} className="rounded-lg border border-slate-800 p-3">
+                      <li key={entry.id} className="rounded-lg border border-border bg-card p-3">
                         <p className="font-medium">
                           {entry.oldStatus ? getBookingStatusLabel(entry.oldStatus) : "Neu"}{" "}
-                          <span className="text-slate-500">{"->"}</span> {getBookingStatusLabel(entry.newStatus)}
+                          <span className="text-muted-foreground">{"->"}</span> {getBookingStatusLabel(entry.newStatus)}
                         </p>
-                        <p className="mt-1 text-slate-400">
+                        <p className="mt-1 text-muted-foreground">
                           {dateFormatter.format(entry.createdAt)} | {entry.actor?.displayName ?? "System"}
                         </p>
-                        {entry.reason ? <p className="mt-2 text-slate-300">{entry.reason}</p> : null}
+                        {entry.reason ? <p className="mt-2">{entry.reason}</p> : null}
                       </li>
                     ))}
                   </ul>
@@ -179,56 +221,58 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
               </div>
 
               {canApprove || canReject ? (
-                <section className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-                  <h4 className="text-sm font-medium text-slate-200">Entscheidung</h4>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Workflow in Phase 6: Beantragt {"->"} In Prüfung {"->"} Genehmigt oder Abgelehnt.
+                <section className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
+                  <h4 className="text-sm font-medium">Entscheidung</h4>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Beantragte Buchungen können direkt genehmigt oder abgelehnt werden. &quot;In Prüfung&quot; bleibt optional,
+                    wenn ein Antrag intern vorgemerkt werden soll.
                   </p>
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
                     {canApprove && booking.status === "REQUESTED" ? (
-                      <form action={markBookingInReviewAction} className="rounded-lg border border-slate-800 p-4">
+                      <form action={markBookingInReviewAction} className="rounded-xl border border-border bg-card p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <p className="text-sm text-slate-300">Antrag zur fachlichen Prüfung übernehmen.</p>
-                        <button className="mt-4 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                          In Prüfung setzen
-                        </button>
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <p className="text-sm text-muted-foreground">Antrag zur fachlichen Prüfung übernehmen.</p>
+                        <Button type="submit" className="mt-4">In Prüfung setzen</Button>
                       </form>
                     ) : null}
 
-                    {canApprove && booking.status === "IN_REVIEW" ? (
-                      <form action={approveBookingAction} className="rounded-lg border border-emerald-900 p-4">
+                    {canApprove && (booking.status === "REQUESTED" || booking.status === "IN_REVIEW") ? (
+                      <form action={approveBookingAction} className="rounded-xl border border-emerald-500/20 bg-card p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <label className="text-sm text-slate-300">
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <label className="text-sm font-medium">
                           Kommentar (optional)
                           <textarea name="decisionNote" rows={3} className={textareaClass} />
                         </label>
-                        <button className="mt-4 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400">
+                        <Button type="submit" className="mt-4" variant="success">
                           Genehmigen
-                        </button>
+                        </Button>
                       </form>
                     ) : null}
 
-                    {canReject && booking.status === "IN_REVIEW" ? (
-                      <form action={rejectBookingAction} className="rounded-lg border border-rose-900 p-4">
+                    {canReject && (booking.status === "REQUESTED" || booking.status === "IN_REVIEW") ? (
+                      <form action={rejectBookingAction} className="rounded-xl border border-rose-500/20 bg-card p-4">
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
-                        <label className="text-sm text-slate-300">
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <label className="text-sm font-medium">
                           Begründung (erforderlich)
                           <textarea name="decisionNote" rows={3} required className={textareaClass} />
                         </label>
-                        <button className="mt-4 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-rose-400">
+                        <Button type="submit" className="mt-4" variant="destructive">
                           Ablehnen
-                        </button>
+                        </Button>
                       </form>
                     ) : null}
                   </div>
                 </section>
               ) : null}
-            </article>
-          ))
-        )}
+            </CardContent>
+          </Card>
+        ))}
       </section>
     </>
   );

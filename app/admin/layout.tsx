@@ -52,25 +52,27 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           { href: "/admin/booking-changes", label: "Änderungsanträge" },
           { href: "/admin/series", label: "Serien" },
           { href: "/admin/calendar", label: "Kalender" },
-          { href: "/admin/notifications", label: "Benachrichtigungen" },
         ]
       : []),
     ...(canBlockRoom ? [{ href: "/admin/holidays", label: "Ferien" }] : []),
     ...(canCreateExports ? [{ href: "/admin/billing", label: "Abrechnung" }] : []),
-    ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "System-Jobs" }] : []),
     ...(canManageDocuments ? [{ href: "/admin/documents", label: "Dokumente" }] : []),
     ...(canManageDamage ? [{ href: "/admin/damages", label: "Schäden" }] : []),
-    ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "No-Shows" }] : []),
     ...(canManageHandovers ? [{ href: "/admin/handovers", label: "Hallenübergaben" }] : []),
     ...(canManageAccess ? [{ href: "/admin/access", label: "Zutritte" }] : []),
     ...(canManageUsers
       ? [
-          { href: "/admin/settings/calendar", label: "Einstellungen" },
           { href: "/admin/buildings", label: "Gebäude" },
           { href: "/admin/rooms", label: "Räume" },
           { href: "/admin/organizations", label: "Organisationen" },
           { href: "/admin/users", label: "Benutzer" },
           { href: "/admin/roles", label: "Rollen/Rechte" },
+          { href: "/admin/settings/calendar", label: "Einstellungen: Öffentlicher Kalender" },
+          ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "Einstellungen: System-Jobs" }] : []),
+          ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "Einstellungen: No-Shows" }] : []),
+          ...(canViewBookings || canApproveBookings || canRejectBookings
+            ? [{ href: "/admin/notifications", label: "Einstellungen: Benachrichtigungen" }]
+            : []),
         ]
       : []),
   ];

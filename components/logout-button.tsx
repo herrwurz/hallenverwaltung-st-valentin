@@ -1,4 +1,5 @@
 import { signOut } from "@/auth";
+import { Button } from "@/components/ui/button";
 
 export function LogoutButton() {
   return (
@@ -8,12 +9,12 @@ export function LogoutButton() {
         await signOut({ redirectTo: "/login" });
       }}
     >
-      <button
+      <Button
         type="submit"
-        className="rounded-sm border border-slate-400 bg-white px-4 py-2 text-sm text-slate-800 transition hover:bg-slate-100"
+        variant="outline"
       >
         Abmelden
-      </button>
+      </Button>
     </form>
   );
 }

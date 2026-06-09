@@ -25,16 +25,16 @@ export function getCalendarEventStatusLabel(status: CalendarEventStatus) {
 export function getCalendarEventStatusBadgeClass(status: CalendarEventStatus) {
   switch (status) {
     case "REQUESTED":
-      return "bg-amber-500/20 text-amber-200";
+      return "border border-warning/35 bg-warning/15 text-warning-foreground";
     case "IN_REVIEW":
-      return "bg-sky-500/20 text-sky-200";
+      return "border border-primary/20 bg-primary/10 text-primary";
     case "APPROVED":
-      return "bg-emerald-500/20 text-emerald-200";
+      return "border border-emerald-500/20 bg-emerald-500/10 text-emerald-700";
     case "CANCELLED":
-      return "bg-slate-700 text-slate-200";
+      return "border border-slate-500/20 bg-slate-500/10 text-slate-700";
     case "CLOSURE":
-      return "bg-rose-500/20 text-rose-200";
+      return "border border-rose-500/20 bg-rose-500/10 text-rose-700";
     default:
-      return "bg-slate-800 text-slate-100";
+      return "border border-slate-500/20 bg-slate-500/10 text-slate-700";
   }
 }

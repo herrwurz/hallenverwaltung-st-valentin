@@ -5,6 +5,17 @@ import { createBookingRequest } from "@/lib/services/booking-request-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
 const maxSeriesOccurrences = 80;
+const weekdays = [0, 1, 2, 3, 4, 5, 6] as const;
+const recurrenceTypes = ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"] as const;
+const monthlyModes = ["DAY_OF_MONTH", "NTH_WEEKDAY"] as const;
+const ordinalValues = ["FIRST", "SECOND", "THIRD", "FOURTH", "LAST"] as const;
+
+type Weekday = (typeof weekdays)[number];
+type OrdinalValue = (typeof ordinalValues)[number];
+
+function emptyToUndefined(value: unknown) {
+  return value === null || value === "" ? undefined : value;
+}
 
 export const bookingSeriesRequestSchema = z.object({
   organizationId: z.string().trim().min(1, "Eine Organisation ist erforderlich."),
@@ -15,6 +26,14 @@ export const bookingSeriesRequestSchema = z.object({
   firstStartsAt: z.coerce.date(),
   firstEndsAt: z.coerce.date(),
   repeatUntil: z.coerce.date(),
+  recurrenceType: z.preprocess(emptyToUndefined, z.enum(recurrenceTypes).default("WEEKLY")),
+  interval: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(99).default(1)),
+  weekdays: z.preprocess((value) => parseWeekdays(value), z.array(z.number().int().min(0).max(6))).default([]),
+  monthlyMode: z.preprocess(emptyToUndefined, z.enum(monthlyModes).default("DAY_OF_MONTH")),
+  dayOfMonth: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(31).optional()),
+  ordinal: z.preprocess(emptyToUndefined, z.enum(ordinalValues).optional()),
+  weekday: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).max(6).optional()),
+  month: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(12).optional()),
   excludedDates: z
     .preprocess((value) => parseExcludedDates(value), z.array(z.date()))
     .default([]),
@@ -43,6 +62,63 @@ function dateKey(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function atTimeOf(baseDate: Date, timeSource: Date) {
+  const date = new Date(baseDate);
+  date.setHours(timeSource.getHours(), timeSource.getMinutes(), timeSource.getSeconds(), timeSource.getMilliseconds());
+  return date;
+}
+
+function startOfWeek(date: Date) {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  const mondayBasedOffset = (normalized.getDay() + 6) % 7;
+  normalized.setDate(normalized.getDate() - mondayBasedOffset);
+  return normalized;
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function addMonths(date: Date, months: number) {
+  const next = new Date(date);
+  next.setMonth(next.getMonth() + months);
+  return next;
+}
+
+function daysInMonth(year: number, monthIndex: number) {
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+function getNthWeekdayOfMonth(year: number, monthIndex: number, weekday: Weekday, ordinal: OrdinalValue) {
+  if (ordinal === "LAST") {
+    const date = new Date(year, monthIndex + 1, 0);
+    while (date.getDay() !== weekday) {
+      date.setDate(date.getDate() - 1);
+    }
+    return date;
+  }
+
+  const ordinalIndex = ordinalValues.indexOf(ordinal) + 1;
+  const date = new Date(year, monthIndex, 1);
+  while (date.getDay() !== weekday) {
+    date.setDate(date.getDate() + 1);
+  }
+  date.setDate(date.getDate() + (ordinalIndex - 1) * 7);
+
+  return date.getMonth() === monthIndex ? date : null;
+}
+
+function monthsBetween(first: Date, candidate: Date) {
+  return (candidate.getFullYear() - first.getFullYear()) * 12 + candidate.getMonth() - first.getMonth();
+}
+
+function yearsBetween(first: Date, candidate: Date) {
+  return candidate.getFullYear() - first.getFullYear();
 }
 
 function overlaps(startA: Date, endA: Date, startB: Date, endB: Date) {
@@ -75,14 +151,69 @@ export function parseExcludedDates(value: unknown): Date[] {
     });
 }
 
+export function parseWeekdays(value: unknown): Weekday[] {
+  const values = Array.isArray(value) ? value : String(value ?? "").split(/[,;]+/);
+  const normalized = values.map((entry) => String(entry).trim()).filter(Boolean);
+
+  for (const entry of normalized) {
+    if (!weekdays.includes(Number(entry) as Weekday)) {
+      throw new BookingValidationError(`Der Wochentag "${entry}" ist ungültig.`);
+    }
+  }
+
+  return Array.from(
+    new Set(
+      normalized
+        .map((entry) => Number(entry))
+        .filter((entry): entry is Weekday => weekdays.includes(entry as Weekday)),
+    ),
+  ).sort((a, b) => a - b);
+}
+
 export function isExcludedOccurrence(occurrence: SeriesOccurrence, excludedDates: Date[]) {
   const excludedDateKeys = new Set(excludedDates.map(dateKey));
   return excludedDateKeys.has(dateKey(occurrence.startsAt));
 }
 
-function buildWeeklyRecurrenceRule(excludedDates: Date[]) {
+function appendExcludedDates(rule: string, excludedDates: Date[]) {
   const excluded = Array.from(new Set(excludedDates.map(dateKey))).sort();
-  return excluded.length ? `FREQ=WEEKLY;INTERVAL=1;EXDATE=${excluded.join(",")}` : "FREQ=WEEKLY;INTERVAL=1";
+  return excluded.length ? `${rule};EXDATE=${excluded.join(",")}` : rule;
+}
+
+function buildRecurrenceRule(data: z.infer<typeof bookingSeriesRequestSchema>) {
+  const interval = `INTERVAL=${data.interval}`;
+
+  if (data.recurrenceType === "DAILY") {
+    return appendExcludedDates(`FREQ=DAILY;${interval}`, data.excludedDates);
+  }
+
+  if (data.recurrenceType === "WEEKLY") {
+    const selectedWeekdays = (data.weekdays.length > 0 ? data.weekdays : [data.firstStartsAt.getDay()]).join(",");
+    return appendExcludedDates(`FREQ=WEEKLY;${interval};BYDAY=${selectedWeekdays}`, data.excludedDates);
+  }
+
+  if (data.recurrenceType === "MONTHLY" && data.monthlyMode === "NTH_WEEKDAY") {
+    return appendExcludedDates(
+      `FREQ=MONTHLY;${interval};BYSETPOS=${data.ordinal ?? "FIRST"};BYDAY=${data.weekday ?? data.firstStartsAt.getDay()}`,
+      data.excludedDates,
+    );
+  }
+
+  if (data.recurrenceType === "MONTHLY") {
+    return appendExcludedDates(`FREQ=MONTHLY;${interval};BYMONTHDAY=${data.dayOfMonth ?? data.firstStartsAt.getDate()}`, data.excludedDates);
+  }
+
+  if (data.monthlyMode === "NTH_WEEKDAY") {
+    return appendExcludedDates(
+      `FREQ=YEARLY;${interval};BYMONTH=${data.month ?? data.firstStartsAt.getMonth() + 1};BYSETPOS=${data.ordinal ?? "FIRST"};BYDAY=${data.weekday ?? data.firstStartsAt.getDay()}`,
+      data.excludedDates,
+    );
+  }
+
+  return appendExcludedDates(
+    `FREQ=YEARLY;${interval};BYMONTH=${data.month ?? data.firstStartsAt.getMonth() + 1};BYMONTHDAY=${data.dayOfMonth ?? data.firstStartsAt.getDate()}`,
+    data.excludedDates,
+  );
 }
 
 export function generateWeeklyOccurrences({
@@ -94,28 +225,99 @@ export function generateWeeklyOccurrences({
   firstEndsAt: Date;
   repeatUntil: Date;
 }) {
-  if (!(firstStartsAt < firstEndsAt)) {
+  return generateSeriesOccurrences({
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil,
+    recurrenceType: "WEEKLY",
+    interval: 1,
+    weekdays: [firstStartsAt.getDay()],
+    monthlyMode: "DAY_OF_MONTH",
+    excludedDates: [],
+  });
+}
+
+export function generateSeriesOccurrences(data: Pick<
+  z.infer<typeof bookingSeriesRequestSchema>,
+  "firstStartsAt" | "firstEndsAt" | "repeatUntil" | "recurrenceType" | "interval" | "weekdays" | "monthlyMode" | "dayOfMonth" | "ordinal" | "weekday" | "month" | "excludedDates"
+>) {
+  if (!(data.firstStartsAt < data.firstEndsAt)) {
     throw new BookingValidationError("Der erste Serientermin muss vor seinem Ende beginnen.");
   }
 
-  if (repeatUntil < firstStartsAt) {
+  if (data.repeatUntil < data.firstStartsAt) {
     throw new BookingValidationError("Das Serienende darf nicht vor dem ersten Termin liegen.");
   }
 
-  const durationMs = firstEndsAt.getTime() - firstStartsAt.getTime();
+  const durationMs = data.firstEndsAt.getTime() - data.firstStartsAt.getTime();
   const occurrences: SeriesOccurrence[] = [];
-  let startsAt = new Date(firstStartsAt);
+  let overflow = false;
+  const pushOccurrence = (startsAt: Date | null) => {
+    if (!startsAt || startsAt < data.firstStartsAt || startsAt > data.repeatUntil) {
+      return;
+    }
+    if (occurrences.length >= maxSeriesOccurrences) {
+      overflow = true;
+      return;
+    }
+    occurrences.push({ startsAt, endsAt: new Date(startsAt.getTime() + durationMs) });
+  };
 
-  while (startsAt <= repeatUntil && occurrences.length < maxSeriesOccurrences) {
-    occurrences.push({
-      startsAt: new Date(startsAt),
-      endsAt: new Date(startsAt.getTime() + durationMs),
-    });
-    startsAt = new Date(startsAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+  if (data.recurrenceType === "DAILY") {
+    for (let candidate = new Date(data.firstStartsAt); candidate <= data.repeatUntil; candidate = addDays(candidate, data.interval)) {
+      pushOccurrence(new Date(candidate));
+    }
   }
 
-  if (occurrences.length === maxSeriesOccurrences && startsAt <= repeatUntil) {
-    throw new BookingValidationError("Die Serie ist zu lang. Maximal 80 woechentliche Termine sind erlaubt.");
+  if (data.recurrenceType === "WEEKLY") {
+    const selectedWeekdays = data.weekdays.length > 0 ? data.weekdays : [data.firstStartsAt.getDay()];
+    const firstWeekStart = startOfWeek(data.firstStartsAt);
+
+    for (let candidateDay = new Date(data.firstStartsAt); candidateDay <= data.repeatUntil; candidateDay = addDays(candidateDay, 1)) {
+      const weekDistance = Math.floor((startOfWeek(candidateDay).getTime() - firstWeekStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      if (weekDistance % data.interval === 0 && selectedWeekdays.includes(candidateDay.getDay() as Weekday)) {
+        pushOccurrence(atTimeOf(candidateDay, data.firstStartsAt));
+      }
+    }
+  }
+
+  if (data.recurrenceType === "MONTHLY") {
+    for (let cursor = new Date(data.firstStartsAt.getFullYear(), data.firstStartsAt.getMonth(), 1); cursor <= data.repeatUntil; cursor = addMonths(cursor, 1)) {
+      if (monthsBetween(data.firstStartsAt, cursor) % data.interval !== 0) {
+        continue;
+      }
+
+      if (data.monthlyMode === "NTH_WEEKDAY") {
+        const candidate = getNthWeekdayOfMonth(cursor.getFullYear(), cursor.getMonth(), (data.weekday ?? data.firstStartsAt.getDay()) as Weekday, data.ordinal ?? "FIRST");
+        pushOccurrence(candidate ? atTimeOf(candidate, data.firstStartsAt) : null);
+      } else {
+        const day = Math.min(data.dayOfMonth ?? data.firstStartsAt.getDate(), daysInMonth(cursor.getFullYear(), cursor.getMonth()));
+        pushOccurrence(atTimeOf(new Date(cursor.getFullYear(), cursor.getMonth(), day), data.firstStartsAt));
+      }
+    }
+  }
+
+  if (data.recurrenceType === "YEARLY") {
+    for (let year = data.firstStartsAt.getFullYear(); year <= data.repeatUntil.getFullYear(); year += 1) {
+      if (yearsBetween(data.firstStartsAt, new Date(year, 0, 1)) % data.interval !== 0) {
+        continue;
+      }
+
+      const monthIndex = (data.month ?? data.firstStartsAt.getMonth() + 1) - 1;
+      if (data.monthlyMode === "NTH_WEEKDAY") {
+        const candidate = getNthWeekdayOfMonth(year, monthIndex, (data.weekday ?? data.firstStartsAt.getDay()) as Weekday, data.ordinal ?? "FIRST");
+        pushOccurrence(candidate ? atTimeOf(candidate, data.firstStartsAt) : null);
+      } else {
+        const day = Math.min(data.dayOfMonth ?? data.firstStartsAt.getDate(), daysInMonth(year, monthIndex));
+        pushOccurrence(atTimeOf(new Date(year, monthIndex, day), data.firstStartsAt));
+      }
+    }
+  }
+
+  occurrences.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+
+  if (overflow) {
+    throw new BookingValidationError("Die Serie ist zu lang. Maximal 80 Termine sind erlaubt.");
   }
 
   return occurrences;
@@ -149,7 +351,7 @@ export function evaluateHolidayOverlap(
 export async function createBookingSeriesRequest(input: unknown, actorUserId: string) {
   const data = bookingSeriesRequestSchema.parse(input);
   const repeatUntil = endOfDay(data.repeatUntil);
-  const occurrences = generateWeeklyOccurrences({ ...data, repeatUntil });
+  const occurrences = generateSeriesOccurrences({ ...data, repeatUntil });
   const startsOn = occurrences[0]?.startsAt;
   const endsOn = occurrences.at(-1)?.endsAt;
 
@@ -174,7 +376,7 @@ export async function createBookingSeriesRequest(input: unknown, actorUserId: st
         title: data.title,
         startsOn,
         endsOn,
-        recurrenceRule: buildWeeklyRecurrenceRule(data.excludedDates),
+        recurrenceRule: buildRecurrenceRule(data),
       },
     });
 

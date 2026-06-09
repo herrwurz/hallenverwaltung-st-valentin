@@ -206,7 +206,6 @@ async function seedCatalogs() {
     ["SCHOOL", "Schule"],
     ["PRIVATE", "Privat"],
     ["EXTERNAL", "Extern"],
-    ["EMERGENCY_SERVICE", "Katastrophenschutz"],
   ] as const;
 
   for (const [code, name] of organizationTypes) {
@@ -221,7 +220,7 @@ async function seedCatalogs() {
     ["MUNICIPAL_EMERGENCY", "Gemeinde / Katastrophenschutz / Wahlen", 1, true],
     ["SCHOOL_USE", "Schulnutzung", 2, true],
     ["LEAGUE_MATCH", "Meisterschafts- und Ligabetrieb", 3, true],
-    ["CLUB_TRAINING", "Regelmaessige Vereinsnutzung", 4, false],
+    ["CLUB_TRAINING", "Training", 4, false],
     ["COURSE", "VHS / Kurse", 5, false],
     ["PRIVATE_EVENT", "Private / Einzelveranstaltungen", 6, false],
   ] as const;

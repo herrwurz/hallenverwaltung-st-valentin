@@ -24,7 +24,7 @@ werden beantragt, verwaltungsseitig geprueft und bei Genehmigung als neuer
 Ersatztermin angelegt.
 Phase 16 aktiviert die Dokumentenverwaltung als Metadaten-Workflow und das
 Schadensmanagement fuer Portal und Verwaltung.
-Phase 17 fuehrt woechentliche Serienantraege und konfigurierbare Ferien-/
+Phase 17 fuehrt Serienantraege und konfigurierbare Ferien-/
 Feiertagsregeln ein.
 Phase 18 fuegt No-Show-Meldungen fuer Hallenwarte und Verwaltung hinzu.
 
@@ -203,7 +203,7 @@ erDiagram
   Check-Constraint; `validateClosureTarget` bereitet dieselbe Regel fuer
   kuenftige Service-Schreibpfade vor.
 - Serien bleiben weiterhin reine Datenmodellgrundlage; umgesetzt werden
-  ab Phase 17 woechentliche Serienantraege, die einzelne
+  ab Phase 17 wiederkehrende Serienantraege, die einzelne
   `Booking`-Datensaetze mit `kind = SERIES_OCCURRENCE` und Verknuepfung zur
   `BookingSeries` erzeugen. Diese Einzeltermine starten im Status `REQUESTED`
   und durchlaufen den normalen Genehmigungsworkflow.
@@ -248,14 +248,16 @@ erDiagram
 - Phase 12 fuehrt keinen Deployment-Scheduler ein; Cron/Worker-Aufrufe bleiben
   betriebliche Konfiguration.
 - Blockbuchungen sind fachlich noch nicht eindeutig genug spezifiziert. Bis
-  dahin werden wiederkehrende Nutzungen als woechentliche Serien mit
+  dahin werden wiederkehrende Nutzungen als Serien mit
   Einzelterminen abgebildet.
 - Erweiterte organisationsbezogene Rollen oder Delegationen sind noch nicht
   umgesetzt; Buchungsantraege pruefen aktive `OrganizationMember`-Eintraege.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
 - `VIEW_BOOKINGS` ist auch Voraussetzung fuer die Admin-Wartelistenuebersicht.
-- `APPROVE_BOOKING` erlaubt das Uebernehmen in Pruefung und die Genehmigung.
-- `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
+- `APPROVE_BOOKING` erlaubt das optionale Uebernehmen in Pruefung und die
+  Genehmigung beantragter oder in Pruefung befindlicher Antraege.
+- `REJECT_BOOKING` erlaubt die Ablehnung beantragter oder in Pruefung
+  befindlicher Antraege.
 - Offensichtliche Dubletten derselben Organisation fuer denselben Raum und
   denselben Slot werden in Phase 7.5 zusaetzlich per partiellem Unique-Index
   fuer `ACTIVE`/`OFFERED` abgefangen. Uebergreifende Parent-/Teilraum-Dubletten

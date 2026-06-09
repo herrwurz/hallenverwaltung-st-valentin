@@ -1,10 +1,10 @@
 import { AppBackLink } from "@/components/app-back-link";
-import { AdminShell } from "@/components/admin-shell";
+import { WaitlistTable, type WaitlistTableRow } from "@/components/admin-access-tables";
 import { StatusFilterSelect } from "@/components/status-filter-select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import {
   adminWaitlistFilterStatuses,
-  getWaitlistStatusBadgeClass,
   getWaitlistStatusLabel,
   type AdminWaitlistFilterKey,
 } from "@/lib/waitlist-status";
@@ -24,14 +24,27 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const entries = await getWaitlistForAdmin(user.id, params.status);
   const selectedStatus = params.status ?? "";
+  const rows: WaitlistTableRow[] = entries.map((entry) => ({
+    id: entry.id,
+    title: entry.title,
+    organizationName: entry.organization.name,
+    roomName: `${entry.room.building.name} - ${entry.room.name}`,
+    startsAtLabel: dateFormatter.format(entry.startsAt),
+    endsAtLabel: dateFormatter.format(entry.endsAt),
+    usageTypeName: entry.usageType.name,
+    placedAtLabel: dateFormatter.format(entry.placedAt),
+    offerExpiresAtLabel: entry.offerExpiresAt ? dateFormatter.format(entry.offerExpiresAt) : "-",
+    status: entry.status,
+    statusLabel: getWaitlistStatusLabel(entry.status),
+  }));
 
   return (
-    <AdminShell userName={user.name}>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Warteliste</p>
+    <>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Warteliste</p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-semibold">Wartelistenübersicht</h2>
-          <p className="mt-3 max-w-3xl text-slate-300">
+          <h2 className="text-3xl font-semibold tracking-tight">Wartelistenübersicht</h2>
+          <p className="mt-3 max-w-3xl text-muted-foreground">
             Alle Wartelistenplätze mit Status, Frist und Organisationsbezug. Die Reihenfolge bleibt in dieser Phase
             unverändert und richtet sich nach dem Eingangszeitpunkt.
           </p>
@@ -51,44 +64,21 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <div className="mt-8 space-y-4">
-        {entries.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Keine Wartelistenplätze für den ausgewählten Filter gefunden.
-          </p>
-        ) : (
-          entries.map((entry) => (
-            <article key={entry.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-              <div className="flex flex-wrap justify-between gap-4">
-                <div>
-                  <h3 className="font-medium">{entry.title}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {entry.organization.name} | {entry.room.building.name} - {entry.room.name}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {dateFormatter.format(entry.startsAt)} bis {dateFormatter.format(entry.endsAt)} |{" "}
-                    {entry.usageType.name}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Eingereiht am {dateFormatter.format(entry.placedAt)}
-                    {entry.requestedBy ? ` | angelegt von ${entry.requestedBy.displayName ?? entry.requestedBy.email}` : ""}
-                  </p>
-                  {entry.offerExpiresAt ? (
-                    <p className="mt-1 text-sm text-amber-200">
-                      Angebotsfrist bis {dateFormatter.format(entry.offerExpiresAt)}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="text-right">
-                  <p className={`inline-flex rounded-full px-3 py-1 text-sm ${getWaitlistStatusBadgeClass(entry.status)}`}>
-                    {getWaitlistStatusLabel(entry.status)}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))
-        )}
-      </div>
-    </AdminShell>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Wartelisteneinträge</CardTitle>
+          <CardDescription>Filterbare Übersicht aller Wartelistenplätze.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {entries.length === 0 ? (
+            <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
+              Keine Wartelistenplätze für den ausgewählten Filter gefunden.
+            </p>
+          ) : (
+            <WaitlistTable rows={rows} />
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 }

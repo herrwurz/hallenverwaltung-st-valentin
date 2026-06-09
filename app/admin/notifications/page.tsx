@@ -1,17 +1,14 @@
+import { processNotificationQueueAction, retryNotificationAction, updateNotificationEventSettingsAction } from "@/app/admin/notifications/actions";
 import { AppBackLink } from "@/components/app-back-link";
+import { AppFeedback } from "@/components/app-feedback";
+import { NotificationsTable, type NotificationTableRow } from "@/components/admin-notifications-table";
 import { StatusFilterSelect } from "@/components/status-filter-select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import { getNotificationsForAdmin } from "@/lib/services/notification-service";
-import {
-  getNotificationEventSettings,
-  notificationEventLabels,
-} from "@/lib/services/notification-settings-service";
-import {
-  processNotificationQueueAction,
-  retryNotificationAction,
-  updateNotificationEventSettingsAction,
-} from "@/app/admin/notifications/actions";
 import { notificationEventCodes } from "@/lib/services/notification-types";
+import { getNotificationEventSettings, notificationEventLabels } from "@/lib/services/notification-settings-service";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
@@ -24,12 +21,6 @@ const statusLabels = {
   SENT: "Gesendet",
   FAILED: "Fehlgeschlagen",
 } as const;
-
-const statusBadgeClass: Record<"PENDING" | "SENT" | "FAILED", string> = {
-  PENDING: "bg-amber-500/20 text-amber-200",
-  SENT: "bg-emerald-500/20 text-emerald-200",
-  FAILED: "bg-rose-500/20 text-rose-200",
-};
 
 type SearchParams = Promise<{
   status?: "ALL" | "PENDING" | "SENT" | "FAILED";
@@ -50,72 +41,81 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
     getNotificationsForAdmin(user.id, selectedStatus),
     getNotificationEventSettings(),
   ]);
+  const rows: NotificationTableRow[] = notifications
+    .filter((notification) => notification.status === "PENDING" || notification.status === "SENT" || notification.status === "FAILED")
+    .map((notification) => {
+      const eventLabel =
+        notification.eventCode in notificationEventLabels
+          ? notificationEventLabels[notification.eventCode as keyof typeof notificationEventLabels]
+          : notification.eventCode;
+      const reference = notification.booking
+        ? `Buchung: ${notification.booking.title} | ${notification.booking.organization.name} | ${notification.booking.room.building.name} - ${notification.booking.room.name}`
+        : notification.waitlistEntry
+          ? `Warteliste: ${notification.waitlistEntry.title} | ${notification.waitlistEntry.organization.name} | ${notification.waitlistEntry.room.building.name} - ${notification.waitlistEntry.room.name}`
+          : "-";
+
+      return {
+        id: notification.id,
+        eventLabel,
+        recipient: `${notification.recipientUser?.displayName ?? notification.recipient} (${notification.recipient})`,
+        reference,
+        createdAtLabel: dateFormatter.format(notification.createdAt),
+        sentAtLabel: notification.sentAt ? dateFormatter.format(notification.sentAt) : "-",
+        attempts: `${notification.attemptCount}/${notification.maxAttempts}`,
+        nextAttemptAtLabel: notification.nextAttemptAt ? dateFormatter.format(notification.nextAttemptAt) : "-",
+        status: notification.status,
+        lastError: notification.lastError ?? notification.errorMessage ?? "-",
+      };
+    });
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Benachrichtigungen</p>
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Benachrichtigungen</p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-semibold">Notification Queue</h2>
-          <p className="mt-3 max-w-3xl text-slate-300">
-            Versandprotokoll für zentrale Buchungs- und Wartelistenereignisse inklusive Fehlerstatus und manuellem
-            Retry.
+          <h2 className="text-3xl font-semibold tracking-tight">Notification Queue</h2>
+          <p className="mt-3 max-w-3xl text-muted-foreground">
+            Versandprotokoll für zentrale Buchungs- und Wartelistenereignisse inklusive Fehlerstatus und manuellem Retry.
           </p>
         </div>
-        <form action={processNotificationQueueAction}>
-          <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-            Queue verarbeiten
-          </button>
-        </form>
-        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
+        <div className="flex flex-wrap items-center gap-3">
+          <form action={processNotificationQueueAction}>
+            <Button>Queue verarbeiten</Button>
+          </form>
+          <AppBackLink href="/admin" label="Zurück zum Dashboard" />
+        </div>
       </div>
 
-      {params.retried ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Die Benachrichtigung wurde erneut verarbeitet.
-        </p>
-      ) : null}
-      {params.processed ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Die Queue wurde verarbeitet.
-        </p>
-      ) : null}
-      {params.settingsSaved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Die Event-Schalter wurden gespeichert.
-        </p>
-      ) : null}
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">{params.error}</p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "success", text: params.retried ? "Die Benachrichtigung wurde erneut verarbeitet." : undefined },
+          { tone: "success", text: params.processed ? "Die Queue wurde verarbeitet." : undefined },
+          { tone: "success", text: params.settingsSaved ? "Die Event-Schalter wurden gespeichert." : undefined },
+          { tone: "error", text: params.error },
+        ]}
+      />
 
-      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
-        <h3 className="text-xl font-medium">Event-Schalter</h3>
-        <form action={updateNotificationEventSettingsAction} className="mt-5 space-y-3">
-          {notificationEventCodes.map((eventCode) => (
-            <label
-              key={eventCode}
-              className="flex items-center justify-between gap-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4"
-            >
-              <span>
-                <span className="block font-medium">{notificationEventLabels[eventCode]}</span>
-                <span className="mt-1 block text-sm text-slate-400">{eventCode}</span>
-              </span>
-              <input
-                type="checkbox"
-                name={eventCode}
-                defaultChecked={eventSettings[eventCode]}
-                className="h-5 w-5 rounded border-slate-600 bg-slate-900 text-sky-500"
-              />
-            </label>
-          ))}
-          <div className="flex justify-end">
-            <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-              Schalter speichern
-            </button>
-          </div>
-        </form>
-      </section>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Event-Schalter</CardTitle>
+          <CardDescription>Steuert, für welche Ereignisse Benachrichtigungen erzeugt werden.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={updateNotificationEventSettingsAction} className="space-y-3">
+            {notificationEventCodes.map((eventCode) => (
+              <label key={eventCode} className="flex items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 p-4">
+                <span>
+                  <span className="block font-medium">{notificationEventLabels[eventCode]}</span>
+                </span>
+                <input type="checkbox" name={eventCode} defaultChecked={eventSettings[eventCode]} className="h-5 w-5" />
+              </label>
+            ))}
+            <div className="flex justify-end">
+              <Button>Schalter speichern</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <StatusFilterSelect
         selectedValue={selectedStatus}
@@ -125,74 +125,47 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
         }))}
       />
 
-      <section className="mt-8 space-y-3">
-        {notifications.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
-            Keine Benachrichtigungen für den gewählten Filter vorhanden.
-          </p>
-        ) : (
-          notifications.map((notification) => {
-            const eventLabel =
-              notification.eventCode in notificationEventLabels
-                ? notificationEventLabels[notification.eventCode as keyof typeof notificationEventLabels]
-                : notification.eventCode;
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Queue-Einträge</CardTitle>
+          <CardDescription>Filterbare Liste gesendeter, wartender und fehlgeschlagener Benachrichtigungen.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {notifications.length === 0 ? (
+            <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
+              Keine Benachrichtigungen für den gewählten Filter vorhanden.
+            </p>
+          ) : (
+            <NotificationsTable rows={rows} />
+          )}
+        </CardContent>
+      </Card>
 
-            return (
-            <article key={notification.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-medium">{eventLabel}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Empfänger: {notification.recipientUser?.displayName ?? notification.recipient} ({notification.recipient})
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Erstellt am {dateFormatter.format(notification.createdAt)}
-                    {notification.sentAt ? ` | Gesendet am ${dateFormatter.format(notification.sentAt)}` : ""}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Versuche: {notification.attemptCount}/{notification.maxAttempts}
-                    {notification.nextAttemptAt ? ` | Nächster Versuch ab ${dateFormatter.format(notification.nextAttemptAt)}` : ""}
-                  </p>
-                  {notification.booking ? (
-                    <p className="mt-1 text-sm text-slate-400">
-                      Buchung: {notification.booking.title} | {notification.booking.organization.name} |{" "}
-                      {notification.booking.room.building.name} - {notification.booking.room.name}
-                    </p>
-                  ) : null}
-                  {notification.waitlistEntry ? (
-                    <p className="mt-1 text-sm text-slate-400">
-                      Warteliste: {notification.waitlistEntry.title} | {notification.waitlistEntry.organization.name} |{" "}
-                      {notification.waitlistEntry.room.building.name} - {notification.waitlistEntry.room.name}
-                    </p>
-                  ) : null}
-                  {notification.lastError ?? notification.errorMessage ? (
-                    <p className="mt-3 rounded-lg border border-rose-900 bg-rose-950/40 px-3 py-2 text-sm text-rose-200">
-                      {notification.lastError ?? notification.errorMessage}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="text-right">
-                  {notification.status === "PENDING" || notification.status === "SENT" || notification.status === "FAILED" ? (
-                    <span className={`rounded-full px-3 py-1 text-sm ${statusBadgeClass[notification.status]}`}>
-                      {statusLabels[notification.status]}
-                    </span>
-                  ) : null}
-                  {notification.status === "FAILED" ? (
-                    <form action={retryNotificationAction} className="mt-3">
-                      <input type="hidden" name="notificationId" value={notification.id} />
-                      <input type="hidden" name="status" value={selectedStatus} />
-                      <button className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                        Erneut senden
-                      </button>
-                    </form>
-                  ) : null}
-                </div>
-              </div>
-            </article>
-            );
-          })
-        )}
-      </section>
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Fehlgeschlagene erneut senden</CardTitle>
+          <CardDescription>Retry bleibt serverseitig über die bestehende Action abgesichert.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {notifications.filter((notification) => notification.status === "FAILED").length === 0 ? (
+            <p className="text-sm text-muted-foreground">Keine fehlgeschlagenen Benachrichtigungen im aktuellen Filter.</p>
+          ) : (
+            notifications
+              .filter((notification) => notification.status === "FAILED")
+              .map((notification) => (
+                <form key={notification.id} action={retryNotificationAction} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-4">
+                  <input type="hidden" name="notificationId" value={notification.id} />
+                  <input type="hidden" name="status" value={selectedStatus} />
+                  <div>
+                    <p className="font-medium">{notification.recipient}</p>
+                    <p className="text-sm text-muted-foreground">{notification.lastError ?? notification.errorMessage}</p>
+                  </div>
+                  <Button size="sm">Erneut senden</Button>
+                </form>
+              ))
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

@@ -14,22 +14,25 @@ test("application shells use the documented Windows style foundation", () => {
   assert.match(globals, /\.admin-desktop/);
   assert.match(adminShell, /windows-shell admin-desktop/);
   assert.match(areaShell, /windows-shell app-area-shell/);
-  assert.match(adminBackLink, /border border-slate-300 bg-white/);
+  assert.match(adminBackLink, /Button/);
+  assert.match(adminBackLink, /variant="ghost"/);
   assert.match(loginPage, /windows-shell/);
   assert.match(styleGuide, /Windows-\/Desktop-Anmutung/);
   assert.match(styleGuide, /Google-Kalender/);
 });
 
-test("shared form actions expose light Windows-style primary and secondary actions", () => {
+test("shared form actions expose shadcn-style primary and secondary actions", () => {
   const formActions = readFileSync("components/form-actions.tsx", "utf8");
   const statusFilterSelect = readFileSync("components/status-filter-select.tsx", "utf8");
   const logoutButton = readFileSync("components/logout-button.tsx", "utf8");
 
-  assert.match(formActions, /bg-white/);
-  assert.match(formActions, /border-blue-700 bg-blue-600/);
+  assert.match(formActions, /Button/);
+  assert.match(formActions, /variant="outline"/);
   assert.match(formActions, /Abbrechen/);
-  assert.match(statusFilterSelect, /border-slate-400 bg-white/);
-  assert.match(logoutButton, /border-slate-400 bg-white/);
+  assert.match(statusFilterSelect, /Button/);
+  assert.match(statusFilterSelect, /border-input bg-background/);
+  assert.match(logoutButton, /Button/);
+  assert.match(logoutButton, /variant="outline"/);
 });
 
 test("navigation back links use the shared light Windows-style component", () => {
@@ -46,7 +49,8 @@ test("navigation back links use the shared light Windows-style component", () =>
     "app/admin/settings/calendar/page.tsx",
   ];
 
-  assert.match(appBackLink, /border border-slate-300 bg-white/);
+  assert.match(appBackLink, /Button/);
+  assert.match(appBackLink, /variant="ghost"/);
 
   for (const page of pages) {
     const source = readFileSync(page, "utf8");

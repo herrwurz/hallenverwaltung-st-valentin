@@ -1,4 +1,4 @@
-import type { BookingStatus, Prisma } from "@prisma/client";
+﻿import type { BookingStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   checkBookingConflicts,
@@ -172,7 +172,7 @@ async function applyExistingBookingTransition(client: TransitionClient, input: U
   });
 
   if (!updatedBooking) {
-    throw new BookingValidationError("Die Buchung konnte nach der Statusänderung nicht geladen werden.");
+    throw new BookingValidationError("Die Buchung konnte nach der StatusÃ¤nderung nicht geladen werden.");
   }
 
   return updatedBooking;
@@ -231,7 +231,7 @@ export async function cancelBooking(
       updateData: { cancellationNote: "Vom Antragsteller storniert." },
       scope: input.scope,
       notFoundMessage: "Der Buchungsantrag wurde nicht gefunden.",
-      invalidStatusMessage: "Nur beantragte Buchungen können storniert werden.",
+      invalidStatusMessage: "Nur beantragte Buchungen kÃ¶nnen storniert werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geändert. Bitte neu laden.",
     });
 
@@ -251,13 +251,13 @@ export async function markBookingInReview(
       actorUserId: input.actorUserId,
       expectedStatuses: ["REQUESTED"],
       nextStatus: "IN_REVIEW",
-      reason: "Zur Prüfung übernommen.",
+      reason: "Zur PrÃ¼fung Ã¼bernommen.",
       updateData: {
         processedByUserId: input.actorUserId,
         processedAt: new Date(),
       },
       notFoundMessage: "Die Buchung wurde nicht gefunden.",
-      invalidStatusMessage: "Nur beantragte Buchungen können in Prüfung gesetzt werden.",
+      invalidStatusMessage: "Nur beantragte Buchungen kÃ¶nnen in PrÃ¼fung gesetzt werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geändert. Bitte neu laden.",
     });
 
@@ -333,7 +333,7 @@ export async function approveBooking(
     return applyExistingBookingTransition(transaction, {
       bookingId: input.bookingId,
       actorUserId: input.actorUserId,
-      expectedStatuses: ["IN_REVIEW"],
+      expectedStatuses: ["REQUESTED", "IN_REVIEW"],
       nextStatus: "APPROVED",
       reason: input.decisionNote?.trim() || "Buchung genehmigt.",
       updateData: {
@@ -342,7 +342,7 @@ export async function approveBooking(
         decisionNote: input.decisionNote?.trim() || null,
       },
       notFoundMessage: "Die Buchung wurde nicht gefunden.",
-      invalidStatusMessage: "Nur Buchungen in Prüfung können genehmigt werden.",
+      invalidStatusMessage: "Nur beantragte oder in Prüfung befindliche Buchungen können genehmigt werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geändert. Bitte neu laden.",
     });
   };
@@ -362,7 +362,7 @@ export async function rejectBooking(
     applyExistingBookingTransition(transaction, {
       bookingId: input.bookingId,
       actorUserId: input.actorUserId,
-      expectedStatuses: ["IN_REVIEW"],
+      expectedStatuses: ["REQUESTED", "IN_REVIEW"],
       nextStatus: "REJECTED",
       reason: input.decisionNote?.trim() || "Buchung abgelehnt.",
       updateData: {
@@ -371,9 +371,10 @@ export async function rejectBooking(
         decisionNote: input.decisionNote?.trim() || null,
       },
       notFoundMessage: "Die Buchung wurde nicht gefunden.",
-      invalidStatusMessage: "Nur Buchungen in Prüfung können abgelehnt werden.",
+      invalidStatusMessage: "Nur beantragte oder in Prüfung befindliche Buchungen können abgelehnt werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geändert. Bitte neu laden.",
     });
 
   return client ? execute(client) : prisma.$transaction((transaction) => execute(transaction));
 }
+

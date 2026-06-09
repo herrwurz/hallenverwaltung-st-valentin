@@ -1,4 +1,8 @@
+import { approveChangeRequestAction, markChangeRequestInReviewAction, rejectChangeRequestAction } from "@/app/admin/booking-changes/actions";
+import { AppFeedback } from "@/components/app-feedback";
 import { StatusFilterSelect } from "@/components/status-filter-select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getBookingChangeStatusBadgeClass,
   getBookingChangeStatusLabel,
@@ -6,15 +10,7 @@ import {
   type BookingChangeFilterKey,
 } from "@/lib/booking-change-status";
 import { hasPermission, requirePermission } from "@/lib/permissions";
-import {
-  getChangeRequestsForAdmin,
-  resolveBookingChangeFilter,
-} from "@/lib/services/booking-change-service";
-import {
-  approveChangeRequestAction,
-  markChangeRequestInReviewAction,
-  rejectChangeRequestAction,
-} from "@/app/admin/booking-changes/actions";
+import { getChangeRequestsForAdmin, resolveBookingChangeFilter } from "@/lib/services/booking-change-service";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
@@ -41,7 +37,7 @@ const filterButtons: BookingChangeFilterKey[] = [
   "ALL",
 ];
 
-const textareaClass = "mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm";
+const textareaClass = "mt-2 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
 type PageProps = {
   searchParams: Promise<{
@@ -82,33 +78,21 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
 
   return (
     <>
-      <p className="text-sm font-medium uppercase tracking-[0.25em] text-sky-400">Buchungen</p>
-      <h2 className="mt-3 text-3xl font-semibold">Änderungsanträge</h2>
-      <p className="mt-3 text-slate-300">
+      <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Buchungen</p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight">Änderungsanträge</h2>
+      <p className="mt-3 text-muted-foreground">
         Terminverschiebungen und vorbereitete Tauschanträge. Genehmigte Verschiebungen behalten die alte Buchung als
         `MOVED` und erzeugen einen neuen genehmigten Ersatztermin.
       </p>
 
-      {params.error ? (
-        <p className="mt-6 rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-200">
-          {params.error}
-        </p>
-      ) : null}
-      {params.reviewed ? (
-        <p className="mt-6 rounded-lg border border-sky-800 bg-sky-950/40 p-4 text-sm text-sky-200">
-          Der Änderungsantrag wurde in Prüfung übernommen.
-        </p>
-      ) : null}
-      {params.approved ? (
-        <p className="mt-6 rounded-lg border border-emerald-800 bg-emerald-950/40 p-4 text-sm text-emerald-200">
-          Der Änderungsantrag wurde genehmigt.
-        </p>
-      ) : null}
-      {params.rejected ? (
-        <p className="mt-6 rounded-lg border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">
-          Der Änderungsantrag wurde abgelehnt.
-        </p>
-      ) : null}
+      <AppFeedback
+        messages={[
+          { tone: "error", text: params.error },
+          { tone: "info", text: params.reviewed ? "Der Änderungsantrag wurde in Prüfung übernommen." : undefined },
+          { tone: "success", text: params.approved ? "Der Änderungsantrag wurde genehmigt." : undefined },
+          { tone: "success", text: params.rejected ? "Der Änderungsantrag wurde abgelehnt." : undefined },
+        ]}
+      />
 
       <StatusFilterSelect
         selectedValue={selectedFilter}
@@ -118,138 +102,133 @@ export default async function AdminBookingChangesPage({ searchParams }: PageProp
         }))}
       />
 
-      <section className="mt-8 space-y-3">
+      <section className="mt-8 space-y-4">
         {requests.length === 0 ? (
-          <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">
+          <p className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
             Für den gewählten Statusfilter sind keine Änderungsanträge vorhanden.
           </p>
         ) : (
           requests.map((request) => (
-            <article key={request.id} className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm text-sky-300">{getBookingChangeTypeLabel(request.type)}</p>
-                  <h3 className="mt-1 font-medium">{request.booking.title}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {request.booking.organization.name} | beantragt von{" "}
-                    {request.requestedBy.displayName ?? request.requestedBy.email}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Filter aktiv: {Array.from(activeStatuses).map(getBookingChangeStatusLabel).join(", ")}
-                  </p>
-                </div>
-                <span className={`rounded-full px-3 py-1 text-sm ${getBookingChangeStatusBadgeClass(request.status)}`}>
-                  {getBookingChangeStatusLabel(request.status)}
-                </span>
-              </div>
-
-              <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                <section className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
-                  <h4 className="font-medium text-slate-200">Bisheriger Termin</h4>
-                  <p className="mt-2 text-slate-300">
-                    {request.oldRoom.building.name} - {request.oldRoom.name}
-                  </p>
-                  <p className="mt-1 text-slate-400">
-                    {dateFormatter.format(request.oldStartAt)} bis {dateFormatter.format(request.oldEndAt)}
-                  </p>
-                </section>
-                <section className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
-                  <h4 className="font-medium text-slate-200">Gewünschter Termin</h4>
-                  <p className="mt-2 text-slate-300">
-                    {request.newRoom.building.name} - {request.newRoom.name}
-                  </p>
-                  <p className="mt-1 text-slate-400">
-                    {dateFormatter.format(request.newStartAt)} bis {dateFormatter.format(request.newEndAt)}
-                  </p>
-                </section>
-              </div>
-
-              <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
-                <h4 className="font-medium text-slate-200">Begründung</h4>
-                <p className="mt-2 text-slate-300">{request.reason}</p>
-                {request.decisionNote ? (
-                  <p className="mt-3 text-slate-400">
-                    Entscheidung: {request.decisionNote}
-                    {request.decidedBy ? ` | ${request.decidedBy.displayName ?? request.decidedBy.email}` : ""}
-                    {request.decidedAt ? ` | ${dateFormatter.format(request.decidedAt)}` : ""}
-                  </p>
-                ) : null}
-              </section>
-
-              <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-                <h4 className="text-sm font-medium text-slate-200">Konflikthinweise neuer Termin</h4>
-                {request.conflicts.length === 0 ? (
-                  <p className="mt-3 text-sm text-emerald-200">Aktuell keine harten Konflikte erkannt.</p>
-                ) : (
-                  <ul className="mt-3 space-y-2 text-sm">
-                    {request.conflicts.map((conflict, index) => (
-                      <li
-                        key={`${request.id}-conflict-${index}`}
-                        className={`rounded-lg border px-3 py-2 ${
-                          conflict.severity === "blocking"
-                            ? "border-rose-900 bg-rose-950/40 text-rose-200"
-                            : "border-amber-900 bg-amber-950/40 text-amber-200"
-                        }`}
-                      >
-                        <p className="font-medium">
-                          {conflict.severity === "blocking" ? "Blockierend" : "Soft-Konflikt"}
-                        </p>
-                        <p className="mt-1">{conflict.message}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              {canApprove || canReject ? (
-                <section className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-                  <h4 className="text-sm font-medium text-slate-200">Entscheidung</h4>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Verschiebung: Beantragt {"->"} In Prüfung {"->"} Genehmigt oder Abgelehnt. Tausch ist aktuell nur
-                    vorbereitet.
-                  </p>
-                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                    {canApprove && request.status === "REQUESTED" ? (
-                      <form action={markChangeRequestInReviewAction} className="rounded-lg border border-slate-800 p-4">
-                        <input type="hidden" name="requestId" value={request.id} />
-                        <input type="hidden" name="status" value={selectedFilter} />
-                        <p className="text-sm text-slate-300">Antrag zur fachlichen Prüfung übernehmen.</p>
-                        <button className="mt-4 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-400">
-                          In Prüfung setzen
-                        </button>
-                      </form>
-                    ) : null}
-
-                    {canApprove && request.status === "IN_REVIEW" ? (
-                      <form action={approveChangeRequestAction} className="rounded-lg border border-emerald-900 p-4">
-                        <input type="hidden" name="requestId" value={request.id} />
-                        <input type="hidden" name="status" value={selectedFilter} />
-                        <p className="text-sm text-slate-300">
-                          Genehmigt die Verschiebung, setzt die alte Buchung auf MOVED und legt den Ersatztermin an.
-                        </p>
-                        <button className="mt-4 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400">
-                          Genehmigen
-                        </button>
-                      </form>
-                    ) : null}
-
-                    {canReject && request.status === "IN_REVIEW" ? (
-                      <form action={rejectChangeRequestAction} className="rounded-lg border border-rose-900 p-4">
-                        <input type="hidden" name="requestId" value={request.id} />
-                        <input type="hidden" name="status" value={selectedFilter} />
-                        <label className="text-sm text-slate-300">
-                          Begründung (erforderlich)
-                          <textarea name="decisionNote" rows={3} required className={textareaClass} />
-                        </label>
-                        <button className="mt-4 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-rose-400">
-                          Ablehnen
-                        </button>
-                      </form>
-                    ) : null}
+            <Card key={request.id}>
+              <CardHeader>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-primary">{getBookingChangeTypeLabel(request.type)}</p>
+                    <CardTitle className="mt-1">{request.booking.title}</CardTitle>
+                    <CardDescription>
+                      {request.booking.organization.name} | beantragt von{" "}
+                      {request.requestedBy.displayName ?? request.requestedBy.email}
+                    </CardDescription>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Filter aktiv: {Array.from(activeStatuses).map(getBookingChangeStatusLabel).join(", ")}
+                    </p>
                   </div>
+                  <span className={`rounded-full px-3 py-1 text-sm ${getBookingChangeStatusBadgeClass(request.status)}`}>
+                    {getBookingChangeStatusLabel(request.status)}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <section className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+                    <h4 className="font-medium">Bisheriger Termin</h4>
+                    <p className="mt-2 text-muted-foreground">
+                      {request.oldRoom.building.name} - {request.oldRoom.name}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">
+                      {dateFormatter.format(request.oldStartAt)} bis {dateFormatter.format(request.oldEndAt)}
+                    </p>
+                  </section>
+                  <section className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+                    <h4 className="font-medium">Gewünschter Termin</h4>
+                    <p className="mt-2 text-muted-foreground">
+                      {request.newRoom.building.name} - {request.newRoom.name}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">
+                      {dateFormatter.format(request.newStartAt)} bis {dateFormatter.format(request.newEndAt)}
+                    </p>
+                  </section>
+                </div>
+
+                <section className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-sm">
+                  <h4 className="font-medium">Begründung</h4>
+                  <p className="mt-2 text-muted-foreground">{request.reason}</p>
+                  {request.decisionNote ? (
+                    <p className="mt-3 text-muted-foreground">
+                      Entscheidung: {request.decisionNote}
+                      {request.decidedBy ? ` | ${request.decidedBy.displayName ?? request.decidedBy.email}` : ""}
+                      {request.decidedAt ? ` | ${dateFormatter.format(request.decidedAt)}` : ""}
+                    </p>
+                  ) : null}
                 </section>
-              ) : null}
-            </article>
+
+                <section className="mt-4 rounded-lg border border-border bg-muted/40 p-4">
+                  <h4 className="text-sm font-medium">Konflikthinweise neuer Termin</h4>
+                  {request.conflicts.length === 0 ? (
+                    <p className="mt-3 text-sm text-emerald-700">Aktuell keine harten Konflikte erkannt.</p>
+                  ) : (
+                    <ul className="mt-3 space-y-2 text-sm">
+                      {request.conflicts.map((conflict, index) => (
+                        <li
+                          key={`${request.id}-conflict-${index}`}
+                          className={`rounded-lg border px-3 py-2 ${
+                            conflict.severity === "blocking"
+                              ? "border-rose-500/20 bg-destructive/10 text-rose-700"
+                              : "border-warning/35 bg-warning/15 text-warning-foreground"
+                          }`}
+                        >
+                          <p className="font-medium">{conflict.severity === "blocking" ? "Blockierend" : "Soft-Konflikt"}</p>
+                          <p className="mt-1">{conflict.message}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
+                {canApprove || canReject ? (
+                  <section className="mt-5 rounded-lg border border-border bg-muted/40 p-4">
+                    <h4 className="text-sm font-medium">Entscheidung</h4>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Verschiebung: Beantragt {"->"} In Prüfung {"->"} Genehmigt oder Abgelehnt. Tausch ist aktuell nur
+                      vorbereitet.
+                    </p>
+                    <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                      {canApprove && request.status === "REQUESTED" ? (
+                        <form action={markChangeRequestInReviewAction} className="rounded-lg border border-border bg-card p-4">
+                          <input type="hidden" name="requestId" value={request.id} />
+                          <input type="hidden" name="status" value={selectedFilter} />
+                          <p className="text-sm text-muted-foreground">Antrag zur fachlichen Prüfung übernehmen.</p>
+                          <Button className="mt-4">In Prüfung setzen</Button>
+                        </form>
+                      ) : null}
+
+                      {canApprove && request.status === "IN_REVIEW" ? (
+                        <form action={approveChangeRequestAction} className="rounded-lg border border-emerald-500/20 bg-card p-4">
+                          <input type="hidden" name="requestId" value={request.id} />
+                          <input type="hidden" name="status" value={selectedFilter} />
+                          <p className="text-sm text-muted-foreground">
+                            Genehmigt die Verschiebung, setzt die alte Buchung auf MOVED und legt den Ersatztermin an.
+                          </p>
+                          <Button className="mt-4" variant="success">Genehmigen</Button>
+                        </form>
+                      ) : null}
+
+                      {canReject && request.status === "IN_REVIEW" ? (
+                        <form action={rejectChangeRequestAction} className="rounded-lg border border-rose-500/20 bg-card p-4">
+                          <input type="hidden" name="requestId" value={request.id} />
+                          <input type="hidden" name="status" value={selectedFilter} />
+                          <label className="text-sm font-medium">
+                            Begründung (erforderlich)
+                            <textarea name="decisionNote" rows={3} required className={textareaClass} />
+                          </label>
+                          <Button className="mt-4" variant="destructive">Ablehnen</Button>
+                        </form>
+                      ) : null}
+                    </div>
+                  </section>
+                ) : null}
+              </CardContent>
+            </Card>
           ))
         )}
       </section>

@@ -1,51 +1,42 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Building2 } from "lucide-react";
+import { AdminNavigation, adminNavigation, type AdminNavigationItem } from "@/components/admin-navigation";
 import { LogoutButton } from "@/components/logout-button";
-
-const navigation = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/bookings", label: "Buchungsanträge" },
-  { href: "/admin/calendar", label: "Kalender" },
-  { href: "/admin/billing", label: "Abrechnung" },
-  { href: "/admin/notifications", label: "Benachrichtigungen" },
-  { href: "/admin/settings/calendar", label: "Einstellungen" },
-  { href: "/admin/waitlist", label: "Warteliste" },
-  { href: "/admin/buildings", label: "Gebäude" },
-  { href: "/admin/rooms", label: "Räume" },
-  { href: "/admin/organizations", label: "Organisationen" },
-  { href: "/admin/users", label: "Benutzer" },
-  { href: "/admin/roles", label: "Rollen/Rechte" },
-];
 
 type AdminShellProps = {
   children: ReactNode;
-  navigationItems?: typeof navigation;
+  navigationItems?: AdminNavigationItem[];
   userName?: string | null;
 };
 
-export function AdminShell({ children, navigationItems = navigation, userName }: AdminShellProps) {
+export function AdminShell({ children, navigationItems = adminNavigation, userName }: AdminShellProps) {
   return (
-    <main className="windows-shell admin-desktop min-h-screen text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-7xl">
-        <aside className="w-64 shrink-0 border-r border-slate-800 px-5 py-8">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-sky-400">Verwaltung</p>
-          <h1 className="mt-3 text-xl font-semibold">Verwaltungsportal</h1>
-          <nav className="mt-10 space-y-1" aria-label="Admin-Navigation">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block rounded-sm px-3 py-2.5 text-sm text-slate-300 transition hover:bg-slate-900 hover:text-white"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+    <main className="windows-shell admin-desktop min-h-screen">
+      <div className="mx-auto flex min-h-screen max-w-[1440px]">
+        <aside className="sticky top-0 h-screen w-72 shrink-0 overflow-y-auto border-r px-5 py-6">
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Building2 className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-primary">St. Valentin</p>
+              <h1 className="text-base font-semibold tracking-tight">Hallenverwaltung</h1>
+            </div>
+          </div>
+          <AdminNavigation items={navigationItems} />
         </aside>
-        <div className="min-w-0 flex-1 px-8 py-8">
-          <header className="flex items-center justify-end gap-4 border-b border-slate-800 pb-5">
-            {userName ? <span className="text-sm text-slate-400">{userName}</span> : null}
-            <LogoutButton />
+        <div className="min-w-0 flex-1 px-8 py-6">
+          <header className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                Verwaltungsportal
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Stammdaten, Buchungen, Kalender und Reports</p>
+            </div>
+            <div className="flex items-center gap-3">
+              {userName ? <span className="text-sm text-muted-foreground">{userName}</span> : null}
+              <LogoutButton />
+            </div>
           </header>
           <div className="py-8">{children}</div>
         </div>

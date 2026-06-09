@@ -17,7 +17,7 @@ Phase 12 nutzt `AuditEntry` fuer die Protokollierung von Worker-Laeufen. Die in
 Phase 15 ergaenzt `BookingChangeRequest` fuer Terminverschiebungen und
 vorbereitete Tauschantraege. Phase 16 nutzt `Document` und `DamageReport`
 fuer Dokumentenmetadaten und Schadensmeldungen. Phase 17 nutzt `BookingSeries`
-und `HolidayPeriod` fuer woechentliche Serienantraege und Ferienregeln. Phase
+und `HolidayPeriod` fuer Serienantraege und Ferienregeln. Phase
 18 ergaenzt `NoShowReport` fuer Hallenwart- und Verwaltungsprotokolle. Phase
 19.1 haertet die Hallenwart-Zuordnung mit `Caretaker.userId`. Die in Phase 3 vorhandene
 Authentifizierung verwendet `User.passwordHash`.
@@ -59,9 +59,9 @@ werden.
   verhindert `UPDATE` und `DELETE` an Historieneintraegen.
 - Bei der Erstanlage eines Buchungsantrags ist `BookingStatusHistory.oldStatus`
   bewusst `null`; erst danach werden echte Statusuebergaenge historisiert.
-- Die Verwaltungsfreigabe folgt in Version 1 dem Weg `REQUESTED ->
-  IN_REVIEW -> APPROVED/REJECTED`; direkte Genehmigung oder Ablehnung aus
-  `REQUESTED` ist nicht vorgesehen.
+- Die Verwaltungsfreigabe erlaubt in Version 1 den einfachen Weg `REQUESTED ->
+  APPROVED/REJECTED`. Der Zwischenstatus `IN_REVIEW` bleibt optional, wenn ein
+  Antrag intern zur Pruefung vorgemerkt werden soll.
 - Vor `APPROVED` wird der konfliktrelevante Raumkontext per transaktionalem
   PostgreSQL-Advisory-Lock serialisiert. Der Lock umfasst den angefragten Raum
   sowie alle ueber `RoomComposition` verbundenen Parent- und Teilraeume.
@@ -77,8 +77,10 @@ werden.
   Antragstellung, sofern kein Verwaltungsrecht vorliegt.
 - `VIEW_BOOKINGS` ist Voraussetzung fuer die Admin-Buchungsuebersicht.
 - `VIEW_BOOKINGS` ist ebenfalls Voraussetzung fuer die Admin-Wartelistenuebersicht.
-- `APPROVE_BOOKING` erlaubt die Genehmigung eines Antrags in Pruefung.
-- `REJECT_BOOKING` erlaubt die Ablehnung eines Antrags in Pruefung.
+- `APPROVE_BOOKING` erlaubt das optionale Uebernehmen in Pruefung und die
+  Genehmigung beantragter oder in Pruefung befindlicher Antraege.
+- `REJECT_BOOKING` erlaubt die Ablehnung beantragter oder in Pruefung
+  befindlicher Antraege.
 - Wartelistenplaetze werden nach `placedAt` gereiht. Wenn ein passender Slot
   frei wird, erhaelt genau ein Eintrag gleichzeitig den Status `OFFERED` mit
   einer Frist von 48 Stunden (`offerExpiresAt`).
@@ -109,8 +111,10 @@ werden.
 - Schadensstatuswechsel sind vorwaertsgerichtet (`REPORTED -> IN_REVIEW ->
   RESOLVED`) und werden ueber `AuditEntry` protokolliert. Neue Meldungen
   koennen das Notification-Event `DAMAGE_REPORTED` erzeugen.
-- `BookingSeries` erzeugt in Phase 17 woechentliche `Booking`-Einzeltermine
-  mit `kind = SERIES_OCCURRENCE`. Jeder Termin bleibt ein normaler
+- `BookingSeries` erzeugt wiederkehrende `Booking`-Einzeltermine mit
+  `kind = SERIES_OCCURRENCE`. Unterstuetzt werden taegliche, woechentliche,
+  monatliche und jaehrliche Muster; das konkrete Muster wird in
+  `recurrenceRule` gespeichert. Jeder Termin bleibt ein normaler
   Buchungsantrag mit Statushistorie und Genehmigungsworkflow.
 - `HolidayPeriod.defaultStatus` steuert die Serienanlage: `CLOSED` fuehrt zum
   Ueberspringen des betroffenen Termins, `RESTRICTED` erzeugt einen Hinweis,
