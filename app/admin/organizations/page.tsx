@@ -123,7 +123,7 @@ function OrganizationForm({
         </select>
       </label>
       <label className="text-sm font-medium">
-        Sperrgrund
+        Sperr-/Stilllegungsgrund
         <input name="blockedReason" defaultValue={organization?.blockedReason ?? ""} className={inputClass} />
       </label>
       <div className="lg:col-span-4">

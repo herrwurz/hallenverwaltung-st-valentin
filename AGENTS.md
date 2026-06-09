@@ -546,6 +546,16 @@ Standardverhalten ab sofort:
   wenn Port 3000 stabil erreichbar bleibt. Bei erneutem
   `Found lockfile missing swc dependencies` plus `EACCES/fetch failed` nicht
   weiter experimentieren, sondern als bekanntes Umgebungsrisiko dokumentieren.
+- Beim OneDrive-/Windows-Dateisperrenproblem mit `.next/standalone` und
+  Prisma-DLLs (`query_engine-windows.dll.node`) nicht wiederholt Build-
+  Versuche im OneDrive-Pfad starten.
+- Zuletzt funktionierende Loesung: Projekt fuer Build, Teststand und
+  Durchklicken in einen normalen lokalen Pfad wie `C:\Projekte\...`
+  verschieben oder kopieren, laufende Dev-/Node-Prozesse beenden und erst
+  dann `.next` neu erzeugen.
+- Wenn der Build nur wegen einer gesperrten alten `.next`-DLL scheitert,
+  den Fehler als Umgebungsblocker dokumentieren und nicht als Codefehler
+  behandeln.
 
 ---
 
