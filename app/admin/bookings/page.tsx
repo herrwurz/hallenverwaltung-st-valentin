@@ -10,7 +10,14 @@ import {
   getBookingsForAdmin,
   resolveAdminBookingFilter,
 } from "@/lib/services/booking-approval-service";
-import { approveBookingAction, markBookingInReviewAction, rejectBookingAction } from "@/app/admin/bookings/actions";
+import {
+  approveBookingAction,
+  approveSeriesAction,
+  markBookingInReviewAction,
+  markSeriesInReviewAction,
+  rejectBookingAction,
+  rejectSeriesAction,
+} from "@/app/admin/bookings/actions";
 
 const dateFormatter = new Intl.DateTimeFormat("de-AT", {
   dateStyle: "medium",
@@ -35,6 +42,9 @@ type PageProps = {
     reviewed?: string;
     approved?: string;
     rejected?: string;
+    seriesReviewed?: string;
+    seriesApproved?: string;
+    seriesRejected?: string;
     organizationId?: string;
     error?: string;
   }>;
@@ -91,6 +101,9 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
           { tone: "info", text: params.reviewed ? "Der Antrag wurde in Prüfung übernommen." : undefined },
           { tone: "success", text: params.approved ? "Die Buchung wurde genehmigt." : undefined },
           { tone: "success", text: params.rejected ? "Die Buchung wurde abgelehnt." : undefined },
+          { tone: "info", text: params.seriesReviewed },
+          { tone: "success", text: params.seriesApproved },
+          { tone: "success", text: params.seriesRejected },
         ]}
       />
 
@@ -264,6 +277,57 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         </label>
                         <Button type="submit" className="mt-4" variant="destructive">
                           Ablehnen
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+
+              {booking.series && (canApprove || canReject) ? (
+                <section className="mt-5 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                  <h4 className="text-sm font-medium">Ganze Serie bearbeiten</h4>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Diese Aktion betrifft alle passenden offenen Einzeltermine der Serie &quot;{booking.series.title}&quot;.
+                    Jeder Termin wird einzeln geprüft, historisiert und bei der Genehmigung erneut auf harte Konflikte geprüft.
+                  </p>
+                  <div className="mt-4 grid gap-4 lg:grid-cols-3">
+                    {canApprove ? (
+                      <form action={markSeriesInReviewAction} className="rounded-xl border border-border bg-card p-4">
+                        <input type="hidden" name="seriesId" value={booking.series.id} />
+                        <input type="hidden" name="status" value={selectedFilter} />
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <p className="text-sm text-muted-foreground">Alle beantragten Serientermine in Prüfung setzen.</p>
+                        <Button type="submit" className="mt-4">Serie in Prüfung</Button>
+                      </form>
+                    ) : null}
+
+                    {canApprove ? (
+                      <form action={approveSeriesAction} className="rounded-xl border border-emerald-500/20 bg-card p-4">
+                        <input type="hidden" name="seriesId" value={booking.series.id} />
+                        <input type="hidden" name="status" value={selectedFilter} />
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <label className="text-sm font-medium">
+                          Kommentar (optional)
+                          <textarea name="decisionNote" rows={3} className={textareaClass} />
+                        </label>
+                        <Button type="submit" className="mt-4" variant="success">
+                          Serie genehmigen
+                        </Button>
+                      </form>
+                    ) : null}
+
+                    {canReject ? (
+                      <form action={rejectSeriesAction} className="rounded-xl border border-rose-500/20 bg-card p-4">
+                        <input type="hidden" name="seriesId" value={booking.series.id} />
+                        <input type="hidden" name="status" value={selectedFilter} />
+                        <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <label className="text-sm font-medium">
+                          Begründung (erforderlich)
+                          <textarea name="decisionNote" rows={3} required className={textareaClass} />
+                        </label>
+                        <Button type="submit" className="mt-4" variant="destructive">
+                          Serie ablehnen
                         </Button>
                       </form>
                     ) : null}
