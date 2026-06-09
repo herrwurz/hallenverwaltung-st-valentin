@@ -264,6 +264,10 @@ model Building {
   code        String              @unique
   name        String
   address     String?
+  postalCode  String?
+  city        String?
+  email       String?
+  phone       String?
   isActive    Boolean             @default(true)
   rooms       Room[]
   caretakers  BuildingCaretaker[]

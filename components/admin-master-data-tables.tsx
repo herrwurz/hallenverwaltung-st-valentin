@@ -10,6 +10,10 @@ export type BuildingTableRow = {
   code: string;
   name: string;
   address: string;
+  postalCode: string;
+  city: string;
+  email: string;
+  phone: string;
   roomCount: number;
   caretakerName: string;
   isActive: boolean;
@@ -51,6 +55,21 @@ const buildingColumns: ColumnDef<BuildingTableRow>[] = [
     ),
   },
   { accessorKey: "address", header: "Adresse" },
+  {
+    accessorKey: "city",
+    header: "Ort",
+    cell: ({ row }) => [row.original.postalCode, row.original.city].filter(Boolean).join(" ") || "-",
+  },
+  {
+    accessorKey: "email",
+    header: "Kontakt",
+    cell: ({ row }) => (
+      <div className="space-y-0.5 text-xs">
+        <p>{row.original.email || "-"}</p>
+        <p className="text-muted-foreground">{row.original.phone || ""}</p>
+      </div>
+    ),
+  },
   { accessorKey: "roomCount", header: "Räume" },
   { accessorKey: "caretakerName", header: "Hauswart" },
   {

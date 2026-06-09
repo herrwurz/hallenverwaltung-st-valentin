@@ -5,9 +5,11 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
 import { saveBuilding } from "@/lib/services/admin/building-service";
+import { createClosure } from "@/lib/services/admin/closure-admin-service";
 import { saveOrganization } from "@/lib/services/admin/organization-service";
 import { saveRoom } from "@/lib/services/admin/room-service";
 import { saveUser } from "@/lib/services/admin/user-service";
+import { BookingValidationError } from "@/lib/services/booking-rules";
 
 function optionalValue(formData: FormData, name: string) {
   const value = String(formData.get(name) ?? "").trim();
@@ -17,6 +19,10 @@ function optionalValue(formData: FormData, name: string) {
 function getErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
     return error.issues[0]?.message ?? "Die Eingaben sind nicht gültig.";
+  }
+
+  if (error instanceof BookingValidationError) {
+    return error.message;
   }
 
   const expectedMessages = new Set([
@@ -50,6 +56,20 @@ async function executeAdminMutation(path: string, operation: (actorUserId: strin
   redirect(`${path}?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "saved=1"}`);
 }
 
+async function executeClosureMutation(path: string, operation: (actorUserId: string) => Promise<void>) {
+  const actor = await requirePermission("BLOCK_ROOM");
+
+  let errorMessage: string | undefined;
+  try {
+    await operation(actor.id);
+  } catch (error) {
+    errorMessage = getErrorMessage(error);
+  }
+
+  revalidatePath(path);
+  redirect(`${path}?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "closureSaved=1"}`);
+}
+
 export async function saveBuildingAction(formData: FormData) {
   await executeAdminMutation("/admin/buildings", () =>
     saveBuilding({
@@ -57,6 +77,10 @@ export async function saveBuildingAction(formData: FormData) {
       code: String(formData.get("code") ?? "").trim().toUpperCase(),
       name: formData.get("name"),
       address: optionalValue(formData, "address"),
+      postalCode: optionalValue(formData, "postalCode"),
+      city: optionalValue(formData, "city"),
+      email: optionalValue(formData, "email"),
+      phone: optionalValue(formData, "phone"),
       isActive: formData.get("isActive") === "on",
       caretakerId: optionalValue(formData, "caretakerId"),
     }),
@@ -80,6 +104,38 @@ export async function saveRoomAction(formData: FormData) {
       teardownBufferMinutes: formData.get("teardownBufferMinutes"),
     }),
   );
+}
+
+export async function createBuildingClosureAction(formData: FormData) {
+  await executeClosureMutation("/admin/buildings", async (actorUserId) => {
+    await createClosure(
+      {
+        buildingId: formData.get("buildingId"),
+        status: formData.get("status"),
+        reason: formData.get("reason"),
+        startsAt: formData.get("startsAt"),
+        endsAt: formData.get("endsAt"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
+}
+
+export async function createRoomClosureAction(formData: FormData) {
+  await executeClosureMutation("/admin/rooms", async (actorUserId) => {
+    await createClosure(
+      {
+        roomId: formData.get("roomId"),
+        status: formData.get("status"),
+        reason: formData.get("reason"),
+        startsAt: formData.get("startsAt"),
+        endsAt: formData.get("endsAt"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
 }
 
 export async function saveOrganizationAction(formData: FormData) {

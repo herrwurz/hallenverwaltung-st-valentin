@@ -88,6 +88,49 @@ test("phase 26.8 organization blocking deactivates users and preserves reasons",
   assert.match(organizationPage, /Stilllegungsgrund/);
 });
 
+test("phase 27 building contact fields are persisted and visible in admin", () => {
+  const schema = readFileSync("prisma/schema.prisma", "utf8");
+  const migration = readFileSync("prisma/migrations/20260609180000_phase27_building_contact_fields/migration.sql", "utf8");
+  const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
+  const adminActions = readFileSync("app/admin/actions.ts", "utf8");
+  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const tables = readFileSync("components/admin-master-data-tables.tsx", "utf8");
+
+  assert.match(schema, /postalCode\s+String\?/);
+  assert.match(schema, /city\s+String\?/);
+  assert.match(schema, /email\s+String\?/);
+  assert.match(schema, /phone\s+String\?/);
+  assert.match(migration, /ADD COLUMN "postalCode"/);
+  assert.match(buildingService, /postalCode/);
+  assert.match(buildingService, /email[\s\S]*E-Mail/);
+  assert.match(adminActions, /optionalValue\(formData, "postalCode"\)/);
+  assert.match(buildingPage, /name="postalCode"/);
+  assert.match(buildingPage, /name="phone"/);
+  assert.match(tables, /header: "Kontakt"/);
+});
+
+test("phase 27 building and room closures use the central closure model", () => {
+  const closureService = readFileSync("lib/services/admin/closure-admin-service.ts", "utf8");
+  const closurePanel = readFileSync("components/admin-closure-panel.tsx", "utf8");
+  const actions = readFileSync("app/admin/actions.ts", "utf8");
+  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
+  const roomService = readFileSync("lib/services/admin/room-service.ts", "utf8");
+
+  assert.match(closureService, /validateClosureTarget/);
+  assert.match(closureService, /hasPermission\(actorUserId, "BLOCK_ROOM"\)/);
+  assert.match(closureService, /prisma\.closure\.create/);
+  assert.match(actions, /createBuildingClosureAction/);
+  assert.match(actions, /createRoomClosureAction/);
+  assert.match(actions, /requirePermission\("BLOCK_ROOM"\)/);
+  assert.match(buildingPage, /<AdminClosurePanel/);
+  assert.match(roomPage, /<AdminClosurePanel/);
+  assert.match(buildingService, /closures:\s*\{/);
+  assert.match(roomService, /closures:\s*\{/);
+  assert.match(closurePanel, /Sperre speichern/);
+});
+
 test("phase 26.5 series form exposes daily weekly monthly yearly patterns and preview", () => {
   const seriesForm = readFileSync("components/series-request-form.tsx", "utf8");
   const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
