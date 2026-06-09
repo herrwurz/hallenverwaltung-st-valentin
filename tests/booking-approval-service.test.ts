@@ -9,6 +9,7 @@ import {
   markBookingInReview,
   rejectBooking,
 } from "../lib/services/booking-transition-service";
+import { lockBookingApprovalContext } from "../lib/services/booking-conflict-service";
 
 const start = new Date("2026-06-01T18:00:00Z");
 const end = new Date("2026-06-01T20:00:00Z");
@@ -29,6 +30,28 @@ type WorkflowBooking = {
   requestedAt: Date;
   processedAt: Date | null;
 };
+
+test("approval lock query returns a serializable value for Prisma", async () => {
+  const queries: string[] = [];
+  const values: unknown[] = [];
+
+  await lockBookingApprovalContext("room-child", {
+    roomComposition: {
+      async findMany() {
+        return [];
+      },
+    },
+    async $queryRawUnsafe<T = unknown>(query: string, value: unknown): Promise<T> {
+      queries.push(query);
+      values.push(value);
+      return [{ locked: 1 }] as T;
+    },
+  });
+
+  assert.equal(queries.length, 1);
+  assert.match(queries[0] ?? "", /AS locked/);
+  assert.equal(values[0], "booking-approval-room:room-child");
+});
 
 function makeWorkflowBooking(overrides: Partial<WorkflowBooking> = {}): WorkflowBooking {
   return {

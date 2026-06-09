@@ -83,7 +83,7 @@ async function lockConflictRoomContext(
 
   for (const lockedRoomId of roomIds) {
     await client.$queryRawUnsafe(
-      "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+      "WITH lock AS (SELECT pg_advisory_xact_lock(hashtextextended($1, 0))) SELECT 1 AS locked",
       `${namespace}:${lockedRoomId}`,
     );
   }
