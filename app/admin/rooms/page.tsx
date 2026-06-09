@@ -1,5 +1,6 @@
-import { saveRoomAction } from "@/app/admin/actions";
+import { createRoomClosureAction, saveRoomAction } from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
+import { AdminClosurePanel } from "@/components/admin-closure-panel";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { RoomsTable, type RoomTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
@@ -11,7 +12,7 @@ import { getRoomAdministrationData } from "@/lib/services/admin/room-service";
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
 type PageProps = {
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; closureSaved?: string; error?: string }>;
 };
 
 export default async function RoomsPage({ searchParams }: PageProps) {
@@ -80,6 +81,12 @@ export default async function RoomsPage({ searchParams }: PageProps) {
             </CardHeader>
             <CardContent>
               <RoomForm buildings={data.buildings} rooms={data.rooms} room={room} />
+              <AdminClosurePanel
+                action={createRoomClosureAction}
+                targetName="roomId"
+                targetId={room.id}
+                closures={room.closures}
+              />
             </CardContent>
           </Card>
         ))}

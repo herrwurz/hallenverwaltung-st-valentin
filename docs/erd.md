@@ -36,7 +36,7 @@ absichtlich verhindert werden.
 
 - Berechtigungen: Rollen, Rechte und optionale Einzelrechte je Benutzer.
 - Organisationen: Typ, Sperrstatus, Ansprechpartner und Benutzerzuordnungen.
-- Infrastruktur: Gebaeude, Raeume, Teil-/Gesamthallen und Hauswarte.
+- Infrastruktur: Gebaeude mit Standort-/Kontaktdaten, Raeume, Teil-/Gesamthallen und Hauswarte.
 - Nutzung: Nutzungstypen, Buchungsgrundmodell, Warteliste und Sperren.
 - Historisierung: Append-only Statusverlauf einer Buchung.
 - Abrechnung: Tarifgruppen, Tarife und Abrechnungseintraege als Datenbasis.

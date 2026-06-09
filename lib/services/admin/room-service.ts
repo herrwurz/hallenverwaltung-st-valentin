@@ -32,6 +32,10 @@ export async function getRoomAdministrationData() {
         componentChildren: {
           include: { parentRoom: true },
         },
+        closures: {
+          orderBy: { startsAt: "desc" },
+          take: 5,
+        },
       },
       orderBy: [{ building: { name: "asc" } }, { name: "asc" }],
     }),

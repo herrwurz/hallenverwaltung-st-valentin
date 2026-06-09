@@ -1,5 +1,6 @@
-import { saveBuildingAction } from "@/app/admin/actions";
+import { createBuildingClosureAction, saveBuildingAction } from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
+import { AdminClosurePanel } from "@/components/admin-closure-panel";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { BuildingsTable, type BuildingTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
@@ -11,7 +12,7 @@ import { getBuildingAdministrationData } from "@/lib/services/admin/building-ser
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
 type PageProps = {
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; closureSaved?: string; error?: string }>;
 };
 
 export default async function BuildingsPage({ searchParams }: PageProps) {
@@ -22,6 +23,10 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
     code: building.code,
     name: building.name,
     address: building.address ?? "-",
+    postalCode: building.postalCode ?? "",
+    city: building.city ?? "",
+    email: building.email ?? "",
+    phone: building.phone ?? "",
     roomCount: building.rooms.length,
     caretakerName: building.caretakers[0]?.caretaker.name ?? "Kein Hauswart",
     isActive: building.isActive,
@@ -78,6 +83,12 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
             </CardHeader>
             <CardContent>
               <BuildingForm caretakers={data.caretakers} building={building} />
+              <AdminClosurePanel
+                action={createBuildingClosureAction}
+                targetName="buildingId"
+                targetId={building.id}
+                closures={building.closures}
+              />
             </CardContent>
           </Card>
         ))}
@@ -114,6 +125,22 @@ function BuildingForm({ caretakers, building }: BuildingFormProps) {
       <label className="text-sm font-medium">
         Adresse
         <input name="address" defaultValue={building?.address ?? ""} className={inputClass} />
+      </label>
+      <label className="text-sm font-medium">
+        PLZ
+        <input name="postalCode" defaultValue={building?.postalCode ?? ""} className={inputClass} inputMode="numeric" />
+      </label>
+      <label className="text-sm font-medium">
+        Ort
+        <input name="city" defaultValue={building?.city ?? ""} className={inputClass} />
+      </label>
+      <label className="text-sm font-medium">
+        E-Mail
+        <input name="email" type="email" defaultValue={building?.email ?? ""} className={inputClass} />
+      </label>
+      <label className="text-sm font-medium">
+        Telefonnummer
+        <input name="phone" defaultValue={building?.phone ?? ""} className={inputClass} />
       </label>
       <label className="text-sm font-medium">
         Primärer Hauswart
