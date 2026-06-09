@@ -131,6 +131,26 @@ test("phase 27 building and room closures use the central closure model", () => 
   assert.match(closurePanel, /Sperre speichern/);
 });
 
+test("phase 27.1 series approval actions use the central booking workflow", () => {
+  const approvalService = readFileSync("lib/services/booking-approval-service.ts", "utf8");
+  const actions = readFileSync("app/admin/bookings/actions.ts", "utf8");
+  const page = readFileSync("app/admin/bookings/page.tsx", "utf8");
+
+  assert.match(approvalService, /markSeriesInReviewForAdmin/);
+  assert.match(approvalService, /approveSeriesForAdmin/);
+  assert.match(approvalService, /rejectSeriesForAdmin/);
+  assert.match(approvalService, /markBookingInReviewForAdmin\(bookingId/);
+  assert.match(approvalService, /approveBookingForAdmin\(\{ bookingId, decisionNote \}/);
+  assert.match(approvalService, /rejectBookingForAdmin\(\{ bookingId, decisionNote \}/);
+  assert.match(actions, /markSeriesInReviewAction/);
+  assert.match(actions, /approveSeriesAction/);
+  assert.match(actions, /rejectSeriesAction/);
+  assert.match(page, /Ganze Serie bearbeiten/);
+  assert.match(page, /name="seriesId"/);
+  assert.match(page, /Serie genehmigen/);
+  assert.match(page, /Serie ablehnen/);
+});
+
 test("phase 26.5 series form exposes daily weekly monthly yearly patterns and preview", () => {
   const seriesForm = readFileSync("components/series-request-form.tsx", "utf8");
   const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");

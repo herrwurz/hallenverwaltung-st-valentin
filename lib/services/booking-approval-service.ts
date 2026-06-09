@@ -45,6 +45,14 @@ type AdminBookingFilters = {
   organizationId?: string;
 };
 
+export type SeriesWorkflowSummary = {
+  seriesId: string;
+  totalEligible: number;
+  processed: number;
+  failed: number;
+  errors: string[];
+};
+
 async function resolvePermission(override: boolean | undefined, permissionPromiseFactory: () => Promise<boolean>) {
   if (typeof override === "boolean") {
     return override;
@@ -109,6 +117,12 @@ export async function getBookingsForAdmin(
           },
         },
         orderBy: { createdAt: "desc" },
+      },
+      series: {
+        select: {
+          id: true,
+          title: true,
+        },
       },
     },
     orderBy: [
@@ -248,4 +262,117 @@ export async function rejectBookingForAdmin(
     await processPendingNotifications();
   });
   return rejected;
+}
+
+async function getSeriesBookingsForWorkflow(seriesId: string, statuses: BookingStatus[]) {
+  return prisma.booking.findMany({
+    where: {
+      seriesId,
+      status: { in: statuses },
+    },
+    orderBy: { startsAt: "asc" },
+    select: {
+      id: true,
+    },
+  });
+}
+
+function getSeriesErrorMessage(error: unknown) {
+  if (error instanceof BookingValidationError) {
+    return error.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Der Serientermin konnte nicht bearbeitet werden.";
+}
+
+async function runSeriesWorkflow(
+  seriesId: string,
+  eligibleStatuses: BookingStatus[],
+  operation: (bookingId: string) => Promise<unknown>,
+): Promise<SeriesWorkflowSummary> {
+  const bookings = await getSeriesBookingsForWorkflow(seriesId, eligibleStatuses);
+
+  if (bookings.length === 0) {
+    throw new BookingValidationError("Für diese Serie gibt es keine passenden offenen Termine.");
+  }
+
+  const summary: SeriesWorkflowSummary = {
+    seriesId,
+    totalEligible: bookings.length,
+    processed: 0,
+    failed: 0,
+    errors: [],
+  };
+
+  for (const booking of bookings) {
+    try {
+      await operation(booking.id);
+      summary.processed += 1;
+    } catch (error) {
+      summary.failed += 1;
+      summary.errors.push(getSeriesErrorMessage(error));
+    }
+  }
+
+  if (summary.processed === 0 && summary.failed > 0) {
+    throw new BookingValidationError(summary.errors[0] ?? "Die Serientermine konnten nicht bearbeitet werden.");
+  }
+
+  return summary;
+}
+
+export async function markSeriesInReviewForAdmin(
+  seriesId: string,
+  actorUserId: string,
+  permissions: AdminWorkflowPermissions = {},
+) {
+  const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
+  assertBookingApprovalPermission(canApprove);
+
+  return runSeriesWorkflow(seriesId, ["REQUESTED"], (bookingId) =>
+    markBookingInReviewForAdmin(bookingId, actorUserId, { canApprove: true }),
+  );
+}
+
+export async function approveSeriesForAdmin(
+  {
+    seriesId,
+    decisionNote,
+  }: {
+    seriesId: string;
+    decisionNote?: string;
+  },
+  actorUserId: string,
+  permissions: AdminWorkflowPermissions = {},
+) {
+  const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
+  assertBookingApprovalPermission(canApprove);
+
+  return runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
+    approveBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canApprove: true }),
+  );
+}
+
+export async function rejectSeriesForAdmin(
+  {
+    seriesId,
+    decisionNote,
+  }: {
+    seriesId: string;
+    decisionNote?: string;
+  },
+  actorUserId: string,
+  permissions: AdminWorkflowPermissions = {},
+) {
+  const canReject = await resolvePermission(permissions.canReject, () => hasPermission(actorUserId, "REJECT_BOOKING"));
+  assertBookingRejectionPermission(canReject);
+  assertBookingDecisionNote(decisionNote);
+
+  return runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
+    rejectBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canReject: true }),
+  );
 }
