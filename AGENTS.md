@@ -549,6 +549,11 @@ Standardverhalten ab sofort:
 - Beim OneDrive-/Windows-Dateisperrenproblem mit `.next/standalone` und
   Prisma-DLLs (`query_engine-windows.dll.node`) nicht wiederholt Build-
   Versuche im OneDrive-Pfad starten.
+- Falls der OneDrive-Pfad weiter genutzt wird, zuerst die zuletzt
+  funktionierende Reparatur anwenden:
+  `attrib -U +P .next /S /D`, danach die alte Prisma-DLL oder den gesamten
+  generierten `.next`-Ordner entfernen und `npm.cmd run build` mit
+  grosszuegigem Timeout neu starten.
 - Zuletzt funktionierende Loesung: Projekt fuer Build, Teststand und
   Durchklicken in einen normalen lokalen Pfad wie `C:\Projekte\...`
   verschieben oder kopieren, laufende Dev-/Node-Prozesse beenden und erst
