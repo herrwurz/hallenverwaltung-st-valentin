@@ -263,6 +263,32 @@ test("validates exception dates in the series schema", () => {
   );
 });
 
+test("accepts action-style null values for optional series fields", () => {
+  const parsed = bookingSeriesRequestSchema.parse({
+    organizationId: "organization-1",
+    roomId: "room-1",
+    usageTypeId: "usage-1",
+    title: "Serientraining",
+    firstStartsAt,
+    firstEndsAt,
+    repeatUntil: "2026-09-30",
+    recurrenceType: "WEEKLY",
+    interval: "1",
+    weekdays: ["1"],
+    monthlyMode: null,
+    dayOfMonth: null,
+    ordinal: null,
+    weekday: null,
+    month: null,
+  });
+
+  assert.equal(parsed.monthlyMode, "DAY_OF_MONTH");
+  assert.equal(parsed.dayOfMonth, undefined);
+  assert.equal(parsed.ordinal, undefined);
+  assert.equal(parsed.weekday, undefined);
+  assert.equal(parsed.month, undefined);
+});
+
 test("validates holiday period ranges and labels", () => {
   assert.doesNotThrow(() =>
     assertHolidayPeriodRange(new Date("2026-12-24T00:00:00Z"), new Date("2027-01-07T00:00:00Z")),

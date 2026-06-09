@@ -13,6 +13,10 @@ const ordinalValues = ["FIRST", "SECOND", "THIRD", "FOURTH", "LAST"] as const;
 type Weekday = (typeof weekdays)[number];
 type OrdinalValue = (typeof ordinalValues)[number];
 
+function emptyToUndefined(value: unknown) {
+  return value === null || value === "" ? undefined : value;
+}
+
 export const bookingSeriesRequestSchema = z.object({
   organizationId: z.string().trim().min(1, "Eine Organisation ist erforderlich."),
   roomId: z.string().trim().min(1, "Ein Raum ist erforderlich."),
@@ -22,14 +26,14 @@ export const bookingSeriesRequestSchema = z.object({
   firstStartsAt: z.coerce.date(),
   firstEndsAt: z.coerce.date(),
   repeatUntil: z.coerce.date(),
-  recurrenceType: z.enum(recurrenceTypes).default("WEEKLY"),
-  interval: z.coerce.number().int().min(1).max(99).default(1),
+  recurrenceType: z.preprocess(emptyToUndefined, z.enum(recurrenceTypes).default("WEEKLY")),
+  interval: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(99).default(1)),
   weekdays: z.preprocess((value) => parseWeekdays(value), z.array(z.number().int().min(0).max(6))).default([]),
-  monthlyMode: z.enum(monthlyModes).default("DAY_OF_MONTH"),
-  dayOfMonth: z.coerce.number().int().min(1).max(31).optional(),
-  ordinal: z.enum(ordinalValues).optional(),
-  weekday: z.coerce.number().int().min(0).max(6).optional(),
-  month: z.coerce.number().int().min(1).max(12).optional(),
+  monthlyMode: z.preprocess(emptyToUndefined, z.enum(monthlyModes).default("DAY_OF_MONTH")),
+  dayOfMonth: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(31).optional()),
+  ordinal: z.preprocess(emptyToUndefined, z.enum(ordinalValues).optional()),
+  weekday: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).max(6).optional()),
+  month: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(12).optional()),
   excludedDates: z
     .preprocess((value) => parseExcludedDates(value), z.array(z.date()))
     .default([]),
