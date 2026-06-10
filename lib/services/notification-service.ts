@@ -7,9 +7,13 @@ import { renderNotificationTemplate } from "@/lib/services/notification-template
 import type {
   BookingNotificationPayload,
   BookingSeriesNotificationPayload,
+  BookingChangeNotificationPayload,
+  ClosureNotificationPayload,
   DamageNotificationPayload,
+  OrganizationNotificationPayload,
   NoShowNotificationPayload,
   NotificationEventCode,
+  UserAccountNotificationPayload,
   WaitlistNotificationPayload,
 } from "@/lib/services/notification-types";
 
@@ -17,7 +21,17 @@ type NotificationEventStatusFilter = "ALL" | "PENDING" | "SENT" | "FAILED";
 
 type NotificationClient = Pick<
   PrismaClient,
-  "notification" | "booking" | "bookingSeries" | "waitlistEntry" | "damageReport" | "noShowReport" | "user" | "systemSetting"
+  | "notification"
+  | "booking"
+  | "bookingSeries"
+  | "bookingChangeRequest"
+  | "closure"
+  | "organization"
+  | "waitlistEntry"
+  | "damageReport"
+  | "noShowReport"
+  | "user"
+  | "systemSetting"
 >;
 
 type MailSender = (payload: MailPayload) => Promise<unknown>;
@@ -328,11 +342,11 @@ export async function queueBookingNotifications(
   const caretakerRecipients = dedupeRecipients(
     [
       ...booking.room.caretakers.map(({ caretaker }) => ({
-        id: caretaker.id,
+        id: null,
         email: caretaker.email,
       })),
       ...booking.room.building.caretakers.map(({ caretaker }) => ({
-        id: caretaker.id,
+        id: null,
         email: caretaker.email,
       })),
     ],
@@ -536,11 +550,11 @@ export async function queueBookingSeriesNotifications(
   const caretakerRecipients = dedupeRecipients(
     [
       ...series.room.caretakers.map(({ caretaker }) => ({
-        id: caretaker.id,
+        id: null,
         email: caretaker.email,
       })),
       ...series.room.building.caretakers.map(({ caretaker }) => ({
-        id: caretaker.id,
+        id: null,
         email: caretaker.email,
       })),
     ],
@@ -565,6 +579,289 @@ export async function queueBookingSeriesNotifications(
       })),
     client,
   );
+}
+
+export async function queueBookingChangeNotifications(
+  changeRequestId: string,
+  eventCode:
+    | "BOOKING_CHANGE_REQUESTED"
+    | "BOOKING_CHANGE_IN_REVIEW"
+    | "BOOKING_CHANGE_APPROVED"
+    | "BOOKING_CHANGE_REJECTED",
+  client: NotificationClient = prisma,
+) {
+  const request = await client.bookingChangeRequest.findUnique({
+    where: { id: changeRequestId },
+    include: {
+      booking: {
+        include: {
+          organization: {
+            include: {
+              members: {
+                where: {
+                  activeFrom: { lte: new Date() },
+                  OR: [{ activeUntil: null }, { activeUntil: { gt: new Date() } }],
+                },
+                include: {
+                  user: { select: { id: true, email: true, displayName: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+      oldRoom: { include: { building: true } },
+      newRoom: { include: { building: true } },
+      requestedBy: { select: { id: true, email: true, displayName: true } },
+      decidedBy: { select: { id: true, email: true, displayName: true } },
+    },
+  });
+
+  if (!request) {
+    return [];
+  }
+
+  const payload: BookingChangeNotificationPayload = {
+    changeRequestId: request.id,
+    bookingId: request.bookingId,
+    title: request.booking.title,
+    organizationName: request.booking.organization.name,
+    oldBuildingName: request.oldRoom.building.name,
+    oldRoomName: request.oldRoom.name,
+    newBuildingName: request.newRoom.building.name,
+    newRoomName: request.newRoom.name,
+    oldStartAt: request.oldStartAt.toISOString(),
+    oldEndAt: request.oldEndAt.toISOString(),
+    newStartAt: request.newStartAt.toISOString(),
+    newEndAt: request.newEndAt.toISOString(),
+    requestedByName: request.requestedBy.displayName ?? undefined,
+    processedByName: request.decidedBy?.displayName ?? undefined,
+    reason: request.reason,
+    note: request.decisionNote ?? undefined,
+  };
+  const requesterRecipients = dedupeRecipients(
+    [
+      { id: request.requestedBy.id, email: request.requestedBy.email },
+      ...request.booking.organization.members
+        .filter((member) => member.isPrimary)
+        .map((member) => ({ id: member.user.id, email: member.user.email })),
+    ],
+  );
+  const adminRecipients = await getAdminRecipients(client);
+
+  const recipients = eventCode === "BOOKING_CHANGE_REQUESTED" ? [...requesterRecipients, ...adminRecipients] : requesterRecipients;
+
+  return queueNotificationRows(
+    dedupeRecipients(recipients)
+      .filter((recipient) => recipient.email)
+      .map((recipient) => ({
+        eventCode,
+        recipientUserId: recipient.id,
+        recipient: recipient.email!,
+        payload,
+      })),
+    client,
+  );
+}
+
+export async function queueClosureCreatedNotification(
+  closureId: string,
+  client: NotificationClient = prisma,
+) {
+  const closure = await client.closure.findUnique({
+    where: { id: closureId },
+    include: {
+      building: {
+        include: {
+          caretakers: { include: { caretaker: true } },
+        },
+      },
+      room: {
+        include: {
+          building: {
+            include: {
+              caretakers: { include: { caretaker: true } },
+            },
+          },
+          caretakers: { include: { caretaker: true } },
+        },
+      },
+    },
+  });
+
+  if (!closure) {
+    return [];
+  }
+
+  const targetName = closure.room
+    ? `${closure.room.building.name} - ${closure.room.name}`
+    : closure.building?.name ?? "Sperre";
+  const payload: ClosureNotificationPayload = {
+    closureId: closure.id,
+    targetName,
+    targetType: closure.roomId ? "ROOM" : "BUILDING",
+    status: closure.status,
+    reason: closure.reason,
+    startsAt: closure.startsAt.toISOString(),
+    endsAt: closure.endsAt.toISOString(),
+    isPublic: closure.isPublic,
+  };
+  const caretakerRecipients = dedupeRecipients(
+    closure.room
+      ? [
+          ...closure.room.caretakers.map(({ caretaker }) => ({ id: null, email: caretaker.email })),
+          ...closure.room.building.caretakers.map(({ caretaker }) => ({ id: null, email: caretaker.email })),
+        ]
+      : [
+          ...(closure.building?.caretakers.map(({ caretaker }) => ({ id: null, email: caretaker.email })) ?? []),
+        ],
+  );
+  const adminRecipients = await getAdminRecipients(client);
+
+  return queueNotificationRows(
+    dedupeRecipients([...caretakerRecipients, ...adminRecipients])
+      .filter((recipient) => recipient.email)
+      .map((recipient) => ({
+        eventCode: "CLOSURE_CREATED",
+        recipientUserId: recipient.id,
+        recipient: recipient.email!,
+        payload,
+      })),
+    client,
+  );
+}
+
+export async function queueUserAccountNotification(
+  userId: string,
+  eventCode: "USER_ACCOUNT_CREATED" | "USER_ACCOUNT_DEACTIVATED",
+  note?: string,
+  client: NotificationClient = prisma,
+) {
+  const user = await client.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, displayName: true },
+  });
+
+  if (!user?.email) {
+    return [];
+  }
+
+  const payload: UserAccountNotificationPayload = {
+    userId: user.id,
+    displayName: user.displayName ?? user.email,
+    email: user.email,
+    note,
+  };
+
+  return queueNotificationRows(
+    [
+      {
+        eventCode,
+        recipientUserId: user.id,
+        recipient: user.email,
+        payload,
+      },
+    ],
+    client,
+  );
+}
+
+export async function queueOrganizationStatusNotification(
+  organizationId: string,
+  affectedUserCount: number,
+  client: NotificationClient = prisma,
+) {
+  const organization = await client.organization.findUnique({
+    where: { id: organizationId },
+    select: {
+      id: true,
+      name: true,
+      status: true,
+      blockedReason: true,
+    },
+  });
+
+  if (!organization || organization.status === "ACTIVE") {
+    return [];
+  }
+
+  const payload: OrganizationNotificationPayload = {
+    organizationId: organization.id,
+    organizationName: organization.name,
+    status: organization.status,
+    reason: organization.blockedReason ?? undefined,
+    affectedUserCount,
+  };
+  const adminRecipients = await getAdminRecipients(client);
+
+  return queueNotificationRows(
+    adminRecipients
+      .filter((recipient) => recipient.email)
+      .map((recipient) => ({
+        eventCode: "ORGANIZATION_BLOCKED",
+        recipientUserId: recipient.id,
+        recipient: recipient.email!,
+        payload,
+      })),
+    client,
+  );
+}
+
+export async function queueAdminTestEmail(
+  {
+    recipient,
+    actorUserId,
+    note,
+  }: {
+    recipient: string;
+    actorUserId: string;
+    note?: string;
+  },
+  client: NotificationClient = prisma,
+) {
+  const actor = await client.user.findUnique({
+    where: { id: actorUserId },
+    select: { displayName: true, email: true },
+  });
+  const payload = {
+    recipient,
+    requestedByName: actor?.displayName ?? actor?.email ?? undefined,
+    createdAt: new Date().toISOString(),
+    note,
+  };
+
+  return queueNotificationRows(
+    [
+      {
+        eventCode: "ADMIN_TEST_EMAIL",
+        recipientUserId: null,
+        recipient,
+        payload,
+      },
+    ],
+    client,
+  );
+}
+
+export async function getNotificationRecipientPreview(client: NotificationClient = prisma) {
+  const [admins, activeUsers, caretakers, organizations] = await Promise.all([
+    getAdminRecipients(client),
+    client.user.count({ where: { isActive: true } }),
+    client.user.count({
+      where: {
+        isActive: true,
+        caretakerProfile: { isNot: null },
+      },
+    }),
+    client.organization.count({ where: { status: "ACTIVE", canRequestBookings: true } }),
+  ]);
+
+  return [
+    { label: "Verwaltung / Genehmigung", count: admins.length, description: "Empfänger für neue Anträge, Sperren und Systemmeldungen." },
+    { label: "Aktive Benutzer", count: activeUsers, description: "Potenzielle direkte Empfänger für Konto- und Portalereignisse." },
+    { label: "Hallenwarte", count: caretakers, description: "Empfänger für Sperren, Genehmigungen, Schäden und No-Shows nach Zuordnung." },
+    { label: "Aktive buchungsberechtigte Organisationen", count: organizations, description: "Organisationen mit möglichem Mailverkehr über Kontaktpersonen." },
+  ];
 }
 
 export async function queueWaitlistOfferNotification(
@@ -758,11 +1055,11 @@ export async function queueDamageReportedNotification(
   const caretakerRecipients = dedupeRecipients(
     [
       ...damage.room.caretakers.map(({ caretaker }) => ({
-        id: caretaker.id,
+        id: null,
         email: caretaker.email,
       })),
       ...damage.room.building.caretakers.map(({ caretaker }) => ({
-        id: caretaker.id,
+        id: null,
         email: caretaker.email,
       })),
     ],

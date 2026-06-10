@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
 import {
   processPendingNotifications,
+  queueAdminTestEmail,
   retryFailedNotification,
 } from "@/lib/services/notification-service";
 import {
@@ -13,6 +14,11 @@ import {
   updateNotificationEventSettings,
 } from "@/lib/services/notification-settings-service";
 import { notificationEventCodes } from "@/lib/services/notification-types";
+
+const testMailSchema = z.object({
+  recipient: z.email("Bitte eine gültige E-Mail-Adresse eingeben."),
+  note: z.string().trim().max(500).optional(),
+});
 
 function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof ZodError) {
@@ -57,6 +63,33 @@ export async function processNotificationQueueAction() {
     errorMessage
       ? `/admin/notifications?error=${encodeURIComponent(errorMessage)}`
       : "/admin/notifications?processed=1",
+  );
+}
+
+export async function sendTestNotificationAction(formData: FormData) {
+  const user = await requirePermission("VIEW_BOOKINGS");
+  let errorMessage: string | undefined;
+
+  try {
+    const input = testMailSchema.parse({
+      recipient: formData.get("recipient"),
+      note: String(formData.get("note") ?? "").trim() || undefined,
+    });
+    await queueAdminTestEmail({
+      recipient: input.recipient,
+      actorUserId: user.id,
+      note: input.note,
+    });
+    await processPendingNotifications();
+  } catch (error) {
+    errorMessage = getErrorMessage(error, "Die Testmail konnte nicht versendet werden.");
+  }
+
+  revalidatePath("/admin/notifications");
+  redirect(
+    errorMessage
+      ? `/admin/notifications?error=${encodeURIComponent(errorMessage)}`
+      : "/admin/notifications?testSent=1",
   );
 }
 

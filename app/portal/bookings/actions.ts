@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
-import { createMoveChangeRequest } from "@/lib/services/booking-change-service";
+import { createMoveChangeRequestWithNotifications } from "@/lib/services/booking-change-service";
 import { cancelOwnBookingRequest, createBookingRequest } from "@/lib/services/booking-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 import { createBookingSeriesRequest } from "@/lib/services/booking-series-service";
@@ -137,7 +137,7 @@ export async function createMoveChangeRequestAction(formData: FormData) {
   let errorMessage: string | undefined;
 
   try {
-    await createMoveChangeRequest(
+    await createMoveChangeRequestWithNotifications(
       {
         bookingId: formData.get("bookingId"),
         newRoomId: formData.get("newRoomId"),

@@ -4,6 +4,10 @@ import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 import { validateClosureTarget } from "@/lib/services/closure-service";
+import {
+  processPendingNotifications,
+  queueClosureCreatedNotification,
+} from "@/lib/services/notification-service";
 
 const closureStatusSchema = z.enum(["OPEN", "RESTRICTED", "CLOSED"] satisfies ClosureStatus[]);
 
@@ -33,7 +37,7 @@ export async function createClosure(input: unknown, actorUserId: string) {
     throw new BookingValidationError("Die Sperre muss ein gültiges Beginn- und Enddatum haben.");
   }
 
-  return prisma.closure.create({
+  const closure = await prisma.closure.create({
     data: {
       buildingId,
       roomId,
@@ -44,6 +48,15 @@ export async function createClosure(input: unknown, actorUserId: string) {
       isPublic: data.isPublic,
     },
   });
+
+  try {
+    await queueClosureCreatedNotification(closure.id);
+    await processPendingNotifications();
+  } catch (error) {
+    console.error("Notification dispatch failed after closure creation.", error);
+  }
+
+  return closure;
 }
 
 export function getClosureStatusLabel(status: ClosureStatus) {

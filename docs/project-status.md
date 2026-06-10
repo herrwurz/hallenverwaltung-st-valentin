@@ -439,6 +439,19 @@ Version 1:
 * mail-service.ts
 * worker-service.ts
 
+Aktueller Umfang:
+
+* persistente Notification Queue mit Retry-/Backoff-Logik
+* SMTP-Versand ueber konfigurierbare `SMTP_*`-Variablen
+* Admin-Testmail und Empfaenger-Vorschau unter `/admin/notifications`
+* Event-Schalter fuer aktivierbare/deaktivierbare Mailereignisse
+* automatische E-Mail-Vorbereitung fuer Buchungsantrag, in Pruefung,
+  Genehmigung, Ablehnung, Storno, Serienzusammenfassungen,
+  Verschiebungsantraege, Wartelistenangebote und Ablauf, Sperren,
+  Benutzerkonto-Anlage/-Deaktivierung sowie Organisationssperren
+* Newsletter, SMS und Push bleiben als spaetere Kanaele bewusst ausserhalb
+  von Version 1
+
 ## Abrechnung
 
 * billing-service.ts
@@ -492,10 +505,13 @@ Version 1:
 
 ### Verschiebungen & Tauschanträge
 
-* Verschiebungsanträge im Portal
-* Verwaltungsprüfung unter /admin/booking-changes
-* Genehmigung legt Ersatztermin an und setzt Ausgangsbuchung auf MOVED
-* Tauschanträge strukturell vorbereitet, aber noch nicht vollständig umgesetzt
+* Verschiebungsanträge im Portal sind umgesetzt.
+* Verwaltungsprüfung unter /admin/booking-changes ist umgesetzt.
+* Genehmigung legt Ersatztermin an und setzt Ausgangsbuchung auf MOVED.
+* Mailereignisse fuer beantragt, in Pruefung, genehmigt und abgelehnt sind
+  vorbereitet.
+* Tauschanträge sind strukturell vorbereitet, aber noch nicht vollständig
+  umgesetzt.
 
 ### Serienbuchungen erweitert
 
@@ -590,7 +606,9 @@ nicht automatisch.
 
 ## Kein vollständiger SMTP-Integrationstest
 
-Mailversand wurde service-seitig getestet, aber nicht gegen produktiven SMTP-Server.
+Mailversand wurde service-seitig getestet. Unter `/admin/notifications` gibt
+es eine Testmail-Funktion, der echte Nachweis gegen den produktiven SMTP-Server
+bleibt aber ein Go-Live-Blocker.
 
 ---
 

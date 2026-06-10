@@ -30,7 +30,7 @@ Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 | `.env.production` ohne Platzhalterwerte | offen |  |  |  |
 | Produktiver Admin-Initialbenutzer angelegt | offen |  |  |  |
 | Demo-Zugaenge in Produktion ausgeschlossen | offen |  |  |  |
-| SMTP gegen echten Server getestet | offen |  |  |  |
+| SMTP gegen echten Server getestet | offen | Admin-Testmail unter `/admin/notifications` ist vorhanden. Der Nachweis muss gegen den spaeteren echten SMTP-Server erfolgen. |  |  |
 | Worker-Betrieb aktiv und protokolliert | offen |  |  |  |
 | Backup-Routine eingerichtet | offen |  |  |  |
 | Restore-Probe erfolgreich dokumentiert | offen |  |  |  |
