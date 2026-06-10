@@ -197,3 +197,20 @@ test("phase 26.5 series form exposes daily weekly monthly yearly patterns and pr
   assert.match(seriesForm, /Vorschau \(max\. 50 Einträge\)/);
   assert.match(actions, /formData\.getAll\("weekdays"\)/);
 });
+
+test("phase 30 holiday presets and semester shortcuts are exposed", () => {
+  const holidayService = readFileSync("lib/services/holiday-service.ts", "utf8");
+  const holidayActions = readFileSync("app/admin/holidays/actions.ts", "utf8");
+  const holidayPage = readFileSync("app/admin/holidays/page.tsx", "utf8");
+  const seriesForm = readFileSync("components/series-request-form.tsx", "utf8");
+
+  assert.match(holidayService, /holidayPresetOptions/);
+  assert.match(holidayService, /AT_NO_SCHOOL_HOLIDAYS/);
+  assert.match(holidayService, /Semesterferien Niederösterreich/);
+  assert.match(holidayActions, /importHolidayPresetAction/);
+  assert.match(holidayPage, /Vorlagen übernehmen/);
+  assert.match(holidayPage, /name="presetKey"/);
+  assert.match(seriesForm, /Semester\/Saison/);
+  assert.match(seriesForm, /SCHOOL_SEMESTER/);
+  assert.match(seriesForm, /Schuljahr \/ Saison bis 30\. Juni/);
+});

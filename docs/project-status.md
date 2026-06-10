@@ -520,8 +520,10 @@ Aktueller Umfang:
 * CLOSED-Zeitraeume werden uebersprungen
 * RESTRICTED-Zeitraeume erzeugen Hinweise
 * einzelne Ausnahmedaten koennen bei Serienanlage angegeben werden
-* Saison-/Semesterlogik wird aktuell ueber das Feld "Wiederholen bis"
-  abgebildet
+* Saison-/Semesterlogik ist als Komfortauswahl fuer aktuelles Semester,
+  Schuljahr/Saison bis 30. Juni und Kalenderjahr umgesetzt
+* Oesterreichische Feiertage und Niederoesterreich-Schulferien koennen in der
+  Ferienverwaltung als Vorlagen importiert werden
 * Blockbuchungen bleiben offen, bis die Fachregel eindeutig spezifiziert ist
 
 ### Dokumentenmanagement

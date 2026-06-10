@@ -46,8 +46,8 @@ Sie sollten aber vor einem breiteren Vereins-Pilot bewusst entschieden werden.
 | --- | --- | --- | --- | --- |
 | Stammdaten loeschen | Nicht schnell loeschen einbauen. Fuer Version 1 Inaktiv-/Sperrstatus verwenden und danach Loesch-/Archivkonzept spezifizieren. | offen |  |  |
 | Rollen/Rechte bearbeiten | Nur vorziehen, wenn die Verwaltung Rollen/Rechte selbst pflegen muss. Sonst Seed-/Adminpflege beibehalten. | offen |  |  |
-| Semester-Vorauswahl fuer Serien | Komfortfunktion fuer Vereine. Kein Go-Live-Blocker, solange Serien manuell mit Wiederholen-bis angelegt werden koennen. | offen |  |  |
-| Oesterreichische Ferien je Bundesland vordefinieren | Fuer St. Valentin fachlich sinnvoll. Vor breitem Serienbuchungs-Pilot priorisieren, wenn Vereine viele Serientermine erfassen. | offen |  |  |
+| Semester-Vorauswahl fuer Serien | Umgesetzt fuer aktuelles Semester, Schuljahr/Saison bis 30. Juni und Kalenderjahr. | erledigt | Codex | 2026-06-10 |
+| Oesterreichische Ferien je Bundesland vordefinieren | Umgesetzt fuer gesetzliche Feiertage Oesterreich und Schulferien Niederoesterreich als importierbare Admin-Vorlagen. | erledigt | Codex | 2026-06-10 |
 
 ## Niedrige Punkte nach Version 1
 
@@ -80,11 +80,13 @@ Begruendung:
 
 Empfehlung:
 
-- Fuer den Erststart koennen Ferien/Feiertage manuell gepflegt werden.
-- Vor breitem Serienbuchungs-Pilot sollte entschieden werden, ob
-  Niederoesterreich-/Oesterreich-Vorlagen als eigene Phase umgesetzt werden.
-- Semester-Vorauswahl fuer Serien ist Komfort, aber kein Ersatz fuer die
-  fachliche Ferien-/Feiertagskonfiguration.
+- Fuer den Erststart koennen Ferien/Feiertage weiterhin manuell gepflegt
+  werden.
+- Zusaetzlich stehen importierbare Vorlagen fuer gesetzliche Feiertage in
+  Oesterreich und Schulferien in Niederoesterreich zur Verfuegung.
+- Die Semester-Vorauswahl in der Serienanlage setzt nur das vorhandene
+  Enddatum komfortabel vor; die fachliche Ferien-/Feiertagskonfiguration
+  bleibt weiterhin massgeblich.
 
 ## Nicht Teil von Version 1
 
