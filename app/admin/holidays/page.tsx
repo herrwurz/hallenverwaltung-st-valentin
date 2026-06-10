@@ -4,7 +4,13 @@ import { HolidaysDataTable, type HolidayTableRow } from "@/components/phase25-da
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
-import { getHolidayAdministrationData, getHolidayStatusLabel } from "@/lib/services/holiday-service";
+import {
+  getHolidayAdministrationData,
+  getHolidayScopeLabel,
+  getHolidayStatusLabel,
+  holidayCountryOptions,
+  holidayRegionOptions,
+} from "@/lib/services/holiday-service";
 
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
@@ -19,7 +25,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
   const holidayRows: HolidayTableRow[] = holidays.map((holiday) => ({
     id: holiday.id,
     name: holiday.name,
-    period: `${dateFormatter.format(holiday.startsOn)} bis ${dateFormatter.format(holiday.endsOn)}`,
+    period: `${getHolidayScopeLabel(holiday.countryCode, holiday.regionCode)} | ${dateFormatter.format(holiday.startsOn)} bis ${dateFormatter.format(holiday.endsOn)}`,
     status: getHolidayStatusLabel(holiday.defaultStatus),
     visibility: holiday.isPublic ? "Sichtbar" : "Intern",
     reason: holiday.reason,
@@ -51,6 +57,27 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
             <label className="text-sm font-medium">
               Name
               <input name="name" required maxLength={160} className={inputClass} />
+            </label>
+            <label className="text-sm font-medium">
+              Land
+              <select name="countryCode" required defaultValue="AT" className={inputClass}>
+                {holidayCountryOptions.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium">
+              Bundesland
+              <select name="regionCode" defaultValue="" className={inputClass}>
+                <option value="">Bundesweit / nicht eingeschränkt</option>
+                {holidayRegionOptions.map((region) => (
+                  <option key={region.code} value={region.code}>
+                    {region.label}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="text-sm font-medium">
               Status

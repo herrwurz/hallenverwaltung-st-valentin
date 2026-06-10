@@ -151,6 +151,29 @@ test("phase 27.1 series approval actions use the central booking workflow", () =
   assert.match(page, /Serie ablehnen/);
 });
 
+test("phase 27.2 holidays support Austria and federal-state scopes", () => {
+  const schema = readFileSync("prisma/schema.prisma", "utf8");
+  const migration = readFileSync("prisma/migrations/20260609193000_phase27_2_holiday_regions/migration.sql", "utf8");
+  const service = readFileSync("lib/services/holiday-service.ts", "utf8");
+  const actions = readFileSync("app/admin/holidays/actions.ts", "utf8");
+  const page = readFileSync("app/admin/holidays/page.tsx", "utf8");
+
+  assert.match(schema, /countryCode\s+String\s+@default\("AT"\)/);
+  assert.match(schema, /regionCode\s+String\?/);
+  assert.match(schema, /@@index\(\[countryCode, regionCode, startsOn, endsOn\]\)/);
+  assert.match(migration, /ADD COLUMN "countryCode"/);
+  assert.match(service, /holidayCountryOptions/);
+  assert.match(service, /Österreich/);
+  assert.match(service, /AT-NO/);
+  assert.match(service, /Wien/);
+  assert.match(service, /getHolidayScopeLabel/);
+  assert.match(actions, /countryCode: formData\.get\("countryCode"\)/);
+  assert.match(actions, /regionCode: formData\.get\("regionCode"\)/);
+  assert.match(page, /name="countryCode"/);
+  assert.match(page, /name="regionCode"/);
+  assert.match(page, /Bundesweit/);
+});
+
 test("phase 26.5 series form exposes daily weekly monthly yearly patterns and preview", () => {
   const seriesForm = readFileSync("components/series-request-form.tsx", "utf8");
   const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");

@@ -33,7 +33,7 @@ werden.
 | Berechtigungen | `Role`, `Permission`, `RolePermission`, `User`, `UserRole`, `UserPermission` | Rollen plus ergaenzende Einzelrechte |
 | Organisationen | `OrganizationType`, `Organization`, `OrganizationContact`, `OrganizationMember` | Organisationen, Kontakte und gueltige Benutzerzuordnungen |
 | Hallen | `Building`, `Room`, `RoomComposition`, `Caretaker`, `BuildingCaretaker`, `RoomCaretaker` | Gebaeude mit Adresse/Kontakt, kombinierbare Raeume und Betreuung |
-| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingChangeRequest`, `BookingStatusHistory`, `NoShowReport`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, Aenderungsantraege, No-Show-Protokolle, unveraenderbare Historie, Warteliste und Sperren |
+| Nutzung | `UsageType`, `BookingSeries`, `Booking`, `BookingChangeRequest`, `BookingStatusHistory`, `NoShowReport`, `WaitlistEntry`, `HolidayPeriod`, `Closure` | Buchungsgrundlage, Aenderungsantraege, No-Show-Protokolle, unveraenderbare Historie, Warteliste, Ferien-/Feiertagsbereiche und Sperren |
 | Abrechnung | `TariffGroup`, `Tariff`, `BillingEntry` | Flexible Preis- und Abrechnungsgrundlage |
 | Erweiterungen | `Document`, `DamageReport`, `Handover`, `AccessMedium`, `AccessAssignment`, `Notification`, `AuditEntry`, `SystemSetting` | Erweiterbarkeit und Nachvollziehbarkeit |
 

@@ -27,6 +27,8 @@ export async function createHolidayPeriodAction(formData: FormData) {
     await saveHolidayPeriod(
       {
         name: formData.get("name"),
+        countryCode: formData.get("countryCode"),
+        regionCode: formData.get("regionCode"),
         startsOn: formData.get("startsOn"),
         endsOn: formData.get("endsOn"),
         defaultStatus: formData.get("defaultStatus"),
