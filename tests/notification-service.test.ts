@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   processPendingNotifications,
   queueBookingNotifications,
+  queueBookingSeriesNotifications,
   retryFailedNotification,
 } from "../lib/services/notification-service";
 import { renderNotificationTemplate } from "../lib/services/notification-template-service";
@@ -63,6 +64,30 @@ function createNotificationHarness() {
       },
     },
   };
+  const bookingSeries = {
+    id: "series-1",
+    title: "Serientraining",
+    startsOn: new Date("2026-06-12T18:00:00Z"),
+    endsOn: new Date("2026-07-10T20:00:00Z"),
+    organization: booking.organization,
+    room: booking.room,
+    bookings: [
+      {
+        id: "booking-1",
+        startsAt: new Date("2026-06-12T18:00:00Z"),
+        endsAt: new Date("2026-06-12T20:00:00Z"),
+        requestedBy: booking.requestedBy,
+        processedBy: booking.processedBy,
+      },
+      {
+        id: "booking-2",
+        startsAt: new Date("2026-06-19T18:00:00Z"),
+        endsAt: new Date("2026-06-19T20:00:00Z"),
+        requestedBy: booking.requestedBy,
+        processedBy: booking.processedBy,
+      },
+    ],
+  };
   const adminUsers = [
     {
       id: "user-admin",
@@ -75,6 +100,11 @@ function createNotificationHarness() {
     booking: {
       async findUnique() {
         return booking;
+      },
+    },
+    bookingSeries: {
+      async findUnique() {
+        return bookingSeries;
       },
     },
     waitlistEntry: {
@@ -199,6 +229,50 @@ test("renders the booking approval template with title and note", async () => {
   assert.match(template.text, /Abendtraining/);
   assert.match(template.text, /Freigegeben/);
   assert.match(template.html, /Verein Blau/);
+});
+
+test("queues one booking series requested summary for requester primary contact and admin", async () => {
+  const harness = createNotificationHarness();
+
+  const ids = await queueBookingSeriesNotifications(
+    "series-1",
+    "BOOKING_SERIES_REQUESTED",
+    { createdCount: 2, skippedCount: 1, note: "Ein Termin wurde übersprungen." },
+    harness.client as never,
+  );
+
+  assert.equal(ids.length, 3);
+  assert.deepEqual(
+    harness.notifications.map((notification) => notification.recipient),
+    ["requester@example.test", "primary@example.test", "admin@example.test"],
+  );
+  assert.equal(harness.notifications[0]?.eventCode, "BOOKING_SERIES_REQUESTED");
+  assert.equal((harness.notifications[0]?.payload as { createdCount?: number }).createdCount, 2);
+});
+
+test("renders booking series approval template with summarized counts", () => {
+  const template = renderNotificationTemplate({
+    eventCode: "BOOKING_SERIES_APPROVED",
+    payload: {
+      seriesId: "series-1",
+      title: "Serientraining",
+      organizationName: "Verein Blau",
+      buildingName: "Volksschule Hauptplatz",
+      roomName: "Turnsaal",
+      startsAt: "2026-06-12T18:00:00.000Z",
+      endsAt: "2026-07-10T20:00:00.000Z",
+      createdCount: 5,
+      skippedCount: 1,
+      processedCount: 5,
+      failedCount: 0,
+      note: "Freigegeben.",
+    },
+  });
+
+  assert.match(template.subject, /Serienbuchung genehmigt/);
+  assert.match(template.text, /Serientraining/);
+  assert.match(template.text, /Verarbeitete Termine: 5/);
+  assert.match(template.html, /Freigegeben/);
 });
 
 test("marks a notification as failed when mail delivery throws", async () => {

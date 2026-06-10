@@ -10,7 +10,7 @@ import { BookingValidationError } from "@/lib/services/booking-rules";
 import { createBookingSeriesRequest } from "@/lib/services/booking-series-service";
 import {
   processPendingNotifications,
-  queueBookingNotifications,
+  queueBookingSeriesNotifications,
 } from "@/lib/services/notification-service";
 
 function bookingErrorMessage(error: unknown) {
@@ -90,9 +90,11 @@ export async function createBookingSeriesRequestAction(formData: FormData) {
     );
 
     try {
-      for (const booking of result.createdBookings) {
-        await queueBookingNotifications(booking.id, "BOOKING_REQUESTED");
-      }
+      await queueBookingSeriesNotifications(result.series.id, "BOOKING_SERIES_REQUESTED", {
+        createdCount: result.createdBookings.length,
+        skippedCount: result.skipped.length,
+        note: result.warnings.join(" "),
+      });
       await processPendingNotifications();
     } catch (notificationError) {
       console.error("Booking series notifications failed", notificationError);

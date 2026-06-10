@@ -49,6 +49,52 @@ function renderBookingCommonHtml(template: NotificationTemplateData & { payload:
   `;
 }
 
+function renderSeriesCommonText(template: NotificationTemplateData & { payload: NotificationTemplateData["payload"] }) {
+  if (!("seriesId" in template.payload)) {
+    return "";
+  }
+
+  return [
+    `Titel: ${template.payload.title}`,
+    `Organisation: ${template.payload.organizationName}`,
+    `Ort: ${template.payload.buildingName} - ${template.payload.roomName}`,
+    `Zeitraum: ${formatDateRange(template.payload.startsAt, template.payload.endsAt)}`,
+    `Angelegte Termine: ${template.payload.createdCount}`,
+    `Übersprungene Termine: ${template.payload.skippedCount}`,
+    typeof template.payload.processedCount === "number" ? `Verarbeitete Termine: ${template.payload.processedCount}` : "",
+    typeof template.payload.failedCount === "number" ? `Fehlgeschlagene Termine: ${template.payload.failedCount}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function renderSeriesCommonHtml(template: NotificationTemplateData & { payload: NotificationTemplateData["payload"] }) {
+  if (!("seriesId" in template.payload)) {
+    return "";
+  }
+
+  return `
+    <ul>
+      <li><strong>Titel:</strong> ${escapeHtml(template.payload.title)}</li>
+      <li><strong>Organisation:</strong> ${escapeHtml(template.payload.organizationName)}</li>
+      <li><strong>Ort:</strong> ${escapeHtml(template.payload.buildingName)} - ${escapeHtml(template.payload.roomName)}</li>
+      <li><strong>Zeitraum:</strong> ${escapeHtml(formatDateRange(template.payload.startsAt, template.payload.endsAt))}</li>
+      <li><strong>Angelegte Termine:</strong> ${template.payload.createdCount}</li>
+      <li><strong>Übersprungene Termine:</strong> ${template.payload.skippedCount}</li>
+      ${
+        typeof template.payload.processedCount === "number"
+          ? `<li><strong>Verarbeitete Termine:</strong> ${template.payload.processedCount}</li>`
+          : ""
+      }
+      ${
+        typeof template.payload.failedCount === "number"
+          ? `<li><strong>Fehlgeschlagene Termine:</strong> ${template.payload.failedCount}</li>`
+          : ""
+      }
+    </ul>
+  `;
+}
+
 export function renderNotificationTemplate(input: NotificationTemplateData | { eventCode: string; payload: unknown }) {
   const template = "payload" in input && typeof input.eventCode === "string" && !("subject" in input)
     ? parseNotificationTemplateData(input.eventCode, input.payload)
@@ -138,6 +184,68 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           <p>Eine Buchung wurde storniert.</p>
           ${renderBookingCommonHtml(template)}
           ${template.payload.note ? `<p><strong>Hinweis:</strong> ${escapeHtml(template.payload.note)}</p>` : ""}
+        `,
+      };
+    case "BOOKING_SERIES_REQUESTED":
+      return {
+        subject: `Serienbuchung beantragt: ${template.payload.title}`,
+        text: [
+          "Eine neue Serienbuchung wurde erfasst.",
+          "",
+          renderSeriesCommonText(template),
+          template.payload.requestedByName ? `Antragsteller: ${template.payload.requestedByName}` : "",
+          template.payload.note ? `Hinweis: ${template.payload.note}` : "",
+        ].filter(Boolean).join("\n"),
+        html: `
+          <p>Eine neue Serienbuchung wurde erfasst.</p>
+          ${renderSeriesCommonHtml(template)}
+          ${template.payload.requestedByName ? `<p><strong>Antragsteller:</strong> ${escapeHtml(template.payload.requestedByName)}</p>` : ""}
+          ${template.payload.note ? `<p><strong>Hinweis:</strong> ${escapeHtml(template.payload.note)}</p>` : ""}
+        `,
+      };
+    case "BOOKING_SERIES_IN_REVIEW":
+      return {
+        subject: `Serienbuchung in Prüfung: ${template.payload.title}`,
+        text: [
+          "Ihre Serienbuchung befindet sich jetzt in Prüfung.",
+          "",
+          renderSeriesCommonText(template),
+          template.payload.processedByName ? `Bearbeitet von: ${template.payload.processedByName}` : "",
+        ].filter(Boolean).join("\n"),
+        html: `
+          <p>Ihre Serienbuchung befindet sich jetzt in Prüfung.</p>
+          ${renderSeriesCommonHtml(template)}
+          ${template.payload.processedByName ? `<p><strong>Bearbeitet von:</strong> ${escapeHtml(template.payload.processedByName)}</p>` : ""}
+        `,
+      };
+    case "BOOKING_SERIES_APPROVED":
+      return {
+        subject: `Serienbuchung genehmigt: ${template.payload.title}`,
+        text: [
+          "Ihre Serienbuchung wurde genehmigt.",
+          "",
+          renderSeriesCommonText(template),
+          template.payload.note ? `Kommentar: ${template.payload.note}` : "",
+        ].filter(Boolean).join("\n"),
+        html: `
+          <p>Ihre Serienbuchung wurde genehmigt.</p>
+          ${renderSeriesCommonHtml(template)}
+          ${template.payload.note ? `<p><strong>Kommentar:</strong> ${escapeHtml(template.payload.note)}</p>` : ""}
+        `,
+      };
+    case "BOOKING_SERIES_REJECTED":
+      return {
+        subject: `Serienbuchung abgelehnt: ${template.payload.title}`,
+        text: [
+          "Ihre Serienbuchung wurde abgelehnt.",
+          "",
+          renderSeriesCommonText(template),
+          template.payload.note ? `Begründung: ${template.payload.note}` : "",
+        ].filter(Boolean).join("\n"),
+        html: `
+          <p>Ihre Serienbuchung wurde abgelehnt.</p>
+          ${renderSeriesCommonHtml(template)}
+          ${template.payload.note ? `<p><strong>Begründung:</strong> ${escapeHtml(template.payload.note)}</p>` : ""}
         `,
       };
     case "WAITLIST_OFFER_CREATED":

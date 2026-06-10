@@ -6,6 +6,7 @@ import { isNotificationEventEnabled } from "@/lib/services/notification-settings
 import { renderNotificationTemplate } from "@/lib/services/notification-template-service";
 import type {
   BookingNotificationPayload,
+  BookingSeriesNotificationPayload,
   DamageNotificationPayload,
   NoShowNotificationPayload,
   NotificationEventCode,
@@ -16,7 +17,7 @@ type NotificationEventStatusFilter = "ALL" | "PENDING" | "SENT" | "FAILED";
 
 type NotificationClient = Pick<
   PrismaClient,
-  "notification" | "booking" | "waitlistEntry" | "damageReport" | "noShowReport" | "user" | "systemSetting"
+  "notification" | "booking" | "bookingSeries" | "waitlistEntry" | "damageReport" | "noShowReport" | "user" | "systemSetting"
 >;
 
 type MailSender = (payload: MailPayload) => Promise<unknown>;
@@ -392,6 +393,178 @@ export async function queueBookingNotifications(
   }
 
   return queueNotificationRows(rows, client);
+}
+
+export async function queueBookingSeriesNotifications(
+  seriesId: string,
+  eventCode:
+    | "BOOKING_SERIES_REQUESTED"
+    | "BOOKING_SERIES_IN_REVIEW"
+    | "BOOKING_SERIES_APPROVED"
+    | "BOOKING_SERIES_REJECTED",
+  summary: {
+    createdCount?: number;
+    skippedCount?: number;
+    processedCount?: number;
+    failedCount?: number;
+    note?: string;
+  } = {},
+  client: NotificationClient = prisma,
+) {
+  const series = await client.bookingSeries.findUnique({
+    where: { id: seriesId },
+    select: {
+      id: true,
+      title: true,
+      startsOn: true,
+      endsOn: true,
+      organization: {
+        select: {
+          name: true,
+          members: {
+            where: {
+              activeFrom: { lte: new Date() },
+              OR: [{ activeUntil: null }, { activeUntil: { gt: new Date() } }],
+            },
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  displayName: true,
+                },
+              },
+              isPrimary: true,
+            },
+          },
+        },
+      },
+      room: {
+        select: {
+          name: true,
+          caretakers: {
+            select: {
+              caretaker: {
+                select: {
+                  id: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          building: {
+            select: {
+              name: true,
+              caretakers: {
+                select: {
+                  caretaker: {
+                    select: {
+                      id: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      bookings: {
+        orderBy: { startsAt: "asc" },
+        select: {
+          id: true,
+          startsAt: true,
+          endsAt: true,
+          requestedBy: {
+            select: {
+              id: true,
+              email: true,
+              displayName: true,
+            },
+          },
+          processedBy: {
+            select: {
+              id: true,
+              email: true,
+              displayName: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!series) {
+    return [];
+  }
+
+  const firstBooking = series.bookings[0];
+  const lastBooking = series.bookings.at(-1);
+  const payload: BookingSeriesNotificationPayload = {
+    seriesId: series.id,
+    title: series.title,
+    organizationName: series.organization.name,
+    buildingName: series.room.building.name,
+    roomName: series.room.name,
+    startsAt: (firstBooking?.startsAt ?? series.startsOn).toISOString(),
+    endsAt: (lastBooking?.endsAt ?? series.endsOn).toISOString(),
+    createdCount: summary.createdCount ?? series.bookings.length,
+    skippedCount: summary.skippedCount ?? 0,
+    processedCount: summary.processedCount,
+    failedCount: summary.failedCount,
+    requestedByName: firstBooking?.requestedBy?.displayName ?? undefined,
+    processedByName: firstBooking?.processedBy?.displayName ?? undefined,
+    note: summary.note,
+  };
+
+  const requesterRecipients = dedupeRecipients(
+    [
+      firstBooking?.requestedBy
+        ? {
+            id: firstBooking.requestedBy.id,
+            email: firstBooking.requestedBy.email,
+          }
+        : null,
+      ...series.organization.members
+        .filter((member) => member.isPrimary)
+        .map((member) => ({
+          id: member.user.id,
+          email: member.user.email,
+        })),
+    ].filter(Boolean) as Array<{ id: string; email: string | null }>,
+  );
+  const caretakerRecipients = dedupeRecipients(
+    [
+      ...series.room.caretakers.map(({ caretaker }) => ({
+        id: caretaker.id,
+        email: caretaker.email,
+      })),
+      ...series.room.building.caretakers.map(({ caretaker }) => ({
+        id: caretaker.id,
+        email: caretaker.email,
+      })),
+    ],
+  );
+  const adminRecipients = await getAdminRecipients(client);
+
+  const recipients =
+    eventCode === "BOOKING_SERIES_REQUESTED"
+      ? [...requesterRecipients, ...adminRecipients]
+      : eventCode === "BOOKING_SERIES_APPROVED"
+        ? [...requesterRecipients, ...caretakerRecipients]
+        : requesterRecipients;
+
+  return queueNotificationRows(
+    dedupeRecipients(recipients)
+      .filter((recipient) => recipient.email)
+      .map((recipient) => ({
+        eventCode,
+        recipientUserId: recipient.id ?? null,
+        recipient: recipient.email!,
+        payload,
+      })),
+    client,
+  );
 }
 
 export async function queueWaitlistOfferNotification(

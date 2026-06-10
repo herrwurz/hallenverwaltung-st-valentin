@@ -44,6 +44,17 @@ async function dispatchNotifications(work: () => Promise<void>) {
   }
 }
 
+function canProcessNotificationsWithClient(client: unknown) {
+  return (
+    typeof client === "object" &&
+    client !== null &&
+    "booking" in client &&
+    "notification" in client &&
+    "user" in client &&
+    "systemSetting" in client
+  );
+}
+
 type WaitlistRequestInput = z.infer<typeof waitlistRequestSchema>;
 
 type WaitlistPermissionOverrides = {
@@ -544,7 +555,11 @@ export async function activateNextWaitlistEntryForSlot(
 
   if (result) {
     await dispatchNotifications(async () => {
-      await processPendingNotifications();
+      if (canProcessNotificationsWithClient(options.rootClient)) {
+        await processPendingNotifications(25, options.rootClient as never);
+      } else if (!options.rootClient) {
+        await processPendingNotifications();
+      }
     });
   }
 
@@ -640,8 +655,13 @@ export async function acceptWaitlistOffer(
     return result;
   }).then(async (result) => {
     await dispatchNotifications(async () => {
-      await queueBookingNotifications(result.booking.id, "BOOKING_REQUESTED");
-      await processPendingNotifications();
+      if (canProcessNotificationsWithClient(rootClient)) {
+        await queueBookingNotifications(result.booking.id, "BOOKING_REQUESTED", rootClient as never);
+        await processPendingNotifications(25, rootClient as never);
+      } else if (rootClient === prisma) {
+        await queueBookingNotifications(result.booking.id, "BOOKING_REQUESTED");
+        await processPendingNotifications();
+      }
     });
     return result;
   });
@@ -780,7 +800,11 @@ export async function expireWaitlistOffers(
 
   if (expiredIds.length > 0) {
     await dispatchNotifications(async () => {
-      await processPendingNotifications();
+      if (canProcessNotificationsWithClient(rootClient)) {
+        await processPendingNotifications(25, rootClient as never);
+      } else if (rootClient === prisma) {
+        await processPendingNotifications();
+      }
     });
   }
 

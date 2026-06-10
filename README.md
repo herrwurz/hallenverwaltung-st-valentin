@@ -84,6 +84,10 @@ Enthalten sind:
    der Benachrichtigungsqueue kann ueber `/admin/notifications` manuell
    angestossen werden; Event-Schalter werden dort als `SystemSetting`
    gespeichert.
+   Version 1 versendet ausschliesslich E-Mail ueber die persistente
+   Notification Queue. Newsletter, SMS und Push werden fachlich als spaetere
+   Kanaele vorbereitet, aber nicht hardcodiert und nicht ohne gesonderte
+   Anbieter-/Datenschutzentscheidung aktiviert.
    Die Abrechnungsvorbereitung ist unter `/admin/billing` verfuegbar und
    erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen. CSV-, XLSX-
    und PDF-Exporte koennen dort fuer gefilterte Zeitraeume erstellt werden.

@@ -6,6 +6,10 @@ export const notificationEventCodes = [
   "BOOKING_APPROVED",
   "BOOKING_REJECTED",
   "BOOKING_CANCELLED",
+  "BOOKING_SERIES_REQUESTED",
+  "BOOKING_SERIES_IN_REVIEW",
+  "BOOKING_SERIES_APPROVED",
+  "BOOKING_SERIES_REJECTED",
   "WAITLIST_OFFER_CREATED",
   "WAITLIST_OFFER_EXPIRED",
   "DAMAGE_REPORTED",
@@ -30,6 +34,25 @@ export const bookingNotificationPayloadSchema = z.object({
 });
 
 export type BookingNotificationPayload = z.infer<typeof bookingNotificationPayloadSchema>;
+
+export const bookingSeriesNotificationPayloadSchema = z.object({
+  seriesId: z.string().min(1),
+  title: z.string().min(1),
+  organizationName: z.string().min(1),
+  buildingName: z.string().min(1),
+  roomName: z.string().min(1),
+  startsAt: isoDateString,
+  endsAt: isoDateString,
+  createdCount: z.number().int().nonnegative(),
+  skippedCount: z.number().int().nonnegative().default(0),
+  processedCount: z.number().int().nonnegative().optional(),
+  failedCount: z.number().int().nonnegative().optional(),
+  requestedByName: z.string().min(1).optional(),
+  processedByName: z.string().min(1).optional(),
+  note: z.string().min(1).optional(),
+});
+
+export type BookingSeriesNotificationPayload = z.infer<typeof bookingSeriesNotificationPayloadSchema>;
 
 export const waitlistNotificationPayloadSchema = z.object({
   waitlistEntryId: z.string().min(1),
@@ -82,6 +105,14 @@ export type NotificationTemplateData =
       payload: BookingNotificationPayload;
     }
   | {
+      eventCode:
+        | "BOOKING_SERIES_REQUESTED"
+        | "BOOKING_SERIES_IN_REVIEW"
+        | "BOOKING_SERIES_APPROVED"
+        | "BOOKING_SERIES_REJECTED";
+      payload: BookingSeriesNotificationPayload;
+    }
+  | {
       eventCode: "WAITLIST_OFFER_CREATED" | "WAITLIST_OFFER_EXPIRED";
       payload: WaitlistNotificationPayload;
     }
@@ -107,6 +138,14 @@ export function parseNotificationTemplateData(
       return {
         eventCode,
         payload: bookingNotificationPayloadSchema.parse(payload),
+      };
+    case "BOOKING_SERIES_REQUESTED":
+    case "BOOKING_SERIES_IN_REVIEW":
+    case "BOOKING_SERIES_APPROVED":
+    case "BOOKING_SERIES_REJECTED":
+      return {
+        eventCode,
+        payload: bookingSeriesNotificationPayloadSchema.parse(payload),
       };
     case "WAITLIST_OFFER_CREATED":
     case "WAITLIST_OFFER_EXPIRED":

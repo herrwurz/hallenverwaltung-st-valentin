@@ -10,6 +10,7 @@ import { checkBookingConflicts } from "@/lib/services/booking-conflict-service";
 import {
   processPendingNotifications,
   queueBookingNotifications,
+  queueBookingSeriesNotifications,
 } from "@/lib/services/notification-service";
 import {
   approveBooking,
@@ -43,6 +44,10 @@ type AdminWorkflowPermissions = {
 
 type AdminBookingFilters = {
   organizationId?: string;
+};
+
+type NotificationDispatchOptions = {
+  suppressNotifications?: boolean;
 };
 
 export type SeriesWorkflowSummary = {
@@ -170,6 +175,7 @@ export async function markBookingInReviewForAdmin(
   bookingId: string,
   actorUserId: string,
   permissions: AdminWorkflowPermissions = {},
+  notificationOptions: NotificationDispatchOptions = {},
 ) {
   const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
   assertBookingApprovalPermission(canApprove);
@@ -178,10 +184,12 @@ export async function markBookingInReviewForAdmin(
     bookingId,
     actorUserId,
   });
-  await dispatchNotifications(async () => {
-    await queueBookingNotifications(booking.id, "BOOKING_IN_REVIEW");
-    await processPendingNotifications();
-  });
+  if (!notificationOptions.suppressNotifications) {
+    await dispatchNotifications(async () => {
+      await queueBookingNotifications(booking.id, "BOOKING_IN_REVIEW");
+      await processPendingNotifications();
+    });
+  }
   return booking;
 }
 
@@ -195,6 +203,7 @@ export async function approveBookingForAdmin(
   },
   actorUserId: string,
   permissions: AdminWorkflowPermissions = {},
+  notificationOptions: NotificationDispatchOptions = {},
 ) {
   const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
   assertBookingApprovalPermission(canApprove);
@@ -228,10 +237,12 @@ export async function approveBookingForAdmin(
       transaction,
     );
   });
-  await dispatchNotifications(async () => {
-    await queueBookingNotifications(approved.id, "BOOKING_APPROVED");
-    await processPendingNotifications();
-  });
+  if (!notificationOptions.suppressNotifications) {
+    await dispatchNotifications(async () => {
+      await queueBookingNotifications(approved.id, "BOOKING_APPROVED");
+      await processPendingNotifications();
+    });
+  }
   return approved;
 }
 
@@ -245,6 +256,7 @@ export async function rejectBookingForAdmin(
   },
   actorUserId: string,
   permissions: AdminWorkflowPermissions = {},
+  notificationOptions: NotificationDispatchOptions = {},
 ) {
   const canReject = await resolvePermission(permissions.canReject, () => hasPermission(actorUserId, "REJECT_BOOKING"));
   assertBookingRejectionPermission(canReject);
@@ -257,10 +269,12 @@ export async function rejectBookingForAdmin(
       decisionNote,
     },
   );
-  await dispatchNotifications(async () => {
-    await queueBookingNotifications(rejected.id, "BOOKING_REJECTED");
-    await processPendingNotifications();
-  });
+  if (!notificationOptions.suppressNotifications) {
+    await dispatchNotifications(async () => {
+      await queueBookingNotifications(rejected.id, "BOOKING_REJECTED");
+      await processPendingNotifications();
+    });
+  }
   return rejected;
 }
 
@@ -333,9 +347,17 @@ export async function markSeriesInReviewForAdmin(
   const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
   assertBookingApprovalPermission(canApprove);
 
-  return runSeriesWorkflow(seriesId, ["REQUESTED"], (bookingId) =>
-    markBookingInReviewForAdmin(bookingId, actorUserId, { canApprove: true }),
+  const summary = await runSeriesWorkflow(seriesId, ["REQUESTED"], (bookingId) =>
+    markBookingInReviewForAdmin(bookingId, actorUserId, { canApprove: true }, { suppressNotifications: true }),
   );
+  await dispatchNotifications(async () => {
+    await queueBookingSeriesNotifications(seriesId, "BOOKING_SERIES_IN_REVIEW", {
+      processedCount: summary.processed,
+      failedCount: summary.failed,
+    });
+    await processPendingNotifications();
+  });
+  return summary;
 }
 
 export async function approveSeriesForAdmin(
@@ -352,9 +374,18 @@ export async function approveSeriesForAdmin(
   const canApprove = await resolvePermission(permissions.canApprove, () => hasPermission(actorUserId, "APPROVE_BOOKING"));
   assertBookingApprovalPermission(canApprove);
 
-  return runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
-    approveBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canApprove: true }),
+  const summary = await runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
+    approveBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canApprove: true }, { suppressNotifications: true }),
   );
+  await dispatchNotifications(async () => {
+    await queueBookingSeriesNotifications(seriesId, "BOOKING_SERIES_APPROVED", {
+      processedCount: summary.processed,
+      failedCount: summary.failed,
+      note: decisionNote,
+    });
+    await processPendingNotifications();
+  });
+  return summary;
 }
 
 export async function rejectSeriesForAdmin(
@@ -372,7 +403,16 @@ export async function rejectSeriesForAdmin(
   assertBookingRejectionPermission(canReject);
   assertBookingDecisionNote(decisionNote);
 
-  return runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
-    rejectBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canReject: true }),
+  const summary = await runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
+    rejectBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canReject: true }, { suppressNotifications: true }),
   );
+  await dispatchNotifications(async () => {
+    await queueBookingSeriesNotifications(seriesId, "BOOKING_SERIES_REJECTED", {
+      processedCount: summary.processed,
+      failedCount: summary.failed,
+      note: decisionNote,
+    });
+    await processPendingNotifications();
+  });
+  return summary;
 }
