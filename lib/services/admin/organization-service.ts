@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import {
+  processPendingNotifications,
+  queueOrganizationStatusNotification,
+  queueUserAccountNotification,
+} from "@/lib/services/notification-service";
 
 const organizationSchema = z.object({
   id: z.string().trim().optional(),
@@ -43,12 +48,13 @@ export async function saveOrganization(input: unknown) {
   };
 
   if (data.id) {
-    await prisma.$transaction(async (transaction) => {
+    const notificationContext = await prisma.$transaction(async (transaction) => {
       await transaction.organization.update({
         where: { id: data.id },
         data: updateData,
       });
 
+      let deactivatedUserIds: string[] = [];
       if (data.status !== "ACTIVE") {
         const now = new Date();
         const affectedMemberships = await transaction.organizationMember.findMany({
@@ -82,10 +88,35 @@ export async function saveOrganization(input: unknown) {
               where: { id: { in: userIdsToDeactivate } },
               data: { isActive: false },
             });
+            deactivatedUserIds = userIdsToDeactivate;
           }
         }
       }
+
+      return {
+        organizationId: data.id!,
+        status: data.status,
+        deactivatedUserIds,
+      };
     });
+    if (notificationContext.status !== "ACTIVE") {
+      try {
+        await queueOrganizationStatusNotification(
+          notificationContext.organizationId,
+          notificationContext.deactivatedUserIds.length,
+        );
+        for (const userId of notificationContext.deactivatedUserIds) {
+          await queueUserAccountNotification(
+            userId,
+            "USER_ACCOUNT_DEACTIVATED",
+            "Die zugeordnete Organisation wurde gesperrt oder stillgelegt.",
+          );
+        }
+        await processPendingNotifications();
+      } catch (error) {
+        console.error("Notification dispatch failed after organization administration.", error);
+      }
+    }
     return;
   }
 

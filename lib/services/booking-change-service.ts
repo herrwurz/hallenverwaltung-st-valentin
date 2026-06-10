@@ -18,6 +18,11 @@ import {
   BookingValidationError,
   validateBookingAvailability,
 } from "@/lib/services/booking-rules";
+import {
+  processPendingNotifications,
+  queueBookingChangeNotifications,
+  queueBookingNotifications,
+} from "@/lib/services/notification-service";
 
 export const bookingMoveRequestSchema = z.object({
   bookingId: z.string().trim().min(1, "Die Buchung ist ungültig."),
@@ -30,6 +35,14 @@ export const bookingMoveRequestSchema = z.object({
 type BookingChangeClient = Prisma.TransactionClient & BookingConflictClient & BookingApprovalLockClient;
 
 const defaultOpenStatuses: BookingChangeRequestStatus[] = ["REQUESTED", "IN_REVIEW"];
+
+async function dispatchNotifications(work: () => Promise<void>) {
+  try {
+    await work();
+  } catch (error) {
+    console.error("Notification dispatch failed after booking change workflow.", error);
+  }
+}
 
 function assertTransitionStatus(
   current: BookingChangeRequestStatus,
@@ -219,6 +232,19 @@ export async function createMoveChangeRequest(
   });
 }
 
+export async function createMoveChangeRequestWithNotifications(
+  input: unknown,
+  actorUserId: string,
+  options: { now?: Date; permissions?: { canRequestReschedule?: boolean; isAdmin?: boolean } } = {},
+) {
+  const result = await createMoveChangeRequest(input, actorUserId, options);
+  await dispatchNotifications(async () => {
+    await queueBookingChangeNotifications(result.changeRequest.id, "BOOKING_CHANGE_REQUESTED");
+    await processPendingNotifications();
+  });
+  return result;
+}
+
 export function resolveBookingChangeFilter(filter: string | undefined) {
   if (filter === "ALL") {
     return ["REQUESTED", "IN_REVIEW", "APPROVED", "REJECTED", "CANCELLED"] satisfies BookingChangeRequestStatus[];
@@ -346,6 +372,10 @@ export async function markChangeRequestInReview(requestId: string, actorUserId: 
       client: transaction,
     }),
   );
+  await dispatchNotifications(async () => {
+    await queueBookingChangeNotifications(requestId, "BOOKING_CHANGE_IN_REVIEW");
+    await processPendingNotifications();
+  });
 }
 
 export async function rejectChangeRequest(requestId: string, actorUserId: string, decisionNote?: string) {
@@ -363,13 +393,17 @@ export async function rejectChangeRequest(requestId: string, actorUserId: string
       client: transaction,
     }),
   );
+  await dispatchNotifications(async () => {
+    await queueBookingChangeNotifications(requestId, "BOOKING_CHANGE_REJECTED");
+    await processPendingNotifications();
+  });
 }
 
 export async function approveChangeRequest(requestId: string, actorUserId: string) {
   const canApprove = await hasPermission(actorUserId, "APPROVE_BOOKING");
   assertBookingApprovalPermission(canApprove);
 
-  return prisma.$transaction(async (transaction) => {
+  const result = await prisma.$transaction(async (transaction) => {
     const client = transaction as BookingChangeClient;
     const request = await transaction.bookingChangeRequest.findUnique({
       where: { id: requestId },
@@ -467,4 +501,10 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
 
     return { requestId, replacementBookingId: replacement.id };
   });
+  await dispatchNotifications(async () => {
+    await queueBookingChangeNotifications(requestId, "BOOKING_CHANGE_APPROVED");
+    await queueBookingNotifications(result.replacementBookingId, "BOOKING_APPROVED");
+    await processPendingNotifications();
+  });
+  return result;
 }

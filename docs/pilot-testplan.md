@@ -95,9 +95,18 @@ Produktionsumgebungen verwendet werden.
 - Schluesselerhalt, Hallenuebernahme und Rueckgabe fuer eine genehmigte
   Demo-Buchung testweise durchlaufen.
 
+### Benachrichtigungen
+
+- Als Admin `/admin/notifications` oeffnen.
+- Event-Schalter pruefen.
+- Empfaenger-Vorschau ansehen.
+- Optional eine Testmail an eine eigene Adresse ausloesen, wenn SMTP lokal
+  konfiguriert ist.
+
 ## Was noch kein finaler Abnahmetest ist
 
-- Kein Test gegen echten SMTP-Server.
+- Kein finaler Test gegen echten SMTP-Server; die Testmail-Funktion prueft nur
+  die aktuell konfigurierte Umgebung.
 - Kein echter Produktivbetrieb mit HTTPS, Backup-Restore-Probe und Monitoring.
 - Keine echte Dateiablage fuer Dokumente oder Schadensfotos.
 - Keine Integration in Schliesssysteme.

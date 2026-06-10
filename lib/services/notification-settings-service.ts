@@ -11,10 +11,23 @@ export const notificationEventLabels: Record<NotificationEventCode, string> = {
   BOOKING_APPROVED: "Buchung genehmigt",
   BOOKING_REJECTED: "Buchung abgelehnt",
   BOOKING_CANCELLED: "Buchung storniert",
+  BOOKING_SERIES_REQUESTED: "Serienbuchung beantragt",
+  BOOKING_SERIES_IN_REVIEW: "Serienbuchung in Prüfung",
+  BOOKING_SERIES_APPROVED: "Serienbuchung genehmigt",
+  BOOKING_SERIES_REJECTED: "Serienbuchung abgelehnt",
+  BOOKING_CHANGE_REQUESTED: "Verschiebung beantragt",
+  BOOKING_CHANGE_IN_REVIEW: "Verschiebung in Prüfung",
+  BOOKING_CHANGE_APPROVED: "Verschiebung genehmigt",
+  BOOKING_CHANGE_REJECTED: "Verschiebung abgelehnt",
   WAITLIST_OFFER_CREATED: "Wartelistenangebot",
   WAITLIST_OFFER_EXPIRED: "Wartelistenangebot abgelaufen",
+  CLOSURE_CREATED: "Sperre angelegt",
+  USER_ACCOUNT_CREATED: "Benutzerkonto angelegt",
+  USER_ACCOUNT_DEACTIVATED: "Benutzerkonto deaktiviert",
+  ORGANIZATION_BLOCKED: "Organisation gesperrt/stillgelegt",
   DAMAGE_REPORTED: "Schaden gemeldet",
   NO_SHOW_REPORTED: "No-Show gemeldet",
+  ADMIN_TEST_EMAIL: "Testmail",
 };
 
 export const notificationEventSettingsSchema = z.object(

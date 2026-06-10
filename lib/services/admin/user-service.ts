@@ -1,6 +1,10 @@
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import {
+  processPendingNotifications,
+  queueUserAccountNotification,
+} from "@/lib/services/notification-service";
 
 const userSchema = z.object({
   id: z.string().trim().optional(),
@@ -39,6 +43,12 @@ export async function getUserAdministrationData() {
 export async function saveUser(input: unknown, actorUserId: string) {
   const data = userSchema.parse(input);
   const password = data.password?.trim() || undefined;
+  const existingUser = data.id
+    ? await prisma.user.findUnique({
+        where: { id: data.id },
+        select: { isActive: true },
+      })
+    : null;
 
   if (!data.id && !password) {
     throw new Error("Neue Benutzer benötigen ein Passwort.");
@@ -67,7 +77,7 @@ export async function saveUser(input: unknown, actorUserId: string) {
 
   const passwordHash = password ? await hash(password, 12) : undefined;
 
-  await prisma.$transaction(async (transaction) => {
+  const savedUser = await prisma.$transaction(async (transaction) => {
     const superAdminRole = await transaction.role.findUnique({
       where: { code: "SUPER_ADMIN" },
       select: { id: true },
@@ -169,5 +179,19 @@ export async function saveUser(input: unknown, actorUserId: string) {
         });
       }
     }
+
+    return user;
   });
+
+  try {
+    if (!data.id) {
+      await queueUserAccountNotification(savedUser.id, "USER_ACCOUNT_CREATED", "Das Passwort wird aus Sicherheitsgründen nicht per E-Mail versendet.");
+      await processPendingNotifications();
+    } else if (existingUser?.isActive && !data.isActive) {
+      await queueUserAccountNotification(savedUser.id, "USER_ACCOUNT_DEACTIVATED", "Das Konto wurde durch die Verwaltung deaktiviert.");
+      await processPendingNotifications();
+    }
+  } catch (error) {
+    console.error("Notification dispatch failed after user administration.", error);
+  }
 }

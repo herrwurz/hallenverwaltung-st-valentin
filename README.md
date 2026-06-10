@@ -83,7 +83,16 @@ Enthalten sind:
    `SMTP_*`-Variablen in der `.env` gepflegt werden. Die Verarbeitung
    der Benachrichtigungsqueue kann ueber `/admin/notifications` manuell
    angestossen werden; Event-Schalter werden dort als `SystemSetting`
-   gespeichert.
+   gespeichert. Dort steht auch eine Testmail-Funktion fuer den SMTP-
+   Durchstich sowie eine Empfaenger-Vorschau zur Verfuegung.
+   Version 1 versendet ausschliesslich E-Mail ueber die persistente
+   Notification Queue. Newsletter, SMS und Push werden fachlich als spaetere
+   Kanaele vorbereitet, aber nicht hardcodiert und nicht ohne gesonderte
+   Anbieter-/Datenschutzentscheidung aktiviert.
+   Automatisch vorbereitete Mailereignisse umfassen Buchungsantrag, in
+   Pruefung, Genehmigung, Ablehnung, Storno, Serienzusammenfassungen,
+   Verschiebungsantraege, Wartelistenangebote und Ablauf, Sperren,
+   Benutzerkonto-Anlage/-Deaktivierung sowie Organisationssperren.
    Die Abrechnungsvorbereitung ist unter `/admin/billing` verfuegbar und
    erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen. CSV-, XLSX-
    und PDF-Exporte koennen dort fuer gefilterte Zeitraeume erstellt werden.

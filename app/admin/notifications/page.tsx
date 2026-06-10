@@ -1,4 +1,9 @@
-import { processNotificationQueueAction, retryNotificationAction, updateNotificationEventSettingsAction } from "@/app/admin/notifications/actions";
+import {
+  processNotificationQueueAction,
+  retryNotificationAction,
+  sendTestNotificationAction,
+  updateNotificationEventSettingsAction,
+} from "@/app/admin/notifications/actions";
 import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { NotificationsTable, type NotificationTableRow } from "@/components/admin-notifications-table";
@@ -6,7 +11,7 @@ import { StatusFilterSelect } from "@/components/status-filter-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
-import { getNotificationsForAdmin } from "@/lib/services/notification-service";
+import { getNotificationRecipientPreview, getNotificationsForAdmin } from "@/lib/services/notification-service";
 import { notificationEventCodes } from "@/lib/services/notification-types";
 import { getNotificationEventSettings, notificationEventLabels } from "@/lib/services/notification-settings-service";
 
@@ -27,6 +32,7 @@ type SearchParams = Promise<{
   retried?: string;
   processed?: string;
   settingsSaved?: string;
+  testSent?: string;
   error?: string;
 }>;
 
@@ -37,9 +43,10 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
     params.status === "PENDING" || params.status === "SENT" || params.status === "FAILED" || params.status === "ALL"
       ? params.status
       : "ALL";
-  const [notifications, eventSettings] = await Promise.all([
+  const [notifications, eventSettings, recipientPreview] = await Promise.all([
     getNotificationsForAdmin(user.id, selectedStatus),
     getNotificationEventSettings(),
+    getNotificationRecipientPreview(),
   ]);
   const rows: NotificationTableRow[] = notifications
     .filter((notification) => notification.status === "PENDING" || notification.status === "SENT" || notification.status === "FAILED")
@@ -91,9 +98,60 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
           { tone: "success", text: params.retried ? "Die Benachrichtigung wurde erneut verarbeitet." : undefined },
           { tone: "success", text: params.processed ? "Die Queue wurde verarbeitet." : undefined },
           { tone: "success", text: params.settingsSaved ? "Die Event-Schalter wurden gespeichert." : undefined },
+          { tone: "success", text: params.testSent ? "Die Testmail wurde erzeugt und die Queue wurde verarbeitet." : undefined },
           { tone: "error", text: params.error },
         ]}
       />
+
+      <section className="mt-8 grid gap-6 lg:grid-cols-[1fr,1fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Testmail senden</CardTitle>
+            <CardDescription>Prüft SMTP-Konfiguration, Template-Rendering, Queue und Versandweg mit einer frei wählbaren Adresse.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={sendTestNotificationAction} className="space-y-4">
+              <label className="block text-sm font-medium">
+                Empfänger
+                <input
+                  name="recipient"
+                  type="email"
+                  required
+                  placeholder="test@example.at"
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+                />
+              </label>
+              <label className="block text-sm font-medium">
+                Hinweis (optional)
+                <input
+                  name="note"
+                  maxLength={500}
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+                />
+              </label>
+              <Button>Testmail senden</Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Empfänger-Vorschau</CardTitle>
+            <CardDescription>Orientierung, welche Empfängergruppen aktuell vom Mailverkehr betroffen sein können.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {recipientPreview.map((item) => (
+              <div key={item.label} className="rounded-xl border border-border bg-muted/40 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-medium">{item.label}</p>
+                  <span className="rounded-full border border-border bg-card px-3 py-1 text-sm">{item.count}</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </section>
 
       <Card className="mt-8">
         <CardHeader>

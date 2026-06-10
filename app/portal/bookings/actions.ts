@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
-import { createMoveChangeRequest } from "@/lib/services/booking-change-service";
+import { createMoveChangeRequestWithNotifications } from "@/lib/services/booking-change-service";
 import { cancelOwnBookingRequest, createBookingRequest } from "@/lib/services/booking-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 import { createBookingSeriesRequest } from "@/lib/services/booking-series-service";
 import {
   processPendingNotifications,
-  queueBookingNotifications,
+  queueBookingSeriesNotifications,
 } from "@/lib/services/notification-service";
 
 function bookingErrorMessage(error: unknown) {
@@ -90,9 +90,11 @@ export async function createBookingSeriesRequestAction(formData: FormData) {
     );
 
     try {
-      for (const booking of result.createdBookings) {
-        await queueBookingNotifications(booking.id, "BOOKING_REQUESTED");
-      }
+      await queueBookingSeriesNotifications(result.series.id, "BOOKING_SERIES_REQUESTED", {
+        createdCount: result.createdBookings.length,
+        skippedCount: result.skipped.length,
+        note: result.warnings.join(" "),
+      });
       await processPendingNotifications();
     } catch (notificationError) {
       console.error("Booking series notifications failed", notificationError);
@@ -135,7 +137,7 @@ export async function createMoveChangeRequestAction(formData: FormData) {
   let errorMessage: string | undefined;
 
   try {
-    await createMoveChangeRequest(
+    await createMoveChangeRequestWithNotifications(
       {
         bookingId: formData.get("bookingId"),
         newRoomId: formData.get("newRoomId"),
