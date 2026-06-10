@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarClock } from "lucide-react";
 import { CalendarEventDialog } from "@/components/calendar-event-dialog";
+import { CalendarFilterForm } from "@/components/calendar-filter-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,19 @@ const weekdayFormatter = new Intl.DateTimeFormat("de-AT", {
 const timeFormatter = new Intl.DateTimeFormat("de-AT", {
   hour: "2-digit",
   minute: "2-digit",
+});
+
+const compactDayFormatter = new Intl.DateTimeFormat("de-AT", {
+  day: "2-digit",
+});
+
+const monthTitleFormatter = new Intl.DateTimeFormat("de-AT", {
+  month: "long",
+  year: "numeric",
+});
+
+const weekdayHeaderFormatter = new Intl.DateTimeFormat("de-AT", {
+  weekday: "short",
 });
 
 const viewLabels: Record<CalendarResult["view"], string> = {
@@ -63,6 +77,50 @@ function toDateKey(date: Date) {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function startOfWeekMonday(date: Date) {
+  const day = date.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + mondayOffset, 0, 0, 0, 0);
+}
+
+function getMonthCalendarDays(monthDate: Date) {
+  const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1, 0, 0, 0, 0);
+  const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 0, 0, 0, 0);
+  const gridStart = startOfWeekMonday(monthStart);
+  const gridEnd = startOfWeekMonday(new Date(monthEnd.getFullYear(), monthEnd.getMonth(), monthEnd.getDate() + 7, 0, 0, 0, 0));
+  const days: Array<{ date: Date; key: string; isCurrentMonth: boolean }> = [];
+
+  for (const cursor = new Date(gridStart); cursor < gridEnd; cursor.setDate(cursor.getDate() + 1)) {
+    days.push({
+      date: new Date(cursor),
+      key: toDateKey(cursor),
+      isCurrentMonth: cursor.getMonth() === monthDate.getMonth(),
+    });
+  }
+
+  return days;
+}
+
+function chunkWeeks<T>(days: T[]) {
+  const weeks: T[][] = [];
+  for (let index = 0; index < days.length; index += 7) {
+    weeks.push(days.slice(index, index + 7));
+  }
+  return weeks;
+}
+
+function getEventsForDay(events: CalendarEvent[], date: Date) {
+  const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+  const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0);
+  return events.filter((event) => event.endsAt > dayStart && event.startsAt < dayEnd);
+}
+
+function getEventsForMonth(events: CalendarEvent[], monthDate: Date) {
+  const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1, 0, 0, 0, 0);
+  const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1, 0, 0, 0, 0);
+  return events.filter((event) => event.endsAt > monthStart && event.startsAt < monthEnd);
 }
 
 type CalendarViewProps = {
@@ -179,77 +237,22 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             Zeitraum: {dateTimeFormatter.format(calendar.rangeStart)} bis {dateTimeFormatter.format(calendar.rangeEnd)}
           </p>
 
-          <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,220px,200px,auto]">
-            <label className="text-sm font-medium text-foreground">
-              Gebäude
-              <select
-                name="buildingId"
-                defaultValue={calendar.filters.buildingId ?? ""}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
-              >
-                <option value="">Alle Gebäude</option>
-                {calendar.buildings.map((building) => (
-                  <option key={building.id} value={building.id}>
-                    {building.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="text-sm font-medium text-foreground">
-              Raum
-              <select
-                name="roomId"
-                defaultValue={calendar.filters.roomId ?? ""}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
-              >
-                <option value="">Alle Räume</option>
-                {calendar.buildings
-                  .filter((building) => !calendar.filters.buildingId || building.id === calendar.filters.buildingId)
-                  .flatMap((building) =>
-                    building.rooms.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {building.name} - {room.name}
-                      </option>
-                    )),
-                  )}
-              </select>
-            </label>
-
-            <label className="text-sm font-medium text-foreground">
-              Datum
-              <input
-                name="date"
-                type="date"
-                defaultValue={calendar.selectedDate}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
-              />
-            </label>
-
-            <label className="text-sm font-medium text-foreground">
-              Ansicht
-              <select
-                name="view"
-                defaultValue={calendar.view}
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
-              >
-                <option value="day">Tag</option>
-                <option value="week">Woche</option>
-                <option value="month">Monat</option>
-                <option value="year">Jahr</option>
-              </select>
-            </label>
-
-            <div className="flex items-end">
-              <Button className="w-full">Aktualisieren</Button>
-            </div>
-          </form>
+          <CalendarFilterForm
+            buildings={calendar.buildings}
+            filters={calendar.filters}
+            selectedDate={calendar.selectedDate}
+            view={calendar.view}
+          />
         </CardContent>
       </Card>
 
       {calendar.view === "day" || calendar.view === "week" ? (
         <ResourceScheduleGrid calendar={calendar} events={calendar.events} rooms={visibleRooms} />
       ) : null}
+
+      {calendar.view === "month" ? <MonthCalendarGrid calendar={calendar} events={calendar.events} /> : null}
+
+      {calendar.view === "year" ? <YearCalendarGrid calendar={calendar} events={calendar.events} basePath={basePath} /> : null}
 
       <section className="mt-8">
         <div className="flex items-center justify-between gap-3">
@@ -266,11 +269,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
             <Link href={`${basePath}?${shareParams.toString()}`}>Ansicht teilen</Link>
           </Button>
         </div>
-        <div
-          className={`mt-4 grid gap-3 ${
-            calendar.view === "week" ? "lg:grid-cols-7" : calendar.view === "month" ? "sm:grid-cols-2 lg:grid-cols-7" : "sm:grid-cols-2 lg:grid-cols-3"
-          }`}
-        >
+        <div className={`mt-4 grid gap-3 ${calendar.view === "week" ? "lg:grid-cols-7" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
           {groupedEvents.map((day) => (
             <Card key={day.key} className="min-h-40">
               <CardHeader className="border-b border-border pb-3">
@@ -332,6 +331,148 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
         </CardContent>
       </Card>
     </>
+  );
+}
+
+function MonthCalendarGrid({ calendar, events }: { calendar: CalendarResult; events: CalendarEvent[] }) {
+  const monthCalendarWeeks = chunkWeeks(getMonthCalendarDays(calendar.rangeStart));
+  const weekdayHeaders = monthCalendarWeeks[0]?.map((day) => weekdayHeaderFormatter.format(day.date)) ?? [];
+
+  return (
+    <Card className="mt-8 overflow-hidden">
+      <CardHeader className="border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle>Monatsraster</CardTitle>
+            <CardDescription>Google-ähnliche Monatsansicht mit echten Kalenderwochen und Termin-Badges.</CardDescription>
+          </div>
+          <Badge variant="outline">{events.length} Termine</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="grid grid-cols-7 border-b border-border bg-muted/50 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          {weekdayHeaders.map((weekday) => (
+            <div key={weekday} className="border-r border-border px-3 py-2 last:border-r-0">
+              {weekday}
+            </div>
+          ))}
+        </div>
+        <div className="month-calendar-weeks grid">
+          {monthCalendarWeeks.map((week, weekIndex) => (
+            <div key={`week-${weekIndex}`} className="grid grid-cols-7 border-b border-border last:border-b-0">
+              {week.map((day) => {
+                const dayEvents = getEventsForDay(events, day.date);
+
+                return (
+                  <div
+                    key={day.key}
+                    className={`min-h-36 border-r border-border p-2 last:border-r-0 ${
+                      day.isCurrentMonth ? "bg-card" : "bg-muted/30 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-sm font-medium">
+                        {compactDayFormatter.format(day.date)}
+                      </span>
+                      {dayEvents.length > 0 ? (
+                        <Badge variant="outline" className="text-[11px]">
+                          {dayEvents.length}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <div className="space-y-1">
+                      {dayEvents.slice(0, 3).map((event) => (
+                        <CalendarEventDialog
+                          key={`${event.sourceType}-${event.id}-${day.key}`}
+                          event={event}
+                          className={`block w-full truncate rounded-md border px-2 py-1 text-left text-xs ${getCalendarEventStatusBadgeClass(event.status)}`}
+                          triggerLabel={`Details zu ${event.title} anzeigen`}
+                        >
+                          {timeFormatter.format(event.startsAt)} {event.title}
+                        </CalendarEventDialog>
+                      ))}
+                      {dayEvents.length > 3 ? (
+                        <p className="text-xs font-medium text-muted-foreground">+ {dayEvents.length - 3} weitere</p>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function YearCalendarGrid({
+  calendar,
+  events,
+  basePath,
+}: {
+  calendar: CalendarResult;
+  events: CalendarEvent[];
+  basePath: string;
+}) {
+  const yearCalendarMonths = Array.from({ length: 12 }, (_, index) => new Date(calendar.rangeStart.getFullYear(), index, 1, 0, 0, 0, 0));
+  const weekdayHeaders = getMonthCalendarDays(yearCalendarMonths[0]!).slice(0, 7).map((day) => weekdayHeaderFormatter.format(day.date).slice(0, 2));
+
+  return (
+    <Card className="mt-8">
+      <CardHeader className="border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle>Jahresraster</CardTitle>
+            <CardDescription>Zwölf Mini-Monate mit Markierungen für belegte Tage. Ein Klick öffnet den jeweiligen Monat.</CardDescription>
+          </div>
+          <Badge variant="outline">{events.length} Termine</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-5">
+        <div className="year-calendar-months grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {yearCalendarMonths.map((monthDate) => {
+            const monthEvents = getEventsForMonth(events, monthDate);
+            const monthDays = getMonthCalendarDays(monthDate);
+            const monthHref = `${basePath}?date=${formatDateInput(monthDate)}&view=month${
+              calendar.filters.buildingId ? `&buildingId=${calendar.filters.buildingId}` : ""
+            }${calendar.filters.roomId ? `&roomId=${calendar.filters.roomId}` : ""}`;
+
+            return (
+              <Link key={monthDate.toISOString()} href={monthHref} className="rounded-xl border border-border bg-card p-4 shadow-sm transition hover:border-primary/40 hover:shadow-md">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h4 className="font-semibold tracking-tight">{monthTitleFormatter.format(monthDate)}</h4>
+                  <Badge variant="outline">{monthEvents.length}</Badge>
+                </div>
+                <div className="grid grid-cols-7 gap-1 text-center text-[11px] text-muted-foreground">
+                  {weekdayHeaders.map((weekday) => (
+                    <span key={weekday}>{weekday}</span>
+                  ))}
+                  {monthDays.map((day) => {
+                    const dayEvents = getEventsForDay(events, day.date);
+
+                    return (
+                      <span
+                        key={day.key}
+                        className={`flex h-7 items-center justify-center rounded-md ${
+                          dayEvents.length > 0
+                            ? "bg-primary/10 font-semibold text-primary"
+                            : day.isCurrentMonth
+                              ? "text-foreground"
+                              : "text-muted-foreground/50"
+                        }`}
+                      >
+                        {compactDayFormatter.format(day.date)}
+                      </span>
+                    );
+                  })}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
