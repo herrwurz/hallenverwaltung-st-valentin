@@ -73,19 +73,29 @@ test("phase 26.4 pilot master data fixes protect codes and settings navigation",
 });
 
 
-test("phase 26.8 organization blocking deactivates users and preserves reasons", () => {
+test("phase 26.8 and 27.3 organization blocking preserves reasons and respects multi memberships", () => {
   const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
+  const userService = readFileSync("lib/services/admin/user-service.ts", "utf8");
   const loginAction = readFileSync("app/login/actions.ts", "utf8");
   const organizationPage = readFileSync("app/admin/organizations/page.tsx", "utf8");
+  const usersPage = readFileSync("app/admin/users/page.tsx", "utf8");
+  const adminActions = readFileSync("app/admin/actions.ts", "utf8");
 
   assert.match(organizationService, /data\.status !== "ACTIVE"/);
   assert.match(organizationService, /blockedReason/);
+  assert.match(organizationService, /usersWithRemainingActiveOrganizations/);
+  assert.match(organizationService, /userIdsToDeactivate/);
   assert.match(organizationService, /user\.updateMany/);
   assert.match(organizationService, /isActive: false/);
   assert.match(organizationService, /organizationMember\.updateMany/);
+  assert.match(userService, /where: \{ status: "ACTIVE" \}/);
+  assert.match(userService, /Benutzer dürfen nur aktiven Organisationen zugeordnet werden/);
+  assert.match(adminActions, /Benutzer dürfen nur aktiven Organisationen zugeordnet werden/);
   assert.match(loginAction, /compare\(password, user\.passwordHash\)/);
   assert.match(loginAction, /Der Login ist gesperrt/);
   assert.match(organizationPage, /Stilllegungsgrund/);
+  assert.match(usersPage, /gesperrt/);
+  assert.match(usersPage, /Mindestens eine aktive Mitgliedschaft/);
 });
 
 test("phase 27 building contact fields are persisted and visible in admin", () => {

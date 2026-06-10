@@ -61,14 +61,28 @@ export async function saveOrganization(input: unknown) {
         const userIds = Array.from(new Set(affectedMemberships.map((membership) => membership.userId)));
 
         if (userIds.length > 0) {
-          await transaction.user.updateMany({
-            where: { id: { in: userIds } },
-            data: { isActive: false },
-          });
           await transaction.organizationMember.updateMany({
             where: { id: { in: affectedMemberships.map((membership) => membership.id) } },
             data: { activeUntil: now },
           });
+
+          const usersWithRemainingActiveOrganizations = await transaction.organizationMember.findMany({
+            where: {
+              userId: { in: userIds },
+              OR: [{ activeUntil: null }, { activeUntil: { gt: now } }],
+              organization: { status: "ACTIVE" },
+            },
+            select: { userId: true },
+          });
+          const stillActiveUserIds = new Set(usersWithRemainingActiveOrganizations.map((membership) => membership.userId));
+          const userIdsToDeactivate = userIds.filter((userId) => !stillActiveUserIds.has(userId));
+
+          if (userIdsToDeactivate.length > 0) {
+            await transaction.user.updateMany({
+              where: { id: { in: userIdsToDeactivate } },
+              data: { isActive: false },
+            });
+          }
         }
       }
     });

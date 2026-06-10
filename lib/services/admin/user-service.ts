@@ -28,7 +28,7 @@ export async function getUserAdministrationData() {
     }),
     prisma.role.findMany({ orderBy: { name: "asc" } }),
     prisma.organization.findMany({
-      where: { status: { not: "INACTIVE" } },
+      where: { status: "ACTIVE" },
       orderBy: { name: "asc" },
     }),
   ]);
@@ -50,6 +50,19 @@ export async function saveUser(input: unknown, actorUserId: string) {
 
   if (data.primaryOrganizationId && !data.organizationIds.includes(data.primaryOrganizationId)) {
     throw new Error("Die primäre Organisation muss dem Benutzer zugewiesen sein.");
+  }
+
+  if (data.organizationIds.length > 0) {
+    const activeOrganizationCount = await prisma.organization.count({
+      where: {
+        id: { in: data.organizationIds },
+        status: "ACTIVE",
+      },
+    });
+
+    if (activeOrganizationCount !== new Set(data.organizationIds).size) {
+      throw new Error("Benutzer dürfen nur aktiven Organisationen zugeordnet werden.");
+    }
   }
 
   const passwordHash = password ? await hash(password, 12) : undefined;
