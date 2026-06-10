@@ -15,8 +15,10 @@ const dateTimeFormatter = new Intl.DateTimeFormat("de-AT", {
   timeStyle: "short",
 });
 
-const dateFormatter = new Intl.DateTimeFormat("de-AT", {
-  dateStyle: "medium",
+const weekdayFormatter = new Intl.DateTimeFormat("de-AT", {
+  weekday: "short",
+  day: "2-digit",
+  month: "2-digit",
 });
 
 const timeFormatter = new Intl.DateTimeFormat("de-AT", {
@@ -53,6 +55,10 @@ function shiftCalendarDate(selectedDate: string, view: CalendarResult["view"], d
 
 function getMinutesFromDayStart(date: Date) {
   return date.getHours() * 60 + date.getMinutes();
+}
+
+function toDateKey(date: Date) {
+  return formatDateInput(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0));
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -347,6 +353,9 @@ function ResourceScheduleGrid({
     return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
   });
   const isWeek = calendar.view === "week";
+  const scheduleColumns = isWeek
+    ? rooms.flatMap((room) => calendar.days.map((day) => ({ room, day })))
+    : rooms.map((room) => ({ room, day: calendar.days[0] }));
 
   return (
     <Card className="mt-8 overflow-hidden">
@@ -358,8 +367,7 @@ function ResourceScheduleGrid({
               {isWeek ? "Wochenplan nach Räumen" : "Tagesplan nach Räumen"}
             </CardTitle>
             <CardDescription>
-              Räume als Spalten, Zeitfenster in 30-Minuten-Schritten. In der Wochenansicht zeigt jeder Termin zusätzlich
-              den Wochentag.
+              Räume als Spalten, Zeitfenster in 30-Minuten-Schritten. Die Wochenansicht trennt zusätzlich nach Wochentagen.
             </CardDescription>
           </div>
           <Badge variant="outline">{rooms.length} Räume</Badge>
@@ -368,19 +376,22 @@ function ResourceScheduleGrid({
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <div
-            className="google-calendar-grid grid min-w-[900px]"
-            style={{ gridTemplateColumns: `88px repeat(${Math.max(rooms.length, 1)}, minmax(240px, 1fr))` }}
+            className="google-calendar-grid grid min-w-[1100px]"
+            style={{ gridTemplateColumns: `88px repeat(${Math.max(scheduleColumns.length, 1)}, minmax(180px, 1fr))` }}
           >
             <div className="sticky left-0 z-20 border-b border-r border-border bg-card p-3 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               Zeit
             </div>
-            {rooms.length === 0 ? (
+            {scheduleColumns.length === 0 ? (
               <div className="border-b border-border p-3 text-sm text-muted-foreground">Keine Räume im Filter.</div>
             ) : (
-              rooms.map((room) => (
-                <div key={room.id} className="border-b border-r border-border bg-card p-3">
+              scheduleColumns.map(({ room, day }) => (
+                <div key={`${room.id}-${day?.key ?? "day"}`} className="border-b border-r border-border bg-card p-3">
                   <p className="text-sm font-semibold tracking-tight">{room.name}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{room.buildingName}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {isWeek && day ? `${weekdayFormatter.format(day.date)} · ` : ""}
+                    {room.buildingName}
+                  </p>
                 </div>
               ))
             )}
@@ -393,16 +404,20 @@ function ResourceScheduleGrid({
               ))}
             </div>
 
-            {rooms.map((room) => {
-              const roomEvents = events.filter(
-                (event) =>
-                  event.roomId === room.id || (event.sourceType === "closure" && event.roomId === null && event.buildingId === room.buildingId),
-              );
+            {scheduleColumns.map(({ room, day }) => {
+              const dayKey = day ? toDateKey(day.date) : null;
+              const roomEvents = events.filter((event) => {
+                const affectsRoom =
+                  event.roomId === room.id || (event.sourceType === "closure" && event.roomId === null && event.buildingId === room.buildingId);
+                const affectsDay = !isWeek || !dayKey || toDateKey(event.startsAt) === dayKey || toDateKey(event.endsAt) === dayKey;
+
+                return affectsRoom && affectsDay;
+              });
 
               return (
-                <div key={room.id} className="relative border-r border-border" style={{ height: `${timeSlots.length * slotHeight}px` }}>
+                <div key={`${room.id}-${day?.key ?? "day"}`} className="relative border-r border-border" style={{ height: `${timeSlots.length * slotHeight}px` }}>
                   {timeSlots.map((slot) => (
-                    <div key={`${room.id}-${slot}`} className="h-[34px] border-b border-border/70 bg-white" />
+                    <div key={`${room.id}-${day?.key ?? "day"}-${slot}`} className="h-[34px] border-b border-border/70 bg-white" />
                   ))}
                   {roomEvents.map((event) => {
                     const blockedStart = clamp(getMinutesFromDayStart(event.blockedFrom) - schedulerStartMinutes, 0, totalSchedulerMinutes);
@@ -412,7 +427,7 @@ function ResourceScheduleGrid({
 
                     return (
                       <CalendarEventDialog
-                        key={`${event.sourceType}-${event.id}-${room.id}`}
+                        key={`${event.sourceType}-${event.id}-${room.id}-${day?.key ?? "day"}`}
                         event={event}
                         className="absolute left-2 right-2 overflow-hidden rounded-lg border-l-4 border-l-primary bg-primary/10 p-2 text-xs shadow-sm transition hover:bg-primary/15"
                         triggerLabel={`Details zu ${event.title} öffnen`}
@@ -423,7 +438,6 @@ function ResourceScheduleGrid({
                         </span>
                         <span className="block truncate font-semibold text-foreground">{event.title}</span>
                         <span className="block truncate text-muted-foreground">
-                          {isWeek ? `${dateFormatter.format(event.startsAt)}, ` : ""}
                           {timeFormatter.format(event.startsAt)} bis {timeFormatter.format(event.endsAt)}
                         </span>
                       </CalendarEventDialog>

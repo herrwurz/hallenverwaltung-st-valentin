@@ -27,10 +27,10 @@ test("calendar UI exposes shadcn event detail dialogs and localized labels", () 
   assert.match(calendarDialog, /Gebäude/);
   assert.match(calendarView, /Details anzeigen/);
   assert.match(calendarView, /Alle Räume/);
-  assert.doesNotMatch(calendarView, /Gebaeude|Raeume|Eintraege|auswaehlen|gewaehl/);
+  assert.doesNotMatch(calendarView, /Gebaeude|Raeume|Eintraege|auswaehlen|gewaehl|Ã/);
 });
 
-test("calendar UI exposes Google-like period navigation", () => {
+test("calendar UI exposes Google-like period navigation and resource week grid", () => {
   const calendarView = readFileSync("components/calendar-view.tsx", "utf8");
 
   assert.match(calendarView, /shiftCalendarDate/);
@@ -39,6 +39,9 @@ test("calendar UI exposes Google-like period navigation", () => {
   assert.match(calendarView, /Weiter/);
   assert.match(calendarView, /google-calendar-grid/);
   assert.match(calendarView, /Wochenplan nach Räumen/);
+  assert.match(calendarView, /scheduleColumns/);
+  assert.match(calendarView, /weekdayFormatter/);
+  assert.match(calendarView, /Räume als Spalten/);
 });
 
 test("admin navigation uses localized umlauts for core master data", () => {
@@ -49,4 +52,18 @@ test("admin navigation uses localized umlauts for core master data", () => {
   assert.match(adminNavigation, /Buchungen|Buchungsanträge/);
   assert.match(adminNavigation, /Gebäude/);
   assert.match(adminNavigation, /Räume/);
+});
+
+test("calendar pages do not expose mojibake in visible German copy", () => {
+  const files = [
+    "app/admin/calendar/page.tsx",
+    "app/portal/calendar/page.tsx",
+    "app/public/calendar/page.tsx",
+    "components/calendar-view.tsx",
+  ];
+
+  for (const file of files) {
+    const content = readFileSync(file, "utf8");
+    assert.doesNotMatch(content, /Ã|Gebaeude|Raeume|zurueck|oeffentlich/i, file);
+  }
 });

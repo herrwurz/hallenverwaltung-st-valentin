@@ -26,6 +26,7 @@ function getErrorMessage(error: unknown) {
   }
 
   const expectedMessages = new Set([
+    "Benutzer dürfen nur aktiven Organisationen zugeordnet werden.",
     "Ein Raum kann nicht sein eigener Teilbereich sein.",
     "Parent-Room und Teilbereich müssen demselben Gebäude zugeordnet sein.",
     "Die Parent-Room-Zuordnung darf keinen Zyklus bilden.",

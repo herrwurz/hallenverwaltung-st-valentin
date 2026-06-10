@@ -23,7 +23,13 @@ export default async function UsersPage({ searchParams }: PageProps) {
     email: user.email,
     roles: user.roles.map(({ role }) => role.name).join(", ") || "Keine Rolle",
     organizations:
-      user.organizationMemberships.map((membership) => membership.organization.name).join(", ") || "Keine Organisation",
+      user.organizationMemberships
+        .map((membership) =>
+          membership.organization.status === "ACTIVE"
+            ? membership.organization.name
+            : `${membership.organization.name} (${membership.organization.status === "BLOCKED" ? "gesperrt" : "inaktiv"})`,
+        )
+        .join(", ") || "Keine Organisation",
     isActive: user.isActive,
   }));
 
@@ -70,6 +76,11 @@ export default async function UsersPage({ searchParams }: PageProps) {
                   <CardDescription>
                     {user.email} | {user.roles.map(({ role }) => role.name).join(", ") || "Keine Rolle"}
                   </CardDescription>
+                  {user.organizationMemberships.some((membership) => membership.organization.status !== "ACTIVE") ? (
+                    <p className="mt-2 text-sm text-amber-700">
+                      Hinweis: Mindestens eine aktive Mitgliedschaft verweist auf eine gesperrte oder inaktive Organisation.
+                    </p>
+                  ) : null}
                 </div>
                 <Badge variant={user.isActive ? "success" : "secondary"}>{user.isActive ? "Aktiv" : "Inaktiv"}</Badge>
               </div>
