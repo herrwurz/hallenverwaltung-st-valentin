@@ -501,11 +501,15 @@ model WaitlistEntry {
 model HolidayPeriod {
   id            String        @id @default(cuid())
   name          String
+  countryCode   String        @default("AT")
+  regionCode    String?
   startsOn      DateTime
   endsOn        DateTime
   defaultStatus ClosureStatus
   reason        String
   isPublic      Boolean       @default(true)
+
+  @@index([countryCode, regionCode, startsOn, endsOn])
 }
 
 model Closure {
