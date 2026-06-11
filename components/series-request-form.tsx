@@ -67,6 +67,13 @@ const monthOptions = [
   "Dezember",
 ].map((label, index) => ({ value: index + 1, label }));
 
+const semesterPresetOptions = [
+  { value: "", label: "Manuell wählen" },
+  { value: "SCHOOL_SEMESTER", label: "Aktuelles Semester" },
+  { value: "SCHOOL_YEAR", label: "Schuljahr / Saison bis 30. Juni" },
+  { value: "CALENDAR_YEAR", label: "Kalenderjahr bis 31. Dezember" },
+] as const;
+
 const previewFormatter = new Intl.DateTimeFormat("de-AT", {
   weekday: "short",
   day: "2-digit",
@@ -124,6 +131,31 @@ function nthWeekday(year: number, monthIndex: number, weekday: number, ordinal: 
 
 function monthDistance(first: Date, candidate: Date) {
   return (candidate.getFullYear() - first.getFullYear()) * 12 + candidate.getMonth() - first.getMonth();
+}
+
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getSemesterPresetEndDate(firstStartsAt: Date, preset: string) {
+  const year = firstStartsAt.getFullYear();
+
+  if (preset === "CALENDAR_YEAR") {
+    return new Date(year, 11, 31);
+  }
+
+  if (preset === "SCHOOL_YEAR") {
+    return firstStartsAt.getMonth() >= 6 ? new Date(year + 1, 5, 30) : new Date(year, 5, 30);
+  }
+
+  if (preset === "SCHOOL_SEMESTER") {
+    return firstStartsAt.getMonth() >= 7 ? new Date(year + 1, 0, 31) : new Date(year, 5, 30);
+  }
+
+  return null;
 }
 
 function buildPreview({
@@ -216,6 +248,7 @@ export function SeriesRequestForm({
   const [interval, setInterval] = useState(1);
   const [firstStartsAt, setFirstStartsAt] = useState("");
   const [repeatUntil, setRepeatUntil] = useState("");
+  const [semesterPreset, setSemesterPreset] = useState("");
   const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>([]);
   const [monthlyMode, setMonthlyMode] = useState("DAY_OF_MONTH");
   const [dayOfMonth, setDayOfMonth] = useState(1);
@@ -234,6 +267,19 @@ export function SeriesRequestForm({
     setWeekday(parsed.getDay());
     setMonth(parsed.getMonth() + 1);
     setSelectedWeekdays((current) => (current.length === 0 ? [parsed.getDay()] : current));
+    const presetEndDate = getSemesterPresetEndDate(parsed, semesterPreset);
+    if (presetEndDate) {
+      setRepeatUntil(formatDateInput(presetEndDate));
+    }
+  };
+
+  const applySemesterPreset = (value: string) => {
+    setSemesterPreset(value);
+    const parsed = parseDateTime(firstStartsAt);
+    const presetEndDate = parsed ? getSemesterPresetEndDate(parsed, value) : null;
+    if (presetEndDate) {
+      setRepeatUntil(formatDateInput(presetEndDate));
+    }
   };
 
   const preview = useMemo(
@@ -399,7 +445,7 @@ export function SeriesRequestForm({
 
       <fieldset className="rounded-xl border border-border bg-card p-4">
         <legend className="px-2 text-sm font-semibold text-emerald-700">Seriendauer</legend>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-4">
           <label className="text-sm font-medium">
             Beginn
             <input
@@ -425,6 +471,20 @@ export function SeriesRequestForm({
               onChange={(event) => setRepeatUntil(event.target.value)}
               className={inputClassName}
             />
+          </label>
+          <label className="text-sm font-medium">
+            Semester/Saison
+            <select
+              value={semesterPreset}
+              onChange={(event) => applySemesterPreset(event.target.value)}
+              className={inputClassName}
+            >
+              {semesterPresetOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
       </fieldset>

@@ -11,10 +11,14 @@ import {
   parseExcludedDates,
   parseWeekdays,
 } from "../lib/services/booking-series-service";
-import { assertHolidayPeriodRange, getHolidayStatusLabel } from "../lib/services/holiday-service";
+import { assertHolidayPeriodRange, buildHolidayPresetPeriods, getHolidayStatusLabel } from "../lib/services/holiday-service";
 
 const firstStartsAt = new Date("2026-09-07T18:00:00Z");
 const firstEndsAt = new Date("2026-09-07T20:00:00Z");
+
+function localDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 
 test("generates weekly booking occurrences up to the configured end date", () => {
   const occurrences = generateWeeklyOccurrences({
@@ -300,6 +304,27 @@ test("validates holiday period ranges and labels", () => {
   assert.equal(getHolidayStatusLabel("OPEN"), "Geöffnet");
   assert.equal(getHolidayStatusLabel("RESTRICTED"), "Eingeschränkt");
   assert.equal(getHolidayStatusLabel("CLOSED"), "Gesperrt");
+});
+
+test("builds Austria and Lower Austria holiday presets for a pilot year", () => {
+  const periods = buildHolidayPresetPeriods({
+    presetKey: "AT_NO_ALL",
+    year: 2027,
+    defaultStatus: "CLOSED",
+    isPublic: true,
+  });
+
+  assert.ok(periods.some((period) => period.name === "Staatsfeiertag 2027" && period.countryCode === "AT"));
+  assert.ok(
+    periods.some(
+      (period) =>
+        period.name === "Semesterferien Niederösterreich 2027" &&
+        period.regionCode === "AT-NO" &&
+        localDateKey(period.startsOn) === "2027-02-01" &&
+        localDateKey(period.endsOn) === "2027-02-08",
+    ),
+  );
+  assert.ok(periods.some((period) => period.name === "Sommerferien Niederösterreich 2027"));
 });
 
 test("requestBooking persists series metadata for generated occurrences", async () => {

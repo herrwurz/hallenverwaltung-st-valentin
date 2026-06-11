@@ -1,4 +1,4 @@
-import { createHolidayPeriodAction } from "@/app/admin/holidays/actions";
+import { createHolidayPeriodAction, importHolidayPresetAction } from "@/app/admin/holidays/actions";
 import { AppFeedback } from "@/components/app-feedback";
 import { HolidaysDataTable, type HolidayTableRow } from "@/components/phase25-data-tables";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import {
   getHolidayScopeLabel,
   getHolidayStatusLabel,
   holidayCountryOptions,
+  holidayPresetOptions,
+  holidayPresetYearOptions,
   holidayRegionOptions,
 } from "@/lib/services/holiday-service";
 
@@ -16,7 +18,7 @@ const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
 
 type PageProps = {
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; presetImported?: string; created?: string; skipped?: string; error?: string }>;
 };
 
 export default async function AdminHolidaysPage({ searchParams }: PageProps) {
@@ -44,8 +46,63 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
         messages={[
           { tone: "error", text: params.error },
           { tone: "success", text: params.saved ? "Ferienzeitraum wurde gespeichert." : undefined },
+          {
+            tone: "success",
+            text: params.presetImported
+              ? `Vorlage übernommen: ${params.created ?? "0"} neu, ${params.skipped ?? "0"} bereits vorhanden.`
+              : undefined,
+          },
         ]}
       />
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Vorlagen übernehmen</CardTitle>
+          <CardDescription>
+            Legt österreichische Feiertage und Niederösterreich-Schulferien als normale Ferienzeiträume an. Bereits vorhandene
+            gleiche Zeiträume werden übersprungen.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={importHolidayPresetAction} className="grid gap-4 lg:grid-cols-4">
+            <label className="text-sm font-medium lg:col-span-2">
+              Vorlage
+              <select name="presetKey" required defaultValue="AT_NO_ALL" className={inputClass}>
+                {holidayPresetOptions.map((preset) => (
+                  <option key={preset.key} value={preset.key}>
+                    {preset.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium">
+              Jahr
+              <select name="year" required defaultValue={new Date().getFullYear()} className={inputClass}>
+                {holidayPresetYearOptions.map((year) => (
+                  <option key={year.value} value={year.value}>
+                    {year.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium">
+              Status
+              <select name="defaultStatus" required defaultValue="CLOSED" className={inputClass}>
+                <option value="OPEN">Geöffnet</option>
+                <option value="RESTRICTED">Eingeschränkt</option>
+                <option value="CLOSED">Gesperrt</option>
+              </select>
+            </label>
+            <label className="inline-flex items-center gap-2 text-sm font-medium lg:col-span-3">
+              <input name="isPublic" type="checkbox" defaultChecked className="rounded border-input bg-background" />
+              Für Benutzer sichtbar
+            </label>
+            <div className="lg:text-right">
+              <Button>Vorlage importieren</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <Card className="mt-8">
         <CardHeader>

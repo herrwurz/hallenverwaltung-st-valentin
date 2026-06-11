@@ -86,3 +86,19 @@ test("damage forms use building filtered room selection", () => {
 
   assert.match(portalDamages, /BuildingRoomSelect/);
 });
+
+test("admin roles expose guarded role permission editing", () => {
+  const rolePage = readFileSync("app/admin/roles/page.tsx", "utf8");
+  const roleActions = readFileSync("app/admin/roles/actions.ts", "utf8");
+  const roleService = readFileSync("lib/services/admin/role-service.ts", "utf8");
+
+  assert.match(rolePage, /updateRolePermissionsAction/);
+  assert.match(rolePage, /name="permissionIds"/);
+  assert.match(rolePage, /Rechte speichern/);
+  assert.match(rolePage, /SUPER_ADMIN darf nur durch SUPER_ADMIN/);
+  assert.match(roleActions, /requirePermission\("MANAGE_USERS"\)/);
+  assert.match(roleService, /updateRolePermissions/);
+  assert.match(roleService, /role\.code === "SUPER_ADMIN"/);
+  assert.match(roleService, /SUPER_ADMIN muss alle Rechte behalten/);
+  assert.match(roleService, /PERMISSIONS_UPDATED/);
+});

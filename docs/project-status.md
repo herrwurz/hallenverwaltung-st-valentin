@@ -326,6 +326,12 @@ Status-Badges. Termin-Details werden ueber eine Radix/shadcn-Dialogkomponente
 angezeigt. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
 Option.
 
+## Phase 31
+
+Rollen/Rechte sind in der Verwaltung nicht mehr nur lesbar: Rolle-Rechte-
+Zuordnungen koennen serverseitig geschuetzt bearbeitet werden. SUPER_ADMIN
+bleibt besonders abgesichert und muss alle Rechte behalten.
+
 ---
 
 # Wichtigste Architekturentscheidungen
@@ -520,8 +526,10 @@ Aktueller Umfang:
 * CLOSED-Zeitraeume werden uebersprungen
 * RESTRICTED-Zeitraeume erzeugen Hinweise
 * einzelne Ausnahmedaten koennen bei Serienanlage angegeben werden
-* Saison-/Semesterlogik wird aktuell ueber das Feld "Wiederholen bis"
-  abgebildet
+* Saison-/Semesterlogik ist als Komfortauswahl fuer aktuelles Semester,
+  Schuljahr/Saison bis 30. Juni und Kalenderjahr umgesetzt
+* Oesterreichische Feiertage und Niederoesterreich-Schulferien koennen in der
+  Ferienverwaltung als Vorlagen importiert werden
 * Blockbuchungen bleiben offen, bis die Fachregel eindeutig spezifiziert ist
 
 ### Dokumentenmanagement

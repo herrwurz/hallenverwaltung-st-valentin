@@ -100,6 +100,10 @@ Enthalten sind:
    Die oeffentliche Ansicht unter `/public` zeigt Standortuebersicht,
    datenschutzkonforme Kalenderdaten, freie Zeiten und einen iCal-Export unter
    `/public/calendar/ical`.
+   Ferien und Feiertage koennen unter `/admin/holidays` manuell gepflegt oder
+   ueber Vorlagen fuer Oesterreich/Niederoesterreich importiert werden. In der
+   Serienanlage gibt es zusaetzlich eine Semester-/Saison-Vorauswahl fuer das
+   Enddatum.
    Hintergrundjobs fuer Benachrichtigungen und Wartelistenablauf koennen unter
    `/admin/system/jobs` manuell gestartet oder per CLI ausgefuehrt werden:
 
