@@ -172,7 +172,7 @@ async function applyExistingBookingTransition(client: TransitionClient, input: U
   });
 
   if (!updatedBooking) {
-    throw new BookingValidationError("Die Buchung konnte nach der StatusÃ¤nderung nicht geladen werden.");
+    throw new BookingValidationError("Die Buchung konnte nach der Statusänderung nicht geladen werden.");
   }
 
   return updatedBooking;
@@ -231,7 +231,7 @@ export async function cancelBooking(
       updateData: { cancellationNote: "Vom Antragsteller storniert." },
       scope: input.scope,
       notFoundMessage: "Der Buchungsantrag wurde nicht gefunden.",
-      invalidStatusMessage: "Nur beantragte Buchungen kÃ¶nnen storniert werden.",
+      invalidStatusMessage: "Nur beantragte Buchungen können storniert werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geändert. Bitte neu laden.",
     });
 
@@ -251,13 +251,13 @@ export async function markBookingInReview(
       actorUserId: input.actorUserId,
       expectedStatuses: ["REQUESTED"],
       nextStatus: "IN_REVIEW",
-      reason: "Zur PrÃ¼fung Ã¼bernommen.",
+      reason: "Zur Prüfung übernommen.",
       updateData: {
         processedByUserId: input.actorUserId,
         processedAt: new Date(),
       },
       notFoundMessage: "Die Buchung wurde nicht gefunden.",
-      invalidStatusMessage: "Nur beantragte Buchungen kÃ¶nnen in PrÃ¼fung gesetzt werden.",
+      invalidStatusMessage: "Nur beantragte Buchungen können in Prüfung gesetzt werden.",
       parallelChangeMessage: "Die Buchung wurde zwischenzeitlich geändert. Bitte neu laden.",
     });
 
