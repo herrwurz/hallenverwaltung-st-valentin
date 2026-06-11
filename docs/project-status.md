@@ -326,11 +326,31 @@ Status-Badges. Termin-Details werden ueber eine Radix/shadcn-Dialogkomponente
 angezeigt. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
 Option.
 
+## Phase 29
+
+Mailbenachrichtigungen wurden fuer zentrale Ereignisse erweitert:
+Buchungsantrag, in Pruefung, Genehmigung, Ablehnung, Storno,
+Serienzusammenfassungen, Verschiebungsantraege, Wartelistenangebote und
+Ablauf, Sperren, Benutzerkonto-Anlage/-Deaktivierung und
+Organisationssperren. Testmail und Empfaenger-Vorschau stehen im
+Verwaltungsportal zur Verfuegung.
+
+## Phase 30
+
+Ferien-/Feiertagsvorlagen fuer Oesterreich und Niederoesterreich sowie
+Semester-/Saison-Kurzbefuellung fuer Serienbuchungen wurden umgesetzt.
+
 ## Phase 31
 
 Rollen/Rechte sind in der Verwaltung nicht mehr nur lesbar: Rolle-Rechte-
 Zuordnungen koennen serverseitig geschuetzt bearbeitet werden. SUPER_ADMIN
 bleibt besonders abgesichert und muss alle Rechte behalten.
+
+## Phase 32
+
+Teststand-Freeze fuer den naechsten Echstand-Durchklicktest. Der verbindliche
+Umfang, bewusste Nicht-Ziele, Blocker-Regeln und die Durchklick-Reihenfolge
+stehen in `docs/teststand-freeze.md`.
 
 ---
 
