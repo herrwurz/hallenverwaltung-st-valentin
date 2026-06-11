@@ -326,6 +326,12 @@ Status-Badges. Termin-Details werden ueber eine Radix/shadcn-Dialogkomponente
 angezeigt. FullCalendar Resource Timeline bleibt nur nach Lizenzklaerung eine
 Option.
 
+## Phase 31
+
+Rollen/Rechte sind in der Verwaltung nicht mehr nur lesbar: Rolle-Rechte-
+Zuordnungen koennen serverseitig geschuetzt bearbeitet werden. SUPER_ADMIN
+bleibt besonders abgesichert und muss alle Rechte behalten.
+
 ---
 
 # Wichtigste Architekturentscheidungen

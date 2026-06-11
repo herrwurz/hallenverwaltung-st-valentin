@@ -45,7 +45,7 @@ Sie sollten aber vor einem breiteren Vereins-Pilot bewusst entschieden werden.
 | Punkt | Empfehlung | Entscheidung | Verantwortlich | Datum |
 | --- | --- | --- | --- | --- |
 | Stammdaten loeschen | Nicht schnell loeschen einbauen. Fuer Version 1 Inaktiv-/Sperrstatus verwenden und danach Loesch-/Archivkonzept spezifizieren. | offen |  |  |
-| Rollen/Rechte bearbeiten | Nur vorziehen, wenn die Verwaltung Rollen/Rechte selbst pflegen muss. Sonst Seed-/Adminpflege beibehalten. | offen |  |  |
+| Rollen/Rechte bearbeiten | Umgesetzt: Rolle-Rechte-Zuordnung kann serverseitig geschuetzt bearbeitet werden; SUPER_ADMIN bleibt besonders abgesichert. | erledigt | Codex | 2026-06-10 |
 | Semester-Vorauswahl fuer Serien | Umgesetzt fuer aktuelles Semester, Schuljahr/Saison bis 30. Juni und Kalenderjahr. | erledigt | Codex | 2026-06-10 |
 | Oesterreichische Ferien je Bundesland vordefinieren | Umgesetzt fuer gesetzliche Feiertage Oesterreich und Schulferien Niederoesterreich als importierbare Admin-Vorlagen. | erledigt | Codex | 2026-06-10 |
 
