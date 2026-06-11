@@ -3,7 +3,7 @@
 Technisches Grundgeruest fuer eine Hallenverwaltungssoftware auf Basis von
 Next.js, TypeScript, Tailwind CSS, Prisma und PostgreSQL.
 
-## Stand: Phase 23
+## Stand: Testbarer Echstand / Phase 32
 
 Enthalten sind:
 
@@ -23,6 +23,8 @@ Enthalten sind:
   `docs/go-live-runbook.md`, `docs/go-live-evidence.md` und
   `docs/go-live-open-points.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
+- Teststand-Freeze unter `docs/teststand-freeze.md` als verbindlicher Umfang
+  fuer den naechsten Durchklicktest
 
 ## Voraussetzungen
 
@@ -142,6 +144,8 @@ nutzbar:
 - Hallenwart-Funktionen nach Login: `/admin/handovers`
 
 Ein manueller Testleitfaden liegt in `docs/pilot-testplan.md`.
+Der verbindliche Freeze-Umfang fuer den naechsten Echstand-Test liegt in
+`docs/teststand-freeze.md`.
 Flexible lokale und serverseitige Installationsoptionen stehen in
 `docs/installation-options.md`.
 Der finale Abnahmetestplan liegt in `docs/acceptance-testplan.md`.
@@ -246,6 +250,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
 
 - `docs/installation-options.md` fuer lokalen Teststand, eigenen Testserver
   und spaeteren Gemeinde-Server
+- `docs/teststand-freeze.md` fuer den fachlichen Umfang des testbaren
+  Echstands
 - `docker-compose.production.yml` fuer PostgreSQL, Migrationen, Web,
   Worker und Nginx Reverse Proxy
 - `.env.production.example` als Vorlage fuer Produktionsvariablen

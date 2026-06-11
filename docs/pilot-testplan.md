@@ -3,6 +3,10 @@
 Dieser Plan beschreibt einen schlanken manuellen Produkttest fuer die lokale
 Demo- oder Pilotumgebung.
 
+Der verbindliche Umfang fuer den naechsten testbaren Echstand ist in
+`docs/teststand-freeze.md` dokumentiert. Waehrend dieses Freeze sollen nur
+Blocker, Datenintegritaetsfehler und zentrale Bedienfehler korrigiert werden.
+
 ## Lokaler Start
 
 ### Komfortstart fuer den Klicktest
