@@ -403,7 +403,7 @@ test("renders booking change approval template with old and new slot", () => {
   assert.match(template.subject, /Verschiebung genehmigt/);
   assert.match(template.text, /Volksschule Hauptplatz/);
   assert.match(template.text, /NMS Langenhart/);
-  assert.match(template.html, /Verschiebung ist mÃ¶glich|Verschiebung ist möglich/);
+  assert.match(template.html, /Verschiebung ist möglich/);
 });
 
 test("queues closure notifications for caretakers and admin recipients", async () => {

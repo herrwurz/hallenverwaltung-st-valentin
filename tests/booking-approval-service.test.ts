@@ -433,7 +433,7 @@ test("moves a booking from REQUESTED to IN_REVIEW", async () => {
     actorUserId: "admin-1",
     oldStatus: "REQUESTED",
     newStatus: "IN_REVIEW",
-    reason: "Zur PrÃ¼fung Ã¼bernommen.",
+    reason: "Zur Prüfung übernommen.",
     oldStartAt: start,
     oldEndAt: end,
     newStartAt: start,
