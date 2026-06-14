@@ -1,4 +1,9 @@
-import { createRoomClosureAction, saveRoomAction } from "@/app/admin/actions";
+import {
+  createRoomClosureAction,
+  deleteRoomClosureAction,
+  saveRoomAction,
+  updateRoomClosureAction,
+} from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminClosurePanel } from "@/components/admin-closure-panel";
 import { AdminFeedback } from "@/components/admin-feedback";
@@ -83,9 +88,15 @@ export default async function RoomsPage({ searchParams }: PageProps) {
               <RoomForm buildings={data.buildings} rooms={data.rooms} room={room} />
               <AdminClosurePanel
                 action={createRoomClosureAction}
+                updateAction={updateRoomClosureAction}
+                deleteAction={deleteRoomClosureAction}
                 targetName="roomId"
                 targetId={room.id}
                 closures={room.closures}
+                relatedClosures={room.building.closures.map((closure) => ({
+                  ...closure,
+                  sourceLabel: `Gebaeude: ${room.building.name}`,
+                }))}
               />
             </CardContent>
           </Card>

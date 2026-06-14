@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { getPublicAreaEnabled } from "@/lib/services/calendar-settings-service";
 import { exportPublicCalendarIcs } from "@/lib/services/public-calendar-export-service";
 import type { CalendarView } from "@/lib/services/calendar-service";
 
@@ -7,6 +8,15 @@ function parseView(value: string | null): CalendarView {
 }
 
 export async function GET(request: NextRequest) {
+  if (!(await getPublicAreaEnabled())) {
+    return new Response("Public calendar is disabled.", {
+      status: 404,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
   const params = request.nextUrl.searchParams;
   const content = await exportPublicCalendarIcs({
     date: params.get("date") ?? undefined,

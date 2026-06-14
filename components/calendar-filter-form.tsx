@@ -2,16 +2,27 @@
 
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import type { CalendarFilterOption, CalendarResult } from "@/lib/services/calendar-service";
+import type {
+  CalendarFilterOption,
+  CalendarOrganizationFilterOption,
+  CalendarResult,
+} from "@/lib/services/calendar-service";
 
 type CalendarFilterFormProps = {
   buildings: CalendarFilterOption[];
+  organizations?: CalendarOrganizationFilterOption[];
   filters: CalendarResult["filters"];
   selectedDate: string;
   view: CalendarResult["view"];
 };
 
-export function CalendarFilterForm({ buildings, filters, selectedDate, view }: CalendarFilterFormProps) {
+export function CalendarFilterForm({
+  buildings,
+  organizations = [],
+  filters,
+  selectedDate,
+  view,
+}: CalendarFilterFormProps) {
   const [selectedBuildingId, setSelectedBuildingId] = useState(filters.buildingId ?? "");
   const [selectedRoomId, setSelectedRoomId] = useState(filters.roomId ?? "");
 
@@ -29,7 +40,27 @@ export function CalendarFilterForm({ buildings, filters, selectedDate, view }: C
   );
 
   return (
-    <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,220px,200px,auto]">
+    <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,1fr,220px,auto]">
+      <input type="hidden" name="view" value={view} />
+
+      {organizations.length > 0 ? (
+        <label className="text-sm font-medium text-foreground">
+          Organisation
+          <select
+            name="organizationId"
+            defaultValue={filters.organizationId ?? ""}
+            className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+          >
+            <option value="">Alle Organisationen</option>
+            {organizations.map((organization) => (
+              <option key={organization.id} value={organization.id}>
+                {organization.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
       <label className="text-sm font-medium text-foreground">
         Gebäude
         <select
@@ -75,20 +106,6 @@ export function CalendarFilterForm({ buildings, filters, selectedDate, view }: C
           defaultValue={selectedDate}
           className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
         />
-      </label>
-
-      <label className="text-sm font-medium text-foreground">
-        Ansicht
-        <select
-          name="view"
-          defaultValue={view}
-          className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
-        >
-          <option value="day">Tag</option>
-          <option value="week">Woche</option>
-          <option value="month">Monat</option>
-          <option value="year">Jahr</option>
-        </select>
       </label>
 
       <div className="flex items-end">

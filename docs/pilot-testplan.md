@@ -7,6 +7,10 @@ Der verbindliche Umfang fuer den naechsten testbaren Echstand ist in
 `docs/teststand-freeze.md` dokumentiert. Waehrend dieses Freeze sollen nur
 Blocker, Datenintegritaetsfehler und zentrale Bedienfehler korrigiert werden.
 
+Die priorisierte Befundliste aus dem ausfuehrlichen Klicktest vom 12.06.2026
+liegt in `docs/phase-34-teststand-befunde.md` und ist die Arbeitsliste fuer
+die naechsten Teststand-Korrekturen.
+
 ## Lokaler Start
 
 ### Komfortstart fuer den Klicktest

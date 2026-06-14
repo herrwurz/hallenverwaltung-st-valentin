@@ -10,16 +10,65 @@ import {
 } from "@/lib/services/notification-service";
 
 const closureStatusSchema = z.enum(["OPEN", "RESTRICTED", "CLOSED"] satisfies ClosureStatus[]);
+const optionalDateSchema = z.preprocess(
+  (value) => (value === "" || value === null ? undefined : value),
+  z.coerce.date().optional(),
+);
 
 const closureSchema = z.object({
   buildingId: z.string().trim().optional(),
   roomId: z.string().trim().optional(),
   status: closureStatusSchema,
   reason: z.string().trim().min(3, "Ein Sperrgrund ist erforderlich.").max(1000),
-  startsAt: z.coerce.date(),
-  endsAt: z.coerce.date(),
+  startsAt: optionalDateSchema,
+  endsAt: optionalDateSchema,
+  startsOn: optionalDateSchema,
+  endsOn: optionalDateSchema,
+  isAllDay: z.boolean().default(false),
   isPublic: z.boolean(),
 });
+
+const closureUpdateSchema = closureSchema
+  .omit({
+    buildingId: true,
+    roomId: true,
+  })
+  .extend({
+    id: z.string().trim().min(1),
+  });
+
+const closureDeleteSchema = z.object({
+  id: z.string().trim().min(1),
+});
+
+function startOfLocalDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+}
+
+function nextLocalDay(date: Date) {
+  const next = startOfLocalDay(date);
+  next.setDate(next.getDate() + 1);
+  return next;
+}
+
+export function resolveClosureRange(data: z.infer<typeof closureSchema>) {
+  if (!data.isAllDay) {
+    if (!data.startsAt || !data.endsAt) {
+      throw new BookingValidationError("Die Sperre muss ein gültiges Beginn- und Enddatum haben.");
+    }
+
+    return { startsAt: data.startsAt, endsAt: data.endsAt };
+  }
+
+  if (!data.startsOn) {
+    throw new BookingValidationError("Für ganztägige Sperren ist ein Datum erforderlich.");
+  }
+
+  const startsAt = startOfLocalDay(data.startsOn);
+  const endsAt = data.endsOn ? nextLocalDay(data.endsOn) : nextLocalDay(data.startsOn);
+
+  return { startsAt, endsAt };
+}
 
 export async function createClosure(input: unknown, actorUserId: string) {
   const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
@@ -33,7 +82,9 @@ export async function createClosure(input: unknown, actorUserId: string) {
 
   validateClosureTarget({ buildingId, roomId });
 
-  if (!(data.startsAt < data.endsAt)) {
+  const { startsAt, endsAt } = resolveClosureRange(data);
+
+  if (!(startsAt < endsAt)) {
     throw new BookingValidationError("Die Sperre muss ein gültiges Beginn- und Enddatum haben.");
   }
 
@@ -43,8 +94,8 @@ export async function createClosure(input: unknown, actorUserId: string) {
       roomId,
       status: data.status,
       reason: data.reason,
-      startsAt: data.startsAt,
-      endsAt: data.endsAt,
+      startsAt,
+      endsAt,
       isPublic: data.isPublic,
     },
   });
@@ -57,6 +108,44 @@ export async function createClosure(input: unknown, actorUserId: string) {
   }
 
   return closure;
+}
+
+export async function updateClosure(input: unknown, actorUserId: string) {
+  const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
+  if (!canBlockRoom) {
+    throw new BookingValidationError("FÃ¼r GebÃ¤ude- und Raumsperren fehlt das Recht BLOCK_ROOM.");
+  }
+
+  const data = closureUpdateSchema.parse(input);
+  const { startsAt, endsAt } = resolveClosureRange(data);
+
+  if (!(startsAt < endsAt)) {
+    throw new BookingValidationError("Die Sperre muss ein gÃ¼ltiges Beginn- und Enddatum haben.");
+  }
+
+  return prisma.closure.update({
+    where: { id: data.id },
+    data: {
+      status: data.status,
+      reason: data.reason,
+      startsAt,
+      endsAt,
+      isPublic: data.isPublic,
+    },
+  });
+}
+
+export async function deleteClosure(input: unknown, actorUserId: string) {
+  const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
+  if (!canBlockRoom) {
+    throw new BookingValidationError("FÃ¼r GebÃ¤ude- und Raumsperren fehlt das Recht BLOCK_ROOM.");
+  }
+
+  const data = closureDeleteSchema.parse(input);
+
+  await prisma.closure.delete({
+    where: { id: data.id },
+  });
 }
 
 export function getClosureStatusLabel(status: ClosureStatus) {

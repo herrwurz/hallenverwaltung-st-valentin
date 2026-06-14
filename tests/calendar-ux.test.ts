@@ -9,10 +9,8 @@ test("calendar UI exposes day week month and year views", () => {
   const portalCalendar = readFileSync("app/portal/calendar/page.tsx", "utf8");
   const publicCalendar = readFileSync("app/public/calendar/page.tsx", "utf8");
 
-  assert.match(filterForm, /option value="day"/);
-  assert.match(filterForm, /option value="week"/);
-  assert.match(filterForm, /option value="month"/);
-  assert.match(filterForm, /option value="year"/);
+  assert.match(calendarView, /\["day", "week", "month", "year"\]/);
+  assert.match(filterForm, /type="hidden" name="view" value=\{view\}/);
   assert.match(calendarView, /Jahresansicht/);
   assert.match(adminCalendar, /view === "month" \|\| view === "year"/);
   assert.match(portalCalendar, /view === "month" \|\| view === "year"/);

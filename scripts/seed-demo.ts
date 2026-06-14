@@ -68,6 +68,10 @@ async function upsertUserWithRole(userInput: (typeof demoUsers)[keyof typeof dem
     create: { userId: user.id, roleId: role.id },
   });
 
+  await prisma.userPermission.deleteMany({
+    where: { userId: user.id },
+  });
+
   return user;
 }
 
@@ -130,6 +134,15 @@ async function ensureDemoOrganization(portalUserId: string) {
       },
     });
   }
+
+  await prisma.organizationMember.updateMany({
+    where: {
+      userId: portalUserId,
+      organizationId: { not: organization.id },
+      activeUntil: null,
+    },
+    data: { activeUntil: new Date() },
+  });
 
   return organization;
 }

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
 import { saveBuilding } from "@/lib/services/admin/building-service";
-import { createClosure } from "@/lib/services/admin/closure-admin-service";
+import { createClosure, deleteClosure, updateClosure } from "@/lib/services/admin/closure-admin-service";
 import { saveOrganization } from "@/lib/services/admin/organization-service";
 import { saveRoom } from "@/lib/services/admin/room-service";
 import { saveUser } from "@/lib/services/admin/user-service";
@@ -116,10 +116,36 @@ export async function createBuildingClosureAction(formData: FormData) {
         reason: formData.get("reason"),
         startsAt: formData.get("startsAt"),
         endsAt: formData.get("endsAt"),
+        startsOn: formData.get("startsOn"),
+        endsOn: formData.get("endsOn"),
+        isAllDay: formData.get("isAllDay") === "on",
         isPublic: formData.get("isPublic") === "on",
       },
       actorUserId,
     );
+  });
+}
+
+export async function updateBuildingClosureAction(formData: FormData) {
+  await executeClosureMutation("/admin/buildings", async (actorUserId) => {
+    await updateClosure(
+      {
+        id: formData.get("id"),
+        status: formData.get("status"),
+        reason: formData.get("reason"),
+        startsAt: formData.get("startsAt"),
+        endsAt: formData.get("endsAt"),
+        isAllDay: false,
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
+}
+
+export async function deleteBuildingClosureAction(formData: FormData) {
+  await executeClosureMutation("/admin/buildings", async (actorUserId) => {
+    await deleteClosure({ id: formData.get("id") }, actorUserId);
   });
 }
 
@@ -132,10 +158,36 @@ export async function createRoomClosureAction(formData: FormData) {
         reason: formData.get("reason"),
         startsAt: formData.get("startsAt"),
         endsAt: formData.get("endsAt"),
+        startsOn: formData.get("startsOn"),
+        endsOn: formData.get("endsOn"),
+        isAllDay: formData.get("isAllDay") === "on",
         isPublic: formData.get("isPublic") === "on",
       },
       actorUserId,
     );
+  });
+}
+
+export async function updateRoomClosureAction(formData: FormData) {
+  await executeClosureMutation("/admin/rooms", async (actorUserId) => {
+    await updateClosure(
+      {
+        id: formData.get("id"),
+        status: formData.get("status"),
+        reason: formData.get("reason"),
+        startsAt: formData.get("startsAt"),
+        endsAt: formData.get("endsAt"),
+        isAllDay: false,
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
+}
+
+export async function deleteRoomClosureAction(formData: FormData) {
+  await executeClosureMutation("/admin/rooms", async (actorUserId) => {
+    await deleteClosure({ id: formData.get("id") }, actorUserId);
   });
 }
 

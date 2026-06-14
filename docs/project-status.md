@@ -352,6 +352,13 @@ Teststand-Freeze fuer den naechsten Echstand-Durchklicktest. Der verbindliche
 Umfang, bewusste Nicht-Ziele, Blocker-Regeln und die Durchklick-Reihenfolge
 stehen in `docs/teststand-freeze.md`.
 
+## Phase 34
+
+Ausfuehrlicher Klicktest vom 12.06.2026 wurde als priorisierte Arbeitsliste
+unter `docs/phase-34-teststand-befunde.md` dokumentiert. Hohe Prioritaet haben
+Login/Auth, Ganztagssperren, Public-Deaktivierung, Gebaeude-/Raum-Sperren,
+Admin-Buchungsfilter und fachlich abgesicherte Ausnahmegenehmigungen.
+
 ---
 
 # Wichtigste Architekturentscheidungen

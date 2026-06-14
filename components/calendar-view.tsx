@@ -146,6 +146,10 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
     shareParams.set("roomId", calendar.filters.roomId);
   }
 
+  if (calendar.filters.organizationId) {
+    shareParams.set("organizationId", calendar.filters.organizationId);
+  }
+
   const buildHref = (date: string, view = calendar.view) => {
     const params = new URLSearchParams(shareParams);
     params.set("date", date);
@@ -239,6 +243,7 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
 
           <CalendarFilterForm
             buildings={calendar.buildings}
+            organizations={calendar.organizations}
             filters={calendar.filters}
             selectedDate={calendar.selectedDate}
             view={calendar.view}
@@ -296,8 +301,11 @@ export function CalendarView({ basePath, calendar, freeSlots, detailHint, backHr
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Freie Zeiten</CardTitle>
-          <CardDescription>Öffnungszeiten, Sperren, genehmigte Buchungen und Pufferzeiten werden berücksichtigt.</CardDescription>
+          <CardTitle>Freie Zeitfenster für Buchungsanträge</CardTitle>
+          <CardDescription>
+            Diese Liste zeigt mögliche freie Zeitfenster für den ausgewählten Raum und das ausgewählte Datum.
+            Öffnungszeiten, Sperren, genehmigte Buchungen und Pufferzeiten werden berücksichtigt.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!calendar.filters.roomId ? (
@@ -434,6 +442,7 @@ function YearCalendarGrid({
           {yearCalendarMonths.map((monthDate) => {
             const monthEvents = getEventsForMonth(events, monthDate);
             const monthDays = getMonthCalendarDays(monthDate);
+            const nextMonthEvent = monthEvents[0];
             const monthHref = `${basePath}?date=${formatDateInput(monthDate)}&view=month${
               calendar.filters.buildingId ? `&buildingId=${calendar.filters.buildingId}` : ""
             }${calendar.filters.roomId ? `&roomId=${calendar.filters.roomId}` : ""}`;
@@ -444,6 +453,15 @@ function YearCalendarGrid({
                   <h4 className="font-semibold tracking-tight">{monthTitleFormatter.format(monthDate)}</h4>
                   <Badge variant="outline">{monthEvents.length}</Badge>
                 </div>
+                {nextMonthEvent ? (
+                  <p className="mb-3 rounded-lg border border-border bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                    Nächster Termin: {dateTimeFormatter.format(nextMonthEvent.startsAt)}
+                  </p>
+                ) : (
+                  <p className="mb-3 rounded-lg border border-dashed border-border px-2 py-1 text-xs text-muted-foreground">
+                    Keine Termine in diesem Monat
+                  </p>
+                )}
                 <div className="grid grid-cols-7 gap-1 text-center text-[11px] text-muted-foreground">
                   {weekdayHeaders.map((weekday) => (
                     <span key={weekday}>{weekday}</span>

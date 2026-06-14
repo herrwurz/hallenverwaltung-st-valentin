@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 type PublicCalendarExportClient = Pick<
   PrismaClient,
-  "building" | "room" | "roomComposition" | "booking" | "closure" | "organizationMember" | "systemSetting"
+  "building" | "room" | "roomComposition" | "booking" | "closure" | "organization" | "organizationMember" | "systemSetting"
 >;
 
 function escapeIcsText(value: string) {

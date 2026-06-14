@@ -24,17 +24,23 @@ const transitionSchema = z.object({
   bookingId: z.string().trim().min(1, "Die Buchung ist ungültig."),
   status: optionalFormString,
   organizationId: optionalFormString,
+  buildingId: optionalFormString,
+  roomId: optionalFormString,
 });
 
 const decisionSchema = transitionSchema.extend({
   decisionNote: optionalFormString,
+  allowClosureOverride: z.boolean().default(false),
 });
 
 const seriesTransitionSchema = z.object({
   seriesId: z.string().trim().min(1, "Die Serie ist ungültig."),
   status: optionalFormString,
   organizationId: optionalFormString,
+  buildingId: optionalFormString,
+  roomId: optionalFormString,
   decisionNote: optionalFormString,
+  allowClosureOverride: z.boolean().default(false),
 });
 
 function workflowErrorMessage(error: unknown) {
@@ -49,11 +55,22 @@ function workflowErrorMessage(error: unknown) {
   return "Die Buchung konnte nicht bearbeitet werden.";
 }
 
-function buildRedirect(pathname: string, status: string | undefined, organizationId: string | undefined, params: string) {
+function buildRedirect(
+  pathname: string,
+  filters: { status?: string; organizationId?: string; buildingId?: string; roomId?: string },
+  params: string,
+) {
+  const { status, organizationId, buildingId, roomId } = filters;
   const query = new URLSearchParams(status ? { status } : undefined);
 
   if (organizationId) {
     query.set("organizationId", organizationId);
+  }
+  if (buildingId) {
+    query.set("buildingId", buildingId);
+  }
+  if (roomId) {
+    query.set("roomId", roomId);
   }
 
   for (const [key, value] of new URLSearchParams(params)) {
@@ -79,6 +96,9 @@ async function executeBookingWorkflowAction(
       decisionNote: formData.get("decisionNote"),
       status: formData.get("status"),
       organizationId: formData.get("organizationId"),
+      buildingId: formData.get("buildingId"),
+      roomId: formData.get("roomId"),
+      allowClosureOverride: formData.get("allowClosureOverride") === "on",
     });
     await operation(input, actor.id);
   } catch (error) {
@@ -88,6 +108,9 @@ async function executeBookingWorkflowAction(
       decisionNote: String(formData.get("decisionNote") ?? ""),
       status: String(formData.get("status") ?? ""),
       organizationId: String(formData.get("organizationId") ?? ""),
+      buildingId: String(formData.get("buildingId") ?? ""),
+      roomId: String(formData.get("roomId") ?? ""),
+      allowClosureOverride: formData.get("allowClosureOverride") === "on",
     };
   }
 
@@ -95,8 +118,12 @@ async function executeBookingWorkflowAction(
   revalidatePath("/portal/bookings");
   buildRedirect(
     "/admin/bookings",
-    errorMessage ? input.status : successStatus ?? input.status,
-    input.organizationId,
+    {
+      status: errorMessage ? input.status : successStatus ?? input.status,
+      organizationId: input.organizationId,
+      buildingId: input.buildingId,
+      roomId: input.roomId,
+    },
     errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=1`,
   );
 }
@@ -128,6 +155,9 @@ async function executeSeriesWorkflowAction(
       decisionNote: formData.get("decisionNote"),
       status: formData.get("status"),
       organizationId: formData.get("organizationId"),
+      buildingId: formData.get("buildingId"),
+      roomId: formData.get("roomId"),
+      allowClosureOverride: formData.get("allowClosureOverride") === "on",
     });
     const summary = await operation(input, actor.id);
     resultMessage = buildSeriesResultMessage(summary);
@@ -138,6 +168,9 @@ async function executeSeriesWorkflowAction(
       decisionNote: String(formData.get("decisionNote") ?? ""),
       status: String(formData.get("status") ?? ""),
       organizationId: String(formData.get("organizationId") ?? ""),
+      buildingId: String(formData.get("buildingId") ?? ""),
+      roomId: String(formData.get("roomId") ?? ""),
+      allowClosureOverride: formData.get("allowClosureOverride") === "on",
     };
   }
 
@@ -145,8 +178,12 @@ async function executeSeriesWorkflowAction(
   revalidatePath("/portal/bookings");
   buildRedirect(
     "/admin/bookings",
-    errorMessage ? input.status : successStatus ?? input.status,
-    input.organizationId,
+    {
+      status: errorMessage ? input.status : successStatus ?? input.status,
+      organizationId: input.organizationId,
+      buildingId: input.buildingId,
+      roomId: input.roomId,
+    },
     errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}`,
   );
 }
@@ -170,6 +207,7 @@ export async function approveBookingAction(formData: FormData) {
         {
           bookingId: input.bookingId,
           decisionNote: input.decisionNote,
+          allowClosureOverride: input.allowClosureOverride,
         },
         actorUserId,
       );
@@ -213,6 +251,7 @@ export async function approveSeriesAction(formData: FormData) {
         {
           seriesId: input.seriesId,
           decisionNote: input.decisionNote,
+          allowClosureOverride: input.allowClosureOverride,
         },
         actorUserId,
       ),

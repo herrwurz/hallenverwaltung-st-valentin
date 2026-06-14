@@ -51,6 +51,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           { href: "/admin/bookings", label: "Buchungsanträge" },
           { href: "/admin/booking-changes", label: "Änderungsanträge" },
           { href: "/admin/series", label: "Serien" },
+          { href: "/admin/waitlist", label: "Warteliste" },
           { href: "/admin/calendar", label: "Kalender" },
         ]
       : []),

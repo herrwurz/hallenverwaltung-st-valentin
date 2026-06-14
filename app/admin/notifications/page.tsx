@@ -11,6 +11,7 @@ import { StatusFilterSelect } from "@/components/status-filter-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
+import { getSmtpConfigurationStatus } from "@/lib/services/mail-service";
 import { getNotificationRecipientPreview, getNotificationsForAdmin } from "@/lib/services/notification-service";
 import { notificationEventCodes } from "@/lib/services/notification-types";
 import { getNotificationEventSettings, notificationEventLabels } from "@/lib/services/notification-settings-service";
@@ -48,6 +49,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
     getNotificationEventSettings(),
     getNotificationRecipientPreview(),
   ]);
+  const smtpStatus = getSmtpConfigurationStatus();
   const rows: NotificationTableRow[] = notifications
     .filter((notification) => notification.status === "PENDING" || notification.status === "SENT" || notification.status === "FAILED")
     .map((notification) => {
@@ -109,7 +111,17 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
             <CardTitle>Testmail senden</CardTitle>
             <CardDescription>Prüft SMTP-Konfiguration, Template-Rendering, Queue und Versandweg mit einer frei wählbaren Adresse.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {!smtpStatus.configured ? (
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-900">
+                <p className="font-medium">SMTP ist noch nicht produktiv konfiguriert.</p>
+                <p className="mt-1">
+                  {smtpStatus.usesPlaceholder
+                    ? "Aktuell sind Platzhalterwerte wie smtp.example.test gesetzt. Testmails werden deshalb bewusst nicht versendet."
+                    : `Fehlende Werte: ${smtpStatus.missingFields.join(", ") || "unbekannt"}.`}
+                </p>
+              </div>
+            ) : null}
             <form action={sendTestNotificationAction} className="space-y-4">
               <label className="block text-sm font-medium">
                 Empfänger

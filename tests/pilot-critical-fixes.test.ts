@@ -39,6 +39,76 @@ test("phase 26 admin bookings keep organization filter through workflow actions"
   assert.match(adminActions, /buildRedirect\(/);
 });
 
+test("phase 34 admin booking filters include all organizations buildings and rooms", () => {
+  const adminBookings = readFileSync("app/admin/bookings/page.tsx", "utf8");
+  const adminActions = readFileSync("app/admin/bookings/actions.ts", "utf8");
+  const approvalService = readFileSync("lib/services/booking-approval-service.ts", "utf8");
+
+  assert.match(adminBookings, /getAdminBookingFilterOptions/);
+  assert.match(adminBookings, /Gebaeude filtern/);
+  assert.match(adminBookings, /Raum filtern/);
+  assert.match(adminBookings, /Alle Gebaeude/);
+  assert.match(adminBookings, /Alle Raeume/);
+  assert.match(adminBookings, /room\.buildingId === selectedBuildingId/);
+  assert.match(adminActions, /buildingId: optionalFormString/);
+  assert.match(adminActions, /roomId: optionalFormString/);
+  assert.match(adminActions, /query\.set\("buildingId"/);
+  assert.match(adminActions, /query\.set\("roomId"/);
+  assert.match(approvalService, /getAdminBookingFilterOptions/);
+  assert.match(approvalService, /prisma\.organization\.findMany/);
+  assert.match(approvalService, /roomId: filters\.roomId/);
+  assert.match(approvalService, /buildingId: filters\.buildingId/);
+});
+
+test("phase 34 approval can explicitly override closure conflicts with a required comment", () => {
+  const adminBookings = readFileSync("app/admin/bookings/page.tsx", "utf8");
+  const adminActions = readFileSync("app/admin/bookings/actions.ts", "utf8");
+  const approvalService = readFileSync("lib/services/booking-approval-service.ts", "utf8");
+  const transitionService = readFileSync("lib/services/booking-transition-service.ts", "utf8");
+
+  assert.match(adminBookings, /allowClosureOverride/);
+  assert.match(adminBookings, /Sperre bewusst als Ausnahme genehmigen/);
+  assert.match(adminBookings, /Kommentar ist erforderlich/);
+  assert.match(adminActions, /allowClosureOverride: z\.boolean\(\)\.default\(false\)/);
+  assert.match(adminActions, /formData\.get\("allowClosureOverride"\) === "on"/);
+  assert.match(approvalService, /allowClosureOverride/);
+  assert.match(transitionService, /nonClosureBlockingConflicts/);
+  assert.match(transitionService, /Bei Genehmigung trotz Sperre ist ein Kommentar erforderlich/);
+});
+
+test("phase 34 demo seed restores demo account access predictably", () => {
+  const demoSeed = readFileSync("scripts/seed-demo.ts", "utf8");
+
+  assert.match(demoSeed, /userPermission\.deleteMany/);
+  assert.match(demoSeed, /userId: user\.id/);
+  assert.match(demoSeed, /isActive: true/);
+  assert.match(demoSeed, /organizationMember\.updateMany/);
+  assert.match(demoSeed, /organizationId: \{ not: organization\.id \}/);
+  assert.match(demoSeed, /activeUntil: new Date\(\)/);
+});
+
+test("phase 34 low priority smtp placeholder and dashboard analytics are handled", () => {
+  const mailService = readFileSync("lib/services/mail-service.ts", "utf8");
+  const notificationPage = readFileSync("app/admin/notifications/page.tsx", "utf8");
+  const adminDashboard = readFileSync("app/admin/page.tsx", "utf8");
+  const dashboardService = readFileSync("lib/services/admin/dashboard-service.ts", "utf8");
+
+  assert.match(mailService, /getSmtpConfigurationStatus/);
+  assert.match(mailService, /smtp\.example\.test/);
+  assert.match(mailService, /Platzhalterwerten/);
+  assert.match(notificationPage, /SMTP ist noch nicht produktiv konfiguriert/);
+  assert.match(notificationPage, /Testmails werden deshalb bewusst nicht versendet/);
+  assert.match(adminDashboard, /DashboardStatCard/);
+  assert.match(adminDashboard, /Offene Antraege/);
+  assert.match(adminDashboard, /Genehmigt im Monat/);
+  assert.match(adminDashboard, /Warteliste offen/);
+  assert.match(adminDashboard, /Mailfehler/);
+  assert.match(dashboardService, /getAdminDashboardSummary/);
+  assert.match(dashboardService, /prisma\.booking\.count/);
+  assert.match(dashboardService, /prisma\.waitlistEntry\.count/);
+  assert.match(dashboardService, /prisma\.notification\.count/);
+});
+
 test("phase 26 pilot UI hotfixes hide technical labels in key pages", () => {
   const dashboard = readFileSync("app/admin/page.tsx", "utf8");
   const series = readFileSync("app/admin/series/page.tsx", "utf8");
@@ -70,6 +140,61 @@ test("phase 26.4 pilot master data fixes protect codes and settings navigation",
   assert.doesNotMatch(adminLayout, /Einstellungen: /);
   assert.match(seed, /\["CLUB_TRAINING", "Training"/);
   assert.doesNotMatch(seed, /\["EMERGENCY_SERVICE", "Katastrophenschutz"\]/);
+});
+
+test("phase 34 medium fixes settings navigation membership count caretakers and waitlist", () => {
+  const dashboard = readFileSync("app/admin/page.tsx", "utf8");
+  const adminNavigation = readFileSync("components/admin-navigation.tsx", "utf8");
+  const adminLayout = readFileSync("app/admin/layout.tsx", "utf8");
+  const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
+  const userService = readFileSync("lib/services/admin/user-service.ts", "utf8");
+  const waitlistStatus = readFileSync("lib/waitlist-status.ts", "utf8");
+  const adminWaitlist = readFileSync("app/admin/waitlist/page.tsx", "utf8");
+
+  assert.doesNotMatch(dashboard, /label: "Einstellungen"/);
+  assert.match(adminNavigation, /<details/);
+  assert.match(adminNavigation, /<summary/);
+  assert.match(adminLayout, /href: "\/admin\/waitlist"/);
+  assert.match(organizationService, /activeFrom: \{ lte: now \}/);
+  assert.match(organizationService, /activeUntil: \{ gt: now \}/);
+  assert.match(userService, /role\.code === "CARETAKER"/);
+  assert.match(userService, /transaction\.caretaker\.upsert/);
+  assert.match(waitlistStatus, /bg-amber-500\/10 text-amber-700/);
+  assert.match(adminWaitlist, /Weiterbehandlung/);
+  assert.match(adminWaitlist, /neuer\s+Buchungsantrag im Status Beantragt/);
+});
+
+test("phase 34 calendar filters and labels are clarified", () => {
+  const filterForm = readFileSync("components/calendar-filter-form.tsx", "utf8");
+  const calendarView = readFileSync("components/calendar-view.tsx", "utf8");
+  const calendarService = readFileSync("lib/services/calendar-service.ts", "utf8");
+  const adminCalendar = readFileSync("app/admin/calendar/page.tsx", "utf8");
+
+  assert.match(filterForm, /name="organizationId"/);
+  assert.match(filterForm, /name="view" value=\{view\}/);
+  assert.doesNotMatch(filterForm, /<option value="year">Jahr<\/option>/);
+  assert.match(calendarView, /organizations=\{calendar\.organizations\}/);
+  assert.match(calendarView, /Freie Zeitfenster für Buchungsanträge/);
+  assert.match(calendarView, /Nächster Termin/);
+  assert.match(calendarService, /organizationId\?: string/);
+  assert.match(calendarService, /organizationId: organizationId \|\| undefined/);
+  assert.match(adminCalendar, /organizationId: organizationId \|\| undefined/);
+});
+
+test("phase 34 holidays stay informational and create closures only explicitly", () => {
+  const holidayService = readFileSync("lib/services/holiday-service.ts", "utf8");
+  const holidayActions = readFileSync("app/admin/holidays/actions.ts", "utf8");
+  const holidayPage = readFileSync("app/admin/holidays/page.tsx", "utf8");
+
+  assert.match(holidayService, /default\("OPEN"\)/);
+  assert.match(holidayService, /createClosureFromHolidayPeriod/);
+  assert.match(holidayService, /createClosure\(/);
+  assert.match(holidayActions, /createHolidayClosureAction/);
+  assert.match(holidayPage, /Ferien- und Feiertagszeitraeume sind Hinweisdaten/);
+  assert.match(holidayPage, /defaultValue="OPEN"/);
+  assert.match(holidayPage, /Aus Ferienzeitraum Hallensperre anlegen/);
+  assert.match(holidayPage, /name="buildingId"/);
+  assert.match(holidayPage, /name="roomId"/);
 });
 
 
@@ -134,11 +259,52 @@ test("phase 27 building and room closures use the central closure model", () => 
   assert.match(actions, /createBuildingClosureAction/);
   assert.match(actions, /createRoomClosureAction/);
   assert.match(actions, /requirePermission\("BLOCK_ROOM"\)/);
+  assert.match(actions, /isAllDay: formData\.get\("isAllDay"\) === "on"/);
   assert.match(buildingPage, /<AdminClosurePanel/);
   assert.match(roomPage, /<AdminClosurePanel/);
   assert.match(buildingService, /closures:\s*\{/);
   assert.match(roomService, /closures:\s*\{/);
   assert.match(closurePanel, /Sperre speichern/);
+  assert.match(closurePanel, /name="isAllDay"/);
+  assert.match(closurePanel, /name="startsOn"/);
+});
+
+test("phase 34 closure visibility shows inherited building and room closures", () => {
+  const closurePanel = readFileSync("components/admin-closure-panel.tsx", "utf8");
+  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
+  const roomService = readFileSync("lib/services/admin/room-service.ts", "utf8");
+
+  assert.match(closurePanel, /relatedClosures/);
+  assert.match(closurePanel, /Weitere wirksame Sperren/);
+  assert.match(buildingService, /rooms:\s*\{/);
+  assert.match(buildingService, /closures:\s*\{/);
+  assert.match(roomService, /building:\s*\{/);
+  assert.match(roomService, /closures:\s*\{/);
+  assert.match(buildingPage, /sourceLabel: `Raum:/);
+  assert.match(roomPage, /sourceLabel: `Gebaeude:/);
+});
+
+test("phase 34 closures can be edited and deleted through protected server actions", () => {
+  const closureService = readFileSync("lib/services/admin/closure-admin-service.ts", "utf8");
+  const actions = readFileSync("app/admin/actions.ts", "utf8");
+  const closurePanel = readFileSync("components/admin-closure-panel.tsx", "utf8");
+  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+
+  assert.match(closureService, /export async function updateClosure/);
+  assert.match(closureService, /export async function deleteClosure/);
+  assert.match(closureService, /hasPermission\(actorUserId, "BLOCK_ROOM"\)/);
+  assert.match(actions, /updateBuildingClosureAction/);
+  assert.match(actions, /deleteBuildingClosureAction/);
+  assert.match(actions, /updateRoomClosureAction/);
+  assert.match(actions, /deleteRoomClosureAction/);
+  assert.match(closurePanel, /updateAction/);
+  assert.match(closurePanel, /deleteAction/);
+  assert.match(closurePanel, /Sperre loeschen/);
+  assert.match(buildingPage, /updateAction=\{updateBuildingClosureAction\}/);
+  assert.match(roomPage, /updateAction=\{updateRoomClosureAction\}/);
 });
 
 test("phase 27.1 series approval actions use the central booking workflow", () => {
@@ -150,7 +316,7 @@ test("phase 27.1 series approval actions use the central booking workflow", () =
   assert.match(approvalService, /approveSeriesForAdmin/);
   assert.match(approvalService, /rejectSeriesForAdmin/);
   assert.match(approvalService, /markBookingInReviewForAdmin\(bookingId/);
-  assert.match(approvalService, /approveBookingForAdmin\(\{ bookingId, decisionNote \}/);
+  assert.match(approvalService, /approveBookingForAdmin\(\s*\{\s*bookingId,\s*decisionNote,\s*allowClosureOverride\s*\}/);
   assert.match(approvalService, /rejectBookingForAdmin\(\{ bookingId, decisionNote \}/);
   assert.match(actions, /markSeriesInReviewAction/);
   assert.match(actions, /approveSeriesAction/);

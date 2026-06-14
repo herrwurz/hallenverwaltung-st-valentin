@@ -141,6 +141,30 @@ export async function saveUser(input: unknown, actorUserId: string) {
       });
     }
 
+    const assignedRoles = await transaction.role.findMany({
+      where: { id: { in: data.roleIds } },
+      select: { code: true },
+    });
+    const isCaretaker = assignedRoles.some((role) => role.code === "CARETAKER");
+
+    if (isCaretaker) {
+      await transaction.caretaker.upsert({
+        where: { userId: user.id },
+        update: {
+          name: user.displayName,
+          email: user.email,
+          isActive: user.isActive,
+        },
+        create: {
+          code: `USER_${user.id}`,
+          userId: user.id,
+          name: user.displayName,
+          email: user.email,
+          isActive: user.isActive,
+        },
+      });
+    }
+
     const currentMemberships = await transaction.organizationMember.findMany({
       where: { userId: user.id, activeUntil: null },
     });

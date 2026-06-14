@@ -70,38 +70,50 @@ type AdminNavigationProps = {
 
 export function AdminNavigation({ items = adminNavigation }: AdminNavigationProps) {
   const pathname = usePathname();
-  const groupedItems = items.map((item, index) => ({
-    item,
-    showGroup: Boolean(item.groupLabel && item.groupLabel !== items[index - 1]?.groupLabel),
+  const plainItems = items.filter((item) => !item.groupLabel);
+  const groupLabels = Array.from(new Set(items.map((item) => item.groupLabel).filter(Boolean))) as string[];
+  const groupedItems = groupLabels.map((groupLabel) => ({
+    groupLabel,
+    items: items.filter((item) => item.groupLabel === groupLabel),
   }));
+
+  function renderLink(item: AdminNavigationItem, compact = false) {
+    const Icon = item.icon ?? defaultIconByHref[item.href] ?? LayoutDashboard;
+    const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition",
+          "hover:bg-accent hover:text-accent-foreground",
+          compact && "ml-3 py-2 text-xs",
+          active && "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground",
+        )}
+      >
+        <Icon className="h-4 w-4" aria-hidden="true" />
+        <span>{item.label}</span>
+      </Link>
+    );
+  }
 
   return (
     <nav className="mt-8 space-y-1" aria-label="Admin-Navigation">
-      {groupedItems.map(({ item, showGroup }) => {
-        const Icon = item.icon ?? defaultIconByHref[item.href] ?? LayoutDashboard;
-        const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
+      {plainItems.map((item) => renderLink(item))}
+      {groupedItems.map((group) => {
+        const hasActiveItem = group.items.some(
+          (item) => pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`)),
+        );
 
         return (
-          <div key={item.href}>
-            {showGroup ? (
-              <div className="mt-4 flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                <Settings className="h-3.5 w-3.5" aria-hidden="true" />
-                {item.groupLabel}
-              </div>
-            ) : null}
-            <Link
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition",
-                "hover:bg-accent hover:text-accent-foreground",
-                item.groupLabel && "ml-3 py-2 text-xs",
-                active && "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground",
-              )}
-            >
-              <Icon className="h-4 w-4" aria-hidden="true" />
-              <span>{item.label}</span>
-            </Link>
-          </div>
+          <details key={group.groupLabel} className="mt-4" open={hasActiveItem}>
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+              <Settings className="h-3.5 w-3.5" aria-hidden="true" />
+              {group.groupLabel}
+            </summary>
+            <div className="mt-1 space-y-1">{group.items.map((item) => renderLink(item, true))}</div>
+          </details>
         );
       })}
     </nav>
