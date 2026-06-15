@@ -100,6 +100,8 @@ test("phase 34 low priority smtp placeholder and pilot dashboard are handled", (
   assert.match(adminDashboard, /Stammdaten/);
   assert.match(adminDashboard, /Buchungen/);
   assert.match(adminDashboard, /Kalender/);
+  assert.match(adminDashboard, /Berichte/);
+  assert.match(adminDashboard, /\/admin\/reports/);
   assert.match(adminDashboard, /Statistik-Karten/);
   assert.doesNotMatch(adminDashboard, /Mailfehler|Benachrichtigungs-Queue|Systemeinstellungen|Extras/);
 });
@@ -298,6 +300,8 @@ test("pilot branding dashboard and room defaults match municipality feedback", (
   assert.match(adminDashboard, /Stammdaten/);
   assert.match(adminDashboard, /Buchungen/);
   assert.match(adminDashboard, /Kalender/);
+  assert.match(adminDashboard, /Berichte/);
+  assert.match(adminDashboard, /\/admin\/reports/);
   assert.doesNotMatch(adminDashboard, /Mail \/ SMTP|Benachrichtigungs-Queue|Systemeinstellungen|Extras/);
   assert.match(roomPage, /<RoomOpeningHoursFields/);
   assert.match(openingFields, /Ganztags geöffnet/);

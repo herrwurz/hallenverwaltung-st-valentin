@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Database, ListChecks } from "lucide-react";
+import { BarChart3, CalendarDays, Database, ListChecks } from "lucide-react";
 import { requirePermission } from "@/lib/permissions";
 
 const cards = [
@@ -21,6 +21,12 @@ const cards = [
     description: "Tages-, Wochen-, Monats- und Jahresansichten prüfen.",
     icon: CalendarDays,
   },
+  {
+    href: "/admin/reports",
+    title: "Berichte",
+    description: "Tagesbelegung, Wochenplan, Monats- und Vereinsübersicht drucken.",
+    icon: BarChart3,
+  },
 ];
 
 export default async function AdminPage() {
@@ -34,7 +40,7 @@ export default async function AdminPage() {
         Schnelleinstieg für den Pilotbetrieb. Weitere Auswertungen werden später als eigene Statistik-Karten ergänzt.
       </p>
 
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
+      <div className="mt-10 grid gap-4 md:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
