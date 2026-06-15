@@ -28,7 +28,14 @@ export async function getRoomAdministrationData() {
   const [rooms, buildings] = await Promise.all([
     prisma.room.findMany({
       include: {
-        building: true,
+        building: {
+          include: {
+            closures: {
+              orderBy: { startsAt: "desc" },
+              take: 5,
+            },
+          },
+        },
         componentChildren: {
           include: { parentRoom: true },
         },

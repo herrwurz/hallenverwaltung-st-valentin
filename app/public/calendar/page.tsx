@@ -1,11 +1,14 @@
+import { redirect } from "next/navigation";
 import { CalendarView } from "@/components/calendar-view";
 import { AreaShell } from "@/components/area-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getPublicCalendarVisibilityMode } from "@/lib/services/calendar-settings-service";
+import { getPublicAreaEnabled, getPublicCalendarVisibilityMode } from "@/lib/services/calendar-settings-service";
 import { getFreeSlots, getPublicCalendarEvents, type CalendarQuery } from "@/lib/services/calendar-service";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export const dynamic = "force-dynamic";
 
 function normalizeSearchParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -46,6 +49,10 @@ function buildIcalHref(query: CalendarQuery) {
 }
 
 export default async function PublicCalendarPage({ searchParams }: { searchParams: SearchParams }) {
+  if (!(await getPublicAreaEnabled())) {
+    redirect("/login");
+  }
+
   const params = await searchParams;
   const query = toCalendarQuery(params);
   const [calendar, freeSlots, visibilityMode] = await Promise.all([

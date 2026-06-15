@@ -308,6 +308,7 @@ export async function approveBooking(
     buildingId: string;
     blockedFrom: Date;
     blockedUntil: Date;
+    allowClosureOverride?: boolean;
   },
   client?: ApprovalTransitionClient,
 ) {
@@ -325,9 +326,19 @@ export async function approveBooking(
       transaction,
     );
     const blockingConflicts = conflicts.filter((conflict) => conflict.severity === "blocking");
+    const nonClosureBlockingConflicts = blockingConflicts.filter((conflict) => conflict.type !== "CLOSURE");
+    const closureBlockingConflicts = blockingConflicts.filter((conflict) => conflict.type === "CLOSURE");
 
-    if (blockingConflicts.length) {
+    if (nonClosureBlockingConflicts.length) {
       throw new BookingValidationError(blockingConflicts.map((conflict) => conflict.message).join(" "), conflicts);
+    }
+
+    if (closureBlockingConflicts.length && !input.allowClosureOverride) {
+      throw new BookingValidationError(closureBlockingConflicts.map((conflict) => conflict.message).join(" "), conflicts);
+    }
+
+    if (closureBlockingConflicts.length && !input.decisionNote?.trim()) {
+      throw new BookingValidationError("Bei Genehmigung trotz Sperre ist ein Kommentar erforderlich.", conflicts);
     }
 
     return applyExistingBookingTransition(transaction, {

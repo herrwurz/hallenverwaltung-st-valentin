@@ -44,6 +44,8 @@ type AdminWorkflowPermissions = {
 
 type AdminBookingFilters = {
   organizationId?: string;
+  buildingId?: string;
+  roomId?: string;
 };
 
 type NotificationDispatchOptions = {
@@ -92,6 +94,8 @@ export async function getBookingsForAdmin(
     where: {
       status: { in: statuses },
       organizationId: filters.organizationId || undefined,
+      roomId: filters.roomId || undefined,
+      room: filters.roomId ? undefined : filters.buildingId ? { buildingId: filters.buildingId } : undefined,
     },
     include: {
       organization: true,
@@ -158,17 +162,39 @@ export async function getAdminBookingOrganizations(actorUserId: string, permissi
   assertBookingViewPermission(canView);
 
   return prisma.organization.findMany({
-    where: {
-      bookings: {
-        some: {},
-      },
-    },
     orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
     },
   });
+}
+
+export async function getAdminBookingFilterOptions(actorUserId: string, permissions: AdminWorkflowPermissions = {}) {
+  const canView = await resolvePermission(permissions.canView, () => hasPermission(actorUserId, "VIEW_BOOKINGS"));
+  assertBookingViewPermission(canView);
+
+  const [organizations, buildings, rooms] = await Promise.all([
+    prisma.organization.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.building.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.room.findMany({
+      orderBy: [{ building: { name: "asc" } }, { name: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        buildingId: true,
+        building: { select: { name: true } },
+      },
+    }),
+  ]);
+
+  return { organizations, buildings, rooms };
 }
 
 export async function markBookingInReviewForAdmin(
@@ -197,9 +223,11 @@ export async function approveBookingForAdmin(
   {
     bookingId,
     decisionNote,
+    allowClosureOverride,
   }: {
     bookingId: string;
     decisionNote?: string;
+    allowClosureOverride?: boolean;
   },
   actorUserId: string,
   permissions: AdminWorkflowPermissions = {},
@@ -233,6 +261,7 @@ export async function approveBookingForAdmin(
         buildingId: booking.room.buildingId,
         blockedFrom: booking.blockedFrom,
         blockedUntil: booking.blockedUntil,
+        allowClosureOverride,
       },
       transaction,
     );
@@ -364,9 +393,11 @@ export async function approveSeriesForAdmin(
   {
     seriesId,
     decisionNote,
+    allowClosureOverride,
   }: {
     seriesId: string;
     decisionNote?: string;
+    allowClosureOverride?: boolean;
   },
   actorUserId: string,
   permissions: AdminWorkflowPermissions = {},
@@ -375,7 +406,12 @@ export async function approveSeriesForAdmin(
   assertBookingApprovalPermission(canApprove);
 
   const summary = await runSeriesWorkflow(seriesId, ["REQUESTED", "IN_REVIEW"], (bookingId) =>
-    approveBookingForAdmin({ bookingId, decisionNote }, actorUserId, { canApprove: true }, { suppressNotifications: true }),
+    approveBookingForAdmin(
+      { bookingId, decisionNote, allowClosureOverride },
+      actorUserId,
+      { canApprove: true },
+      { suppressNotifications: true },
+    ),
   );
   await dispatchNotifications(async () => {
     await queueBookingSeriesNotifications(seriesId, "BOOKING_SERIES_APPROVED", {

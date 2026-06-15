@@ -34,18 +34,18 @@ export function getWaitlistStatusLabel(status: WaitlistStatus) {
 export function getWaitlistStatusBadgeClass(status: WaitlistStatus) {
   switch (status) {
     case "ACTIVE":
-      return "bg-slate-800 text-slate-100";
+      return "border border-amber-500/20 bg-amber-500/10 text-amber-700";
     case "OFFERED":
-      return "bg-amber-500/20 text-amber-200";
+      return "border border-primary/20 bg-primary/10 text-primary";
     case "ACCEPTED":
-      return "bg-sky-500/20 text-sky-200";
+      return "border border-emerald-500/20 bg-emerald-500/10 text-emerald-700";
     case "DECLINED":
-      return "bg-rose-500/20 text-rose-200";
+      return "border border-rose-500/20 bg-rose-500/10 text-rose-700";
     case "EXPIRED":
-      return "bg-slate-700 text-slate-200";
+      return "border border-slate-500/20 bg-slate-500/10 text-slate-700";
     case "CANCELLED":
-      return "bg-red-500/20 text-red-200";
+      return "border border-slate-500/20 bg-slate-500/10 text-slate-700";
     default:
-      return "bg-slate-800 text-slate-100";
+      return "border border-slate-500/20 bg-slate-500/10 text-slate-700";
   }
 }

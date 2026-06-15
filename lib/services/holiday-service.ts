@@ -3,6 +3,7 @@ import { z } from "zod";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { BookingValidationError } from "@/lib/services/booking-rules";
+import { createClosure } from "@/lib/services/admin/closure-admin-service";
 
 export const holidayCountryOptions = [
   { code: "AT", label: "Österreich" },
@@ -50,8 +51,17 @@ export const holidayPeriodSchema = z.object({
 export const holidayPresetSchema = z.object({
   presetKey: z.enum(presetKeys),
   year: z.coerce.number().int().min(2026).max(2035),
-  defaultStatus: z.enum(["OPEN", "RESTRICTED", "CLOSED"] satisfies ClosureStatus[]).default("CLOSED"),
+  defaultStatus: z.enum(["OPEN", "RESTRICTED", "CLOSED"] satisfies ClosureStatus[]).default("OPEN"),
   isPublic: z.coerce.boolean().default(true),
+});
+
+const holidayClosureSchema = z.object({
+  holidayId: z.string().trim().min(1),
+  buildingId: z.string().trim().optional(),
+  roomId: z.string().trim().optional(),
+  status: z.enum(["RESTRICTED", "CLOSED"] satisfies ClosureStatus[]).default("CLOSED"),
+  reason: z.string().trim().max(1000).optional(),
+  isPublic: z.boolean(),
 });
 
 export function assertHolidayPeriodRange(startsOn: Date, endsOn: Date) {
@@ -61,9 +71,26 @@ export function assertHolidayPeriodRange(startsOn: Date, endsOn: Date) {
 }
 
 export async function getHolidayAdministrationData() {
-  return prisma.holidayPeriod.findMany({
-    orderBy: [{ startsOn: "desc" }],
-  });
+  const [holidays, buildings] = await Promise.all([
+    prisma.holidayPeriod.findMany({
+      orderBy: [{ startsOn: "desc" }],
+    }),
+    prisma.building.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        rooms: {
+          where: { status: { in: ["ACTIVE", "RESTRICTED"] } },
+          orderBy: { name: "asc" },
+          select: { id: true, name: true },
+        },
+      },
+    }),
+  ]);
+
+  return { holidays, buildings };
 }
 
 function startOfDate(year: number, monthIndex: number, day: number) {
@@ -331,6 +358,42 @@ export async function saveHolidayPeriod(input: unknown, actorUserId: string) {
       isPublic: data.isPublic,
     },
   });
+}
+
+export async function createClosureFromHolidayPeriod(input: unknown, actorUserId: string) {
+  const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
+  if (!canBlockRoom) {
+    throw new BookingValidationError("FÃ¼r Ferien- und Sperrzeiten fehlt das Recht BLOCK_ROOM.");
+  }
+
+  const data = holidayClosureSchema.parse(input);
+  const holiday = await prisma.holidayPeriod.findUnique({
+    where: { id: data.holidayId },
+    select: {
+      name: true,
+      startsOn: true,
+      endsOn: true,
+      reason: true,
+    },
+  });
+
+  if (!holiday) {
+    throw new BookingValidationError("Der Ferienzeitraum wurde nicht gefunden.");
+  }
+
+  return createClosure(
+    {
+      buildingId: data.buildingId,
+      roomId: data.roomId,
+      status: data.status,
+      reason: data.reason || `${holiday.name}: ${holiday.reason}`,
+      startsAt: holiday.startsOn,
+      endsAt: holiday.endsOn,
+      isAllDay: false,
+      isPublic: data.isPublic,
+    },
+    actorUserId,
+  );
 }
 
 export function getHolidayScopeLabel(countryCode: string, regionCode: string | null) {

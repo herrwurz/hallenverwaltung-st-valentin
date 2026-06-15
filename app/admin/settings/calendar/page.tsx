@@ -1,9 +1,13 @@
-import { updateCalendarVisibilitySettingAction } from "@/app/admin/settings/calendar/actions";
+import {
+  updateCalendarVisibilitySettingAction,
+  updatePublicAreaEnabledSettingAction,
+} from "@/app/admin/settings/calendar/actions";
 import { AppBackLink } from "@/components/app-back-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import {
+  getPublicAreaEnabled,
   getPublicCalendarVisibilityMode,
   publicCalendarVisibilityModes,
   type PublicCalendarVisibilityMode,
@@ -32,7 +36,11 @@ function normalizeSearchParam(value: string | string[] | undefined) {
 
 export default async function AdminCalendarSettingsPage({ searchParams }: { searchParams: SearchParams }) {
   await requirePermission("MANAGE_USERS");
-  const [mode, params] = await Promise.all([getPublicCalendarVisibilityMode(), searchParams]);
+  const [publicAreaEnabled, mode, params] = await Promise.all([
+    getPublicAreaEnabled(),
+    getPublicCalendarVisibilityMode(),
+    searchParams,
+  ]);
   const error = normalizeSearchParam(params.error);
   const saved = normalizeSearchParam(params.saved);
 
@@ -58,6 +66,39 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
           {error}
         </p>
       ) : null}
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Oeffentlicher Bereich</CardTitle>
+          <CardDescription>
+            Der oeffentliche Bereich kann fuer den Teststand oder fuer Gemeinden ohne oeffentliche Anzeige komplett
+            deaktiviert werden. Admin- und Vereinslogin bleiben davon unberuehrt.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={updatePublicAreaEnabledSettingAction} className="space-y-4">
+            <label className="flex cursor-pointer items-start gap-4 rounded-xl border border-border bg-muted/40 p-4 transition hover:border-primary/40">
+              <input
+                type="checkbox"
+                name="enabled"
+                defaultChecked={publicAreaEnabled}
+                className="mt-1 h-4 w-4 rounded border-input bg-card text-primary"
+              />
+              <span>
+                <span className="block font-medium">Public-Bereich aktiv</span>
+                <span className="mt-1 block text-sm text-muted-foreground">
+                  Wenn deaktiviert, verweist /public nur noch auf den Login und der oeffentliche Kalender inklusive iCal
+                  ist abgeschaltet.
+                </span>
+              </span>
+            </label>
+
+            <div className="flex justify-end">
+              <Button>Public-Einstellung speichern</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <Card className="mt-8">
         <CardHeader>

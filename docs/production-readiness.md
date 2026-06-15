@@ -114,8 +114,10 @@ Pruefen:
 
 - SMTP-Werte in `.env.production` gesetzt.
 - Absenderadresse ist fuer die Domain erlaubt.
-- Admin-Seite `/admin/notifications` erreichbar.
-- Event-Schalter fuer benoetigte Ereignisse aktiv.
+- Admin-Seite `/admin/settings/mail` erreichbar und SMTP-Status plausibel.
+- Event-Schalter unter `/admin/settings/notifications` fuer benoetigte
+  Ereignisse aktiv.
+- Queue-Seite `/admin/notifications` erreichbar.
 - Testereignis erzeugt Queue-Eintrag.
 - Worker oder manuelle Verarbeitung versendet die Benachrichtigung.
 - Fehlgeschlagene Benachrichtigungen koennen erneut gesendet werden.

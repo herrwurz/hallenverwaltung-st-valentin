@@ -15,11 +15,18 @@ const organizationSchema = z.object({
 });
 
 export async function getOrganizationAdministrationData() {
+  const now = new Date();
   const [organizations, organizationTypes] = await Promise.all([
     prisma.organization.findMany({
       include: {
         organizationType: true,
-        members: { select: { id: true } },
+        members: {
+          where: {
+            activeFrom: { lte: now },
+            OR: [{ activeUntil: null }, { activeUntil: { gt: now } }],
+          },
+          select: { id: true },
+        },
       },
       orderBy: { name: "asc" },
     }),

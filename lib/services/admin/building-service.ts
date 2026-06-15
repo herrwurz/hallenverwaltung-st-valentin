@@ -23,7 +23,16 @@ export async function getBuildingAdministrationData() {
   const [buildings, caretakers] = await Promise.all([
     prisma.building.findMany({
       include: {
-        rooms: { select: { id: true } },
+        rooms: {
+          select: {
+            id: true,
+            name: true,
+            closures: {
+              orderBy: { startsAt: "desc" },
+              take: 5,
+            },
+          },
+        },
         caretakers: {
           where: { isPrimary: true },
           include: { caretaker: true },

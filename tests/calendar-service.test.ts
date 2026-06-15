@@ -174,6 +174,14 @@ function createCalendarClient({
           }));
       },
     },
+    organization: {
+      async findMany() {
+        return organizations.map((organization) => ({
+          id: organization.id,
+          name: organization.name,
+        }));
+      },
+    },
     room: {
       async findMany(args: { where?: Record<string, unknown> } = {}) {
         const buildingId = typeof args.where?.buildingId === "string" ? args.where.buildingId : undefined;
@@ -230,9 +238,11 @@ function createCalendarClient({
         const blockedFrom = (args.where.blockedFrom as { lt?: Date } | undefined)?.lt;
         const blockedUntil = (args.where.blockedUntil as { gt?: Date } | undefined)?.gt;
         const buildingId = ((args.where.room as { buildingId?: string } | undefined)?.buildingId) ?? undefined;
+        const organizationId = typeof args.where.organizationId === "string" ? args.where.organizationId : undefined;
 
         return bookings
           .filter((booking) => (roomIds.length > 0 ? roomIds.includes(booking.roomId) : true))
+          .filter((booking) => (organizationId ? booking.organizationId === organizationId : true))
           .filter((booking) => (statuses.length > 0 ? statuses.includes(booking.status) : true))
           .filter((booking) => (blockedFrom ? booking.blockedFrom < blockedFrom : true))
           .filter((booking) => (blockedUntil ? booking.blockedUntil > blockedUntil : true))
@@ -349,6 +359,27 @@ test("admin calendar shows all booking details", async () => {
   assert.equal(calendar.events.length, 1);
   assert.equal(calendar.events[0]?.title, "Volleyball Training");
   assert.equal(calendar.events[0]?.subtitle, "Verein Blau | Sporthalle - Turnsaal");
+});
+
+test("admin calendar can filter bookings by organization", async () => {
+  const client = createCalendarClient({
+    organizations: [
+      makeOrganization({ id: "organization-1", name: "Verein Blau" }),
+      makeOrganization({ id: "organization-2", name: "Verein Rot" }),
+    ],
+    bookings: [
+      makeBooking({ id: "booking-1", organizationId: "organization-1", title: "Training Blau" }),
+      makeBooking({ id: "booking-2", organizationId: "organization-2", title: "Training Rot" }),
+    ],
+  });
+
+  const calendar = await getAdminCalendarEvents(
+    { date: calendarDate, organizationId: "organization-2" },
+    client as never,
+  );
+
+  assert.equal(calendar.filters.organizationId, "organization-2");
+  assert.deepEqual(calendar.events.map((event) => event.title), ["Training Rot"]);
 });
 
 test("calendar supports month view ranges", async () => {

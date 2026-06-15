@@ -352,6 +352,44 @@ Teststand-Freeze fuer den naechsten Echstand-Durchklicktest. Der verbindliche
 Umfang, bewusste Nicht-Ziele, Blocker-Regeln und die Durchklick-Reihenfolge
 stehen in `docs/teststand-freeze.md`.
 
+## Phase 34
+
+Ausfuehrlicher Klicktest vom 12.06.2026 wurde als priorisierte Arbeitsliste
+unter `docs/phase-34-teststand-befunde.md` dokumentiert. Hohe Prioritaet haben
+Login/Auth, Ganztagssperren, Public-Deaktivierung, Gebaeude-/Raum-Sperren,
+Admin-Buchungsfilter und fachlich abgesicherte Ausnahmegenehmigungen.
+
+## Phase 35
+
+Kalenderstabilisierung fuer den Teststand: Die Admin-, Portal- und Public-
+Kalenderansichten verwenden FullCalendar Community mit Tages-, Wochen-,
+Monats- und Jahresansicht. FullCalendar Resource Timeline bleibt wegen
+Premium-Lizenzklaerung weiterhin ausgeschlossen. Die Admin-Navigation wurde in
+Dashboard/Kalender sowie die Gruppen Stammdaten, Buchungen, Extras und
+Einstellungen verschlankt. Der lokale Teststand wurde fuer Build-/Static-
+Asset-Auslieferung nachgeschaerft.
+
+## Phase 36
+
+Systemeinstellungen wurden fachlich getrennt: `/admin/settings` ist die
+Uebersicht, `/admin/settings/mail` zeigt SMTP-Status und Testmail, ohne
+Passwoerter oder Secrets in der Datenbank zu speichern, und
+`/admin/settings/notifications` verwaltet die Notification-Event-Schalter als
+`SystemSetting`. `/admin/notifications` ist wieder primaer die operative
+Notification Queue mit Verarbeitung und Retry.
+
+## Phase 37
+
+Pilot- und Teststand-Reife: Der lokale Komfortstart wurde auf die zuletzt
+stabile Variante gehaertet. `start-test-deployment.bat` erkennt einen bereits
+laufenden Testserver, prueft/started die lokale PostgreSQL-Testdatenbank,
+normalisiert bekannte OneDrive-/Windows-Dateiattribute fuer `.next`, baut die
+Anwendung und startet den Testserver ueber `npm run start`. Die Readiness-
+Pruefung wartet bewusst auf `/login`. Pilot-Testplan, Teststand-Freeze und
+Produktions-Readiness verweisen nun konsistent auf `/admin/settings/mail`,
+`/admin/settings/notifications` und die operative Queue unter
+`/admin/notifications`.
+
 ---
 
 # Wichtigste Architekturentscheidungen

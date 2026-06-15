@@ -1,9 +1,34 @@
 import Link from "next/link";
 import { AreaShell } from "@/components/area-shell";
+import { Button } from "@/components/ui/button";
+import { getPublicAreaEnabled } from "@/lib/services/calendar-settings-service";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicPage() {
+  const publicAreaEnabled = await getPublicAreaEnabled();
+
+  if (!publicAreaEnabled) {
+    return (
+      <AreaShell
+        eyebrow="Oeffentlich"
+        title="Oeffentlicher Bereich deaktiviert"
+        description="Der oeffentliche Bereich ist fuer diesen Teststand deaktiviert. Bitte nutzen Sie das Verwaltungs- oder Vereinsportal."
+        authenticated={false}
+      >
+        <div className="mt-10 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <p className="text-muted-foreground">
+            Admin- und Vereinsportal bleiben erreichbar. Die oeffentliche Kalenderansicht und der iCal-Export geben in
+            diesem Modus keine Belegungsdaten aus.
+          </p>
+          <Button asChild className="mt-6">
+            <Link href="/login">Zum Login</Link>
+          </Button>
+        </div>
+      </AreaShell>
+    );
+  }
+
   return (
     <AreaShell
       eyebrow="Öffentlich"

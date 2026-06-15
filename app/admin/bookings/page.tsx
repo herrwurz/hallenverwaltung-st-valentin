@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getBookingStatusBadgeClass, getBookingStatusLabel, type AdminBookingFilterKey } from "@/lib/booking-status";
 import { hasPermission, requirePermission } from "@/lib/permissions";
 import {
-  getAdminBookingOrganizations,
+  getAdminBookingFilterOptions,
   getBookingsForAdmin,
   resolveAdminBookingFilter,
 } from "@/lib/services/booking-approval-service";
@@ -46,6 +46,8 @@ type PageProps = {
     seriesApproved?: string;
     seriesRejected?: string;
     organizationId?: string;
+    buildingId?: string;
+    roomId?: string;
     error?: string;
   }>;
 };
@@ -65,14 +67,23 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
       ? requestedFilter
       : "OPEN";
   const selectedOrganizationId = typeof params.organizationId === "string" && params.organizationId ? params.organizationId : "";
-  const [canApprove, canReject, organizationOptions, bookings] = await Promise.all([
+  const selectedBuildingId = typeof params.buildingId === "string" && params.buildingId ? params.buildingId : "";
+  const selectedRoomId = typeof params.roomId === "string" && params.roomId ? params.roomId : "";
+  const [canApprove, canReject, filterOptionsData, bookings] = await Promise.all([
     hasPermission(user.id, "APPROVE_BOOKING"),
     hasPermission(user.id, "REJECT_BOOKING"),
-    getAdminBookingOrganizations(user.id),
-    getBookingsForAdmin(user.id, selectedFilter, {}, { organizationId: selectedOrganizationId || undefined }),
+    getAdminBookingFilterOptions(user.id),
+    getBookingsForAdmin(user.id, selectedFilter, {}, {
+      organizationId: selectedOrganizationId || undefined,
+      buildingId: selectedBuildingId || undefined,
+      roomId: selectedRoomId || undefined,
+    }),
   ]);
   const activeStatuses = new Set(resolveAdminBookingFilter(selectedFilter));
   const filterOptions: AdminBookingFilterKey[] = ["OPEN", "REQUESTED", "IN_REVIEW", "APPROVED", "REJECTED", "CANCELLED", "ALL"];
+  const roomOptions = selectedBuildingId
+    ? filterOptionsData.rooms.filter((room) => room.buildingId === selectedBuildingId)
+    : filterOptionsData.rooms;
   const bookingTableRows: AdminBookingTableRow[] = bookings.map((booking) => ({
     id: booking.id,
     title: booking.title,
@@ -136,9 +147,39 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                 className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
               >
                 <option value="">Alle Organisationen</option>
-                {organizationOptions.map((organization) => (
+                {filterOptionsData.organizations.map((organization) => (
                   <option key={organization.id} value={organization.id}>
                     {organization.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium text-foreground">
+              Gebaeude filtern
+              <select
+                name="buildingId"
+                defaultValue={selectedBuildingId}
+                className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
+                <option value="">Alle Gebaeude</option>
+                {filterOptionsData.buildings.map((building) => (
+                  <option key={building.id} value={building.id}>
+                    {building.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium text-foreground">
+              Raum filtern
+              <select
+                name="roomId"
+                defaultValue={selectedRoomId}
+                className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              >
+                <option value="">Alle Raeume</option>
+                {roomOptions.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.building.name} - {room.name}
                   </option>
                 ))}
               </select>
@@ -246,6 +287,8 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <input type="hidden" name="buildingId" value={selectedBuildingId} />
+                        <input type="hidden" name="roomId" value={selectedRoomId} />
                         <p className="text-sm text-muted-foreground">Antrag zur fachlichen Prüfung übernehmen.</p>
                         <Button type="submit" className="mt-4">In Prüfung setzen</Button>
                       </form>
@@ -256,9 +299,27 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <input type="hidden" name="buildingId" value={selectedBuildingId} />
+                        <input type="hidden" name="roomId" value={selectedRoomId} />
+                        {booking.conflicts.some((conflict) => conflict.type === "CLOSURE" && conflict.severity === "blocking") ? (
+                          <label className="mb-3 flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
+                            <input name="allowClosureOverride" type="checkbox" className="mt-1 rounded border-input bg-background" />
+                            <span>
+                              <span className="block font-medium">Sperre bewusst als Ausnahme genehmigen</span>
+                              <span className="mt-1 block text-xs text-muted-foreground">
+                                Nur fuer fachlich gewollte Ausnahmen verwenden. Ein Kommentar ist erforderlich.
+                              </span>
+                            </span>
+                          </label>
+                        ) : null}
                         <label className="text-sm font-medium">
-                          Kommentar (optional)
-                          <textarea name="decisionNote" rows={3} className={textareaClass} />
+                          Kommentar
+                          <textarea
+                            name="decisionNote"
+                            rows={3}
+                            required={booking.conflicts.some((conflict) => conflict.type === "CLOSURE" && conflict.severity === "blocking")}
+                            className={textareaClass}
+                          />
                         </label>
                         <Button type="submit" className="mt-4" variant="success">
                           Genehmigen
@@ -271,6 +332,8 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="bookingId" value={booking.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <input type="hidden" name="buildingId" value={selectedBuildingId} />
+                        <input type="hidden" name="roomId" value={selectedRoomId} />
                         <label className="text-sm font-medium">
                           Begründung (erforderlich)
                           <textarea name="decisionNote" rows={3} required className={textareaClass} />
@@ -297,6 +360,8 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="seriesId" value={booking.series.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <input type="hidden" name="buildingId" value={selectedBuildingId} />
+                        <input type="hidden" name="roomId" value={selectedRoomId} />
                         <p className="text-sm text-muted-foreground">Alle beantragten Serientermine in Prüfung setzen.</p>
                         <Button type="submit" className="mt-4">Serie in Prüfung</Button>
                       </form>
@@ -307,9 +372,27 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="seriesId" value={booking.series.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <input type="hidden" name="buildingId" value={selectedBuildingId} />
+                        <input type="hidden" name="roomId" value={selectedRoomId} />
+                        {booking.conflicts.some((conflict) => conflict.type === "CLOSURE" && conflict.severity === "blocking") ? (
+                          <label className="mb-3 flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
+                            <input name="allowClosureOverride" type="checkbox" className="mt-1 rounded border-input bg-background" />
+                            <span>
+                              <span className="block font-medium">Sperren fuer Serie bewusst als Ausnahme genehmigen</span>
+                              <span className="mt-1 block text-xs text-muted-foreground">
+                                Wird nur auf Serientermine angewendet, deren harter Konflikt ausschliesslich eine Sperre ist.
+                              </span>
+                            </span>
+                          </label>
+                        ) : null}
                         <label className="text-sm font-medium">
-                          Kommentar (optional)
-                          <textarea name="decisionNote" rows={3} className={textareaClass} />
+                          Kommentar
+                          <textarea
+                            name="decisionNote"
+                            rows={3}
+                            required={booking.conflicts.some((conflict) => conflict.type === "CLOSURE" && conflict.severity === "blocking")}
+                            className={textareaClass}
+                          />
                         </label>
                         <Button type="submit" className="mt-4" variant="success">
                           Serie genehmigen
@@ -322,6 +405,8 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                         <input type="hidden" name="seriesId" value={booking.series.id} />
                         <input type="hidden" name="status" value={selectedFilter} />
                         <input type="hidden" name="organizationId" value={selectedOrganizationId} />
+                        <input type="hidden" name="buildingId" value={selectedBuildingId} />
+                        <input type="hidden" name="roomId" value={selectedRoomId} />
                         <label className="text-sm font-medium">
                           Begründung (erforderlich)
                           <textarea name="decisionNote" rows={3} required className={textareaClass} />

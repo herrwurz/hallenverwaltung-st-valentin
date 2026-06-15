@@ -43,13 +43,17 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Warteliste</p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-semibold tracking-tight">Wartelistenübersicht</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">Wartelistenuebersicht</h2>
           <p className="mt-3 max-w-3xl text-muted-foreground">
-            Alle Wartelistenplätze mit Status, Frist und Organisationsbezug. Die Reihenfolge bleibt in dieser Phase
-            unverändert und richtet sich nach dem Eingangszeitpunkt.
+            Alle Wartelistenplaetze mit Status, Frist und Organisationsbezug. Die Reihenfolge richtet sich nach dem
+            Eingangszeitpunkt.
+          </p>
+          <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+            Weiterbehandlung: Bei frei gewordenem Termin wird Platz 1 angeboten. Nimmt der Verein an, entsteht ein neuer
+            Buchungsantrag im Status Beantragt; die Gemeinde genehmigt oder lehnt danach wie gewohnt ab.
           </p>
         </div>
-        <AppBackLink href="/admin" label="Zurück zum Dashboard" />
+        <AppBackLink href="/admin" label="Zurueck zum Dashboard" />
       </div>
 
       <StatusFilterSelect
@@ -66,13 +70,13 @@ export default async function AdminWaitlistPage({ searchParams }: PageProps) {
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Wartelisteneinträge</CardTitle>
-          <CardDescription>Filterbare Übersicht aller Wartelistenplätze.</CardDescription>
+          <CardTitle>Wartelisteneintraege</CardTitle>
+          <CardDescription>Filterbare Uebersicht aller Wartelistenplaetze.</CardDescription>
         </CardHeader>
         <CardContent>
           {entries.length === 0 ? (
             <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
-              Keine Wartelistenplätze für den ausgewählten Filter gefunden.
+              Keine Wartelistenplaetze fuer den ausgewaehlten Filter gefunden.
             </p>
           ) : (
             <WaitlistTable rows={rows} />

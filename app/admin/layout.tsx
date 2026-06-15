@@ -44,34 +44,43 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     hasPermission(user.id, "MANAGE_HANDOVERS"),
     hasPermission(user.id, "MANAGE_ACCESS"),
   ]);
+
   const navigationItems = [
     ...(canManageUsers ? [{ href: "/admin", label: "Dashboard" }] : []),
-    ...(canViewBookings || canApproveBookings || canRejectBookings
-      ? [
-          { href: "/admin/bookings", label: "Buchungsanträge" },
-          { href: "/admin/booking-changes", label: "Änderungsanträge" },
-          { href: "/admin/series", label: "Serien" },
-          { href: "/admin/calendar", label: "Kalender" },
-        ]
-      : []),
-    ...(canBlockRoom ? [{ href: "/admin/holidays", label: "Ferien" }] : []),
-    ...(canCreateExports ? [{ href: "/admin/billing", label: "Abrechnung" }] : []),
-    ...(canManageDocuments ? [{ href: "/admin/documents", label: "Dokumente" }] : []),
-    ...(canManageDamage ? [{ href: "/admin/damages", label: "Schäden" }] : []),
-    ...(canManageHandovers ? [{ href: "/admin/handovers", label: "Hallenübergaben" }] : []),
-    ...(canManageAccess ? [{ href: "/admin/access", label: "Zutritte" }] : []),
+    ...(canViewBookings || canApproveBookings || canRejectBookings ? [{ href: "/admin/calendar", label: "Kalender" }] : []),
     ...(canManageUsers
       ? [
-          { href: "/admin/buildings", label: "Gebäude" },
-          { href: "/admin/rooms", label: "Räume" },
-          { href: "/admin/organizations", label: "Organisationen" },
-          { href: "/admin/users", label: "Benutzer" },
-          { href: "/admin/roles", label: "Rollen/Rechte" },
+          { href: "/admin/users", label: "Benutzer", groupLabel: "Stammdaten" },
+          { href: "/admin/buildings", label: "Gebäude", groupLabel: "Stammdaten" },
+          { href: "/admin/organizations", label: "Organisationen", groupLabel: "Stammdaten" },
+          { href: "/admin/rooms", label: "Räume", groupLabel: "Stammdaten" },
+        ]
+      : []),
+    ...(canViewBookings || canApproveBookings || canRejectBookings
+      ? [
+          { href: "/admin/bookings", label: "Buchungsanträge", groupLabel: "Buchungen" },
+          { href: "/admin/booking-changes", label: "Änderungsanträge", groupLabel: "Buchungen" },
+          { href: "/admin/series", label: "Serien", groupLabel: "Buchungen" },
+          { href: "/admin/waitlist", label: "Warteliste", groupLabel: "Buchungen" },
+        ]
+      : []),
+    ...(canCreateExports ? [{ href: "/admin/billing", label: "Abrechnung", groupLabel: "Extras" }] : []),
+    ...(canManageDocuments ? [{ href: "/admin/documents", label: "Dokumente", groupLabel: "Extras" }] : []),
+    ...(canManageDamage ? [{ href: "/admin/damages", label: "Schäden", groupLabel: "Extras" }] : []),
+    ...(canManageHandovers ? [{ href: "/admin/handovers", label: "Hallenübergaben", groupLabel: "Extras" }] : []),
+    ...(canManageAccess ? [{ href: "/admin/access", label: "Zutritte", groupLabel: "Extras" }] : []),
+    ...(canManageUsers
+      ? [
+          { href: "/admin/roles", label: "Rollen/Rechte", groupLabel: "Einstellungen" },
+          ...(canBlockRoom ? [{ href: "/admin/holidays", label: "Ferien", groupLabel: "Einstellungen" }] : []),
+          { href: "/admin/settings", label: "Systemeinstellungen", groupLabel: "Einstellungen" },
+          { href: "/admin/settings/mail", label: "Mail / SMTP", groupLabel: "Einstellungen" },
+          { href: "/admin/settings/notifications", label: "Benachrichtigungsregeln", groupLabel: "Einstellungen" },
           { href: "/admin/settings/calendar", label: "Öffentlicher Kalender", groupLabel: "Einstellungen" },
           ...(canManageSystemJobs ? [{ href: "/admin/system/jobs", label: "System-Jobs", groupLabel: "Einstellungen" }] : []),
           ...(canReportNoShow ? [{ href: "/admin/no-shows", label: "No-Shows", groupLabel: "Einstellungen" }] : []),
           ...(canViewBookings || canApproveBookings || canRejectBookings
-            ? [{ href: "/admin/notifications", label: "Benachrichtigungen", groupLabel: "Einstellungen" }]
+            ? [{ href: "/admin/notifications", label: "Notification Queue", groupLabel: "Einstellungen" }]
             : []),
         ]
       : []),

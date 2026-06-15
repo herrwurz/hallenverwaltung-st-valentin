@@ -1,4 +1,9 @@
-import { createBuildingClosureAction, saveBuildingAction } from "@/app/admin/actions";
+import {
+  createBuildingClosureAction,
+  deleteBuildingClosureAction,
+  saveBuildingAction,
+  updateBuildingClosureAction,
+} from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminClosurePanel } from "@/components/admin-closure-panel";
 import { AdminFeedback } from "@/components/admin-feedback";
@@ -85,9 +90,20 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
               <BuildingForm caretakers={data.caretakers} building={building} />
               <AdminClosurePanel
                 action={createBuildingClosureAction}
+                updateAction={updateBuildingClosureAction}
+                deleteAction={deleteBuildingClosureAction}
                 targetName="buildingId"
                 targetId={building.id}
                 closures={building.closures}
+                relatedClosures={building.rooms
+                  .flatMap((room) =>
+                    room.closures.map((closure) => ({
+                      ...closure,
+                      sourceLabel: `Raum: ${room.name}`,
+                    })),
+                  )
+                  .sort((a, b) => b.startsAt.getTime() - a.startsAt.getTime())
+                  .slice(0, 5)}
               />
             </CardContent>
           </Card>

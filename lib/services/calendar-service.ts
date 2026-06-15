@@ -14,11 +14,12 @@ export type CalendarQuery = {
   view?: CalendarView;
   buildingId?: string;
   roomId?: string;
+  organizationId?: string;
 };
 
 type CalendarServiceClient = Pick<
   PrismaClient,
-  "building" | "room" | "roomComposition" | "booking" | "closure" | "organizationMember" | "systemSetting"
+  "building" | "room" | "roomComposition" | "booking" | "closure" | "organization" | "organizationMember" | "systemSetting"
 >;
 
 type CalendarRoom = {
@@ -105,6 +106,11 @@ export type CalendarFilterOption = {
   rooms: Array<{ id: string; name: string }>;
 };
 
+export type CalendarOrganizationFilterOption = {
+  id: string;
+  name: string;
+};
+
 export type CalendarDay = {
   key: string;
   label: string;
@@ -120,8 +126,10 @@ export type CalendarResult = {
   filters: {
     buildingId?: string;
     roomId?: string;
+    organizationId?: string;
   };
   buildings: CalendarFilterOption[];
+  organizations: CalendarOrganizationFilterOption[];
   events: CalendarEvent[];
 };
 
@@ -342,30 +350,45 @@ function mapBookingStatus(status: BookingStatus): CalendarEventStatus | null {
 }
 
 async function loadCalendarFilters(client: CalendarServiceClient) {
-  const buildings = await client.building.findMany({
-    where: { isActive: true },
-    select: {
-      id: true,
-      name: true,
-      rooms: {
-        where: {
-          status: { in: ["ACTIVE", "RESTRICTED"] },
+  const [buildings, organizations] = await Promise.all([
+    client.building.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        rooms: {
+          where: {
+            status: { in: ["ACTIVE", "RESTRICTED"] },
+          },
+          select: {
+            id: true,
+            name: true,
+          },
+          orderBy: { name: "asc" },
         },
-        select: {
-          id: true,
-          name: true,
-        },
-        orderBy: { name: "asc" },
       },
-    },
-    orderBy: { name: "asc" },
-  });
+      orderBy: { name: "asc" },
+    }),
+    client.organization.findMany({
+      where: {
+        bookings: { some: {} },
+      },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+  ]);
 
-  return buildings.map((building) => ({
-    id: building.id,
-    name: building.name,
-    rooms: building.rooms.map((room) => ({ id: room.id, name: room.name })),
-  }));
+  return {
+    buildings: buildings.map((building) => ({
+      id: building.id,
+      name: building.name,
+      rooms: building.rooms.map((room) => ({ id: room.id, name: room.name })),
+    })),
+    organizations,
+  };
 }
 
 async function resolveRoomScope({
@@ -424,6 +447,7 @@ async function loadCalendarRecords({
   rangeEnd,
   buildingId,
   roomId,
+  organizationId,
   bookingStatuses,
   publicClosuresOnly = false,
 }: {
@@ -432,6 +456,7 @@ async function loadCalendarRecords({
   rangeEnd: Date;
   buildingId?: string;
   roomId?: string;
+  organizationId?: string;
   bookingStatuses: BookingStatus[];
   publicClosuresOnly?: boolean;
 }) {
@@ -458,6 +483,7 @@ async function loadCalendarRecords({
       status: { in: bookingStatuses },
       blockedFrom: { lt: rangeEnd },
       blockedUntil: { gt: rangeStart },
+      organizationId: organizationId || undefined,
       roomId: bookingRoomFilter,
       room: buildingId
         ? {
@@ -715,13 +741,14 @@ async function buildCalendarResult({
   const rangeStart = getRangeStart(selectedDate, view);
   const rangeEnd = getRangeEnd(rangeStart, view);
   const days = buildDays(rangeStart, view);
-  const buildings = await loadCalendarFilters(client);
+  const { buildings, organizations } = await loadCalendarFilters(client);
   const { bookings, closures } = await loadCalendarRecords({
     client,
     rangeStart,
     rangeEnd,
     buildingId: query.buildingId,
     roomId: query.roomId,
+    organizationId: query.organizationId,
     bookingStatuses: includeBookingStatuses,
     publicClosuresOnly,
   });
@@ -741,8 +768,10 @@ async function buildCalendarResult({
     filters: {
       buildingId: query.buildingId,
       roomId: query.roomId,
+      organizationId: query.organizationId,
     },
     buildings,
+    organizations,
     events,
   } satisfies CalendarResult;
 }

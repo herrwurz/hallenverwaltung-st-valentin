@@ -13,12 +13,14 @@ function toCalendarQuery(params: Awaited<SearchParams>): CalendarQuery {
   const view = normalizeSearchParam(params.view);
   const buildingId = normalizeSearchParam(params.buildingId);
   const roomId = normalizeSearchParam(params.roomId);
+  const organizationId = normalizeSearchParam(params.organizationId);
 
   return {
     date,
     view: view === "week" || view === "month" || view === "year" ? view : "day",
     buildingId: buildingId || undefined,
     roomId: roomId || undefined,
+    organizationId: organizationId || undefined,
   };
 }
 

@@ -39,10 +39,43 @@ function getMailEnv() {
   };
 }
 
+export function getSmtpConfigurationStatus() {
+  const env = getMailEnv();
+  const missingFields = [
+    !env.host ? "SMTP_HOST" : null,
+    !env.port ? "SMTP_PORT" : null,
+    !env.fromEmail ? "SMTP_FROM_EMAIL" : null,
+  ].filter((field): field is string => Boolean(field));
+  const usesPlaceholder =
+    env.host === "smtp.example.test" ||
+    env.fromEmail === "hallenverwaltung@example.test" ||
+    env.password === "replace-with-smtp-password";
+
+  return {
+    configured: missingFields.length === 0 && !usesPlaceholder,
+    usesPlaceholder,
+    missingFields,
+    host: env.host ?? null,
+    port: env.port ?? null,
+    secure: env.secure,
+    userConfigured: Boolean(env.user),
+    passwordConfigured: Boolean(env.password),
+    fromEmail: env.fromEmail ?? null,
+    fromName: env.fromName,
+  };
+}
+
 export function getSmtpConfig() {
   const env = getMailEnv();
   if (!env.host || !env.port || !env.fromEmail) {
     throw new MailDeliveryError("SMTP ist nicht vollständig konfiguriert.");
+  }
+
+  const status = getSmtpConfigurationStatus();
+  if (status.usesPlaceholder) {
+    throw new MailDeliveryError(
+      "SMTP ist noch mit Platzhalterwerten konfiguriert. Bitte echte SMTP-Daten in .env setzen, bevor eine Testmail versendet wird.",
+    );
   }
 
   return smtpConfigSchema.parse(env);

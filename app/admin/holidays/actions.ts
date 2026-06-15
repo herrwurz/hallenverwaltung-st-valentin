@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
 import { BookingValidationError } from "@/lib/services/booking-rules";
-import { importHolidayPreset, saveHolidayPeriod } from "@/lib/services/holiday-service";
+import { createClosureFromHolidayPeriod, importHolidayPreset, saveHolidayPeriod } from "@/lib/services/holiday-service";
 
 function holidayErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
@@ -72,4 +72,30 @@ export async function importHolidayPresetAction(formData: FormData) {
         : `presetImported=1&created=${result?.createdCount ?? 0}&skipped=${result?.skippedCount ?? 0}`
     }`,
   );
+}
+
+export async function createHolidayClosureAction(formData: FormData) {
+  const user = await requirePermission("BLOCK_ROOM");
+  let errorMessage: string | undefined;
+
+  try {
+    await createClosureFromHolidayPeriod(
+      {
+        holidayId: formData.get("holidayId"),
+        buildingId: formData.get("buildingId"),
+        roomId: formData.get("roomId"),
+        status: formData.get("status"),
+        reason: formData.get("reason"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      user.id,
+    );
+  } catch (error) {
+    errorMessage = holidayErrorMessage(error);
+  }
+
+  revalidatePath("/admin/holidays");
+  revalidatePath("/admin/buildings");
+  revalidatePath("/admin/rooms");
+  redirect(`/admin/holidays?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "closureCreated=1"}`);
 }

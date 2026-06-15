@@ -3,7 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { getPublicCalendarVisibilityMode } from "@/lib/services/calendar-settings-service";
 import { getPublicCalendarEvents } from "@/lib/services/calendar-service";
 
-type PublicServiceClient = Pick<PrismaClient, "building" | "room" | "booking" | "closure" | "roomComposition" | "organizationMember" | "systemSetting">;
+type PublicServiceClient = Pick<
+  PrismaClient,
+  "building" | "room" | "booking" | "closure" | "roomComposition" | "organization" | "organizationMember" | "systemSetting"
+>;
 
 export type PublicOverview = {
   buildingCount: number;

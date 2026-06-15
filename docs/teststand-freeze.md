@@ -26,8 +26,10 @@ gezielte Restkorrekturen.
 - Serienbuchungen als wiederkehrende Einzelantraege.
 - Warteliste mit Angebot, Frist, Annahme, Ablehnung und Ablauf.
 - Kalenderansichten fuer Verwaltung, Portal und Oeffentlichkeit.
-- Benachrichtigungen mit Queue, SMTP-Konfiguration, Event-Schaltern,
-  Testmail und Empfaenger-Vorschau.
+- Benachrichtigungen mit Queue, SMTP-Status, Event-Schaltern und Testmail.
+  SMTP-Status und Testmail liegen unter `/admin/settings/mail`, die
+  Event-Schalter unter `/admin/settings/notifications`, die operative Queue
+  unter `/admin/notifications`.
 - Ferien-/Feiertagsverwaltung mit Vorlagen fuer Oesterreich und
   Niederoesterreich.
 - No-Shows, Hallenuebergaben, Dokumentmetadaten und Schadensmeldungen.
@@ -53,7 +55,8 @@ gezielte Restkorrekturen.
 ### Betrieb lokal
 
 - Lokaler Komfortstart ueber `start-test-deployment.bat`.
-- Migration, Seed, Demo-Seed, Build und Standalone-Testserver.
+- Migration, Seed, Demo-Seed, Build und lokaler Testserver ueber
+  `npm run start`.
 - Manueller Worker-Lauf ueber Admin-Seite oder `npm run worker:run`.
 
 ## Bewusst nicht Teil dieses Teststands
@@ -105,7 +108,7 @@ Nicht blockierend fuer diesen Freeze:
 7. Kalender in Admin, Portal und Public pruefen.
 8. Warteliste anlegen, Angebot ausloesen, annehmen und ablehnen.
 9. Benachrichtigungen pruefen:
-   Event-Schalter, Empfaenger-Vorschau, Queue, optional Testmail.
+   SMTP-Status/Testmail, Event-Schalter und Queue.
 10. System-Jobs manuell ausfuehren.
 11. Abrechnungsvorbereitung und Export stichprobenartig pruefen.
 12. Hallenwart-Workflows fuer Handover und No-Show stichprobenartig pruefen.

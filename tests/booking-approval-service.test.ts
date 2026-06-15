@@ -631,6 +631,111 @@ test("blocks approval when a closure overlaps", async () => {
   assert.equal(harness.getUpdateAttempts(), 0);
 });
 
+test("allows approval over a closure only with explicit override and decision note", async () => {
+  const harness = createWorkflowClient({
+    currentBooking: makeWorkflowBooking({ status: "IN_REVIEW" }),
+    updatedBooking: makeWorkflowBooking({ status: "APPROVED", processedByUserId: "admin-1", processedAt: end }),
+    closures: [
+      {
+        id: "closure-1",
+        buildingId: "building-1",
+        roomId: null,
+        reason: "Reinigung",
+        status: "CLOSED",
+        startsAt: new Date("2026-06-01T17:00:00Z"),
+        endsAt: new Date("2026-06-01T21:00:00Z"),
+      },
+    ],
+  });
+
+  const updated = await approveBooking(
+    {
+      bookingId: "booking-1",
+      actorUserId: "admin-1",
+      decisionNote: "Ausnahme wegen Gemeindeveranstaltung.",
+      allowClosureOverride: true,
+      roomId: "room-child",
+      buildingId: "building-1",
+      blockedFrom: start,
+      blockedUntil: end,
+    },
+    harness.client,
+  );
+
+  assert.equal(updated.status, "APPROVED");
+  assert.equal(harness.getUpdateAttempts(), 1);
+});
+
+test("does not allow closure override without a decision note", async () => {
+  const harness = createWorkflowClient({
+    currentBooking: makeWorkflowBooking({ status: "IN_REVIEW" }),
+    closures: [
+      {
+        id: "closure-1",
+        buildingId: "building-1",
+        roomId: null,
+        reason: "Reinigung",
+        status: "CLOSED",
+        startsAt: new Date("2026-06-01T17:00:00Z"),
+        endsAt: new Date("2026-06-01T21:00:00Z"),
+      },
+    ],
+  });
+
+  await assert.rejects(
+    () =>
+      approveBooking(
+        {
+          bookingId: "booking-1",
+          actorUserId: "admin-1",
+          allowClosureOverride: true,
+          roomId: "room-child",
+          buildingId: "building-1",
+          blockedFrom: start,
+          blockedUntil: end,
+        },
+        harness.client,
+      ),
+    /Kommentar erforderlich/,
+  );
+  assert.equal(harness.getUpdateAttempts(), 0);
+});
+
+test("does not allow override for overlapping approved bookings", async () => {
+  const harness = createWorkflowClient({
+    currentBooking: makeWorkflowBooking({ status: "IN_REVIEW" }),
+    conflictingBookings: [
+      {
+        id: "booking-2",
+        roomId: "room-child",
+        title: "Ligaspiel",
+        status: "APPROVED",
+        blockedFrom: new Date("2026-06-01T17:30:00Z"),
+        blockedUntil: new Date("2026-06-01T18:30:00Z"),
+      },
+    ],
+  });
+
+  await assert.rejects(
+    () =>
+      approveBooking(
+        {
+          bookingId: "booking-1",
+          actorUserId: "admin-1",
+          decisionNote: "Ausnahme versucht.",
+          allowClosureOverride: true,
+          roomId: "room-child",
+          buildingId: "building-1",
+          blockedFrom: start,
+          blockedUntil: end,
+        },
+        harness.client,
+      ),
+    /genehmigten Buchung/,
+  );
+  assert.equal(harness.getUpdateAttempts(), 0);
+});
+
 test("prevents approval when the booking status changed in parallel", async () => {
   const harness = createWorkflowClient({
     currentBooking: makeWorkflowBooking({ status: "IN_REVIEW" }),
