@@ -95,7 +95,7 @@ export default async function RoomsPage({ searchParams }: PageProps) {
                 closures={room.closures}
                 relatedClosures={room.building.closures.map((closure) => ({
                   ...closure,
-                  sourceLabel: `Gebaeude: ${room.building.name}`,
+                  sourceLabel: `Gebäude: ${room.building.name}`,
                 }))}
               />
             </CardContent>

@@ -79,7 +79,7 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/settings/mail", label: "Mail / SMTP", icon: Mail, groupLabel: "Einstellungen" },
   { href: "/admin/settings/notifications", label: "Benachrichtigungsregeln", icon: Bell, groupLabel: "Einstellungen" },
   { href: "/admin/settings/calendar", label: "Öffentlicher Kalender", icon: Settings, groupLabel: "Einstellungen" },
-  { href: "/admin/notifications", label: "Notification Queue", icon: Bell, groupLabel: "Einstellungen" },
+  { href: "/admin/notifications", label: "Benachrichtigungs-Queue", icon: Bell, groupLabel: "Einstellungen" },
   { href: "/admin/roles", label: "Rollen/Rechte", icon: ShieldCheck, groupLabel: "Einstellungen" },
 ] as const;
 

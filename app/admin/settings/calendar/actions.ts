@@ -57,7 +57,7 @@ export async function updatePublicAreaEnabledSettingAction(formData: FormData) {
     errorMessage =
       error instanceof ZodError
         ? (error.issues[0]?.message ?? "Die Einstellung ist ungueltig.")
-        : "Die Einstellung fuer den oeffentlichen Bereich konnte nicht gespeichert werden.";
+        : "Die Einstellung für den öffentlichen Bereich konnte nicht gespeichert werden.";
   }
 
   revalidatePath("/admin/settings/calendar");

@@ -45,10 +45,10 @@ test("phase 34 admin booking filters include all organizations buildings and roo
   const approvalService = readFileSync("lib/services/booking-approval-service.ts", "utf8");
 
   assert.match(adminBookings, /getAdminBookingFilterOptions/);
-  assert.match(adminBookings, /Gebaeude filtern/);
+  assert.match(adminBookings, /Gebäude filtern/);
   assert.match(adminBookings, /Raum filtern/);
-  assert.match(adminBookings, /Alle Gebaeude/);
-  assert.match(adminBookings, /Alle Raeume/);
+  assert.match(adminBookings, /Alle Gebäude/);
+  assert.match(adminBookings, /Alle Räume/);
   assert.match(adminBookings, /room\.buildingId === selectedBuildingId/);
   assert.match(adminActions, /buildingId: optionalFormString/);
   assert.match(adminActions, /roomId: optionalFormString/);
@@ -105,7 +105,7 @@ test("phase 34 low priority smtp placeholder and dashboard analytics are handled
   assert.match(adminDashboard, /Mailfehler/);
   assert.match(adminDashboard, /Mail \/ SMTP/);
   assert.match(adminDashboard, /Benachrichtigungsregeln/);
-  assert.match(adminDashboard, /Notification Queue/);
+  assert.match(adminDashboard, /Benachrichtigungs-Queue/);
   assert.match(dashboardService, /getAdminDashboardSummary/);
   assert.match(dashboardService, /prisma\.booking\.count/);
   assert.match(dashboardService, /prisma\.waitlistEntry\.count/);
@@ -202,7 +202,7 @@ test("phase 34 holidays stay informational and create closures only explicitly",
   assert.match(holidayService, /createClosureFromHolidayPeriod/);
   assert.match(holidayService, /createClosure\(/);
   assert.match(holidayActions, /createHolidayClosureAction/);
-  assert.match(holidayPage, /Ferien- und Feiertagszeitraeume sind Hinweisdaten/);
+  assert.match(holidayPage, /Ferien- und Feiertagszeiträume sind Hinweisdaten/);
   assert.match(holidayPage, /defaultValue="OPEN"/);
   assert.match(holidayPage, /Aus Ferienzeitraum Hallensperre anlegen/);
   assert.match(holidayPage, /name="buildingId"/);
@@ -228,7 +228,7 @@ test("phase 36 separates system settings from notification queue and keeps SMTP 
   assert.match(mailActions, /requirePermission\("MANAGE_USERS"\)/);
   assert.match(notificationSettingsPage, /Benachrichtigungsregeln/);
   assert.match(notificationSettingsPage, /updateSettingsNotificationEventsAction/);
-  assert.match(notificationQueuePage, /Notification Queue/);
+  assert.match(notificationQueuePage, /Benachrichtigungs-Queue/);
   assert.doesNotMatch(notificationQueuePage, /Event-Schalter|Testmail senden/);
   assert.match(navigation, /Mail \/ SMTP/);
   assert.match(navigation, /Benachrichtigungsregeln/);
@@ -255,6 +255,34 @@ test("phase 37 stabilizes the local pilot test start and documents current setti
   assert.match(freeze, /SMTP-Status und Testmail liegen unter `\/admin\/settings\/mail`/);
   assert.match(productionReadiness, /\/admin\/settings\/mail/);
   assert.match(productionReadiness, /\/admin\/settings\/notifications/);
+});
+
+test("phase 38 keeps pilot-facing labels localized and free of visible mojibake", () => {
+  const files = [
+    "app/public/page.tsx",
+    "app/admin/page.tsx",
+    "app/admin/bookings/page.tsx",
+    "app/admin/notifications/page.tsx",
+    "app/admin/settings/calendar/page.tsx",
+    "app/admin/settings/notifications/page.tsx",
+    "app/admin/system/jobs/page.tsx",
+    "app/admin/holidays/page.tsx",
+    "app/admin/rooms/page.tsx",
+    "components/admin-navigation.tsx",
+  ];
+
+  for (const file of files) {
+    const content = readFileSync(file, "utf8");
+    assert.doesNotMatch(content, /Notification Queue|Gebaeude filtern|Alle Gebaeude|Alle Raeume|Oeffentlicher Bereich|oeffentliche|oeffentlicher|Ãƒ|Ã¼|Ã¤|Ã¶|Ã–/i, file);
+  }
+
+  const navigation = readFileSync("components/admin-navigation.tsx", "utf8");
+  const queuePage = readFileSync("app/admin/notifications/page.tsx", "utf8");
+  const publicPage = readFileSync("app/public/page.tsx", "utf8");
+
+  assert.match(navigation, /Benachrichtigungs-Queue/);
+  assert.match(queuePage, /Benachrichtigungs-Queue/);
+  assert.match(publicPage, /Öffentlicher Bereich/);
 });
 
 
@@ -343,7 +371,7 @@ test("phase 34 closure visibility shows inherited building and room closures", (
   assert.match(roomService, /building:\s*\{/);
   assert.match(roomService, /closures:\s*\{/);
   assert.match(buildingPage, /sourceLabel: `Raum:/);
-  assert.match(roomPage, /sourceLabel: `Gebaeude:/);
+  assert.match(roomPage, /sourceLabel: `Gebäude:/);
 });
 
 test("phase 34 closures can be edited and deleted through protected server actions", () => {

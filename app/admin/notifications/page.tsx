@@ -68,7 +68,7 @@ export default async function AdminNotificationsPage({ searchParams }: { searchP
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Benachrichtigungen</p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-semibold tracking-tight">Notification Queue</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">Benachrichtigungs-Queue</h2>
           <p className="mt-3 max-w-3xl text-muted-foreground">
             Versandprotokoll für zentrale Buchungs- und Wartelistenereignisse inklusive Fehlerstatus und manuellem Retry.
             SMTP und Benachrichtigungsregeln werden unter Einstellungen gepflegt.

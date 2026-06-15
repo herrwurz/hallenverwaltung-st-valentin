@@ -155,13 +155,13 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
               </select>
             </label>
             <label className="text-sm font-medium text-foreground">
-              Gebaeude filtern
+              Gebäude filtern
               <select
                 name="buildingId"
                 defaultValue={selectedBuildingId}
                 className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
               >
-                <option value="">Alle Gebaeude</option>
+                <option value="">Alle Gebäude</option>
                 {filterOptionsData.buildings.map((building) => (
                   <option key={building.id} value={building.id}>
                     {building.name}
@@ -176,7 +176,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                 defaultValue={selectedRoomId}
                 className="mt-1 min-w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm"
               >
-                <option value="">Alle Raeume</option>
+                <option value="">Alle Räume</option>
                 {roomOptions.map((room) => (
                   <option key={room.id} value={room.id}>
                     {room.building.name} - {room.name}

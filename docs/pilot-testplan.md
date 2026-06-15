@@ -77,7 +77,7 @@ Produktionsumgebungen verwendet werden.
 
 ## Empfohlene Smoke-Tests
 
-### Oeffentlicher Bereich
+### Öffentlicher Bereich
 
 - `/public` aufrufen.
 - Kalender und freie Zeiten pruefen.
@@ -112,7 +112,7 @@ Produktionsumgebungen verwendet werden.
 - Optional eine Testmail an eine eigene Adresse ausloesen, wenn SMTP lokal
   konfiguriert ist.
 - `/admin/settings/notifications` oeffnen und Event-Schalter pruefen.
-- `/admin/notifications` oeffnen und Queue sowie fehlgeschlagene
+- `/admin/notifications` oeffnen und Benachrichtigungs-Queue sowie fehlgeschlagene
   Benachrichtigungen pruefen.
 
 ## Was noch kein finaler Abnahmetest ist

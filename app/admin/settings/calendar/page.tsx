@@ -69,10 +69,10 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Oeffentlicher Bereich</CardTitle>
+          <CardTitle>Öffentlicher Bereich</CardTitle>
           <CardDescription>
-            Der oeffentliche Bereich kann fuer den Teststand oder fuer Gemeinden ohne oeffentliche Anzeige komplett
-            deaktiviert werden. Admin- und Vereinslogin bleiben davon unberuehrt.
+            Der öffentliche Bereich kann für den Teststand oder für Gemeinden ohne öffentliche Anzeige komplett
+            deaktiviert werden. Admin- und Vereinslogin bleiben davon unberührt.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -87,7 +87,7 @@ export default async function AdminCalendarSettingsPage({ searchParams }: { sear
               <span>
                 <span className="block font-medium">Public-Bereich aktiv</span>
                 <span className="mt-1 block text-sm text-muted-foreground">
-                  Wenn deaktiviert, verweist /public nur noch auf den Login und der oeffentliche Kalender inklusive iCal
+                  Wenn deaktiviert, verweist /public nur noch auf den Login und der öffentliche Kalender inklusive iCal
                   ist abgeschaltet.
                 </span>
               </span>

@@ -25,7 +25,7 @@ export default async function AdminNotificationSettingsPage({ searchParams }: { 
       <h2 className="mt-3 text-3xl font-semibold tracking-tight">Benachrichtigungsregeln</h2>
       <p className="mt-3 max-w-3xl text-muted-foreground">
         Diese Schalter steuern, für welche fachlichen Ereignisse Benachrichtigungen in die Queue geschrieben werden.
-        Der eigentliche Versand läuft weiterhin über die Notification Queue und den Worker.
+        Der eigentliche Versand läuft weiterhin über die Benachrichtigungs-Queue und den Worker.
       </p>
 
       <AppFeedback
