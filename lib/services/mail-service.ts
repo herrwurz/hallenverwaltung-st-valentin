@@ -56,7 +56,12 @@ export function getSmtpConfigurationStatus() {
     usesPlaceholder,
     missingFields,
     host: env.host ?? null,
+    port: env.port ?? null,
+    secure: env.secure,
+    userConfigured: Boolean(env.user),
+    passwordConfigured: Boolean(env.password),
     fromEmail: env.fromEmail ?? null,
+    fromName: env.fromName,
   };
 }
 

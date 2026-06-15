@@ -82,11 +82,13 @@ Enthalten sind:
    Diese Demo-Zugaenge sind nur fuer lokale Tests gedacht.
 
    Fuer Benachrichtigungen per SMTP muessen zusaetzlich die
-   `SMTP_*`-Variablen in der `.env` gepflegt werden. Die Verarbeitung
-   der Benachrichtigungsqueue kann ueber `/admin/notifications` manuell
-   angestossen werden; Event-Schalter werden dort als `SystemSetting`
-   gespeichert. Dort steht auch eine Testmail-Funktion fuer den SMTP-
-   Durchstich sowie eine Empfaenger-Vorschau zur Verfuegung.
+   `SMTP_*`-Variablen in der `.env` gepflegt werden. SMTP-Passwort,
+   Datenbank-URL und andere technische Secrets werden nicht ueber die
+   Weboberflaeche gespeichert. Der SMTP-Status und eine Testmail-Funktion
+   stehen unter `/admin/settings/mail` bereit. Event-Schalter werden als
+   `SystemSetting` gespeichert und unter `/admin/settings/notifications`
+   gepflegt. Die Verarbeitung der Benachrichtigungsqueue kann ueber
+   `/admin/notifications` manuell angestossen werden.
    Version 1 versendet ausschliesslich E-Mail ueber die persistente
    Notification Queue. Newsletter, SMS und Push werden fachlich als spaetere
    Kanaele vorbereitet, aber nicht hardcodiert und nicht ohne gesonderte

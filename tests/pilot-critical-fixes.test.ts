@@ -89,15 +89,15 @@ test("phase 34 demo seed restores demo account access predictably", () => {
 
 test("phase 34 low priority smtp placeholder and dashboard analytics are handled", () => {
   const mailService = readFileSync("lib/services/mail-service.ts", "utf8");
-  const notificationPage = readFileSync("app/admin/notifications/page.tsx", "utf8");
+  const mailSettingsPage = readFileSync("app/admin/settings/mail/page.tsx", "utf8");
   const adminDashboard = readFileSync("app/admin/page.tsx", "utf8");
   const dashboardService = readFileSync("lib/services/admin/dashboard-service.ts", "utf8");
 
   assert.match(mailService, /getSmtpConfigurationStatus/);
   assert.match(mailService, /smtp\.example\.test/);
   assert.match(mailService, /Platzhalterwerten/);
-  assert.match(notificationPage, /SMTP ist noch nicht produktiv konfiguriert/);
-  assert.match(notificationPage, /Testmails werden deshalb bewusst nicht versendet/);
+  assert.match(mailSettingsPage, /SMTP ist noch nicht vollständig produktiv konfiguriert/);
+  assert.match(mailSettingsPage, /Testmails werden service-seitig bewusst blockiert/);
   assert.match(adminDashboard, /DashboardStatCard/);
   assert.match(adminDashboard, /Offene Antraege/);
   assert.match(adminDashboard, /Genehmigt im Monat/);
@@ -160,6 +160,9 @@ test("phase 34 medium fixes settings navigation membership count caretakers and 
   assert.match(adminLayout, /href: "\/admin\/waitlist", label: "Warteliste", groupLabel: "Buchungen"/);
   assert.match(adminLayout, /href: "\/admin\/roles", label: "Rollen\/Rechte", groupLabel: "Einstellungen"/);
   assert.match(adminLayout, /href: "\/admin\/holidays", label: "Ferien", groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /href: "\/admin\/settings", label: "Systemeinstellungen", groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /href: "\/admin\/settings\/mail", label: "Mail \/ SMTP", groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /href: "\/admin\/settings\/notifications", label: "Benachrichtigungsregeln", groupLabel: "Einstellungen"/);
   assert.match(adminLayout, /href: "\/admin\/access", label: "Zutritte", groupLabel: "Extras"/);
   assert.match(organizationService, /activeFrom: \{ lte: now \}/);
   assert.match(organizationService, /activeUntil: \{ gt: now \}/);
@@ -201,6 +204,33 @@ test("phase 34 holidays stay informational and create closures only explicitly",
   assert.match(holidayPage, /Aus Ferienzeitraum Hallensperre anlegen/);
   assert.match(holidayPage, /name="buildingId"/);
   assert.match(holidayPage, /name="roomId"/);
+});
+
+test("phase 36 separates system settings from notification queue and keeps SMTP secrets out of the database", () => {
+  const settingsPage = readFileSync("app/admin/settings/page.tsx", "utf8");
+  const mailPage = readFileSync("app/admin/settings/mail/page.tsx", "utf8");
+  const mailActions = readFileSync("app/admin/settings/mail/actions.ts", "utf8");
+  const notificationSettingsPage = readFileSync("app/admin/settings/notifications/page.tsx", "utf8");
+  const notificationQueuePage = readFileSync("app/admin/notifications/page.tsx", "utf8");
+  const navigation = readFileSync("components/admin-navigation.tsx", "utf8");
+  const mailService = readFileSync("lib/services/mail-service.ts", "utf8");
+
+  assert.match(settingsPage, /Systemeinstellungen/);
+  assert.match(settingsPage, /technische Secrets/i);
+  assert.match(settingsPage, /nicht über die\s+Weboberfläche geändert/);
+  assert.match(mailPage, /Mail \/ SMTP/);
+  assert.match(mailPage, /SMTP-Passwort/);
+  assert.match(mailPage, /gesetzt, verborgen/);
+  assert.match(mailActions, /queueAdminTestEmail/);
+  assert.match(mailActions, /requirePermission\("MANAGE_USERS"\)/);
+  assert.match(notificationSettingsPage, /Benachrichtigungsregeln/);
+  assert.match(notificationSettingsPage, /updateSettingsNotificationEventsAction/);
+  assert.match(notificationQueuePage, /Notification Queue/);
+  assert.doesNotMatch(notificationQueuePage, /Event-Schalter|Testmail senden/);
+  assert.match(navigation, /Mail \/ SMTP/);
+  assert.match(navigation, /Benachrichtigungsregeln/);
+  assert.match(mailService, /passwordConfigured/);
+  assert.doesNotMatch(mailPage, /SMTP_PASSWORD|process\.env\.SMTP_PASSWORD/);
 });
 
 

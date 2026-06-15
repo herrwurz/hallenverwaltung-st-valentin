@@ -184,6 +184,12 @@ Zusatz fuer Phase 9.5:
 - Event-Schalter fuer die E-Mail-Ereignisse werden als `SystemSetting` mit dem
   Key `notifications.events.enabled` gespeichert. Fehlende oder unvollstaendige
   Werte fallen sicher auf aktivierte Standardwerte zurueck.
+- Phase 36 trennt fachliche Systemparameter von technischen Secrets:
+  `notifications.events.enabled`, `public.area.enabled` und
+  `public.calendar.visibility.default` bleiben `SystemSetting`-Werte. SMTP-
+  Host, Port, Benutzer, Passwort, Absender, Datenbank-URL und Auth-Secret
+  bleiben Betriebsparameter aus `.env` oder Serverumgebung und werden nicht in
+  `SystemSetting` gespeichert.
 
 Zusatz fuer Phase 10:
 

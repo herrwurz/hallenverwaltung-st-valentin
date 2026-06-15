@@ -359,6 +359,25 @@ unter `docs/phase-34-teststand-befunde.md` dokumentiert. Hohe Prioritaet haben
 Login/Auth, Ganztagssperren, Public-Deaktivierung, Gebaeude-/Raum-Sperren,
 Admin-Buchungsfilter und fachlich abgesicherte Ausnahmegenehmigungen.
 
+## Phase 35
+
+Kalenderstabilisierung fuer den Teststand: Die Admin-, Portal- und Public-
+Kalenderansichten verwenden FullCalendar Community mit Tages-, Wochen-,
+Monats- und Jahresansicht. FullCalendar Resource Timeline bleibt wegen
+Premium-Lizenzklaerung weiterhin ausgeschlossen. Die Admin-Navigation wurde in
+Dashboard/Kalender sowie die Gruppen Stammdaten, Buchungen, Extras und
+Einstellungen verschlankt. Der lokale Teststand wurde fuer Build-/Static-
+Asset-Auslieferung nachgeschaerft.
+
+## Phase 36
+
+Systemeinstellungen wurden fachlich getrennt: `/admin/settings` ist die
+Uebersicht, `/admin/settings/mail` zeigt SMTP-Status und Testmail, ohne
+Passwoerter oder Secrets in der Datenbank zu speichern, und
+`/admin/settings/notifications` verwaltet die Notification-Event-Schalter als
+`SystemSetting`. `/admin/notifications` ist wieder primaer die operative
+Notification Queue mit Verarbeitung und Retry.
+
 ---
 
 # Wichtigste Architekturentscheidungen
