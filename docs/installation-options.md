@@ -74,14 +74,20 @@ Geeignet fuer:
 - Vorfuehrung fuer Verwaltung oder Vereine
 - technische Vorbereitung vor Gemeinde-Server
 
-Aktueller Hinweis:
+Aktueller Testserver:
 
-- Der geplante eigene Testserver soll voraussichtlich auf all-inkl.com laufen.
-- Das ist eine eigene technische Huerde, weil vorab geklaert werden muss, ob
-  der konkrete Tarif dauerhaft Node.js, PostgreSQL, Worker/Cron, Umgebungs-
-  variablen, Prozessbetrieb und optional Docker/Reverse Proxy unterstuetzt.
-- Bis diese Hosting-Fragen geklaert sind, bleibt der lokale Teststand die
-  verlaessliche Umgebung fuer Klicktests.
+| Feld | Wert |
+| --- | --- |
+| Anbieter | Hetzner |
+| IP-Adresse | `116.203.141.156` |
+| Subdomain | `hallenverwaltung.hofreither.at` |
+| Zweck | eigener produktionsnaher Testserver vor Gemeinde-Server |
+| Betriebsdatei | `.env.test` |
+
+Der frueher angedachte all-inkl.com-Testbetrieb ist damit fuer den aktuellen
+Teststand nicht mehr der bevorzugte Weg. Die Zielumgebung ist jetzt ein eigener
+Hetzner-Server, der Docker, Reverse Proxy, PostgreSQL, Worker und Backups
+realistischer abbilden kann.
 
 Empfohlene Variante:
 
@@ -97,6 +103,22 @@ cp .env.test.example .env.test
 ENV_FILE=.env.test npm run production:check
 docker compose --env-file .env.test -f docker-compose.production.yml config
 ```
+
+Empfohlene `.env.test`-Werte fuer diesen Testserver:
+
+```env
+APP_ENV=test
+PUBLIC_BASE_URL=https://hallenverwaltung.hofreither.at
+AUTH_URL=https://hallenverwaltung.hofreither.at
+AUTH_TRUST_HOST=true
+PUBLIC_AREA_ENABLED=false
+SERVER_NAME=hallenverwaltung.hofreither.at
+MAIL_DELIVERY_MODE=disabled
+```
+
+SMTP kann spaeter fuer echte Mailtests auf `MAIL_DELIVERY_MODE=smtp`
+umgestellt werden. Bis dahin soll Mailversand deaktiviert bleiben oder nur ein
+klar getrenntes Testpostfach verwenden.
 
 Start:
 

@@ -467,6 +467,20 @@ manuelle Standardchecks, Eskalationsregeln, Backup-/Restore-Nachweise und
 Mindestfreigaben vor Echtdatenbetrieb. README, Produktions-Readiness,
 Go-Live-Runbook und Nachweisprotokoll verweisen auf diese Betriebsgrundlage.
 
+## Testserver Hetzner
+
+Ein eigener produktionsnaher Testserver ist angelegt:
+
+* Anbieter: Hetzner
+* IP-Adresse: `116.203.141.156`
+* Subdomain: `hallenverwaltung.hofreither.at`
+
+Der Testserver soll mit `.env.test`, `APP_ENV=test`,
+`PUBLIC_BASE_URL=https://hallenverwaltung.hofreither.at` und
+`AUTH_URL=https://hallenverwaltung.hofreither.at` betrieben werden. Der
+Gemeinde-Server bleibt davon getrennt und weiterhin der spaetere
+Produktiv-Zielbetrieb.
+
 ---
 
 # Wichtigste Architekturentscheidungen

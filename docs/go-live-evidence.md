@@ -30,9 +30,9 @@ Statuswerte:
 | Feld | Wert |
 | --- | --- |
 | Zielumgebung |  |
-| Ziel-Domain |  |
-| Zielserver |  |
-| Betriebsstufe | lokal / eigener Testserver / Gemeinde-Server |
+| Ziel-Domain | hallenverwaltung.hofreither.at |
+| Zielserver | Hetzner, 116.203.141.156 |
+| Betriebsstufe | eigener Testserver |
 | Abnahme-Datum |  |
 | Technisch verantwortlich |  |
 | Fachlich verantwortlich |  |
