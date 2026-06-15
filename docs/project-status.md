@@ -425,6 +425,17 @@ Gruppe `Buchungen` sichtbar und zusaetzlich am Dashboard verlinkt. Fuer echte
 Ausdrucke gibt es `/admin/reports/print` als reduzierte Druckansicht mit
 A4-Layout, kompakten Tabellen und ausgeblendeter Verwaltungsnavigation.
 
+## Phase 39 - Umgebungskonfiguration fuer Test und Gemeinde
+
+Die Betriebsumgebungen werden explizit getrennt: `APP_ENV=local`, `test` oder
+`production`, dazu `PUBLIC_BASE_URL`, `AUTH_URL`, `SERVER_NAME`,
+`PUBLIC_AREA_ENABLED` und `MAIL_DELIVERY_MODE`. Der eigene Testserver nutzt
+`.env.test` aus `.env.test.example`; der Gemeinde-Produktivserver nutzt
+`.env.production` aus `.env.production.example`. Der bestehende
+`npm run production:check` validiert beide Umgebungen ueber `ENV_FILE`, erlaubt
+deaktivierten Mailversand nur fuer Testumgebungen und verlangt in Produktion
+`MAIL_DELIVERY_MODE=smtp`.
+
 ---
 
 # Wichtigste Architekturentscheidungen

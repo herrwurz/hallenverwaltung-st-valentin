@@ -24,6 +24,16 @@ Go-Live-Blocker.
 
 ## 2. Produktionskonfiguration
 
+Fuer den eigenen Testserver wird dieselbe Compose-Datei verwendet, aber eine
+getrennte Umgebungsdatei:
+
+```bash
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+```
+
+Fuer den Gemeinde-Produktivserver:
+
 Aus Vorlage erstellen:
 
 ```bash
@@ -35,11 +45,15 @@ Pflichtwerte vor dem Start setzen:
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
+- `APP_ENV=production`
+- `PUBLIC_BASE_URL`
 - `AUTH_URL`
 - `AUTH_SECRET`
 - `AUTH_TRUST_HOST=true`
+- `PUBLIC_AREA_ENABLED`
 - `SERVER_NAME`
 - `TLS_CERT_DIR`
+- `MAIL_DELIVERY_MODE=smtp`
 - `SMTP_HOST`
 - `SMTP_PORT`
 - `SMTP_SECURE`
@@ -52,7 +66,11 @@ Pflichtwerte vor dem Start setzen:
 Regeln:
 
 - `AUTH_SECRET` muss ein langes zufaelliges Secret sein.
-- `.env.production` darf nicht committet werden.
+- `.env.test` und `.env.production` duerfen nicht committet werden.
+- Testserver und Gemeinde-Produktivserver verwenden getrennte Secrets,
+  Datenbankpasswoerter, Domains und SMTP-Zugangsdaten.
+- `MAIL_DELIVERY_MODE=disabled` ist nur fuer Testumgebungen erlaubt, wenn
+  E-Mail bewusst noch nicht zugestellt werden soll.
 - SMTP-Zugangsdaten duerfen nicht in Logs oder Tickets kopiert werden.
 - Demo-Passwoerter aus README sind nur lokal erlaubt.
 

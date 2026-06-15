@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { z } from "zod";
+import { getMailDeliveryMode } from "@/lib/config/environment";
 
 const booleanFromEnv = z
   .union([z.boolean(), z.string()])
@@ -41,6 +42,7 @@ function getMailEnv() {
 
 export function getSmtpConfigurationStatus() {
   const env = getMailEnv();
+  const deliveryMode = getMailDeliveryMode();
   const missingFields = [
     !env.host ? "SMTP_HOST" : null,
     !env.port ? "SMTP_PORT" : null,
@@ -52,7 +54,8 @@ export function getSmtpConfigurationStatus() {
     env.password === "replace-with-smtp-password";
 
   return {
-    configured: missingFields.length === 0 && !usesPlaceholder,
+    configured: deliveryMode === "smtp" && missingFields.length === 0 && !usesPlaceholder,
+    deliveryMode,
     usesPlaceholder,
     missingFields,
     host: env.host ?? null,
@@ -66,6 +69,10 @@ export function getSmtpConfigurationStatus() {
 }
 
 export function getSmtpConfig() {
+  if (getMailDeliveryMode() === "disabled") {
+    throw new MailDeliveryError("E-Mail-Versand ist per MAIL_DELIVERY_MODE=disabled deaktiviert.");
+  }
+
   const env = getMailEnv();
   if (!env.host || !env.port || !env.fromEmail) {
     throw new MailDeliveryError("SMTP ist nicht vollständig konfiguriert.");

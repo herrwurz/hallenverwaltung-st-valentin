@@ -91,16 +91,28 @@ Aktion:
 cp .env.production.example .env.production
 ```
 
+Fuer einen vorgelagerten Testserver stattdessen:
+
+```bash
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
+```
+
 Pflichtwerte in `.env.production` setzen:
 
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
+- `APP_ENV=production`
+- `PUBLIC_BASE_URL`
 - `AUTH_URL`
 - `AUTH_SECRET`
 - `AUTH_TRUST_HOST=true`
+- `PUBLIC_AREA_ENABLED`
 - `SERVER_NAME`
 - `TLS_CERT_DIR`
+- `MAIL_DELIVERY_MODE=smtp`
 - `SMTP_HOST`
 - `SMTP_PORT`
 - `SMTP_SECURE`
@@ -123,6 +135,9 @@ Stop-Kriterium:
   `example.org`.
 - `AUTH_SECRET` ist kurz, wiederverwendet oder in Logs/Tickets sichtbar.
 - `.env.production` ist versehentlich fuer Git vorgemerkt.
+- `.env.test` und `.env.production` teilen sich Secrets, Datenbank oder SMTP-
+  Zugangsdaten.
+- `MAIL_DELIVERY_MODE` ist in Produktion nicht `smtp`.
 
 Optional koennen Zertifikatsdateien direkt mitgeprueft werden:
 

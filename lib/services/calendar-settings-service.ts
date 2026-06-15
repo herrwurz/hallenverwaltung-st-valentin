@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { z } from "zod";
+import { getPublicAreaDefaultEnabled } from "@/lib/config/environment";
 import { prisma } from "@/lib/prisma";
 
 export const publicCalendarVisibilityModes = ["occupied_only", "organization", "event"] as const;
@@ -17,10 +18,6 @@ export const publicCalendarVisibilitySettingSchema = z.object({
 });
 
 type CalendarSettingsClient = Pick<PrismaClient, "systemSetting">;
-
-function getPublicAreaDefaultEnabled() {
-  return process.env.PUBLIC_AREA_ENABLED !== "false";
-}
 
 export function parsePublicAreaEnabledSetting(value: unknown, defaultEnabled = getPublicAreaDefaultEnabled()): boolean {
   const parsed = publicAreaEnabledSettingSchema.safeParse(value);

@@ -267,6 +267,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
 - `docker-compose.production.yml` fuer PostgreSQL, Migrationen, Web,
   Worker und Nginx Reverse Proxy
 - `.env.production.example` als Vorlage fuer Produktionsvariablen
+- `.env.test.example` als getrennte Vorlage fuer einen produktionsnahen
+  Testserver ohne Produktivdaten
 - `deploy/nginx/templates/hallenverwaltung.conf.template` fuer HTTPS-Terminierung
 - Backup-, Restore- und Restore-Test-Scripts unter `deploy/scripts`
 - `docs/production-readiness.md` als Checkliste fuer Zielumgebung,
@@ -283,7 +285,9 @@ cp .env.production.example .env.production
 ```
 
 Danach muessen mindestens `POSTGRES_PASSWORD`, `AUTH_SECRET`, `AUTH_URL`,
-`SERVER_NAME` und die SMTP-Werte fuer die Zielumgebung gesetzt werden.
+`PUBLIC_BASE_URL`, `SERVER_NAME`, `APP_ENV=production`,
+`MAIL_DELIVERY_MODE=smtp` und die SMTP-Werte fuer die Zielumgebung gesetzt
+werden.
 Zertifikate werden nicht generiert und nicht committed. Erwartet werden:
 
 ```text
@@ -297,6 +301,27 @@ Produktionskonfiguration pruefen:
 npm run production:check
 docker compose --env-file .env.production -f docker-compose.production.yml config
 ```
+
+Produktionsnahen Testserver vorbereiten:
+
+```bash
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
+```
+
+Unter Windows PowerShell:
+
+```powershell
+Copy-Item .env.test.example .env.test
+$env:ENV_FILE=".env.test"; npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
+Remove-Item Env:\ENV_FILE
+```
+
+`.env.test` und `.env.production` bleiben strikt getrennt. Testserver duerfen
+`MAIL_DELIVERY_MODE=disabled` verwenden, wenn noch kein Testpostfach bereit
+steht. Der Gemeinde-Produktivserver muss `MAIL_DELIVERY_MODE=smtp` verwenden.
 
 Optional prueft der Produktionscheck auch Zertifikatsdateien:
 
@@ -369,5 +394,6 @@ docker-compose.production.yml  Produktionsnahe Compose-Konfiguration
 deploy/                 Reverse-Proxy-Templates und Backup-Scripts
 e2e/                    Playwright-Smoke-Tests
 .env.example            Beispielkonfiguration
+.env.test.example       Testserver-Konfiguration ohne Secrets
 .env.production.example Produktionskonfiguration ohne Secrets
 ```

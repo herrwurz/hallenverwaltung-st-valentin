@@ -87,29 +87,29 @@ Empfohlene Variante:
 
 - Docker Compose verwenden
 - eigene Testdomain oder Subdomain verwenden
-- `.env.production` mit Testwerten pflegen
+- `.env.test` aus `.env.test.example` mit Testwerten pflegen
 - SMTP nur mit Testpostfach oder bewusst deaktiviert/markiert testen
 
 Vorbereitung:
 
 ```bash
-cp .env.production.example .env.production
-npm run production:check
-docker compose --env-file .env.production -f docker-compose.production.yml config
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
 ```
 
 Start:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml up --build -d
+docker compose --env-file .env.test -f docker-compose.production.yml up --build -d
 ```
 
 Pruefen:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml ps
-docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 web
-docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 worker
+docker compose --env-file .env.test -f docker-compose.production.yml ps
+docker compose --env-file .env.test -f docker-compose.production.yml logs --tail=100 web
+docker compose --env-file .env.test -f docker-compose.production.yml logs --tail=100 worker
 ```
 
 Wichtig:
@@ -154,12 +154,20 @@ Die Anwendung wird ueber Umgebungsdateien konfiguriert:
 | Umgebung | Datei | Zweck |
 | --- | --- | --- |
 | Lokal | `.env` | Entwicklung und lokaler Test |
-| Testserver | `.env.production` | produktionsnaher Testbetrieb |
+| Testserver | `.env.test` | produktionsnaher Testbetrieb ohne Produktivdaten |
 | Gemeinde-Server | `.env.production` | finaler Produktivbetrieb |
 
 Regeln:
 
-- `.env` und `.env.production` werden nicht committet.
+- `.env`, `.env.test` und `.env.production` werden nicht committet.
+- `.env.test.example` und `.env.production.example` sind nur Vorlagen ohne echte Secrets.
+- `APP_ENV` muss je Umgebung eindeutig gesetzt sein: `local`, `test` oder
+  `production`.
+- `PUBLIC_BASE_URL`, `AUTH_URL` und `SERVER_NAME` muessen zur jeweiligen
+  Test- oder Produktivdomain passen.
+- `MAIL_DELIVERY_MODE=disabled` ist fuer Testumgebungen erlaubt, wenn noch
+  kein Testpostfach bereitsteht. In Produktion muss `MAIL_DELIVERY_MODE=smtp`
+  gesetzt sein.
 - Secrets duerfen nicht in Logs, Tickets, Chat oder Dokumentation stehen.
 - `AUTH_SECRET`, Datenbankpasswoerter und SMTP-Passwoerter je Umgebung
   getrennt vergeben.
