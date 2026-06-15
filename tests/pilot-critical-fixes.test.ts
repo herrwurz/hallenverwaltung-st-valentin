@@ -99,10 +99,13 @@ test("phase 34 low priority smtp placeholder and dashboard analytics are handled
   assert.match(mailSettingsPage, /SMTP ist noch nicht vollständig produktiv konfiguriert/);
   assert.match(mailSettingsPage, /Testmails werden service-seitig bewusst blockiert/);
   assert.match(adminDashboard, /DashboardStatCard/);
-  assert.match(adminDashboard, /Offene Antraege/);
+  assert.match(adminDashboard, /Offene Antr/);
   assert.match(adminDashboard, /Genehmigt im Monat/);
   assert.match(adminDashboard, /Warteliste offen/);
   assert.match(adminDashboard, /Mailfehler/);
+  assert.match(adminDashboard, /Mail \/ SMTP/);
+  assert.match(adminDashboard, /Benachrichtigungsregeln/);
+  assert.match(adminDashboard, /Notification Queue/);
   assert.match(dashboardService, /getAdminDashboardSummary/);
   assert.match(dashboardService, /prisma\.booking\.count/);
   assert.match(dashboardService, /prisma\.waitlistEntry\.count/);
@@ -231,6 +234,27 @@ test("phase 36 separates system settings from notification queue and keeps SMTP 
   assert.match(navigation, /Benachrichtigungsregeln/);
   assert.match(mailService, /passwordConfigured/);
   assert.doesNotMatch(mailPage, /SMTP_PASSWORD|process\.env\.SMTP_PASSWORD/);
+});
+
+test("phase 37 stabilizes the local pilot test start and documents current settings routes", () => {
+  const batch = readFileSync("start-test-deployment.bat", "utf8");
+  const localServer = readFileSync("scripts/start-local-testserver.cmd", "utf8");
+  const pilotPlan = readFileSync("docs/pilot-testplan.md", "utf8");
+  const freeze = readFileSync("docs/teststand-freeze.md", "utf8");
+  const productionReadiness = readFileSync("docs/production-readiness.md", "utf8");
+
+  assert.match(batch, /http:\/\/localhost:3000\/login/);
+  assert.match(batch, /attrib -U \+P "\.next"/);
+  assert.match(batch, /scripts\\start-local-testserver\.cmd/);
+  assert.doesNotMatch(batch, /standalone\\server\.js/);
+  assert.match(localServer, /npm\.cmd run start/);
+  assert.doesNotMatch(localServer, /standalone\\server\.js/);
+  assert.match(pilotPlan, /\/admin\/settings\/mail/);
+  assert.match(pilotPlan, /\/admin\/settings\/notifications/);
+  assert.match(pilotPlan, /\/admin\/notifications/);
+  assert.match(freeze, /SMTP-Status und Testmail liegen unter `\/admin\/settings\/mail`/);
+  assert.match(productionReadiness, /\/admin\/settings\/mail/);
+  assert.match(productionReadiness, /\/admin\/settings\/notifications/);
 });
 
 

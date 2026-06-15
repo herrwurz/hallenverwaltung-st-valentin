@@ -24,12 +24,14 @@ start-test-deployment.bat
 
 Der Batch fuehrt aus:
 
-1. Migrationen anwenden
-2. Stammdaten seeden
-3. Demo-Daten seeden
-4. Produktionsbuild erstellen
-5. Standalone-Testserver starten
-6. `http://localhost:3000` im Browser oeffnen
+1. vorhandenen Testserver auf Port 3000 erkennen
+2. lokale PostgreSQL-Testdatenbank pruefen oder Docker-DB starten
+3. Migrationen anwenden
+4. Stammdaten seeden
+5. Demo-Daten seeden
+6. Produktionsbuild erstellen
+7. Testserver mit `npm run start` starten
+8. `http://localhost:3000/login` im Browser oeffnen
 
 Das Fenster "Hallenverwaltung Testserver" muss waehrend des Klicktests offen
 bleiben und kann mit `Ctrl+C` beendet werden.
@@ -105,11 +107,13 @@ Produktionsumgebungen verwendet werden.
 
 ### Benachrichtigungen
 
-- Als Admin `/admin/notifications` oeffnen.
-- Event-Schalter pruefen.
-- Empfaenger-Vorschau ansehen.
+- Als Admin `/admin/settings/mail` oeffnen.
+- SMTP-Status pruefen.
 - Optional eine Testmail an eine eigene Adresse ausloesen, wenn SMTP lokal
   konfiguriert ist.
+- `/admin/settings/notifications` oeffnen und Event-Schalter pruefen.
+- `/admin/notifications` oeffnen und Queue sowie fehlgeschlagene
+  Benachrichtigungen pruefen.
 
 ## Was noch kein finaler Abnahmetest ist
 

@@ -37,7 +37,18 @@ if not exist "node_modules\next" (
 )
 
 echo.
-echo [0/5] PostgreSQL-Testdatenbank pruefen...
+echo [0/6] Laufenden Testserver pruefen...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $r=Invoke-WebRequest -Uri 'http://localhost:3000/login' -UseBasicParsing -TimeoutSec 2; if($r.StatusCode -ge 200){ exit 0 } } catch {}; exit 1"
+if not errorlevel 1 (
+  echo Unter http://localhost:3000 ist bereits ein Testserver erreichbar.
+  echo Oeffne bestehenden Teststand im Browser.
+  start "" "http://localhost:3000/login"
+  pause
+  exit /b 0
+)
+
+echo.
+echo [1/6] PostgreSQL-Testdatenbank pruefen...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$client = New-Object Net.Sockets.TcpClient; try { $connect = $client.BeginConnect('localhost', %POSTGRES_PORT%, $null, $null); if (-not $connect.AsyncWaitHandle.WaitOne(1500)) { exit 1 }; $client.EndConnect($connect); exit 0 } catch { exit 1 } finally { $client.Close() }"
 if errorlevel 1 (
   echo PostgreSQL ist auf localhost:%POSTGRES_PORT% nicht erreichbar.
@@ -65,50 +76,41 @@ if errorlevel 1 (
 )
 
 echo.
-echo [1/5] Migrationen anwenden...
+echo [2/6] Migrationen anwenden...
 call npm run db:deploy
 if errorlevel 1 goto :error
 
 echo.
-echo [2/5] Stammdaten seeden...
+echo [3/6] Stammdaten seeden...
 call npm run db:seed
 if errorlevel 1 goto :error
 
 echo.
-echo [3/5] Demo-Daten seeden...
+echo [4/6] Demo-Daten seeden...
 call npm run demo:seed
 if errorlevel 1 goto :error
 
 echo.
-echo [4/5] Produktionsbuild erstellen...
+echo [5/6] Produktionsbuild erstellen...
+if exist ".next" (
+  echo OneDrive-/Windows-Dateiattribute fuer .next normalisieren...
+  attrib -U +P ".next" /S /D >nul 2>nul
+)
 call npm run build
 if errorlevel 1 goto :error
 
 echo.
-echo [5/5] Lokalen Testserver starten...
-if not exist ".next\standalone\server.js" (
-  echo Fehler: Standalone-Build fehlt. Bitte Build-Ausgabe pruefen.
+echo [6/6] Lokalen Testserver starten...
+if not exist ".next\BUILD_ID" (
+  echo Fehler: Produktionsbuild fehlt. Bitte Build-Ausgabe pruefen.
   goto :error
 )
 
-if exist ".next\static" (
-  if not exist ".next\standalone\.next" mkdir ".next\standalone\.next" >nul 2>nul
-  if exist ".next\standalone\.next\static" rmdir /s /q ".next\standalone\.next\static" >nul 2>nul
-  xcopy ".next\static" ".next\standalone\.next\static\" /E /I /Y >nul
-  if errorlevel 1 goto :error
-)
-
-if exist "public" (
-  if exist ".next\standalone\public" rmdir /s /q ".next\standalone\public" >nul 2>nul
-  xcopy "public" ".next\standalone\public\" /E /I /Y >nul
-  if errorlevel 1 goto :error
-)
-
-start "Hallenverwaltung Testserver" /D "%CD%" cmd /k "set PORT=3000&& set HOSTNAME=localhost&& set DATABASE_URL=%DATABASE_URL%&& set AUTH_SECRET=%AUTH_SECRET%&& set AUTH_TRUST_HOST=%AUTH_TRUST_HOST%&& npm.cmd run start"
+start "Hallenverwaltung Testserver" /D "%CD%" cmd /k "set PORT=3000&& set HOSTNAME=localhost&& set DATABASE_URL=%DATABASE_URL%&& set AUTH_SECRET=%AUTH_SECRET%&& set AUTH_TRUST_HOST=%AUTH_TRUST_HOST%&& scripts\start-local-testserver.cmd"
 
 echo.
 echo Warte auf http://localhost:3000 ...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ready=$false; for($i=0;$i -lt 90;$i++){ try { $r=Invoke-WebRequest -Uri 'http://localhost:3000' -UseBasicParsing -TimeoutSec 3; if($r.StatusCode -ge 200){ $ready=$true; break } } catch {}; Start-Sleep -Seconds 1 }; if(-not $ready){ exit 1 }"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ready=$false; for($i=0;$i -lt 120;$i++){ try { $r=Invoke-WebRequest -Uri 'http://localhost:3000/login' -UseBasicParsing -TimeoutSec 3; if($r.StatusCode -ge 200){ $ready=$true; break } } catch {}; Start-Sleep -Seconds 1 }; if(-not $ready){ exit 1 }"
 if errorlevel 1 (
   echo Der Server wurde gestartet, war aber noch nicht erreichbar.
   echo Bitte das Fenster "Hallenverwaltung Testserver" pruefen.

@@ -14,13 +14,29 @@ if "%DATABASE_URL%"=="" set "DATABASE_URL=postgresql://hallenverwaltung:change-m
 if "%AUTH_SECRET%"=="" set "AUTH_SECRET=local-clicktest-secret-local-clicktest-secret"
 if "%AUTH_TRUST_HOST%"=="" set "AUTH_TRUST_HOST=true"
 
+where npm.cmd >nul 2>nul
+if errorlevel 1 (
+  echo Fehler: npm.cmd wurde nicht gefunden.
+  pause
+  exit /b 1
+)
+
+if not exist ".next\BUILD_ID" (
+  echo Fehler: Produktionsbuild fehlt. Bitte zuerst npm run build ausfuehren.
+  pause
+  exit /b 1
+)
+
 echo Hallenverwaltung Testserver
 echo ==========================
 echo.
 echo URL: http://localhost:%PORT%
 echo.
+echo Startmodus: npm run start
+echo Hinweis: Dieses Fenster waehrend des Klicktests offen lassen.
+echo.
 
-node .next\standalone\server.js 1>testserver.out.log 2>testserver.err.log
+npm.cmd run start 1>testserver.out.log 2>testserver.err.log
 
 echo.
 echo Testserver wurde beendet.

@@ -139,6 +139,16 @@ erreichbar.
 Fuer einen ersten realen Durchstich ist der aktuelle Stand bereits lokal
 nutzbar:
 
+- Komfortstart fuer den lokalen Klicktest:
+
+  ```cmd
+  start-test-deployment.bat
+  ```
+
+  Der Batch prueft einen bereits laufenden Testserver, startet bei Bedarf die
+  lokale PostgreSQL-Datenbank, spielt Migrationen und Demo-Daten ein, erstellt
+  den Produktionsbuild und startet den Testserver ueber `npm run start`.
+
 - Oeffentlich: [http://localhost:3000/public](http://localhost:3000/public)
 - Login: [http://localhost:3000/login](http://localhost:3000/login)
 - Admin nach Login: `/admin`

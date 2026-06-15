@@ -9,13 +9,16 @@ export default async function AdminPage() {
     { href: "/admin/bookings", label: "Buchungsanträge" },
     { href: "/admin/calendar", label: "Kalender" },
     { href: "/admin/billing", label: "Abrechnung" },
-    { href: "/admin/notifications", label: "Benachrichtigungen" },
+    { href: "/admin/settings/mail", label: "Mail / SMTP" },
+    { href: "/admin/settings/notifications", label: "Benachrichtigungsregeln" },
+    { href: "/admin/notifications", label: "Notification Queue" },
     { href: "/admin/waitlist", label: "Warteliste" },
     { href: "/admin/buildings", label: "Gebäude" },
     { href: "/admin/rooms", label: "Räume" },
     { href: "/admin/organizations", label: "Organisationen" },
     { href: "/admin/users", label: "Benutzer" },
     { href: "/admin/roles", label: "Rollen/Rechte" },
+    { href: "/admin/settings", label: "Systemeinstellungen" },
   ];
 
   return (
@@ -27,15 +30,15 @@ export default async function AdminPage() {
       </p>
       <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <DashboardStatCard
-          label="Offene Antraege"
+          label="Offene Anträge"
           value={summary.bookingReview.totalOpen}
-          detail={`${summary.bookingReview.requested} beantragt, ${summary.bookingReview.inReview} in Pruefung`}
+          detail={`${summary.bookingReview.requested} beantragt, ${summary.bookingReview.inReview} in Prüfung`}
           href="/admin/bookings?status=OPEN"
         />
         <DashboardStatCard
           label="Genehmigt im Monat"
           value={summary.usage.approvedThisMonth}
-          detail={`${summary.usage.activeBuildings} aktive Gebaeude, ${summary.usage.activeRooms} aktive Raeume`}
+          detail={`${summary.usage.activeBuildings} aktive Gebäude, ${summary.usage.activeRooms} aktive Räume`}
           href="/admin/calendar"
         />
         <DashboardStatCard
@@ -47,7 +50,7 @@ export default async function AdminPage() {
         <DashboardStatCard
           label="Mailfehler"
           value={summary.notifications.failed}
-          detail="Fehlgeschlagene Benachrichtigungen pruefen"
+          detail="Fehlgeschlagene Benachrichtigungen prüfen"
           href="/admin/notifications?status=FAILED"
           tone={summary.notifications.failed > 0 ? "warning" : "default"}
         />

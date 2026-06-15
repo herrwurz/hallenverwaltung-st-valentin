@@ -378,6 +378,18 @@ Passwoerter oder Secrets in der Datenbank zu speichern, und
 `SystemSetting`. `/admin/notifications` ist wieder primaer die operative
 Notification Queue mit Verarbeitung und Retry.
 
+## Phase 37
+
+Pilot- und Teststand-Reife: Der lokale Komfortstart wurde auf die zuletzt
+stabile Variante gehaertet. `start-test-deployment.bat` erkennt einen bereits
+laufenden Testserver, prueft/started die lokale PostgreSQL-Testdatenbank,
+normalisiert bekannte OneDrive-/Windows-Dateiattribute fuer `.next`, baut die
+Anwendung und startet den Testserver ueber `npm run start`. Die Readiness-
+Pruefung wartet bewusst auf `/login`. Pilot-Testplan, Teststand-Freeze und
+Produktions-Readiness verweisen nun konsistent auf `/admin/settings/mail`,
+`/admin/settings/notifications` und die operative Queue unter
+`/admin/notifications`.
+
 ---
 
 # Wichtigste Architekturentscheidungen
