@@ -28,6 +28,13 @@ export type AdminNavigationItem = {
   groupLabel?: string;
 };
 
+const groupIconByLabel: Record<string, LucideIcon> = {
+  Stammdaten: Building2,
+  Buchungen: ClipboardList,
+  Extras: ListChecks,
+  Einstellungen: Settings,
+};
+
 const defaultIconByHref: Record<string, LucideIcon> = {
   "/admin": LayoutDashboard,
   "/admin/bookings": ClipboardList,
@@ -45,6 +52,11 @@ const defaultIconByHref: Record<string, LucideIcon> = {
   "/admin/roles": ShieldCheck,
   "/admin/documents": FileText,
   "/admin/access": KeyRound,
+  "/admin/damages": ListChecks,
+  "/admin/handovers": KeyRound,
+  "/admin/holidays": CalendarDays,
+  "/admin/system/jobs": Settings,
+  "/admin/no-shows": ListChecks,
 };
 
 export const adminNavigation: AdminNavigationItem[] = [
@@ -109,7 +121,10 @@ export function AdminNavigation({ items = adminNavigation }: AdminNavigationProp
         return (
           <details key={group.groupLabel} className="mt-4" open={hasActiveItem}>
             <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-              <Settings className="h-3.5 w-3.5" aria-hidden="true" />
+              {(() => {
+                const GroupIcon = groupIconByLabel[group.groupLabel] ?? Settings;
+                return <GroupIcon className="h-3.5 w-3.5" aria-hidden="true" />;
+              })()}
               {group.groupLabel}
             </summary>
             <div className="mt-1 space-y-1">{group.items.map((item) => renderLink(item, true))}</div>

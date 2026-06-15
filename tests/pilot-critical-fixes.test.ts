@@ -137,6 +137,9 @@ test("phase 26.4 pilot master data fixes protect codes and settings navigation",
   assert.doesNotMatch(updateBlock, /code: data\.code/);
   assert.match(organizationService, /notIn: \["EMERGENCY_SERVICE", "E2E_ASSOCIATION"\]/);
   assert.match(adminLayout, /groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /groupLabel: "Stammdaten"/);
+  assert.match(adminLayout, /groupLabel: "Buchungen"/);
+  assert.match(adminLayout, /groupLabel: "Extras"/);
   assert.doesNotMatch(adminLayout, /Einstellungen: /);
   assert.match(seed, /\["CLUB_TRAINING", "Training"/);
   assert.doesNotMatch(seed, /\["EMERGENCY_SERVICE", "Katastrophenschutz"\]/);
@@ -154,7 +157,10 @@ test("phase 34 medium fixes settings navigation membership count caretakers and 
   assert.doesNotMatch(dashboard, /label: "Einstellungen"/);
   assert.match(adminNavigation, /<details/);
   assert.match(adminNavigation, /<summary/);
-  assert.match(adminLayout, /href: "\/admin\/waitlist"/);
+  assert.match(adminLayout, /href: "\/admin\/waitlist", label: "Warteliste", groupLabel: "Buchungen"/);
+  assert.match(adminLayout, /href: "\/admin\/roles", label: "Rollen\/Rechte", groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /href: "\/admin\/holidays", label: "Ferien", groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /href: "\/admin\/access", label: "Zutritte", groupLabel: "Extras"/);
   assert.match(organizationService, /activeFrom: \{ lte: now \}/);
   assert.match(organizationService, /activeUntil: \{ gt: now \}/);
   assert.match(userService, /role\.code === "CARETAKER"/);
@@ -175,7 +181,7 @@ test("phase 34 calendar filters and labels are clarified", () => {
   assert.doesNotMatch(filterForm, /<option value="year">Jahr<\/option>/);
   assert.match(calendarView, /organizations=\{calendar\.organizations\}/);
   assert.match(calendarView, /Freie Zeitfenster für Buchungsanträge/);
-  assert.match(calendarView, /Nächster Termin/);
+  assert.match(calendarView, /Terminliste/);
   assert.match(calendarService, /organizationId\?: string/);
   assert.match(calendarService, /organizationId: organizationId \|\| undefined/);
   assert.match(adminCalendar, /organizationId: organizationId \|\| undefined/);

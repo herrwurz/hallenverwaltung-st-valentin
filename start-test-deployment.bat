@@ -86,7 +86,24 @@ if errorlevel 1 goto :error
 
 echo.
 echo [5/5] Lokalen Testserver starten...
-if exist "%TESTSERVER_LOG%" del "%TESTSERVER_LOG%" >nul 2>nul
+if not exist ".next\standalone\server.js" (
+  echo Fehler: Standalone-Build fehlt. Bitte Build-Ausgabe pruefen.
+  goto :error
+)
+
+if exist ".next\static" (
+  if not exist ".next\standalone\.next" mkdir ".next\standalone\.next" >nul 2>nul
+  if exist ".next\standalone\.next\static" rmdir /s /q ".next\standalone\.next\static" >nul 2>nul
+  xcopy ".next\static" ".next\standalone\.next\static\" /E /I /Y >nul
+  if errorlevel 1 goto :error
+)
+
+if exist "public" (
+  if exist ".next\standalone\public" rmdir /s /q ".next\standalone\public" >nul 2>nul
+  xcopy "public" ".next\standalone\public\" /E /I /Y >nul
+  if errorlevel 1 goto :error
+)
+
 start "Hallenverwaltung Testserver" /D "%CD%" cmd /k "set PORT=3000&& set HOSTNAME=localhost&& set DATABASE_URL=%DATABASE_URL%&& set AUTH_SECRET=%AUTH_SECRET%&& set AUTH_TRUST_HOST=%AUTH_TRUST_HOST%&& npm.cmd run start"
 
 echo.
@@ -95,14 +112,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "$ready=$false; for($i=0;
 if errorlevel 1 (
   echo Der Server wurde gestartet, war aber noch nicht erreichbar.
   echo Bitte das Fenster "Hallenverwaltung Testserver" pruefen.
-  if exist "%TESTSERVER_LOG%" (
-    echo.
-    echo Letzte Testserver-Logzeilen:
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Get-Content -LiteralPath '%TESTSERVER_LOG%' -Tail 40"
-  ) else (
-    echo Hinweis: Der Testserver laeuft im Fenster "Hallenverwaltung Testserver".
-    echo Bitte dort die Fehlermeldung pruefen.
-  )
+  echo Hinweis: Der Testserver laeuft im Fenster "Hallenverwaltung Testserver".
+  echo Bitte dort die Fehlermeldung pruefen.
   pause
   exit /b 1
 )

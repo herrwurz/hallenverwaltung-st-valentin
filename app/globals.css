@@ -259,6 +259,89 @@ textarea {
   box-shadow: 0 1px 1px rgb(15 23 42 / 0.08);
 }
 
+.standard-calendar {
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: hsl(var(--card));
+  --fc-neutral-bg-color: hsl(var(--muted));
+  --fc-today-bg-color: hsl(var(--primary) / 0.08);
+  --fc-button-bg-color: hsl(var(--primary));
+  --fc-button-border-color: hsl(var(--primary));
+  --fc-button-hover-bg-color: hsl(var(--primary) / 0.9);
+  --fc-button-hover-border-color: hsl(var(--primary) / 0.9);
+  --fc-button-active-bg-color: hsl(var(--primary) / 0.9);
+  --fc-button-active-border-color: hsl(var(--primary) / 0.9);
+  --fc-event-bg-color: hsl(var(--primary));
+  --fc-event-border-color: hsl(var(--primary));
+  --fc-event-text-color: hsl(var(--primary-foreground));
+  color: hsl(var(--foreground));
+}
+
+.standard-calendar .fc {
+  font-family: inherit;
+}
+
+.standard-calendar .fc-toolbar {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.standard-calendar .fc-toolbar-title {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.standard-calendar .fc-button {
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 1px rgb(15 23 42 / 0.08);
+  text-transform: none;
+}
+
+.standard-calendar .fc-daygrid-day,
+.standard-calendar .fc-timegrid-slot,
+.standard-calendar .fc-list {
+  background: hsl(var(--card));
+}
+
+.standard-calendar .fc-daygrid-day-number,
+.standard-calendar .fc-col-header-cell-cushion {
+  color: hsl(var(--foreground));
+  text-decoration: none;
+}
+
+.standard-calendar .fc-event {
+  border-radius: 0.45rem;
+  border-width: 1px;
+  padding: 1px 3px;
+  cursor: pointer;
+}
+
+.standard-calendar .calendar-event-approved {
+  background: rgb(16 185 129 / 0.12);
+  border-color: rgb(16 185 129 / 0.25);
+  color: rgb(4 120 87);
+}
+
+.standard-calendar .calendar-event-review,
+.standard-calendar .calendar-event-requested {
+  background: hsl(var(--warning) / 0.18);
+  border-color: hsl(var(--warning) / 0.4);
+  color: hsl(var(--warning-foreground));
+}
+
+.standard-calendar .calendar-event-closure {
+  background: rgb(244 63 94 / 0.12);
+  border-color: rgb(244 63 94 / 0.25);
+  color: rgb(190 18 60);
+}
+
+.standard-calendar .calendar-event-cancelled,
+.standard-calendar .calendar-event-muted {
+  background: rgb(100 116 139 / 0.12);
+  border-color: rgb(100 116 139 / 0.25);
+  color: rgb(51 65 85);
+}
+
 .windows-shell button[class*="bg-primary"],
 .windows-shell a[class*="bg-primary"],
 .windows-shell button[class*="bg-blue-600"],
