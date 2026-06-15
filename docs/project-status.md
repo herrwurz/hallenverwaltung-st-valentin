@@ -376,7 +376,7 @@ Uebersicht, `/admin/settings/mail` zeigt SMTP-Status und Testmail, ohne
 Passwoerter oder Secrets in der Datenbank zu speichern, und
 `/admin/settings/notifications` verwaltet die Notification-Event-Schalter als
 `SystemSetting`. `/admin/notifications` ist wieder primaer die operative
-Notification Queue mit Verarbeitung und Retry.
+Benachrichtigungs-Queue mit Verarbeitung und Retry.
 
 ## Phase 37
 
@@ -387,8 +387,18 @@ normalisiert bekannte OneDrive-/Windows-Dateiattribute fuer `.next`, baut die
 Anwendung und startet den Testserver ueber `npm run start`. Die Readiness-
 Pruefung wartet bewusst auf `/login`. Pilot-Testplan, Teststand-Freeze und
 Produktions-Readiness verweisen nun konsistent auf `/admin/settings/mail`,
-`/admin/settings/notifications` und die operative Queue unter
+`/admin/settings/notifications` und die operative Benachrichtigungs-Queue unter
 `/admin/notifications`.
+
+## Phase 38
+
+Pilot-Oberflaechen-Feinschliff vor Uebergabe: Sichtbare Resttexte in zentralen
+Durchklickflaechen wurden geglaettet. Admin-Dashboard, Admin-Buchungsfilter,
+Public-Einstieg, Ferienlogik, Kalendereinstellungen, System-Jobs und
+Benachrichtigungen verwenden konsistent deutsche Begriffe mit echten Umlauten.
+Die technische Bezeichnung `Notification Queue` wurde in der Oberflaeche durch
+`Benachrichtigungs-Queue` ersetzt. Laufzeitlogs des lokalen Testservers sind
+als Artefakte in `.gitignore` eingetragen.
 
 ---
 
@@ -505,7 +515,7 @@ Version 1:
 
 Aktueller Umfang:
 
-* persistente Notification Queue mit Retry-/Backoff-Logik
+* persistente Benachrichtigungs-Queue mit Retry-/Backoff-Logik
 * SMTP-Versand ueber konfigurierbare `SMTP_*`-Variablen
 * Admin-Testmail und Empfaenger-Vorschau unter `/admin/notifications`
 * Event-Schalter fuer aktivierbare/deaktivierbare Mailereignisse
@@ -665,7 +675,7 @@ Der Genehmigungsworkflow wurde fuer die Verwaltung vereinfacht:
 Der Worker ist in der Production-Compose-Konfiguration vorbereitet und kann
 alternativ per Cron gestartet werden.
 
-Ohne aktivierten Worker-Dienst laufen Notification Queue und Wartelistenabläufe
+Ohne aktivierten Worker-Dienst laufen Benachrichtigungs-Queue und Wartelistenabläufe
 nicht automatisch.
 
 ---

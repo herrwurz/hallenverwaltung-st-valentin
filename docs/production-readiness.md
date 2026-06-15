@@ -117,7 +117,7 @@ Pruefen:
 - Admin-Seite `/admin/settings/mail` erreichbar und SMTP-Status plausibel.
 - Event-Schalter unter `/admin/settings/notifications` fuer benoetigte
   Ereignisse aktiv.
-- Queue-Seite `/admin/notifications` erreichbar.
+- Benachrichtigungs-Queue unter `/admin/notifications` erreichbar.
 - Testereignis erzeugt Queue-Eintrag.
 - Worker oder manuelle Verarbeitung versendet die Benachrichtigung.
 - Fehlgeschlagene Benachrichtigungen koennen erneut gesendet werden.
@@ -139,7 +139,7 @@ docker compose --env-file .env.production -f docker-compose.production.yml logs 
 
 Erfolgskriterium:
 
-- Notification Queue wird verarbeitet.
+- Benachrichtigungs-Queue wird verarbeitet.
 - Wartelistenangebote laufen ab.
 - Folgeplatz wird nach Ablauf aktiviert.
 - Joblaeufe werden als Audit-/Job-Protokoll sichtbar.

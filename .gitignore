@@ -22,6 +22,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 testserver.log
+testserver.out.log
+testserver.err.log
 
 # editor and operating system files
 .DS_Store

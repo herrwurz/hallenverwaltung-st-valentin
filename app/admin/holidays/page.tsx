@@ -49,8 +49,8 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Ferienlogik</p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight">Ferien und Feiertage</h2>
       <p className="mt-3 text-muted-foreground">
-        Ferien- und Feiertagszeitraeume sind Hinweisdaten fuer Serienbuchungen. Sie sperren keine Halle automatisch.
-        Soll eine Halle tatsaechlich geschlossen werden, muss unten bewusst eine Gebaeude- oder Raumsperre erzeugt werden.
+        Ferien- und Feiertagszeiträume sind Hinweisdaten für Serienbuchungen. Sie sperren keine Halle automatisch.
+        Soll eine Halle tatsächlich geschlossen werden, muss unten bewusst eine Gebäude- oder Raumsperre erzeugt werden.
       </p>
 
       <AppFeedback
@@ -61,7 +61,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
           {
             tone: "success",
             text: params.presetImported
-              ? `Vorlage uebernommen: ${params.created ?? "0"} neu, ${params.skipped ?? "0"} bereits vorhanden.`
+              ? `Vorlage übernommen: ${params.created ?? "0"} neu, ${params.skipped ?? "0"} bereits vorhanden.`
               : undefined,
           },
         ]}
@@ -71,8 +71,8 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
         <CardHeader>
           <CardTitle>Vorlagen übernehmen</CardTitle>
           <CardDescription>
-            Legt oesterreichische Feiertage und Niederoesterreich-Schulferien als Ferienzeitraeume an. Standard ist
-            geoeffnet, damit Ferien nicht automatisch Gebaeude oder Raeume sperren.
+            Legt österreichische Feiertage und Niederösterreich-Schulferien als Ferienzeiträume an. Standard ist
+            geöffnet, damit Ferien nicht automatisch Gebäude oder Räume sperren.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -183,7 +183,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
         <CardHeader>
           <CardTitle>Aus Ferienzeitraum Hallensperre anlegen</CardTitle>
           <CardDescription>
-            Diese Aktion erzeugt bewusst einen separaten Sperr-Datensatz fuer genau ein Gebaeude oder genau einen Raum.
+            Diese Aktion erzeugt bewusst einen separaten Sperr-Datensatz für genau ein Gebäude oder genau einen Raum.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -195,7 +195,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
                 Ferienzeitraum
                 <select name="holidayId" required defaultValue="" className={inputClass}>
                   <option value="" disabled>
-                    Bitte waehlen
+                    Bitte wählen
                   </option>
                   {data.holidays.map((holiday) => (
                     <option key={holiday.id} value={holiday.id}>
@@ -205,9 +205,9 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
                 </select>
               </label>
               <label className="text-sm font-medium">
-                Gebaeude
+                Gebäude
                 <select name="buildingId" defaultValue="" className={inputClass}>
-                  <option value="">Keine Gebaeudesperre</option>
+                  <option value="">Keine Gebäudesperre</option>
                   {data.buildings.map((building) => (
                     <option key={building.id} value={building.id}>
                       {building.name}

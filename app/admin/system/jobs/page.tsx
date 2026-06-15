@@ -66,7 +66,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
 
       <section className="mt-8 grid gap-4 lg:grid-cols-3">
         <form action={processNotificationQueueJobAction} className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <h3 className="text-lg font-medium">Notification Queue</h3>
+          <h3 className="text-lg font-medium">Benachrichtigungs-Queue</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Verarbeitet fällige PENDING/FAILED E-Mail-Benachrichtigungen unter Beachtung von Backoff und maxAttempts.
           </p>
@@ -84,7 +84,7 @@ export default async function AdminSystemJobsPage({ searchParams }: { searchPara
         <form action={runMaintenanceJobsAction} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-lg font-medium">Maintenance</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Führt Notification Queue und Wartelistenablauf in einem Wartungslauf aus und protokolliert das Ergebnis.
+            Führt Benachrichtigungs-Queue und Wartelistenablauf in einem Wartungslauf aus und protokolliert das Ergebnis.
           </p>
           <Button className="mt-5">Maintenance ausführen</Button>
         </form>

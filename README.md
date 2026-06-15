@@ -12,7 +12,7 @@ Enthalten sind:
 - Prisma mit PostgreSQL-Anbindung
 - Docker-Setup fuer Webanwendung, Migrationen und PostgreSQL
 - Authentifizierung, Rollen/Rechte, Stammdaten, Buchungen, Genehmigung,
-  Warteliste, Kalender, Benachrichtigungen, Exporte und oeffentliche Ansicht
+  Warteliste, Kalender, Benachrichtigungen, Exporte und öffentliche Ansicht
 - Hintergrundjobs fuer Queue- und Wartelistenverarbeitung
 - Produktionsnahe Docker-/Reverse-Proxy- und Backup-Vorbereitung
 - Produktions-Readiness-Checkliste unter `docs/production-readiness.md`
@@ -90,7 +90,7 @@ Enthalten sind:
    gepflegt. Die Verarbeitung der Benachrichtigungsqueue kann ueber
    `/admin/notifications` manuell angestossen werden.
    Version 1 versendet ausschliesslich E-Mail ueber die persistente
-   Notification Queue. Newsletter, SMS und Push werden fachlich als spaetere
+   Benachrichtigungs-Queue. Newsletter, SMS und Push werden fachlich als spaetere
    Kanaele vorbereitet, aber nicht hardcodiert und nicht ohne gesonderte
    Anbieter-/Datenschutzentscheidung aktiviert.
    Automatisch vorbereitete Mailereignisse umfassen Buchungsantrag, in
@@ -101,7 +101,7 @@ Enthalten sind:
    erzeugt nur Exportgrundlagen, keine Rechnungen oder Zahlungen. CSV-, XLSX-
    und PDF-Exporte koennen dort fuer gefilterte Zeitraeume erstellt werden.
    Der Zugriff ist ueber das Recht `BILLING_EXPORT` geschuetzt.
-   Die oeffentliche Ansicht unter `/public` zeigt Standortuebersicht,
+   Die öffentliche Ansicht unter `/public` zeigt Standortuebersicht,
    datenschutzkonforme Kalenderdaten, freie Zeiten und einen iCal-Export unter
    `/public/calendar/ical`.
    Ferien und Feiertage koennen unter `/admin/holidays` manuell gepflegt oder
@@ -193,7 +193,7 @@ Katalogdaten an:
 
 - Admin-Login und Weiterleitung ins Verwaltungsportal
 - Portal-Login und Buchungsantrag
-- oeffentlicher Bereich und Kalender
+- öffentlicher Bereich und Kalender
 - manuelle System-Job-Ausfuehrung im Adminbereich
 
 Vor dem ersten Lauf muss der Chromium-Browser installiert werden:

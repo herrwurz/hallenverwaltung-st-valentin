@@ -11,7 +11,7 @@ export default async function AdminPage() {
     { href: "/admin/billing", label: "Abrechnung" },
     { href: "/admin/settings/mail", label: "Mail / SMTP" },
     { href: "/admin/settings/notifications", label: "Benachrichtigungsregeln" },
-    { href: "/admin/notifications", label: "Notification Queue" },
+    { href: "/admin/notifications", label: "Benachrichtigungs-Queue" },
     { href: "/admin/waitlist", label: "Warteliste" },
     { href: "/admin/buildings", label: "Gebäude" },
     { href: "/admin/rooms", label: "Räume" },
