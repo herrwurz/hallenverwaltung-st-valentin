@@ -22,6 +22,8 @@ Enthalten sind:
 - Go-Live-Runbook, Nachweisprotokoll und Entscheidungsliste unter
   `docs/go-live-runbook.md`, `docs/go-live-evidence.md` und
   `docs/go-live-open-points.md`
+- IT-Sicherheits- und Datenschutz-Readiness unter
+  `docs/security-privacy-readiness.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 - Teststand-Freeze unter `docs/teststand-freeze.md` als verbindlicher Umfang
   fuer den naechsten Durchklicktest
@@ -165,6 +167,8 @@ Kurzanleitungen fuer Verwaltung und Vereine liegen in
 `docs/user-guide-admin.md` und `docs/user-guide-portal.md`.
 Die Go-Live-Ausfuehrung wird in `docs/go-live-runbook.md` gefuehrt.
 Das zugehoerige Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
+Die Sicherheits- und Datenschutzvorbereitung fuer Test- und Gemeinde-Server
+liegt in `docs/security-privacy-readiness.md`.
 
 ### Hinweis zu Codex auf Windows
 
@@ -277,6 +281,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
   Nachweisen und Stop-Kriterien
 - `docs/go-live-evidence.md` als ausfuellbares Protokoll fuer echte
   Zielumgebungsnachweise
+- `docs/security-privacy-readiness.md` als Checkliste fuer Datenschutz,
+  IT-Sicherheit, Testdaten, Secrets, Backup, Betrieb und Freigaben
 
 Produktionsumgebung vorbereiten:
 

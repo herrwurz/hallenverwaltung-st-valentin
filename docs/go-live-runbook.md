@@ -8,6 +8,9 @@ dokumentiert werden.
 Flexible Installationswege fuer lokalen Teststand, eigenen Testserver und
 spaeteren Gemeinde-Server stehen in `docs/installation-options.md`.
 
+IT-Sicherheits- und Datenschutzvorbereitung steht in
+`docs/security-privacy-readiness.md`.
+
 Die Ergebnisse der echten Zielumgebungs-Abnahme werden in
 `docs/go-live-evidence.md` protokolliert. Dort duerfen keine Secrets, privaten
 Schluessel oder echten Passwoerter eingetragen werden.
@@ -324,6 +327,33 @@ Stop-Kriterium:
 - Hoch-Blocker bleibt offen.
 - Fachliche Freigabe fehlt.
 
+## 11. Datenschutz- und Sicherheitsfreigabe
+
+Aktion:
+
+- `docs/security-privacy-readiness.md` gemeinsam mit IT, Datenschutz und
+  Fachverantwortung durchgehen.
+- Verantwortliche Personen benennen.
+- Testdatenregelung, oeffentliche Sichtbarkeit, SMTP-Betrieb, Backup,
+  Monitoring und Incident-Prozess dokumentieren.
+
+Nachweis:
+
+- Verarbeitungsverzeichnis oder lokale Datenschutzunterlage ist vorbereitet.
+- TOMs oder Sicherheitsmassnahmen sind dokumentiert.
+- Test- und Produktionsumgebung nutzen getrennte Secrets und getrennte
+  Datenbanken.
+- Oeffentliche Kalenderanzeige ist fachlich und datenschutzseitig freigegeben
+  oder deaktiviert.
+
+Stop-Kriterium:
+
+- Niemand ist fuer Datenschutz-/IT-Sicherheitsfreigabe benannt.
+- Echtdaten sollen auf einem Testsystem ohne Freigabe oder Schutzmassnahmen
+  verwendet werden.
+- Oeffentliche Sichtbarkeit ist unklar.
+- Incident-/Datenpannenprozess ist nicht geregelt.
+
 ## Rollback-Entscheidung
 
 Rollback pruefen, wenn nach dem Start eines der folgenden Ereignisse eintritt:
@@ -359,4 +389,5 @@ Nachweise stehen in `docs/go-live-evidence.md`.
 | Worker | offen |  |  |  |
 | Backup/Restore | offen |  |  |  |
 | Monitoring | offen |  |  |  |
+| Datenschutz/IT-Sicherheit | offen |  |  |  |
 | Abnahme | offen |  |  |  |

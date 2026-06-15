@@ -9,6 +9,11 @@ spaeteren Gemeinde-Server sind in `docs/installation-options.md`
 dokumentiert. Der Gemeinde-Server bleibt bis zur finalen Klaerung ein offener
 Go-Live-Blocker.
 
+IT-Sicherheits- und Datenschutzmassnahmen fuer Test- und Gemeinde-Server sind
+in `docs/security-privacy-readiness.md` gesammelt. Diese Unterlage sollte vor
+einem Echtdaten-Test gemeinsam mit IT, Datenschutz und Fachverantwortung
+geprueft werden.
+
 ## 1. Zielumgebung vorbereiten
 
 - Server mit Docker und Docker Compose bereitstellen.
@@ -228,6 +233,8 @@ Details stehen in `docs/pilot-testplan.md`.
   werden.
 - Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz fehlt noch.
 - Restore-Probe muss nach Servereinrichtung dokumentiert werden.
+- Datenschutz-/IT-Sicherheitsfreigabe und Verantwortlichkeiten muessen
+  dokumentiert werden.
 - Finaler Abnahmetest gehoert in Phase 23.
 
 Die verbindliche Go-Live-Entscheidungsliste liegt in

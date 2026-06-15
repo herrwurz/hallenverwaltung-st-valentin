@@ -5,6 +5,9 @@ Es dokumentiert Nachweise zu den Hoch-Blockern aus
 `docs/go-live-open-points.md` und zur Schrittfolge aus
 `docs/go-live-runbook.md`.
 
+Die Sicherheits- und Datenschutzfreigabe wird anhand von
+`docs/security-privacy-readiness.md` vorbereitet.
+
 Hinweis: Lokale Tests und ein eigener Testserver duerfen hier als vorbereitende
 Nachweise dokumentiert werden. Die finale Go-Live-Freigabe benoetigt trotzdem
 die echte Zielumgebung auf dem Gemeinde-Server oder eine ausdruecklich
@@ -45,6 +48,7 @@ Statuswerte:
 | Backup-Routine eingerichtet | offen |  |  |  |  |
 | Restore-Probe erfolgreich dokumentiert | offen |  |  |  |  |
 | Monitoring/Alerting mindestens organisatorisch geregelt | offen |  |  |  |  |
+| Datenschutz-/IT-Sicherheitsfreigabe dokumentiert | offen |  |  |  |  |
 | Finale Abnahme unterschrieben | offen |  |  |  |  |
 
 ## Technische Nachweise
@@ -123,6 +127,18 @@ Statuswerte:
 | Backup-Monitoring | Backup-Erzeugung wird geprueft | offen |  |
 | Eskalation | Verantwortliche Person und Kanal bekannt | offen |  |
 
+### Datenschutz und IT-Sicherheit
+
+| Pruefung | Erwartung | Ergebnis | Nachweis |
+| --- | --- | --- | --- |
+| Verantwortliche benannt | Fachbereich, IT, Datenschutz und Betrieb sind benannt | offen |  |
+| Verarbeitungstaetigkeit | Unterlage ist vorbereitet oder referenziert | offen |  |
+| TOMs/Sicherheitsmassnahmen | Zugriff, TLS, Backup, Logging, Patchprozess dokumentiert | offen |  |
+| Testdatenregelung | Keine echten Produktivdaten ohne Freigabe im Testsystem | offen |  |
+| Oeffentliche Sichtbarkeit | Public-Bereich und Kalenderdetails entschieden | offen |  |
+| Incident-Prozess | Meldeweg und Verantwortliche fuer Datenpannen geregelt | offen |  |
+| Aufbewahrung/Loeschung | Fristen fuer Benutzer, Kontakte, Logs und Notifications geklaert | offen |  |
+
 ## Fachliche Abnahme
 
 | Bereich | Status | Nachweis | Bemerkung |
@@ -167,6 +183,7 @@ Auswirkung, Gegenmassnahme und Verantwortlichen.
 | Technik |  | offen |  |  |
 | Fachbereich |  | offen |  |  |
 | Betrieb |  | offen |  |  |
+| Datenschutz/IT-Sicherheit |  | offen |  |  |
 
 Freigabeentscheidung:
 

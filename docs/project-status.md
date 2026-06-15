@@ -436,6 +436,15 @@ Die Betriebsumgebungen werden explizit getrennt: `APP_ENV=local`, `test` oder
 deaktivierten Mailversand nur fuer Testumgebungen und verlangt in Produktion
 `MAIL_DELIVERY_MODE=smtp`.
 
+## Phase 40.1 - IT-Sicherheit und Datenschutz
+
+`docs/security-privacy-readiness.md` sammelt die erforderlichen Unterlagen und
+Massnahmen fuer Test- und Gemeinde-Server: Verantwortlichkeiten,
+personenbezogene Daten, TOMs, Verarbeitungstaetigkeit, Testdatenregelung,
+Secrets, HTTPS, Backup/Restore, Logging, SMTP, Incident-Prozess und
+Go-Live-Stop-Kriterien. Die Go-Live-Dokumente verweisen nun auf diese
+Freigabegrundlage.
+
 ---
 
 # Wichtigste Architekturentscheidungen

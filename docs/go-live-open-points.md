@@ -35,6 +35,7 @@ Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 | Backup-Routine eingerichtet | offen |  |  |  |
 | Restore-Probe erfolgreich dokumentiert | offen |  |  |  |
 | Monitoring/Alerting mindestens organisatorisch geregelt | offen |  |  |  |
+| Datenschutz-/IT-Sicherheitsfreigabe dokumentiert | offen | Siehe `docs/security-privacy-readiness.md`: Verantwortliche, TOMs, Verarbeitungstaetigkeit, Testdaten, Incident-Prozess und oeffentliche Sichtbarkeit klaeren. |  |  |
 | Finale Abnahme unterschrieben | offen |  |  |  |
 
 ## Mittlere Punkte vor erweitertem Pilot
