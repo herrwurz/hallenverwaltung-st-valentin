@@ -128,7 +128,7 @@ export function FullCalendarBoard({ basePath, initialDate, view, filters, events
           headerToolbar={{
             left: "prev,next today",
             center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,multiMonthYear",
+            right: "",
           }}
           buttonText={{
             today: "Heute",
