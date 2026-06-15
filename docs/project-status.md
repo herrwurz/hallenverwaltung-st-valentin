@@ -400,6 +400,17 @@ Die technische Bezeichnung `Notification Queue` wurde in der Oberflaeche durch
 `Benachrichtigungs-Queue` ersetzt. Laufzeitlogs des lokalen Testservers sind
 als Artefakte in `.gitignore` eingetragen.
 
+## Pilotfix Kalender, Branding und Raumdefaults
+
+Die Kalendernavigation wurde vereinheitlicht: Zurueck, Heute, Weiter sowie
+Tag/Woche/Monat/Jahr liegen im Kalenderfilter; der FullCalendar-Kopf zeigt
+keine konkurrierenden Navigations- oder Ansichtsbuttons mehr. Die Admin-
+Sidebar verwendet das Gemeindelogo aus `public/brand/` auf weissem Hintergrund
+und zeigt darunter `Hallenverwaltung`. Das Dashboard wurde fuer den Pilot auf
+Stammdaten, Buchungen und Kalender reduziert. Raeume verwenden fuer neue und
+geseedete Testdaten 0-Minuten-Puffer sowie ganztags geoeffnete Standardzeiten
+`00:00` bis `23:59`.
+
 ---
 
 # Wichtigste Architekturentscheidungen

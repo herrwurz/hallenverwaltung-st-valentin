@@ -358,14 +358,24 @@ async function seedFacilities() {
     for (const [code, name] of facility.rooms) {
       const room = await prisma.room.upsert({
         where: { code },
-        update: { name, buildingId: building.id, isCombinable: false },
+        update: {
+          name,
+          buildingId: building.id,
+          isCombinable: false,
+          openingTime: "00:00",
+          closingTime: "23:59",
+          setupBufferMinutes: 0,
+          teardownBufferMinutes: 0,
+        },
         create: {
           code,
           name,
           buildingId: building.id,
           isCombinable: false,
-          setupBufferMinutes: 15,
-          teardownBufferMinutes: 15,
+          openingTime: "00:00",
+          closingTime: "23:59",
+          setupBufferMinutes: 0,
+          teardownBufferMinutes: 0,
         },
       });
 

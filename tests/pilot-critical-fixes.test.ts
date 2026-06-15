@@ -87,29 +87,21 @@ test("phase 34 demo seed restores demo account access predictably", () => {
   assert.match(demoSeed, /activeUntil: new Date\(\)/);
 });
 
-test("phase 34 low priority smtp placeholder and dashboard analytics are handled", () => {
+test("phase 34 low priority smtp placeholder and pilot dashboard are handled", () => {
   const mailService = readFileSync("lib/services/mail-service.ts", "utf8");
   const mailSettingsPage = readFileSync("app/admin/settings/mail/page.tsx", "utf8");
   const adminDashboard = readFileSync("app/admin/page.tsx", "utf8");
-  const dashboardService = readFileSync("lib/services/admin/dashboard-service.ts", "utf8");
 
   assert.match(mailService, /getSmtpConfigurationStatus/);
   assert.match(mailService, /smtp\.example\.test/);
   assert.match(mailService, /Platzhalterwerten/);
   assert.match(mailSettingsPage, /SMTP ist noch nicht vollständig produktiv konfiguriert/);
   assert.match(mailSettingsPage, /Testmails werden service-seitig bewusst blockiert/);
-  assert.match(adminDashboard, /DashboardStatCard/);
-  assert.match(adminDashboard, /Offene Antr/);
-  assert.match(adminDashboard, /Genehmigt im Monat/);
-  assert.match(adminDashboard, /Warteliste offen/);
-  assert.match(adminDashboard, /Mailfehler/);
-  assert.match(adminDashboard, /Mail \/ SMTP/);
-  assert.match(adminDashboard, /Benachrichtigungsregeln/);
-  assert.match(adminDashboard, /Benachrichtigungs-Queue/);
-  assert.match(dashboardService, /getAdminDashboardSummary/);
-  assert.match(dashboardService, /prisma\.booking\.count/);
-  assert.match(dashboardService, /prisma\.waitlistEntry\.count/);
-  assert.match(dashboardService, /prisma\.notification\.count/);
+  assert.match(adminDashboard, /Stammdaten/);
+  assert.match(adminDashboard, /Buchungen/);
+  assert.match(adminDashboard, /Kalender/);
+  assert.match(adminDashboard, /Statistik-Karten/);
+  assert.doesNotMatch(adminDashboard, /Mailfehler|Benachrichtigungs-Queue|Systemeinstellungen|Extras/);
 });
 
 test("phase 26 pilot UI hotfixes hide technical labels in key pages", () => {
@@ -118,7 +110,10 @@ test("phase 26 pilot UI hotfixes hide technical labels in key pages", () => {
   const notifications = readFileSync("app/admin/notifications/page.tsx", "utf8");
   const publicPage = readFileSync("app/public/page.tsx", "utf8");
 
-  assert.match(dashboard, /min-h-28 items-center justify-center/);
+  assert.match(dashboard, /min-h-44 flex-col/);
+  assert.match(dashboard, /Stammdaten/);
+  assert.match(dashboard, /Buchungen/);
+  assert.match(dashboard, /Kalender/);
   assert.doesNotMatch(dashboard, /card\.value/);
   assert.match(series, /formatRecurrenceRule/);
   assert.doesNotMatch(series, /recurrenceRule\}\)/);
@@ -183,7 +178,9 @@ test("phase 34 calendar filters and labels are clarified", () => {
   const adminCalendar = readFileSync("app/admin/calendar/page.tsx", "utf8");
 
   assert.match(filterForm, /name="organizationId"/);
-  assert.match(filterForm, /name="view" value=\{view\}/);
+  assert.match(filterForm, /type="hidden" name="view" defaultValue=\{view\}/);
+  assert.match(filterForm, /Kalendernavigation/);
+  assert.match(filterForm, /prepareSubmit\(\{ date: today, view \}\)/);
   assert.doesNotMatch(filterForm, /<option value="year">Jahr<\/option>/);
   assert.match(calendarView, /organizations=\{calendar\.organizations\}/);
   assert.match(calendarView, /Freie Zeitfenster für Buchungsanträge/);
@@ -283,6 +280,40 @@ test("phase 38 keeps pilot-facing labels localized and free of visible mojibake"
   assert.match(navigation, /Benachrichtigungs-Queue/);
   assert.match(queuePage, /Benachrichtigungs-Queue/);
   assert.match(publicPage, /Öffentlicher Bereich/);
+});
+
+test("pilot branding dashboard and room defaults match municipality feedback", () => {
+  const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
+  const adminDashboard = readFileSync("app/admin/page.tsx", "utf8");
+  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const openingFields = readFileSync("components/room-opening-hours-fields.tsx", "utf8");
+  const seed = readFileSync("prisma/seed.ts", "utf8");
+  const calendarFilter = readFileSync("components/calendar-filter-form.tsx", "utf8");
+  const fullCalendarBoard = readFileSync("components/full-calendar-board.tsx", "utf8");
+
+  assert.match(adminShell, /\/brand\/logo-gde-transparent-500\.gif/);
+  assert.match(adminShell, /Sankt Valentin meine Stadt/);
+  assert.match(adminShell, /Hallenverwaltung/);
+  assert.doesNotMatch(adminShell, /Building2/);
+  assert.match(adminDashboard, /Stammdaten/);
+  assert.match(adminDashboard, /Buchungen/);
+  assert.match(adminDashboard, /Kalender/);
+  assert.doesNotMatch(adminDashboard, /Mail \/ SMTP|Benachrichtigungs-Queue|Systemeinstellungen|Extras/);
+  assert.match(roomPage, /<RoomOpeningHoursFields/);
+  assert.match(openingFields, /Ganztags geöffnet/);
+  assert.match(openingFields, /setOpening\("00:00"\)/);
+  assert.match(openingFields, /setClosing\("23:59"\)/);
+  assert.match(seed, /openingTime: "00:00"/);
+  assert.match(seed, /closingTime: "23:59"/);
+  assert.match(seed, /setupBufferMinutes: 0/);
+  assert.match(seed, /teardownBufferMinutes: 0/);
+  assert.match(calendarFilter, /Kalendernavigation/);
+  assert.match(calendarFilter, /Zurück/);
+  assert.match(calendarFilter, /Heute/);
+  assert.match(calendarFilter, /Weiter/);
+  assert.match(fullCalendarBoard, /left: ""/);
+  assert.match(fullCalendarBoard, /right: ""/);
+  assert.doesNotMatch(fullCalendarBoard, /prev,next today/);
 });
 
 

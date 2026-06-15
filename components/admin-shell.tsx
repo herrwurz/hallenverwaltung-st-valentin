@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
 import { AdminNavigation, adminNavigation, type AdminNavigationItem } from "@/components/admin-navigation";
 import { LogoutButton } from "@/components/logout-button";
 
@@ -14,14 +14,16 @@ export function AdminShell({ children, navigationItems = adminNavigation, userNa
     <main className="windows-shell admin-desktop min-h-screen">
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
         <aside className="sticky top-0 h-screen w-72 shrink-0 overflow-y-auto border-r px-5 py-6">
-          <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Building2 className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-primary">St. Valentin</p>
-              <h1 className="text-base font-semibold tracking-tight">Hallenverwaltung</h1>
-            </div>
+          <div className="rounded-xl border border-border bg-white p-3 text-center shadow-sm">
+            <Image
+              src="/brand/logo-gde-transparent-500.gif"
+              alt="Sankt Valentin meine Stadt"
+              width={500}
+              height={159}
+              unoptimized
+              className="mx-auto h-auto max-h-20 w-full object-contain"
+            />
+            <h1 className="mt-3 text-base font-semibold tracking-tight text-foreground">Hallenverwaltung</h1>
           </div>
           <AdminNavigation items={navigationItems} />
         </aside>

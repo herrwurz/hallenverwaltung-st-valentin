@@ -9,6 +9,7 @@ import { AdminClosurePanel } from "@/components/admin-closure-panel";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { RoomsTable, type RoomTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
+import { RoomOpeningHoursFields } from "@/components/room-opening-hours-fields";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
@@ -170,14 +171,7 @@ function RoomForm({
         <input type="checkbox" name="isCombinable" defaultChecked={room?.isCombinable ?? false} />
         Kombinierbar
       </label>
-      <label className="text-sm font-medium">
-        Geöffnet ab
-        <input name="openingTime" required defaultValue={room?.openingTime ?? "06:00"} className={inputClass} />
-      </label>
-      <label className="text-sm font-medium">
-        Geöffnet bis
-        <input name="closingTime" required defaultValue={room?.closingTime ?? "23:00"} className={inputClass} />
-      </label>
+      <RoomOpeningHoursFields openingTime={room?.openingTime} closingTime={room?.closingTime} />
       <label className="text-sm font-medium">
         Aufbaupuffer (Min.)
         <input name="setupBufferMinutes" type="number" min="0" required defaultValue={room?.setupBufferMinutes ?? 0} className={inputClass} />
