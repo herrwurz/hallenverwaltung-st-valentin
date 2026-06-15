@@ -38,11 +38,15 @@ export function CalendarFilterForm({
         ),
     [buildings, selectedBuildingId],
   );
+  const viewOptions: Array<{ value: CalendarResult["view"]; label: string }> = [
+    { value: "day", label: "Tag" },
+    { value: "week", label: "Woche" },
+    { value: "month", label: "Monat" },
+    { value: "year", label: "Jahr" },
+  ];
 
   return (
     <form method="get" className="grid gap-4 lg:grid-cols-[1fr,1fr,1fr,220px,auto]">
-      <input type="hidden" name="view" value={view} />
-
       {organizations.length > 0 ? (
         <label className="text-sm font-medium text-foreground">
           Organisation
@@ -109,8 +113,29 @@ export function CalendarFilterForm({
       </label>
 
       <div className="flex items-end">
-        <Button className="w-full">Aktualisieren</Button>
+        <Button type="submit" name="view" value={view} className="w-full">
+          Aktualisieren
+        </Button>
       </div>
+
+      <fieldset className="lg:col-span-full">
+        <legend className="text-sm font-medium text-foreground">Ansicht</legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {viewOptions.map((option) => (
+            <Button
+              key={option.value}
+              type="submit"
+              name="view"
+              value={option.value}
+              variant={view === option.value ? "default" : "outline"}
+              size="sm"
+              aria-pressed={view === option.value}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </fieldset>
     </form>
   );
 }
