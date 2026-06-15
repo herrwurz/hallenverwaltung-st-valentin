@@ -411,6 +411,16 @@ Stammdaten, Buchungen und Kalender reduziert. Raeume verwenden fuer neue und
 geseedete Testdaten 0-Minuten-Puffer sowie ganztags geoeffnete Standardzeiten
 `00:00` bis `23:59`.
 
+## Phase 38 - Druckberichte fuer den Papierbetrieb
+
+Unter `/admin/reports` stehen druckbare HTML-Berichte fuer Tagesbelegung,
+Wochenplan, Monatsuebersicht und Vereinsuebersicht bereit. Die Berichte sind
+serverseitig mit `VIEW_BOOKINGS` geschuetzt, nutzen einen eigenen
+`print-report-service.ts` und zeigen Buchungen, Sperren sowie Vereinskontakte
+als strukturierte Verwaltungsberichte. Die Ausgabe ist bewusst browserdruck-
+freundlich gehalten, damit Papierausdrucke und PDF-Speichern ohne komplexe
+externe Reporting-Engine funktionieren.
+
 ---
 
 # Wichtigste Architekturentscheidungen

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Bell,
   Building2,
   CalendarDays,
@@ -43,6 +44,7 @@ const defaultIconByHref: Record<string, LucideIcon> = {
   "/admin/series": CalendarDays,
   "/admin/calendar": CalendarDays,
   "/admin/billing": CreditCard,
+  "/admin/reports": BarChart3,
   "/admin/notifications": Bell,
   "/admin/settings": Settings,
   "/admin/settings/mail": Mail,
@@ -68,6 +70,7 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/calendar", label: "Kalender", icon: CalendarDays },
   { href: "/admin/bookings", label: "Buchungsanträge", icon: ClipboardList, groupLabel: "Buchungen" },
   { href: "/admin/waitlist", label: "Warteliste", icon: ListChecks, groupLabel: "Buchungen" },
+  { href: "/admin/reports", label: "Berichte", icon: BarChart3, groupLabel: "Buchungen" },
   { href: "/admin/buildings", label: "Gebäude", icon: Building2, groupLabel: "Stammdaten" },
   { href: "/admin/rooms", label: "Räume", icon: Warehouse, groupLabel: "Stammdaten" },
   { href: "/admin/organizations", label: "Organisationen", icon: Home, groupLabel: "Stammdaten" },
