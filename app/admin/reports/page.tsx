@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AppBackLink } from "@/components/app-back-link";
-import { PrintButton } from "@/components/print-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,6 +88,26 @@ function parseReportType(value: string | undefined): PrintReportType {
 
 function parseStatus(value: string | undefined) {
   return reportStatusOptions.includes(value as BookingStatus) ? (value as BookingStatus) : undefined;
+}
+
+function buildPrintHref(params: Awaited<SearchParams>, report: PrintReportType, periodStart: Date, periodEnd: Date, roomId?: string) {
+  const query = new URLSearchParams({
+    report,
+    periodStart: formatInputDate(periodStart),
+    periodEnd: formatInputDate(periodEnd),
+  });
+
+  for (const key of ["organizationId", "buildingId", "status"] as const) {
+    if (params[key]) {
+      query.set(key, params[key]);
+    }
+  }
+
+  if (roomId) {
+    query.set("roomId", roomId);
+  }
+
+  return `/admin/reports/print?${query.toString()}`;
 }
 
 function defaultPeriod(report: PrintReportType) {
@@ -246,7 +265,9 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
             </p>
           </div>
           <div className="flex gap-2">
-            <PrintButton />
+            <Button variant="outline" asChild>
+              <Link href={buildPrintHref(params, report, periodStart, periodEnd, roomId)}>Druckansicht</Link>
+            </Button>
             <AppBackLink href="/admin" label="Zurück zum Dashboard" />
           </div>
         </div>

@@ -13,7 +13,7 @@ export function AdminShell({ children, navigationItems = adminNavigation, userNa
   return (
     <main className="windows-shell admin-desktop min-h-screen">
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
-        <aside className="sticky top-0 h-screen w-72 shrink-0 overflow-y-auto border-r px-5 py-6">
+        <aside className="sticky top-0 h-screen w-72 shrink-0 overflow-y-auto border-r px-5 py-6 print:hidden">
           <div className="rounded-xl border border-border bg-white p-3 text-center shadow-sm">
             <Image
               src="/brand/logo-gde-transparent-500.gif"
@@ -27,8 +27,8 @@ export function AdminShell({ children, navigationItems = adminNavigation, userNa
           </div>
           <AdminNavigation items={navigationItems} />
         </aside>
-        <div className="min-w-0 flex-1 px-8 py-6">
-          <header className="flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1 px-8 py-6 print:w-full print:px-0 print:py-0">
+          <header className="flex items-center justify-between gap-4 print:hidden">
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 Verwaltungsportal

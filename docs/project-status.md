@@ -420,6 +420,10 @@ serverseitig mit `VIEW_BOOKINGS` geschuetzt, nutzen einen eigenen
 als strukturierte Verwaltungsberichte. Die Ausgabe ist bewusst browserdruck-
 freundlich gehalten, damit Papierausdrucke und PDF-Speichern ohne komplexe
 externe Reporting-Engine funktionieren.
+Die Berichte sind im Verwaltungsportal unter der standardmaessig offenen
+Gruppe `Buchungen` sichtbar und zusaetzlich am Dashboard verlinkt. Fuer echte
+Ausdrucke gibt es `/admin/reports/print` als reduzierte Druckansicht mit
+A4-Layout, kompakten Tabellen und ausgeblendeter Verwaltungsnavigation.
 
 ---
 

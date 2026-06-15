@@ -129,7 +129,7 @@ export function AdminNavigation({ items = adminNavigation }: AdminNavigationProp
         );
 
         return (
-          <details key={group.groupLabel} className="mt-4" open={hasActiveItem}>
+          <details key={group.groupLabel} className="mt-4" open={hasActiveItem || group.groupLabel === "Buchungen"}>
             <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:bg-accent hover:text-accent-foreground">
               {(() => {
                 const GroupIcon = groupIconByLabel[group.groupLabel] ?? Settings;

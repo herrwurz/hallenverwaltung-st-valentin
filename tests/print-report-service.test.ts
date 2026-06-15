@@ -150,14 +150,22 @@ test("organization overview contains contacts and organization bookings", async 
 
 test("admin reports page is protected and offers printable report types", () => {
   const page = readFileSync("app/admin/reports/page.tsx", "utf8");
+  const printPage = readFileSync("app/admin/reports/print/page.tsx", "utf8");
   const navigation = readFileSync("components/admin-navigation.tsx", "utf8");
+  const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
 
   assert.match(page, /requirePermission\("VIEW_BOOKINGS"\)/);
   assert.match(page, /Tagesbelegung/);
   assert.match(page, /Wochenplan/);
   assert.match(page, /Monatsübersicht/);
   assert.match(page, /Vereinsübersicht/);
-  assert.match(page, /PrintButton/);
+  assert.match(page, /\/admin\/reports\/print/);
+  assert.match(printPage, /requirePermission\("VIEW_BOOKINGS"\)/);
+  assert.match(printPage, /print-report/);
+  assert.match(printPage, /@page \{ size: A4/);
+  assert.match(printPage, /Jetzt drucken/);
   assert.match(navigation, /\/admin\/reports/);
   assert.match(navigation, /Berichte/);
+  assert.match(navigation, /group\.groupLabel === "Buchungen"/);
+  assert.match(adminShell, /print:hidden/);
 });
