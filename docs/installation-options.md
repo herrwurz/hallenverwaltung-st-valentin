@@ -89,6 +89,9 @@ Teststand nicht mehr der bevorzugte Weg. Die Zielumgebung ist jetzt ein eigener
 Hetzner-Server, der Docker, Reverse Proxy, PostgreSQL, Worker und Backups
 realistischer abbilden kann.
 
+Die konkrete Einrichtung steht in
+`docs/hetzner-testserver-deployment.md`.
+
 Empfohlene Variante:
 
 - Docker Compose verwenden

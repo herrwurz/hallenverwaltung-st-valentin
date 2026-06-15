@@ -294,6 +294,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
   IT-Sicherheit, Testdaten, Secrets, Backup, Betrieb und Freigaben
 - `docs/operations-monitoring-concept.md` fuer Monitoring, Eskalation,
   Backup-/Restore-Nachweise und Betriebsregeln
+- `docs/hetzner-testserver-deployment.md` fuer die konkrete Einrichtung des
+  eigenen Hetzner-Testservers `hallenverwaltung.hofreither.at`
 
 Produktionsumgebung vorbereiten:
 

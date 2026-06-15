@@ -172,6 +172,9 @@ Fuer den eigenen Testserver:
 
 - `.env.test` verwenden.
 - `APP_ENV=test` setzen.
+- fuer den aktuellen Hetzner-Testserver
+  `https://hallenverwaltung.hofreither.at` als `PUBLIC_BASE_URL` und
+  `AUTH_URL` verwenden.
 - `PUBLIC_AREA_ENABLED=false`, ausser der Public-Bereich wird bewusst getestet.
 - `MAIL_DELIVERY_MODE=disabled` oder Test-SMTP verwenden.
 - Keine Produktivdaten ohne ausgefuellte Echtdatenfreigabe.
@@ -206,4 +209,3 @@ Fuer den Gemeinde-Produktivserver:
 | SMTP geregelt | offen |  |
 | Testdaten-/Echtdatenfreigabe geklaert | offen |  |
 | Eskalationsweg dokumentiert | offen |  |
-

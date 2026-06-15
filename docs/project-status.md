@@ -481,6 +481,11 @@ Der Testserver soll mit `.env.test`, `APP_ENV=test`,
 Gemeinde-Server bleibt davon getrennt und weiterhin der spaetere
 Produktiv-Zielbetrieb.
 
+Die konkrete Einrichtung ist in `docs/hetzner-testserver-deployment.md`
+dokumentiert. Offen sind SSH-Zugang, Docker-Installation, `.env.test` mit
+echten Test-Secrets, TLS-Zertifikate, Compose-Start, Migration/Seed und
+Smoke-Test.
+
 ---
 
 # Wichtigste Architekturentscheidungen
