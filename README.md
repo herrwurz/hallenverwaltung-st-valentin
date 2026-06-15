@@ -24,6 +24,8 @@ Enthalten sind:
   `docs/go-live-open-points.md`
 - IT-Sicherheits- und Datenschutz-Readiness unter
   `docs/security-privacy-readiness.md`
+- Datenschutz-/IT-Vorlagen unter `docs/privacy-processing-record-template.md`,
+  `docs/security-tom-checklist.md` und `docs/testdata-release-template.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 - Teststand-Freeze unter `docs/teststand-freeze.md` als verbindlicher Umfang
   fuer den naechsten Durchklicktest
@@ -169,6 +171,9 @@ Die Go-Live-Ausfuehrung wird in `docs/go-live-runbook.md` gefuehrt.
 Das zugehoerige Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 Die Sicherheits- und Datenschutzvorbereitung fuer Test- und Gemeinde-Server
 liegt in `docs/security-privacy-readiness.md`.
+Die ausfuellbaren Vorlagen fuer Verarbeitungstaetigkeit, TOMs und
+Testdatenfreigabe liegen daneben unter `docs/privacy-processing-record-template.md`,
+`docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
 
 ### Hinweis zu Codex auf Windows
 

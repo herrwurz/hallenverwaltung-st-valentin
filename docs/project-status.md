@@ -445,6 +445,20 @@ Secrets, HTTPS, Backup/Restore, Logging, SMTP, Incident-Prozess und
 Go-Live-Stop-Kriterien. Die Go-Live-Dokumente verweisen nun auf diese
 Freigabegrundlage.
 
+## Phase 40.2 - Datenschutz- und IT-Vorlagen
+
+Ausfuellbare Vorlagen wurden ergaenzt:
+
+* `docs/privacy-processing-record-template.md` fuer das Verzeichnis der
+  Verarbeitungstaetigkeit.
+* `docs/security-tom-checklist.md` fuer technische und organisatorische
+  Massnahmen.
+* `docs/testdata-release-template.md` fuer Testdaten- und
+  Echtdatenfreigaben.
+
+README, Go-Live-Runbook, Nachweisprotokoll und Security-Readiness verweisen
+auf diese Vorlagen.
+
 ---
 
 # Wichtigste Architekturentscheidungen

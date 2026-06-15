@@ -98,6 +98,9 @@ Bestehende Projektunterlagen:
 - `docs/go-live-evidence.md`
 - `docs/installation-options.md`
 - `docs/acceptance-testplan.md`
+- `docs/privacy-processing-record-template.md`
+- `docs/security-tom-checklist.md`
+- `docs/testdata-release-template.md`
 
 ## Technische Mindestmassnahmen
 
@@ -215,3 +218,13 @@ Fuer den naechsten externen Teststand:
 7. Nach dem Test dokumentieren, ob Daten geloescht, anonymisiert oder fuer
    weitere Tests behalten werden.
 
+Fuer Tests mit Echtdaten ist vorab `docs/testdata-release-template.md`
+auszufuellen.
+
+## Ausfuellbare Vorlagen
+
+| Vorlage | Zweck |
+| --- | --- |
+| `docs/privacy-processing-record-template.md` | Grundlage fuer das Verzeichnis der Verarbeitungstaetigkeit |
+| `docs/security-tom-checklist.md` | technische und organisatorische Massnahmen |
+| `docs/testdata-release-template.md` | Freigabe und Bereinigung von Test- oder Echtdaten |

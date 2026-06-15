@@ -6,7 +6,9 @@ Es dokumentiert Nachweise zu den Hoch-Blockern aus
 `docs/go-live-runbook.md`.
 
 Die Sicherheits- und Datenschutzfreigabe wird anhand von
-`docs/security-privacy-readiness.md` vorbereitet.
+`docs/security-privacy-readiness.md` vorbereitet. Ausfuellbare Vorlagen
+liegen in `docs/privacy-processing-record-template.md`,
+`docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
 
 Hinweis: Lokale Tests und ein eigener Testserver duerfen hier als vorbereitende
 Nachweise dokumentiert werden. Die finale Go-Live-Freigabe benoetigt trotzdem

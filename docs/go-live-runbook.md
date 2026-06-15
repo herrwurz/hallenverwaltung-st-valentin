@@ -9,7 +9,9 @@ Flexible Installationswege fuer lokalen Teststand, eigenen Testserver und
 spaeteren Gemeinde-Server stehen in `docs/installation-options.md`.
 
 IT-Sicherheits- und Datenschutzvorbereitung steht in
-`docs/security-privacy-readiness.md`.
+`docs/security-privacy-readiness.md`. Ausfuellbare Vorlagen liegen in
+`docs/privacy-processing-record-template.md`,
+`docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
 
 Die Ergebnisse der echten Zielumgebungs-Abnahme werden in
 `docs/go-live-evidence.md` protokolliert. Dort duerfen keine Secrets, privaten
@@ -333,6 +335,8 @@ Aktion:
 
 - `docs/security-privacy-readiness.md` gemeinsam mit IT, Datenschutz und
   Fachverantwortung durchgehen.
+- Verarbeitungstaetigkeit, TOM-Checkliste und Testdatenfreigabe bei Bedarf
+  ausfuellen.
 - Verantwortliche Personen benennen.
 - Testdatenregelung, oeffentliche Sichtbarkeit, SMTP-Betrieb, Backup,
   Monitoring und Incident-Prozess dokumentieren.
