@@ -26,6 +26,8 @@ Enthalten sind:
   `docs/security-privacy-readiness.md`
 - Datenschutz-/IT-Vorlagen unter `docs/privacy-processing-record-template.md`,
   `docs/security-tom-checklist.md` und `docs/testdata-release-template.md`
+- Betriebs- und Monitoringkonzept unter
+  `docs/operations-monitoring-concept.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 - Teststand-Freeze unter `docs/teststand-freeze.md` als verbindlicher Umfang
   fuer den naechsten Durchklicktest
@@ -174,6 +176,8 @@ liegt in `docs/security-privacy-readiness.md`.
 Die ausfuellbaren Vorlagen fuer Verarbeitungstaetigkeit, TOMs und
 Testdatenfreigabe liegen daneben unter `docs/privacy-processing-record-template.md`,
 `docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
+Das Betriebs- und Monitoringkonzept fuer Test- und Produktivserver liegt in
+`docs/operations-monitoring-concept.md`.
 
 ### Hinweis zu Codex auf Windows
 
@@ -288,6 +292,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
   Zielumgebungsnachweise
 - `docs/security-privacy-readiness.md` als Checkliste fuer Datenschutz,
   IT-Sicherheit, Testdaten, Secrets, Backup, Betrieb und Freigaben
+- `docs/operations-monitoring-concept.md` fuer Monitoring, Eskalation,
+  Backup-/Restore-Nachweise und Betriebsregeln
 
 Produktionsumgebung vorbereiten:
 

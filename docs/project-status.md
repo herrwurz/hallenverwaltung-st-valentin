@@ -459,6 +459,14 @@ Ausfuellbare Vorlagen wurden ergaenzt:
 README, Go-Live-Runbook, Nachweisprotokoll und Security-Readiness verweisen
 auf diese Vorlagen.
 
+## Phase 40.3 - Betriebs- und Monitoringkonzept
+
+`docs/operations-monitoring-concept.md` definiert fuer Testserver und
+Gemeinde-Produktivserver die zu ueberwachenden Komponenten, Pruefintervalle,
+manuelle Standardchecks, Eskalationsregeln, Backup-/Restore-Nachweise und
+Mindestfreigaben vor Echtdatenbetrieb. README, Produktions-Readiness,
+Go-Live-Runbook und Nachweisprotokoll verweisen auf diese Betriebsgrundlage.
+
 ---
 
 # Wichtigste Architekturentscheidungen

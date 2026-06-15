@@ -12,6 +12,8 @@ IT-Sicherheits- und Datenschutzvorbereitung steht in
 `docs/security-privacy-readiness.md`. Ausfuellbare Vorlagen liegen in
 `docs/privacy-processing-record-template.md`,
 `docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
+Betriebs- und Monitoringregeln stehen in
+`docs/operations-monitoring-concept.md`.
 
 Die Ergebnisse der echten Zielumgebungs-Abnahme werden in
 `docs/go-live-evidence.md` protokolliert. Dort duerfen keine Secrets, privaten
@@ -289,11 +291,16 @@ Mindestens ueberwachen:
 - Speicherplatz ausreichend
 - Backup wurde erzeugt
 
+Details zu Intervallen, Eskalation, Testserver-Regeln und Produktivserver-
+Regeln stehen in `docs/operations-monitoring-concept.md`.
+
 Nachweis:
 
 - Verantwortliche Person ist benannt.
 - Pruefintervall ist festgelegt.
 - Eskalationsweg bei Ausfall ist bekannt.
+- Mindestfreigabe aus `docs/operations-monitoring-concept.md` ist ausgefuellt
+  oder in `docs/go-live-evidence.md` nachgewiesen.
 
 Stop-Kriterium:
 

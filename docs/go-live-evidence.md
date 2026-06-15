@@ -9,6 +9,8 @@ Die Sicherheits- und Datenschutzfreigabe wird anhand von
 `docs/security-privacy-readiness.md` vorbereitet. Ausfuellbare Vorlagen
 liegen in `docs/privacy-processing-record-template.md`,
 `docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
+Das Betriebs- und Monitoringkonzept liegt in
+`docs/operations-monitoring-concept.md`.
 
 Hinweis: Lokale Tests und ein eigener Testserver duerfen hier als vorbereitende
 Nachweise dokumentiert werden. Die finale Go-Live-Freigabe benoetigt trotzdem
@@ -128,6 +130,9 @@ Statuswerte:
 | Speicherplatz | Speicherplatz wird geprueft | offen |  |
 | Backup-Monitoring | Backup-Erzeugung wird geprueft | offen |  |
 | Eskalation | Verantwortliche Person und Kanal bekannt | offen |  |
+| Pruefintervalle | Intervalle fuer Test- und Produktivbetrieb festgelegt | offen |  |
+| TLS-Ablauf | Zertifikatsablauf wird rechtzeitig geprueft | offen |  |
+| Stoerungsprotokoll | Vorgehen fuer groessere Stoerungen festgelegt | offen |  |
 
 ### Datenschutz und IT-Sicherheit
 

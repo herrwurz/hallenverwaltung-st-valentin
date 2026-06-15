@@ -14,6 +14,9 @@ in `docs/security-privacy-readiness.md` gesammelt. Diese Unterlage sollte vor
 einem Echtdaten-Test gemeinsam mit IT, Datenschutz und Fachverantwortung
 geprueft werden.
 
+Das Betriebs- und Monitoringkonzept fuer Test- und Produktivserver liegt in
+`docs/operations-monitoring-concept.md`.
+
 ## 1. Zielumgebung vorbereiten
 
 - Server mit Docker und Docker Compose bereitstellen.
@@ -231,7 +234,9 @@ Details stehen in `docs/pilot-testplan.md`.
 - SMTP muss gegen den echten Server getestet werden.
 - Backup-Rotation und Aufbewahrungsfrist muessen organisatorisch festgelegt
   werden.
-- Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz fehlt noch.
+- Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz muss
+  anhand von `docs/operations-monitoring-concept.md` organisatorisch geregelt
+  werden.
 - Restore-Probe muss nach Servereinrichtung dokumentiert werden.
 - Datenschutz-/IT-Sicherheitsfreigabe und Verantwortlichkeiten muessen
   dokumentiert werden.
