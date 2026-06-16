@@ -447,6 +447,36 @@ Branch-Schema:
 
 ---
 
+# Branch-Strategie
+
+`feature/*`:
+
+- aktive Entwicklung
+- niemals direkt deployen
+
+`develop`:
+
+- Integrations- und Testbranch
+- automatischer Deploy auf Hetzner-Testserver
+
+`main`:
+
+- freigegebene Releases
+- Quelle für Produktionsdeployments
+
+Vor Merge nach `develop`:
+
+- relevante Tests ausführen
+- `tsc --noEmit` erfolgreich
+
+Vor Merge nach `main`:
+
+- vollständige Prüfkette
+- Deployment auf Testserver erfolgreich
+- manuelle Abnahme erfolgt
+
+---
+
 # Qualitätsprüfungen
 
 Vor jedem Commit ausführen:
