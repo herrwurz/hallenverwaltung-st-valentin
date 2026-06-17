@@ -486,6 +486,14 @@ dokumentiert. Offen sind SSH-Zugang, Docker-Installation, `.env.test` mit
 echten Test-Secrets, TLS-Zertifikate, Compose-Start, Migration/Seed und
 Smoke-Test.
 
+## Phase 42 - Testdatenverwaltung
+
+Die Testdatenverwaltung wird unter `/admin/system/test-data` vorbereitet. Sie
+ist ausschliesslich fuer SUPER_ADMIN oder SYSTEM_ADMIN sichtbar und funktioniert
+nur, wenn `TEST_DATA_TOOLS_ENABLED=true` gesetzt ist. Testdaten muessen
+eindeutig mit `[TEST]` oder `@test.local` markiert sein. Produktivumgebungen
+bleiben standardmaessig deaktiviert.
+
 ---
 
 # Wichtigste Architekturentscheidungen
