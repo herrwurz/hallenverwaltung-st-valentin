@@ -400,6 +400,100 @@ Die technische Bezeichnung `Notification Queue` wurde in der Oberflaeche durch
 `Benachrichtigungs-Queue` ersetzt. Laufzeitlogs des lokalen Testservers sind
 als Artefakte in `.gitignore` eingetragen.
 
+## Pilotfix Kalender, Branding und Raumdefaults
+
+Die Kalendernavigation wurde vereinheitlicht: Zurueck, Heute, Weiter sowie
+Tag/Woche/Monat/Jahr liegen im Kalenderfilter; der FullCalendar-Kopf zeigt
+keine konkurrierenden Navigations- oder Ansichtsbuttons mehr. Die Admin-
+Sidebar verwendet das Gemeindelogo aus `public/brand/` auf weissem Hintergrund
+und zeigt darunter `Hallenverwaltung`. Das Dashboard wurde fuer den Pilot auf
+Stammdaten, Buchungen und Kalender reduziert. Raeume verwenden fuer neue und
+geseedete Testdaten 0-Minuten-Puffer sowie ganztags geoeffnete Standardzeiten
+`00:00` bis `23:59`.
+
+## Phase 38 - Druckberichte fuer den Papierbetrieb
+
+Unter `/admin/reports` stehen druckbare HTML-Berichte fuer Tagesbelegung,
+Wochenplan, Monatsuebersicht und Vereinsuebersicht bereit. Die Berichte sind
+serverseitig mit `VIEW_BOOKINGS` geschuetzt, nutzen einen eigenen
+`print-report-service.ts` und zeigen Buchungen, Sperren sowie Vereinskontakte
+als strukturierte Verwaltungsberichte. Die Ausgabe ist bewusst browserdruck-
+freundlich gehalten, damit Papierausdrucke und PDF-Speichern ohne komplexe
+externe Reporting-Engine funktionieren.
+Die Berichte sind im Verwaltungsportal unter der standardmaessig offenen
+Gruppe `Buchungen` sichtbar und zusaetzlich am Dashboard verlinkt. Fuer echte
+Ausdrucke gibt es `/admin/reports/print` als reduzierte Druckansicht mit
+A4-Layout, kompakten Tabellen und ausgeblendeter Verwaltungsnavigation.
+
+## Phase 39 - Umgebungskonfiguration fuer Test und Gemeinde
+
+Die Betriebsumgebungen werden explizit getrennt: `APP_ENV=local`, `test` oder
+`production`, dazu `PUBLIC_BASE_URL`, `AUTH_URL`, `SERVER_NAME`,
+`PUBLIC_AREA_ENABLED` und `MAIL_DELIVERY_MODE`. Der eigene Testserver nutzt
+`.env.test` aus `.env.test.example`; der Gemeinde-Produktivserver nutzt
+`.env.production` aus `.env.production.example`. Der bestehende
+`npm run production:check` validiert beide Umgebungen ueber `ENV_FILE`, erlaubt
+deaktivierten Mailversand nur fuer Testumgebungen und verlangt in Produktion
+`MAIL_DELIVERY_MODE=smtp`.
+
+## Phase 40.1 - IT-Sicherheit und Datenschutz
+
+`docs/security-privacy-readiness.md` sammelt die erforderlichen Unterlagen und
+Massnahmen fuer Test- und Gemeinde-Server: Verantwortlichkeiten,
+personenbezogene Daten, TOMs, Verarbeitungstaetigkeit, Testdatenregelung,
+Secrets, HTTPS, Backup/Restore, Logging, SMTP, Incident-Prozess und
+Go-Live-Stop-Kriterien. Die Go-Live-Dokumente verweisen nun auf diese
+Freigabegrundlage.
+
+## Phase 40.2 - Datenschutz- und IT-Vorlagen
+
+Ausfuellbare Vorlagen wurden ergaenzt:
+
+* `docs/privacy-processing-record-template.md` fuer das Verzeichnis der
+  Verarbeitungstaetigkeit.
+* `docs/security-tom-checklist.md` fuer technische und organisatorische
+  Massnahmen.
+* `docs/testdata-release-template.md` fuer Testdaten- und
+  Echtdatenfreigaben.
+
+README, Go-Live-Runbook, Nachweisprotokoll und Security-Readiness verweisen
+auf diese Vorlagen.
+
+## Phase 40.3 - Betriebs- und Monitoringkonzept
+
+`docs/operations-monitoring-concept.md` definiert fuer Testserver und
+Gemeinde-Produktivserver die zu ueberwachenden Komponenten, Pruefintervalle,
+manuelle Standardchecks, Eskalationsregeln, Backup-/Restore-Nachweise und
+Mindestfreigaben vor Echtdatenbetrieb. README, Produktions-Readiness,
+Go-Live-Runbook und Nachweisprotokoll verweisen auf diese Betriebsgrundlage.
+
+## Testserver Hetzner
+
+Ein eigener produktionsnaher Testserver ist angelegt:
+
+* Anbieter: Hetzner
+* IP-Adresse: `116.203.141.156`
+* Subdomain: `hallenverwaltung.hofreither.at`
+
+Der Testserver soll mit `.env.test`, `APP_ENV=test`,
+`PUBLIC_BASE_URL=https://hallenverwaltung.hofreither.at` und
+`AUTH_URL=https://hallenverwaltung.hofreither.at` betrieben werden. Der
+Gemeinde-Server bleibt davon getrennt und weiterhin der spaetere
+Produktiv-Zielbetrieb.
+
+Die konkrete Einrichtung ist in `docs/hetzner-testserver-deployment.md`
+dokumentiert. Offen sind SSH-Zugang, Docker-Installation, `.env.test` mit
+echten Test-Secrets, TLS-Zertifikate, Compose-Start, Migration/Seed und
+Smoke-Test.
+
+## Phase 42 - Testdatenverwaltung
+
+Die Testdatenverwaltung wird unter `/admin/system/test-data` vorbereitet. Sie
+ist ausschliesslich fuer SUPER_ADMIN oder SYSTEM_ADMIN sichtbar und funktioniert
+nur, wenn `TEST_DATA_TOOLS_ENABLED=true` gesetzt ist. Testdaten muessen
+eindeutig mit `[TEST]` oder `@test.local` markiert sein. Produktivumgebungen
+bleiben standardmaessig deaktiviert.
+
 ---
 
 # Wichtigste Architekturentscheidungen

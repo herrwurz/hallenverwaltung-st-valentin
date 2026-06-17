@@ -9,6 +9,14 @@ spaeteren Gemeinde-Server sind in `docs/installation-options.md`
 dokumentiert. Der Gemeinde-Server bleibt bis zur finalen Klaerung ein offener
 Go-Live-Blocker.
 
+IT-Sicherheits- und Datenschutzmassnahmen fuer Test- und Gemeinde-Server sind
+in `docs/security-privacy-readiness.md` gesammelt. Diese Unterlage sollte vor
+einem Echtdaten-Test gemeinsam mit IT, Datenschutz und Fachverantwortung
+geprueft werden.
+
+Das Betriebs- und Monitoringkonzept fuer Test- und Produktivserver liegt in
+`docs/operations-monitoring-concept.md`.
+
 ## 1. Zielumgebung vorbereiten
 
 - Server mit Docker und Docker Compose bereitstellen.
@@ -24,6 +32,16 @@ Go-Live-Blocker.
 
 ## 2. Produktionskonfiguration
 
+Fuer den eigenen Testserver wird dieselbe Compose-Datei verwendet, aber eine
+getrennte Umgebungsdatei:
+
+```bash
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+```
+
+Fuer den Gemeinde-Produktivserver:
+
 Aus Vorlage erstellen:
 
 ```bash
@@ -35,11 +53,15 @@ Pflichtwerte vor dem Start setzen:
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
+- `APP_ENV=production`
+- `PUBLIC_BASE_URL`
 - `AUTH_URL`
 - `AUTH_SECRET`
 - `AUTH_TRUST_HOST=true`
+- `PUBLIC_AREA_ENABLED`
 - `SERVER_NAME`
 - `TLS_CERT_DIR`
+- `MAIL_DELIVERY_MODE=smtp`
 - `SMTP_HOST`
 - `SMTP_PORT`
 - `SMTP_SECURE`
@@ -52,7 +74,11 @@ Pflichtwerte vor dem Start setzen:
 Regeln:
 
 - `AUTH_SECRET` muss ein langes zufaelliges Secret sein.
-- `.env.production` darf nicht committet werden.
+- `.env.test` und `.env.production` duerfen nicht committet werden.
+- Testserver und Gemeinde-Produktivserver verwenden getrennte Secrets,
+  Datenbankpasswoerter, Domains und SMTP-Zugangsdaten.
+- `MAIL_DELIVERY_MODE=disabled` ist nur fuer Testumgebungen erlaubt, wenn
+  E-Mail bewusst noch nicht zugestellt werden soll.
 - SMTP-Zugangsdaten duerfen nicht in Logs oder Tickets kopiert werden.
 - Demo-Passwoerter aus README sind nur lokal erlaubt.
 
@@ -208,8 +234,12 @@ Details stehen in `docs/pilot-testplan.md`.
 - SMTP muss gegen den echten Server getestet werden.
 - Backup-Rotation und Aufbewahrungsfrist muessen organisatorisch festgelegt
   werden.
-- Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz fehlt noch.
+- Monitoring/Alerting fuer Web, Worker, Datenbank und Speicherplatz muss
+  anhand von `docs/operations-monitoring-concept.md` organisatorisch geregelt
+  werden.
 - Restore-Probe muss nach Servereinrichtung dokumentiert werden.
+- Datenschutz-/IT-Sicherheitsfreigabe und Verantwortlichkeiten muessen
+  dokumentiert werden.
 - Finaler Abnahmetest gehoert in Phase 23.
 
 Die verbindliche Go-Live-Entscheidungsliste liegt in

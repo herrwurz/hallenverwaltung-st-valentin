@@ -36,10 +36,14 @@ services:
       target: runner
     restart: unless-stopped
     environment:
+      APP_ENV: ${APP_ENV:?APP_ENV is required}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
       AUTH_URL: ${AUTH_URL:?AUTH_URL is required}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL is required}
+      PUBLIC_AREA_ENABLED: ${PUBLIC_AREA_ENABLED:-false}
+      MAIL_DELIVERY_MODE: ${MAIL_DELIVERY_MODE:-smtp}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}
@@ -60,9 +64,12 @@ services:
       target: worker
     restart: unless-stopped
     environment:
+      APP_ENV: ${APP_ENV:?APP_ENV is required}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
       WORKER_INTERVAL_SECONDS: ${WORKER_INTERVAL_SECONDS:-300}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL is required}
+      MAIL_DELIVERY_MODE: ${MAIL_DELIVERY_MODE:-smtp}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}

@@ -22,6 +22,12 @@ Enthalten sind:
 - Go-Live-Runbook, Nachweisprotokoll und Entscheidungsliste unter
   `docs/go-live-runbook.md`, `docs/go-live-evidence.md` und
   `docs/go-live-open-points.md`
+- IT-Sicherheits- und Datenschutz-Readiness unter
+  `docs/security-privacy-readiness.md`
+- Datenschutz-/IT-Vorlagen unter `docs/privacy-processing-record-template.md`,
+  `docs/security-tom-checklist.md` und `docs/testdata-release-template.md`
+- Betriebs- und Monitoringkonzept unter
+  `docs/operations-monitoring-concept.md`
 - Demo-Seed und Pilot-Testplan fuer lokale Produkttests
 - Teststand-Freeze unter `docs/teststand-freeze.md` als verbindlicher Umfang
   fuer den naechsten Durchklicktest
@@ -165,6 +171,13 @@ Kurzanleitungen fuer Verwaltung und Vereine liegen in
 `docs/user-guide-admin.md` und `docs/user-guide-portal.md`.
 Die Go-Live-Ausfuehrung wird in `docs/go-live-runbook.md` gefuehrt.
 Das zugehoerige Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
+Die Sicherheits- und Datenschutzvorbereitung fuer Test- und Gemeinde-Server
+liegt in `docs/security-privacy-readiness.md`.
+Die ausfuellbaren Vorlagen fuer Verarbeitungstaetigkeit, TOMs und
+Testdatenfreigabe liegen daneben unter `docs/privacy-processing-record-template.md`,
+`docs/security-tom-checklist.md` und `docs/testdata-release-template.md`.
+Das Betriebs- und Monitoringkonzept fuer Test- und Produktivserver liegt in
+`docs/operations-monitoring-concept.md`.
 
 ### Hinweis zu Codex auf Windows
 
@@ -267,6 +280,8 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
 - `docker-compose.production.yml` fuer PostgreSQL, Migrationen, Web,
   Worker und Nginx Reverse Proxy
 - `.env.production.example` als Vorlage fuer Produktionsvariablen
+- `.env.test.example` als getrennte Vorlage fuer einen produktionsnahen
+  Testserver ohne Produktivdaten
 - `deploy/nginx/templates/hallenverwaltung.conf.template` fuer HTTPS-Terminierung
 - Backup-, Restore- und Restore-Test-Scripts unter `deploy/scripts`
 - `docs/production-readiness.md` als Checkliste fuer Zielumgebung,
@@ -275,6 +290,12 @@ umgebungsspezifisch ausgerollte Grundlage bereit:
   Nachweisen und Stop-Kriterien
 - `docs/go-live-evidence.md` als ausfuellbares Protokoll fuer echte
   Zielumgebungsnachweise
+- `docs/security-privacy-readiness.md` als Checkliste fuer Datenschutz,
+  IT-Sicherheit, Testdaten, Secrets, Backup, Betrieb und Freigaben
+- `docs/operations-monitoring-concept.md` fuer Monitoring, Eskalation,
+  Backup-/Restore-Nachweise und Betriebsregeln
+- `docs/hetzner-testserver-deployment.md` fuer die konkrete Einrichtung des
+  eigenen Hetzner-Testservers `hallenverwaltung.hofreither.at`
 
 Produktionsumgebung vorbereiten:
 
@@ -283,7 +304,9 @@ cp .env.production.example .env.production
 ```
 
 Danach muessen mindestens `POSTGRES_PASSWORD`, `AUTH_SECRET`, `AUTH_URL`,
-`SERVER_NAME` und die SMTP-Werte fuer die Zielumgebung gesetzt werden.
+`PUBLIC_BASE_URL`, `SERVER_NAME`, `APP_ENV=production`,
+`MAIL_DELIVERY_MODE=smtp` und die SMTP-Werte fuer die Zielumgebung gesetzt
+werden.
 Zertifikate werden nicht generiert und nicht committed. Erwartet werden:
 
 ```text
@@ -297,6 +320,27 @@ Produktionskonfiguration pruefen:
 npm run production:check
 docker compose --env-file .env.production -f docker-compose.production.yml config
 ```
+
+Produktionsnahen Testserver vorbereiten:
+
+```bash
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
+```
+
+Unter Windows PowerShell:
+
+```powershell
+Copy-Item .env.test.example .env.test
+$env:ENV_FILE=".env.test"; npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
+Remove-Item Env:\ENV_FILE
+```
+
+`.env.test` und `.env.production` bleiben strikt getrennt. Testserver duerfen
+`MAIL_DELIVERY_MODE=disabled` verwenden, wenn noch kein Testpostfach bereit
+steht. Der Gemeinde-Produktivserver muss `MAIL_DELIVERY_MODE=smtp` verwenden.
 
 Optional prueft der Produktionscheck auch Zertifikatsdateien:
 
@@ -369,5 +413,6 @@ docker-compose.production.yml  Produktionsnahe Compose-Konfiguration
 deploy/                 Reverse-Proxy-Templates und Backup-Scripts
 e2e/                    Playwright-Smoke-Tests
 .env.example            Beispielkonfiguration
+.env.test.example       Testserver-Konfiguration ohne Secrets
 .env.production.example Produktionskonfiguration ohne Secrets
 ```

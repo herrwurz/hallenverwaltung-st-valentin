@@ -74,42 +74,67 @@ Geeignet fuer:
 - Vorfuehrung fuer Verwaltung oder Vereine
 - technische Vorbereitung vor Gemeinde-Server
 
-Aktueller Hinweis:
+Aktueller Testserver:
 
-- Der geplante eigene Testserver soll voraussichtlich auf all-inkl.com laufen.
-- Das ist eine eigene technische Huerde, weil vorab geklaert werden muss, ob
-  der konkrete Tarif dauerhaft Node.js, PostgreSQL, Worker/Cron, Umgebungs-
-  variablen, Prozessbetrieb und optional Docker/Reverse Proxy unterstuetzt.
-- Bis diese Hosting-Fragen geklaert sind, bleibt der lokale Teststand die
-  verlaessliche Umgebung fuer Klicktests.
+| Feld | Wert |
+| --- | --- |
+| Anbieter | Hetzner |
+| IP-Adresse | `116.203.141.156` |
+| Subdomain | `hallenverwaltung.hofreither.at` |
+| Zweck | eigener produktionsnaher Testserver vor Gemeinde-Server |
+| Betriebsdatei | `.env.test` |
+
+Der frueher angedachte all-inkl.com-Testbetrieb ist damit fuer den aktuellen
+Teststand nicht mehr der bevorzugte Weg. Die Zielumgebung ist jetzt ein eigener
+Hetzner-Server, der Docker, Reverse Proxy, PostgreSQL, Worker und Backups
+realistischer abbilden kann.
+
+Die konkrete Einrichtung steht in
+`docs/hetzner-testserver-deployment.md`.
 
 Empfohlene Variante:
 
 - Docker Compose verwenden
 - eigene Testdomain oder Subdomain verwenden
-- `.env.production` mit Testwerten pflegen
+- `.env.test` aus `.env.test.example` mit Testwerten pflegen
 - SMTP nur mit Testpostfach oder bewusst deaktiviert/markiert testen
 
 Vorbereitung:
 
 ```bash
-cp .env.production.example .env.production
-npm run production:check
-docker compose --env-file .env.production -f docker-compose.production.yml config
+cp .env.test.example .env.test
+ENV_FILE=.env.test npm run production:check
+docker compose --env-file .env.test -f docker-compose.production.yml config
 ```
+
+Empfohlene `.env.test`-Werte fuer diesen Testserver:
+
+```env
+APP_ENV=test
+PUBLIC_BASE_URL=https://hallenverwaltung.hofreither.at
+AUTH_URL=https://hallenverwaltung.hofreither.at
+AUTH_TRUST_HOST=true
+PUBLIC_AREA_ENABLED=false
+SERVER_NAME=hallenverwaltung.hofreither.at
+MAIL_DELIVERY_MODE=disabled
+```
+
+SMTP kann spaeter fuer echte Mailtests auf `MAIL_DELIVERY_MODE=smtp`
+umgestellt werden. Bis dahin soll Mailversand deaktiviert bleiben oder nur ein
+klar getrenntes Testpostfach verwenden.
 
 Start:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml up --build -d
+docker compose --env-file .env.test -f docker-compose.production.yml up --build -d
 ```
 
 Pruefen:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml ps
-docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 web
-docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=100 worker
+docker compose --env-file .env.test -f docker-compose.production.yml ps
+docker compose --env-file .env.test -f docker-compose.production.yml logs --tail=100 web
+docker compose --env-file .env.test -f docker-compose.production.yml logs --tail=100 worker
 ```
 
 Wichtig:
@@ -154,12 +179,20 @@ Die Anwendung wird ueber Umgebungsdateien konfiguriert:
 | Umgebung | Datei | Zweck |
 | --- | --- | --- |
 | Lokal | `.env` | Entwicklung und lokaler Test |
-| Testserver | `.env.production` | produktionsnaher Testbetrieb |
+| Testserver | `.env.test` | produktionsnaher Testbetrieb ohne Produktivdaten |
 | Gemeinde-Server | `.env.production` | finaler Produktivbetrieb |
 
 Regeln:
 
-- `.env` und `.env.production` werden nicht committet.
+- `.env`, `.env.test` und `.env.production` werden nicht committet.
+- `.env.test.example` und `.env.production.example` sind nur Vorlagen ohne echte Secrets.
+- `APP_ENV` muss je Umgebung eindeutig gesetzt sein: `local`, `test` oder
+  `production`.
+- `PUBLIC_BASE_URL`, `AUTH_URL` und `SERVER_NAME` muessen zur jeweiligen
+  Test- oder Produktivdomain passen.
+- `MAIL_DELIVERY_MODE=disabled` ist fuer Testumgebungen erlaubt, wenn noch
+  kein Testpostfach bereitsteht. In Produktion muss `MAIL_DELIVERY_MODE=smtp`
+  gesetzt sein.
 - Secrets duerfen nicht in Logs, Tickets, Chat oder Dokumentation stehen.
 - `AUTH_SECRET`, Datenbankpasswoerter und SMTP-Passwoerter je Umgebung
   getrennt vergeben.

@@ -126,7 +126,7 @@ export function FullCalendarBoard({ basePath, initialDate, view, filters, events
           initialDate={initialDate}
           initialView={viewMap[view]}
           headerToolbar={{
-            left: "prev,next today",
+            left: "",
             center: "title",
             right: "",
           }}

@@ -10,20 +10,19 @@ const requiredKeys = [
   "POSTGRES_DB",
   "POSTGRES_USER",
   "POSTGRES_PASSWORD",
+  "APP_ENV",
+  "PUBLIC_BASE_URL",
   "AUTH_URL",
   "AUTH_SECRET",
   "AUTH_TRUST_HOST",
+  "PUBLIC_AREA_ENABLED",
   "SERVER_NAME",
   "TLS_CERT_DIR",
-  "SMTP_HOST",
-  "SMTP_PORT",
-  "SMTP_SECURE",
-  "SMTP_USER",
-  "SMTP_PASSWORD",
-  "SMTP_FROM_EMAIL",
-  "SMTP_FROM_NAME",
+  "MAIL_DELIVERY_MODE",
   "WORKER_INTERVAL_SECONDS",
 ] as const;
+
+const smtpKeys = ["SMTP_HOST", "SMTP_PORT", "SMTP_SECURE", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM_EMAIL", "SMTP_FROM_NAME"] as const;
 
 const secretKeys = new Set(["POSTGRES_PASSWORD", "AUTH_SECRET", "SMTP_PASSWORD"]);
 
@@ -82,9 +81,51 @@ export function validateProductionEnv(content: string, options: { checkFiles?: b
     }
   }
 
+  const appEnv = values.get("APP_ENV");
+  if (appEnv && !["test", "production"].includes(appEnv)) {
+    errors.push("APP_ENV must be test or production for deployed environments.");
+  }
+
+  const isProduction = appEnv === "production";
+  const isTest = appEnv === "test";
+
+  const mailDeliveryMode = values.get("MAIL_DELIVERY_MODE");
+  if (mailDeliveryMode && !["disabled", "smtp"].includes(mailDeliveryMode)) {
+    errors.push("MAIL_DELIVERY_MODE must be disabled or smtp.");
+  }
+
+  if (isProduction && mailDeliveryMode !== "smtp") {
+    errors.push("MAIL_DELIVERY_MODE must be smtp in production.");
+  }
+
+  if (mailDeliveryMode === "smtp") {
+    for (const key of smtpKeys) {
+      const value = values.get(key);
+      if (!value) {
+        errors.push(`${key} is missing or empty.`);
+        continue;
+      }
+
+      if (hasPlaceholder(value)) {
+        errors.push(`${key} still contains a placeholder value.`);
+      }
+    }
+  } else if (isTest) {
+    warnings.push("SMTP delivery is disabled for this test environment.");
+  }
+
   const authUrl = values.get("AUTH_URL");
-  if (authUrl && !authUrl.startsWith("https://")) {
+  if (authUrl && isProduction && !authUrl.startsWith("https://")) {
     errors.push("AUTH_URL must use https:// in production.");
+  } else if (authUrl && isTest && !authUrl.startsWith("https://")) {
+    warnings.push("AUTH_URL does not use https:// in this test environment.");
+  }
+
+  const publicBaseUrl = values.get("PUBLIC_BASE_URL");
+  if (publicBaseUrl && isProduction && !publicBaseUrl.startsWith("https://")) {
+    errors.push("PUBLIC_BASE_URL must use https:// in production.");
+  } else if (publicBaseUrl && isTest && !publicBaseUrl.startsWith("https://")) {
+    warnings.push("PUBLIC_BASE_URL does not use https:// in this test environment.");
   }
 
   const serverName = values.get("SERVER_NAME");
@@ -99,8 +140,24 @@ export function validateProductionEnv(content: string, options: { checkFiles?: b
     }
   }
 
+  if (publicBaseUrl && serverName) {
+    try {
+      const hostname = new URL(publicBaseUrl).hostname;
+      if (hostname !== serverName) {
+        warnings.push("PUBLIC_BASE_URL hostname differs from SERVER_NAME.");
+      }
+    } catch {
+      errors.push("PUBLIC_BASE_URL is not a valid URL.");
+    }
+  }
+
   if (values.get("AUTH_TRUST_HOST") !== "true") {
-    errors.push("AUTH_TRUST_HOST must be true in production.");
+    errors.push("AUTH_TRUST_HOST must be true in deployed environments.");
+  }
+
+  const publicAreaEnabled = values.get("PUBLIC_AREA_ENABLED");
+  if (publicAreaEnabled && !["true", "false"].includes(publicAreaEnabled)) {
+    errors.push("PUBLIC_AREA_ENABLED must be true or false.");
   }
 
   const authSecret = values.get("AUTH_SECRET");
@@ -109,12 +166,12 @@ export function validateProductionEnv(content: string, options: { checkFiles?: b
   }
 
   const smtpPort = Number(values.get("SMTP_PORT"));
-  if (!Number.isInteger(smtpPort) || smtpPort <= 0 || smtpPort > 65535) {
+  if (mailDeliveryMode === "smtp" && (!Number.isInteger(smtpPort) || smtpPort <= 0 || smtpPort > 65535)) {
     errors.push("SMTP_PORT must be a valid TCP port.");
   }
 
   const smtpSecure = values.get("SMTP_SECURE");
-  if (smtpSecure && !["true", "false"].includes(smtpSecure)) {
+  if (mailDeliveryMode === "smtp" && smtpSecure && !["true", "false"].includes(smtpSecure)) {
     errors.push("SMTP_SECURE must be true or false.");
   }
 
@@ -124,7 +181,7 @@ export function validateProductionEnv(content: string, options: { checkFiles?: b
   }
 
   const smtpFrom = values.get("SMTP_FROM_EMAIL");
-  if (smtpFrom && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(smtpFrom)) {
+  if (mailDeliveryMode === "smtp" && smtpFrom && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(smtpFrom)) {
     errors.push("SMTP_FROM_EMAIL must be a valid email address.");
   }
 

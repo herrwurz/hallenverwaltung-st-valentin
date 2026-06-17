@@ -15,9 +15,13 @@ test("calendar UI exposes FullCalendar day week month and year views", () => {
   assert.match(fullCalendarBoard, /timeGridWeek/);
   assert.match(fullCalendarBoard, /timeGridDay/);
   assert.match(fullCalendarBoard, /multiMonthYear/);
-  assert.doesNotMatch(filterForm, /type="hidden" name="view"/);
-  assert.match(filterForm, /name="view" value=\{view\}/);
-  assert.match(filterForm, /name="view"/);
+  assert.match(filterForm, /type="hidden" name="view" defaultValue=\{view\}/);
+  assert.match(filterForm, /prepareSubmit\(\{ date: previousDate, view \}\)/);
+  assert.match(filterForm, /prepareSubmit\(\{ date: today, view \}\)/);
+  assert.match(filterForm, /prepareSubmit\(\{ date: nextDate, view \}\)/);
+  assert.match(filterForm, /Zurück/);
+  assert.match(filterForm, /Heute/);
+  assert.match(filterForm, /Weiter/);
   assert.match(filterForm, /aria-pressed=\{view === option\.value\}/);
   assert.match(filterForm, /Tag/);
   assert.match(filterForm, /Woche/);
@@ -44,7 +48,7 @@ test("calendar UI exposes shadcn event detail dialogs and localized labels", () 
   assert.doesNotMatch(calendarView, /Gebaeude|Raeume|Eintraege|auswaehlen|gewaehl|Ã/);
 });
 
-test("calendar UI uses FullCalendar Community standard navigation without duplicate view buttons", () => {
+test("calendar UI uses FullCalendar Community without duplicate header navigation buttons", () => {
   const calendarView = readFileSync("components/calendar-view.tsx", "utf8");
   const fullCalendarBoard = readFileSync("components/full-calendar-board.tsx", "utf8");
   const packageJson = readFileSync("package.json", "utf8");
@@ -55,9 +59,10 @@ test("calendar UI uses FullCalendar Community standard navigation without duplic
   assert.match(packageJson, /@fullcalendar\/timegrid/);
   assert.match(packageJson, /@fullcalendar\/multimonth/);
   assert.match(fullCalendarBoard, /headerToolbar/);
-  assert.match(fullCalendarBoard, /prev,next today/);
+  assert.match(fullCalendarBoard, /left: ""/);
   assert.match(fullCalendarBoard, /right: ""/);
   assert.match(fullCalendarBoard, /Heute/);
+  assert.doesNotMatch(fullCalendarBoard, /prev,next today/);
   assert.doesNotMatch(fullCalendarBoard, /right: "dayGridMonth,timeGridWeek,timeGridDay,multiMonthYear"/);
   assert.match(fullCalendarBoard, /dateClick/);
   assert.match(fullCalendarBoard, /eventClick/);

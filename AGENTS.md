@@ -447,6 +447,36 @@ Branch-Schema:
 
 ---
 
+# Branch-Strategie
+
+`feature/*`:
+
+- aktive Entwicklung
+- niemals direkt deployen
+
+`develop`:
+
+- Integrations- und Testbranch
+- automatischer Deploy auf Hetzner-Testserver
+
+`main`:
+
+- freigegebene Releases
+- Quelle für Produktionsdeployments
+
+Vor Merge nach `develop`:
+
+- relevante Tests ausführen
+- `tsc --noEmit` erfolgreich
+
+Vor Merge nach `main`:
+
+- vollständige Prüfkette
+- Deployment auf Testserver erfolgreich
+- manuelle Abnahme erfolgt
+
+---
+
 # Qualitätsprüfungen
 
 Vor jedem Commit ausführen:
@@ -525,6 +555,40 @@ Standardverhalten ab sofort:
    - Beispiel: Export-Service, Admin-UI, Tests, Doku, Abschlussprüfung.
    - Umsetzung dann Schritt für Schritt, statt alles gleichzeitig zu laden und
      zu prüfen.
+
+---
+
+# Prüfstrategie zur Credit-Optimierung
+
+Nicht jede kleine Änderung benötigt die vollständige Prüfkette.
+
+Bei kleinen Bugfixes oder UI-Anpassungen:
+
+- nur betroffene Tests ausführen
+- TypeScript-Prüfung ausführen
+- kein vollständiger Build, außer Build-relevante Dateien wurden geändert
+
+Bei Prisma-Schema- oder Migrationsänderungen:
+
+- `npx prisma validate`
+- `npx prisma generate`
+- `npx tsc --noEmit`
+
+Bei Service-/Businesslogik:
+
+- betroffene Tests
+- `npx tsc --noEmit`
+
+Bei Phasenabschluss, Pull Request oder vor Push:
+
+- `npm test`
+- `npm run lint`
+- `npm run build`
+- `npx prisma validate`
+- `npx prisma generate`
+- `npx tsc --noEmit`
+
+Codex soll vor teuren Prüfungen kurz begründen, warum sie notwendig sind.
 
 ---
 

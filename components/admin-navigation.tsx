@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Bell,
   Building2,
   CalendarDays,
@@ -43,6 +44,7 @@ const defaultIconByHref: Record<string, LucideIcon> = {
   "/admin/series": CalendarDays,
   "/admin/calendar": CalendarDays,
   "/admin/billing": CreditCard,
+  "/admin/reports": BarChart3,
   "/admin/notifications": Bell,
   "/admin/settings": Settings,
   "/admin/settings/mail": Mail,
@@ -68,6 +70,7 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/calendar", label: "Kalender", icon: CalendarDays },
   { href: "/admin/bookings", label: "Buchungsanträge", icon: ClipboardList, groupLabel: "Buchungen" },
   { href: "/admin/waitlist", label: "Warteliste", icon: ListChecks, groupLabel: "Buchungen" },
+  { href: "/admin/reports", label: "Berichte", icon: BarChart3, groupLabel: "Buchungen" },
   { href: "/admin/buildings", label: "Gebäude", icon: Building2, groupLabel: "Stammdaten" },
   { href: "/admin/rooms", label: "Räume", icon: Warehouse, groupLabel: "Stammdaten" },
   { href: "/admin/organizations", label: "Organisationen", icon: Home, groupLabel: "Stammdaten" },
@@ -126,7 +129,7 @@ export function AdminNavigation({ items = adminNavigation }: AdminNavigationProp
         );
 
         return (
-          <details key={group.groupLabel} className="mt-4" open={hasActiveItem}>
+          <details key={group.groupLabel} className="mt-4" open={hasActiveItem || group.groupLabel === "Buchungen"}>
             <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:bg-accent hover:text-accent-foreground">
               {(() => {
                 const GroupIcon = groupIconByLabel[group.groupLabel] ?? Settings;
