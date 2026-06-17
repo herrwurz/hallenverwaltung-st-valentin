@@ -30,24 +30,30 @@ async function requireTestDataAdmin() {
 
 export async function createTestDataAction() {
   await requireTestDataAdmin();
+  let redirectParams: Record<string, string | undefined>;
 
   try {
     const result = await createTestData();
     revalidatePath("/admin/system/test-data");
-    testDataRedirect({ success: result.message });
+    redirectParams = { success: result.message };
   } catch (error) {
-    testDataRedirect({ error: getErrorMessage(error) });
+    redirectParams = { error: getErrorMessage(error) };
   }
+
+  testDataRedirect(redirectParams);
 }
 
 export async function deleteTestDataAction() {
   await requireTestDataAdmin();
+  let redirectParams: Record<string, string | undefined>;
 
   try {
     const result = await deleteTestData();
     revalidatePath("/admin/system/test-data");
-    testDataRedirect({ success: result.message });
+    redirectParams = { success: result.message };
   } catch (error) {
-    testDataRedirect({ error: getErrorMessage(error) });
+    redirectParams = { error: getErrorMessage(error) };
   }
+
+  testDataRedirect(redirectParams);
 }

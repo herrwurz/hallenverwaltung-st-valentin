@@ -36,10 +36,14 @@ export type TestDataMutationResult = TestDataStatus & {
 };
 
 function isEnabled() {
-  return process.env.TEST_DATA_TOOLS_ENABLED === "true";
+  return process.env.TEST_DATA_TOOLS_ENABLED === "true" && process.env.APP_ENV !== "production";
 }
 
 function assertEnabled() {
+  if (process.env.APP_ENV === "production") {
+    throw new Error("Testdaten-Werkzeuge sind in Produktion deaktiviert.");
+  }
+
   if (!isEnabled()) {
     throw new Error("Testdaten-Werkzeuge sind deaktiviert. Setze TEST_DATA_TOOLS_ENABLED=true in der Testumgebung.");
   }

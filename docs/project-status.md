@@ -494,6 +494,11 @@ nur, wenn `TEST_DATA_TOOLS_ENABLED=true` gesetzt ist. Testdaten muessen
 eindeutig mit `[TEST]` oder `@test.local` markiert sein. Produktivumgebungen
 bleiben standardmaessig deaktiviert.
 
+Wenn das Coolify-Terminal fuer Seeds nicht stabil erreichbar ist, kann der
+Testserver einmalig ueber `/api/test-bootstrap?token=...` initialisiert werden.
+Der Endpunkt ist nur ausserhalb von Produktion, nur mit
+`TEST_DATA_TOOLS_ENABLED=true` und nur mit `TEST_BOOTSTRAP_TOKEN` aktiv.
+
 ---
 
 # Wichtigste Architekturentscheidungen
