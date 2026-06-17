@@ -21,6 +21,13 @@ test("test data UI and actions require super or system admin role", () => {
   assert.match(layoutSource, /\/admin\/system\/test-data/);
 });
 
+test("test data actions do not catch Next redirect exceptions as user-facing errors", () => {
+  assert.match(actionsSource, /let redirectParams/);
+  assert.match(actionsSource, /testDataRedirect\(redirectParams\)/);
+  assert.doesNotMatch(actionsSource, /testDataRedirect\(\{\s*success/);
+  assert.doesNotMatch(actionsSource, /testDataRedirect\(\{\s*error/);
+});
+
 test("test data deletion is marker-based and never uses broad destructive operations", () => {
   assert.doesNotMatch(serviceSource, /deleteMany\(\s*\{\s*\}\s*\)/);
   assert.doesNotMatch(serviceSource, /TRUNCATE/i);
