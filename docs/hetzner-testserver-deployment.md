@@ -102,6 +102,7 @@ AUTH_SECRET=<langes-zufaelliges-test-secret>
 AUTH_TRUST_HOST=true
 PUBLIC_AREA_ENABLED=false
 TEST_DATA_TOOLS_ENABLED=true
+TEST_BOOTSTRAP_TOKEN=<langes-zufaelliges-test-bootstrap-token>
 
 SERVER_NAME=hallenverwaltung.hofreither.at
 TLS_CERT_DIR=./deploy/certs-test
@@ -118,6 +119,8 @@ Wichtig:
 - `MAIL_DELIVERY_MODE=disabled` lassen, bis ein Testpostfach bereitsteht.
 - `TEST_DATA_TOOLS_ENABLED=true` nur auf dem Testserver setzen. In Produktion
   bleibt die Testdatenverwaltung deaktiviert.
+- `TEST_BOOTSTRAP_TOKEN` muss mindestens 32 Zeichen lang sein und darf nicht
+  in Git, Tickets oder Screenshots landen.
 
 ## 5. TLS-Zertifikate bereitstellen
 
@@ -184,6 +187,18 @@ docker compose --env-file .env.test -f docker-compose.production.yml run --rm we
 
 Demo-Zugaenge duerfen nur fuer diesen Testserver genutzt werden und muessen vor
 einem echten Produktivbetrieb entfernt oder deaktiviert werden.
+
+Wenn das Coolify-Terminal instabil ist, kann der Testserver-Bootstrap einmalig
+ueber den geschuetzten Endpunkt ausgefuehrt werden:
+
+```text
+https://hallenverwaltung.hofreither.at/api/test-bootstrap?token=<TEST_BOOTSTRAP_TOKEN>
+```
+
+Der Endpunkt funktioniert nur mit `APP_ENV != production`,
+`TEST_DATA_TOOLS_ENABLED=true` und gueltigem `TEST_BOOTSTRAP_TOKEN`. Er legt
+die minimal noetigen Rollen, Rechte und Katalogwerte sowie die markierten
+Phase-42-Testdaten an.
 
 ## 9. Smoke-Test
 
