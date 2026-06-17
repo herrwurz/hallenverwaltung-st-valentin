@@ -101,6 +101,7 @@ AUTH_URL=https://hallenverwaltung.hofreither.at
 AUTH_SECRET=<langes-zufaelliges-test-secret>
 AUTH_TRUST_HOST=true
 PUBLIC_AREA_ENABLED=false
+TEST_DATA_TOOLS_ENABLED=true
 
 SERVER_NAME=hallenverwaltung.hofreither.at
 TLS_CERT_DIR=./deploy/certs-test
@@ -115,6 +116,8 @@ Wichtig:
 - `.env.test` nicht committen.
 - Test- und Produktiv-Secrets getrennt halten.
 - `MAIL_DELIVERY_MODE=disabled` lassen, bis ein Testpostfach bereitsteht.
+- `TEST_DATA_TOOLS_ENABLED=true` nur auf dem Testserver setzen. In Produktion
+  bleibt die Testdatenverwaltung deaktiviert.
 
 ## 5. TLS-Zertifikate bereitstellen
 
@@ -251,4 +254,3 @@ Danach Smoke-Test wiederholen.
 | Seed/Demo-Seed bewusst ausgefuehrt | offen |
 | HTTPS-Smoke-Test erfolgreich | offen |
 | Testzugang an Tester kommuniziert | offen |
-
