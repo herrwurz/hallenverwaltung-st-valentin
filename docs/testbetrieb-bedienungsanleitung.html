@@ -1,0 +1,462 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bedienungsanleitung - Testbetrieb</title><style>
+  body { font-family: Inter, Roboto, Arial, sans-serif; color: #0f172a; margin: 32px auto; max-width: 800px; }
+  h1,h2,h3 { color: #0b1220; }
+  pre { background:#f3f4f6; padding:12px; border-radius:6px; }
+  code { background:#f8fafc; padding:2px 4px; border-radius:4px; }
+  table { border-collapse: collapse; width:100%; }
+  table, th, td { border: 1px solid #e6e9ef; }
+  th, td { padding:8px; text-align:left; }
+  .meta { color:#475569; font-size:0.95em; }
+  </style></head><body><h1>Bedienungsanleitung — Testbetrieb (Gemeinde)</h1>
+<h2>Zweck</h2>
+<p>Diese Anleitung richtet sich an Gemeindemitarbeiterinnen, Vereinsverantwortliche und Tester. Sie erklärt intuitiv und ohne technische Details, welche Menüs es gibt, welche Aufgaben dort üblich sind und wie Standardabläufe (Use Cases) aussehen.</p>
+<h2>Sicherheitshinweis</h2>
+<p>Der <code>SUPER-ADMIN</code>-Zugang ist nur für das Technikteam und wird nicht öffentlich weitergegeben. Alle Routineaufgaben werden mit <code>ADMIN</code>- oder Portal-Konten durchgeführt.</p>
+<h2>Kurz: Menüs &amp; Aufgaben</h2>
+<ul>
+<li>Dashboard: Übersicht über offene Anfragen, anstehende Buchungen und wichtige Hinweise. Startpunkt für tägliche Checks.</li>
+<li>Kalender: Visualisierung der Hallen und Räume in Tages-/Wochen-/Monatsansicht. Hier sehen Sie geblockte Zeiten, Genehmigungen und Übersichten pro Raum.</li>
+<li>Buchungen: Liste aller Buchungsanträge mit Filter (Status, Raum, Zeitraum). Als Antragsteller: Buchung anlegen. Als Admin: Anfragen prüfen, genehmigen oder ablehnen.</li>
+<li>Serienbuchungen: Bereich für wiederkehrende Termine (z. B. wöchentlich). Einzeltermine werden automatisch erzeugt und durchlaufen die normale Genehmigung.</li>
+<li>Warteliste: Übersicht und Verwaltung der Warteliste für ausgebuchte Zeiten. Reihenfolge nach Eingangszeit.</li>
+<li>Sperren / Hallen-Sperren: Räume oder Gebäude zeitweise sperren (z. B. Wartung, Feiertag). Sperren haben Priorität vor Buchungen.</li>
+<li>Organisationen / Vereine: Stammdaten zu Vereinen und Ansprechpartnern verwalten (Admin-Recht).</li>
+<li>Benutzer &amp; Rollen: Nur für Administratoren: Benutzer anlegen, Rollen zuweisen oder deaktivieren.</li>
+<li>Dokumente: Veranstaltungsdokumente, Schadensmeldungen, Fotos — Metadaten werden hier verwaltet.</li>
+<li>Abrechnung / Exporte: Vorbereitung von Abrechnungen, CSV/Excel-Export. Keine automatische Rechnungslegung im Testbetrieb.</li>
+<li>Abrechnung / Exporte: Vorbereitung von Abrechnungen, CSV/Excel-Export. Keine automatische Rechnungslegung im Testbetrieb.
+ Hinweis: Eine vollständige Abrechnungs-Engine ist in dieser Testversion noch nicht implementiert; es ist derzeit nur die Abrechnungsvorbereitung und der Export vorgesehen.</li>
+<li>Hilfe / Support: Kontaktinformationen, Fehler melden, kurze FAQs.</li>
+</ul>
+<h2>Stammdaten — Was gehört dazu und wie pflegen?</h2>
+<p>Die Stammdaten bilden die Grundlage für alle Buchungen und Abläufe. In dieser Sektion ist beschrieben, welche Daten gepflegt werden sollten, wer das tun kann und wie typische Pflegeabläufe aussehen.</p>
+<ul>
+<li><p>Gebäude / Locations</p>
+<ul>
+<li>Inhalt: Name, Adresse, Beschreibung, Kontakt, Hauptfoto.</li>
+<li>Wer pflegt: Gemeindetechnik / Sachbearbeiter.</li>
+<li>Typische Aktionen: Neues Gebäude anlegen, Adresse korrigieren, Foto hochladen.</li>
+</ul>
+</li>
+<li><p>Räume / Hallen</p>
+<ul>
+<li>Inhalt: Raumname, Kapazität (Personen), Größe (m²), Ausstattung (Tische, Bühne, Beamer), Standardpreise, Öffnungszeiten, Raumfotos.</li>
+<li>Wer pflegt: Sachbearbeiter, in Abstimmung mit Technik bei Ausstattung.</li>
+<li>Typische Aktionen: Kapazität anpassen, Ausstattung ergänzen, Raum sperren/öffnen.</li>
+</ul>
+</li>
+<li><p>Organisationen / Vereine</p>
+<ul>
+<li>Inhalt: Vereinsname, Ansprechpartner, Email, Telefonnummer, Vereinsadresse, Berechtigungen (z. B. bevorzugte Buchungsrechte).</li>
+<li>Wer pflegt: Sachbearbeiter / Portal-Admin.</li>
+<li>Typische Aktionen: Neues Vereinsprofil anlegen, Ansprechpartner ändern.</li>
+</ul>
+</li>
+<li><p>Benutzer &amp; Rollen</p>
+<ul>
+<li>Inhalt: Name, E-Mail, zugewiesene Rolle (z. B. <code>PORTAL_USER</code>, <code>PORTAL_ADMIN</code>, <code>ADMIN</code>), Status (aktiv/inaktiv).</li>
+<li>Wer pflegt: Administratoren.</li>
+<li>Typische Aktionen: Konto anlegen, Rolle ändern, Konto deaktivieren.</li>
+</ul>
+</li>
+<li><p>Tarife / Preise</p>
+<ul>
+<li>Inhalt: Preislisten pro Raum/Kategorie, Zeitbasis (Stunde/Tag), ermässigte Sätze (z. B. Vereine), Bemerkungen.</li>
+<li>Wer pflegt: Sachbearbeiter / Abrechnungskontakt.</li>
+<li>Typische Aktionen: Preis aktualisieren, Rabattregel hinzufügen.</li>
+</ul>
+</li>
+<li><p>Öffnungszeiten &amp; Sonderzeiten</p>
+<ul>
+<li>Inhalt: Regelmäßige Öffnungszeiten pro Raum/Gebäude, Ferien-/Feiertagsregeln, eingeschränkte Zeiten.</li>
+<li>Wer pflegt: Sachbearbeiter.</li>
+<li>Typische Aktionen: Ferienzeitraum anlegen, eingeschränkte Zeiten einstellen (RESTRICTED/CLOSED).</li>
+</ul>
+</li>
+<li><p>Ausstattungs- und Ressourcenliste</p>
+<ul>
+<li>Inhalt: Inventar (z. B. Anzahl Tische, Stühle, technische Geräte), besondere Voraussetzungen (z. B. Bühne erforderlich).</li>
+<li>Wer pflegt: Technik/Sachbearbeiter.</li>
+<li>Typische Aktionen: Inventar aktualisieren, Ressourcenträger zuordnen.</li>
+</ul>
+</li>
+<li><p>Hallenwarte / Caretaker</p>
+<ul>
+<li>Inhalt: Name, Zuordnung zu Räumen, Kontaktinformationen, Zugriffsrechte (No-Show-Reporting etc.).</li>
+<li>Wer pflegt: Verwaltung / Technik.</li>
+<li>Typische Aktionen: Hallenwart hinzufügen, Zuständigkeit anpassen.</li>
+</ul>
+</li>
+<li><p>Dokumentvorlagen &amp; Kategorien</p>
+<ul>
+<li>Inhalt: Standardtexte für Bestätigungen, Ablehnungsmotive, Schadensformulare, Dateivorlagen.</li>
+<li>Wer pflegt: Fachverantwortliche in Abstimmung mit Technik.</li>
+<li>Typische Aktionen: Vorlage anpassen, neue Kategorie anlegen.</li>
+</ul>
+</li>
+<li><p>Kategorien &amp; Tags</p>
+<ul>
+<li>Inhalt: Veranstaltungsarten (Sport, Kultur, Privat), interne Tags zur Filterung.</li>
+<li>Wer pflegt: Sachbearbeiter.</li>
+<li>Typische Aktionen: Neue Kategorie erstellen, bestehende Kategorie umbenennen.</li>
+</ul>
+</li>
+</ul>
+<h2>Pflege‑Workflow (kurz)</h2>
+<ol>
+<li>Anlegen: Neue Stammdaten werden im jeweiligen Stammdaten-Menü erstellt (<code>Admin</code> → z. B. <code>Räume</code>, <code>Gebäude</code>, <code>Organisationen</code>).</li>
+<li>Prüfen: Bei kritischen Änderungen (Kapazität, Preise, Öffnungszeiten) immer kurze interne Freigabe einholen.</li>
+<li>Ändern: Änderungen dokumentieren (Änderungsgrund, Datum, Benutzer).</li>
+<li>Kommunikation: Wichtige Änderungen (z. B. Preisänderung, Schließung über Ferien) per interner Rundmail an betroffene Vereine und Mitarbeiter kommunizieren.</li>
+</ol>
+<h2>Best Practices</h2>
+<ul>
+<li>Verwenden Sie eindeutige, sprechende Bezeichnungen (z. B. „Halle A — Sporthalle“).</li>
+<li>Ergänzen Sie immer ein aussagekräftiges Foto bei neuen Räumen/Gebäuden.</li>
+<li>Halten Sie Kapazitäten realistisch und dokumentieren Sie Annahmen (z. B. Bestuhlung 2x2m).</li>
+<li>Bei Preisanpassungen: Datum und Grund vermerken, alte Preise archivieren.</li>
+</ul>
+<h2>Detaillierte Menüpunkte — Buchungen</h2>
+<p>Hier finden Sie die konkreten Unterfunktionen, die Sie im Menü <code>Buchungen</code> erwarten.</p>
+<ul>
+<li><p>Übersicht / Liste</p>
+<ul>
+<li>Anzeige: Tabellenansicht mit Spalten für Datum, Raum, Antragsteller, Status, Genehmiger.</li>
+<li>Filter: Status (<code>REQUESTED</code>, <code>APPROVED</code>, <code>REJECTED</code>, <code>CANCELLED</code>), Raum, Zeitraum, Organisation.</li>
+<li>Aktionen: Detailansicht öffnen, schnelle Genehmigung/Ablehnung, Export (CSV) der gefilterten Liste.</li>
+</ul>
+</li>
+<li><p>Buchung erstellen (Portal)</p>
+<ul>
+<li>Formularfelder: Raumwahl, Beginn/Ende, erwartete Teilnehmerzahl, Zweck, Zusatzoptionen (Aufbau, Technik), Versicherungsnachweis als Dateiupload.</li>
+<li>Validierungen: Überschneidungen prüfen, Max-Kapazität, Sperren/Feiertage beachten.</li>
+<li>Ergebnis: Antrag wird mit Status <code>REQUESTED</code> angelegt und landet in der Admin-Warteschlange.</li>
+</ul>
+</li>
+<li><p>Buchungsantrag prüfen (Admin)</p>
+<ul>
+<li>Prüfpunkte: Verfügbarkeit, versicherungsrechtliche Angaben, notwendige Dokumente, vorherige No-Shows.</li>
+<li>Aktionen: Genehmigen (<code>APPROVE</code>), Ablehnen (<code>REJECT</code> mit Grund), Vorläufige Vormerkung (<code>IN_REVIEW</code>), Kommentar für Antragsteller.</li>
+<li>Folge: Genehmigte Termine erscheinen im Kalender; Ablehnungen erzeugen Benachrichtigungen.</li>
+</ul>
+</li>
+<li><p>Serienbuchungen</p>
+<ul>
+<li>Verwaltung für wiederkehrende Termine: Übersicht über alle erzeugten Einzeltermine, Möglichkeit einzelne Termine abzusagen oder zu verschieben.</li>
+<li>Hinweis: Serien erzeugen viele Einzelanträge mit jeweils eigenem Status; Änderungen der Serie betreffen nicht automatisch bereits erzeugte Einzeltermine.</li>
+</ul>
+</li>
+<li><p>Warteliste</p>
+<ul>
+<li>Ansicht: Wartelistenplätze pro Zeitraum/Raum, Platz 1 zuerst.</li>
+<li>Aktionen: Platz best&auml;tigen oder ablehnen, manuelles Verschieben, automatisiertes Angebot per Benachrichtigung (falls SMTP konfiguriert).</li>
+</ul>
+</li>
+<li><p>No-Show / Nachbearbeitung</p>
+<ul>
+<li>Erfassen: Hallenwarte oder Admins können No-Shows protokollieren; Eintrag wird auditiert.</li>
+<li>Wirkung: Keine automatische Sanktion, aber als Entscheidungsgrundlage für künftige Vergaben nutzbar.</li>
+</ul>
+</li>
+<li><p>Kalenderintegration</p>
+<ul>
+<li>Visualisierung: Genehmigte Buchungen als Kalenderereignisse pro Raum/Spalte.</li>
+<li>Export/Sync: CSV-Export verfügbar; eine Live-Sync/CalDAV ist in Version 1 nicht enthalten.</li>
+</ul>
+</li>
+<li><p>Benachrichtigungen &amp; E-Mails</p>
+<ul>
+<li>Hinweis: Das System generiert Benachrichtigungstexte (Bestätigung, Ablehnung, Wartelistenangebot). Ob E-Mails tatsächlich versendet werden, hängt von der SMTP-Konfiguration (siehe Hinweis weiter unten).</li>
+</ul>
+</li>
+</ul>
+<h2>Detaillierte Menüpunkte — Stammdaten</h2>
+<p>Im Bereich <code>Stammdaten</code> sind folgende Menüpunkte üblicherweise vorhanden; jede Einzelseite hat typische Felder und Aktionen.</p>
+<ul>
+<li><p>Gebäude / Locations</p>
+<ul>
+<li>Felder: Name, Kurzcode, Adresse, Kontaktperson, Hauptfoto, Beschreibung, aktive/inaktive Kennzeichnung.</li>
+<li>Aktionen: Gebäude anlegen, deaktivieren, Ansprechpartner ändern, Standort- und Bilderpflege.</li>
+</ul>
+</li>
+<li><p>Räume / Hallen</p>
+<ul>
+<li>Felder: Raumcode, Bezeichnung, Kapazität, Fläche, Standardpreise, Zeitfenster/Öffnungszeiten, Ausstattung, Fotos.</li>
+<li>Aktionen: Raum anlegen, Standardpreise setzen, Ressourcen (Inventar) zuordnen, Öffnungszeiten pflegen.</li>
+</ul>
+</li>
+<li><p>Organisationen / Vereine</p>
+<ul>
+<li>Felder: Vereins-ID, Name, Ansprechpartner, Kontakt, Berechtigungsstufe, Notizen.</li>
+<li>Aktionen: Vereinsprofil anlegen, Status (aktiv/inaktiv), bevorzugte Preiskategorie vergeben.</li>
+</ul>
+</li>
+<li><p>Benutzer &amp; Rollen</p>
+<ul>
+<li>Felder: Vorname, Nachname, E-Mail, Rolle(n), Zugeordnete Organisation, Aktiv-Flag.</li>
+<li>Aktionen: Konto anlegen, Rollen zuweisen, Passwort-Reset, Audit-Historie einsehen.</li>
+</ul>
+</li>
+<li><p>Tarife / Preise</p>
+<ul>
+<li>Felder: Preisstufen, Gültigkeitszeitraum, Zielgruppe (z. B. Vereine), Staffelpreise.</li>
+<li>Aktionen: Preis aktualisieren, Historie, Export für Abrechnung.</li>
+</ul>
+</li>
+<li><p>Öffnungszeiten &amp; Sonderzeiten</p>
+<ul>
+<li>Felder: Regelöffnungszeiten, Ferienregelungen, Ausnahmedaten.</li>
+<li>Aktionen: Ferienzeit anlegen, Raum temporär schließen, spezielle Veranstaltungen markieren.</li>
+</ul>
+</li>
+<li><p>Ausstattungs- und Ressourcenliste</p>
+<ul>
+<li>Verwaltung von Inventar, Zuweisung zu Räumen, Verfügbarkeit und besondere Hinweise (z. B. Bühne erforderlich).</li>
+</ul>
+</li>
+<li><p>Hallenwarte / Caretaker</p>
+<ul>
+<li>Felder: Name, Kontakt, verantwortete Räume, Zuständigkeiten.</li>
+<li>Aktionen: Hallenwart zuordnen, No-Show-Berechtigung vergeben.</li>
+</ul>
+</li>
+<li><p>Dokumentvorlagen &amp; Kategorien</p>
+<ul>
+<li>Aktionen: Vorlagen anlegen, Standardtexte pflegen, Dokumenttypen verwalten.</li>
+</ul>
+</li>
+</ul>
+<h2>Hinweis zu E-Mail / SMTP</h2>
+<p>Im Auslieferungszustand des Testpiloten ist SMTP nicht konfiguriert — das bedeutet:</p>
+<ul>
+<li>Die Anwendung besitzt die Mailfunktionalitäten (Vorlagen, Trigger, Queue-Logik), aber</li>
+<li>Ohne konfigurierte SMTP-Einstellungen werden keine externen E-Mails an reale Adressen verschickt.</li>
+<li>In Tests erscheint die Mailausgabe in Logs oder als Vorschau; zur echten Zustellung konfigurieren Sie die SMTP-Parameter in der Umgebungsdatei (<code>.env</code>) oder im Bereitstellungs-Setup (SMTP-Host, Port, Benutzer, Passwort, TLS).</li>
+</ul>
+<p>Empfehlung: Vor Live-Tests SMTP mit einem Testkonto oder SMTP-Dienst (z. B. Mailtrap, test.smtp) konfigurieren, um Mail-Flows realistisch zu prüfen, ohne Produktionsadressen zu nutzen.</p>
+<h2>Standardabläufe (Use Cases)</h2>
+<ol>
+<li><p>Buchung anlegen (Vereinsnutzer / Bürger)</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Buchung erstellen</code></li>
+<li>Schritte: Raum, Datum &amp; Uhrzeit, Teilnahmezahl eingeben → Formular absenden.</li>
+<li>Erwartet: Antrag erhält Status <code>REQUESTED</code>. Bestätigungsmail (Test) wird generiert.</li>
+</ul>
+</li>
+<li><p>Buchungsanfrage prüfen und genehmigen (Verwaltung / Admin)</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Buchungen</code></li>
+<li>Schritte: Filter auf <code>REQUESTED</code> setzen → Anfrage öffnen → Details prüfen (Versicherung, Zweck, Überschneidungen) → <code>Approve</code> oder <code>Reject</code> klicken.</li>
+<li>Erwartet: Bei <code>Approve</code> wird Status <code>APPROVED</code> und der Termin im Kalender sichtbar. Bei <code>Reject</code> erhält der Antragsteller eine Ablehnung.</li>
+</ul>
+</li>
+<li><p>Serienbuchung anlegen (Verein)</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Serienbuchung</code></li>
+<li>Schritte: Wiederkehrendes Muster wählen (z. B. wöchentlich, mehrere Wochentage), Start- und Enddatum festlegen → absenden.</li>
+<li>Erwartet: Einzeltermine im System als <code>REQUESTED</code> erscheinen; jedes Einzelereignis wird durch den normalen Prüfprozess geführt.</li>
+</ul>
+</li>
+<li><p>Sperre anlegen (Verwaltung)</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Sperren</code> / <code>Closure</code></li>
+<li>Schritte: Raum/Gebäude, Grund, Beginn/Ende angeben → Sperre speichern.</li>
+<li>Erwartet: Betroffene Buchungen im Zeitraum werden markiert oder blockiert; neue Anfragen für den Zeitraum werden verhindert.</li>
+</ul>
+</li>
+<li><p>Warteliste verwalten (Verwaltung)</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Warteliste</code></li>
+<li>Schritte: Wartelistenplätze prüfen → wenn frei wird, Platz 1 per Benachrichtigung informieren oder automatisiert verschieben.</li>
+<li>Erwartet: Reihenfolge nach Eingangszeit; Frist (z. B. 48 Stunden) für Platzannahme beachten.</li>
+</ul>
+</li>
+<li><p>No-Show melden (Hallenwart)</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Buchungen</code> → gebuchte Veranstaltung auswählen → <code>No-Show</code> protokollieren.</li>
+<li>Erwartet: No-Show wird protokolliert, keine automatische Abrechnung, Eintrag wird auditiert.</li>
+</ul>
+</li>
+<li><p>Benutzerkonto anlegen (Admin)</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Benutzer</code></li>
+<li>Schritte: Neue Nutzerinformationen (Name, Email, Rolle) eingeben → Konto anlegen → Passwort sicher übergeben.</li>
+<li>Erwartet: Konto kann sich beim ersten Login ein Passwort setzen.</li>
+</ul>
+</li>
+</ol>
+<h2>Fehler melden &amp; Informationen sammeln</h2>
+<p>Wenn ein Fehler auftritt, notieren Sie:</p>
+<ul>
+<li>Welche Aktion Sie ausgeführt haben (z. B. „Buchung anlegen“)</li>
+<li>Welche Rolle Sie hatten (Portal-Benutzer / Admin)</li>
+<li>Datum &amp; Uhrzeit</li>
+<li>Screenshots und die verwendete URL</li>
+</ul>
+<p>Diese Informationen an das Technikteam senden (siehe Kontakt unten).</p>
+<h2>Kontenvergabe &amp; Passwörter</h2>
+<ul>
+<li>Testkonten werden zentral vom Technikteam angelegt.</li>
+<li>Passwörter werden per sicherem Kanal (z. B. Passwort-Manager, verschlüsselte Mail) übergeben.</li>
+<li>Nach Testende Passwörter ändern oder Konten deaktivieren.</li>
+</ul>
+<h2>Standard-Logindaten (Testpilot-Auslieferungszustand)</h2>
+<p>Im Auslieferungszustand dieser Testumgebung werden üblicherweise einige vorbereitete Testkonten eingerichtet, damit Verwaltung und Vereine schnell loslegen können. Die tatsächlichen Zugangsdaten (insbesondere Passwörter) werden vom Technikteam sicher verteilt. Beispiele für die vorkonfigurierten Kontotypen:</p>
+<ul>
+<li><p>Gemeinde (Verwaltung / Admin)</p>
+<ul>
+<li>Benutzer (Beispiel): <a href="mailto:gemeinde.admin@beispiel.local">gemeinde.admin@beispiel.local</a></li>
+<li>Passwort (Beispiel): Test1234!Test</li>
+<li>Rolle: <code>ADMIN</code></li>
+<li>Zweck: Vollständige Verwaltungs- und Genehmigungsrechte (Buchungen prüfen, Sperren anlegen, Stammdaten pflegen).</li>
+</ul>
+</li>
+<li><p>Verein (Portal-Benutzer)</p>
+<ul>
+<li>Benutzer (Beispiel): <a href="mailto:verein.mustermann@verein.local">verein.mustermann@verein.local</a></li>
+<li>Passwort (Beispiel): Test1234!Test</li>
+<li>Rolle: <code>PORTAL_USER</code></li>
+<li>Zweck: Buchungen anlegen, eigene Anträge verwalten, Dokumente hochladen.</li>
+</ul>
+</li>
+<li><p>Hallenwart / Caretaker</p>
+<ul>
+<li>Benutzer (Beispiel): <a href="mailto:hallenwart.mustermann@beispiel.local">hallenwart.mustermann@beispiel.local</a></li>
+<li>Passwort (Beispiel): Test1234!Test</li>
+<li>Rolle: <code>CARETAKER</code> (oder entsprechendes internes Recht)</li>
+<li>Zweck: No-Show-Meldungen, lokale Handover-Schritte, Sicht auf zugewiesene Räume.</li>
+</ul>
+</li>
+</ul>
+<p>Wichtiger Hinweis: In dieser Testversion ist keine Self-Service-Funktion zum Ändern von Passwörtern über das UI implementiert. Zugangsdaten werden zentral gesetzt oder vom Technikteam zurückgesetzt. Bitte behandeln Sie die Zugangsdaten vertraulich und fordern Sie neue Testkonten beim Technikteam an, falls weitere Rollen benötigt werden.</p>
+<h2>Kurze SUPER-ADMIN Richtlinie</h2>
+<ul>
+<li><code>SUPER-ADMIN</code> ist nur für technische Aufgaben (Setup, Migrationen, Notfallwiederherstellung).</li>
+<li>Nicht verwenden für Routine-Tests oder Genehmigungen.</li>
+<li>Jede Nutzung dokumentieren: Zweck, Zeitpunkt, verantwortliche Person.</li>
+</ul>
+<h2>Abschluss &amp; Verantwortlichkeiten</h2>
+<ul>
+<li>Betriebsverantwortlich: Gemeindetechnik (Deployment, Backups)</li>
+<li>Fachverantwortlich: Sachbearbeiter für Buchungen (Genehmigungen, Sperren)</li>
+<li>Support: Technikteam (Fehler, Zugangsprobleme)</li>
+</ul>
+<h2>Kontakt</h2>
+<p>Technikteam: Mag. Andreas Hofreither / +43 (664) 23 14 524 / <a href="mailto:andreas@hofreither.at">andreas@hofreither.at</a>
+Fachkontakt Buchungen: [Name/Email eintragen]</p>
+<p>Möchten Sie, dass ich diese Anleitung als PDF exportiere oder weitere Screenshots/Beispiele ergänze? Die Datei habe ich im Repo abgelegt unter: <a href="docs/testbetrieb-bedienungsanleitung.md">docs/testbetrieb-bedienungsanleitung.md</a></p>
+<h2>Weitere Standardabläufe — Gemeinde (Verwaltung)</h2>
+<ul>
+<li><p>Stornierung einer bestätigten Buchung:</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Buchungen</code></li>
+<li>Schritte: Buchung auswählen → <code>Cancel</code>/<code>Stornieren</code> → Grund eingeben → Buchung auf <code>CANCELLED</code> setzen → betroffene Parteien informieren.</li>
+<li>Erwartet: Termin ist aus Kalender entfernt/markiert; Audit-Eintrag vorhanden.</li>
+</ul>
+</li>
+<li><p>Ersatztermin erstellen (nach Ablehnung oder Verschiebung):</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Buchungen</code> oder <code>Serien</code></li>
+<li>Schritte: Neue Anfrage manuell anlegen oder Änderungsantrag annehmen und neuen Termin anlegen → alten Termin ggf. als <code>MOVED</code> kennzeichnen.</li>
+<li>Erwartet: Konsistente Historie, Nutzerbenachrichtigung.</li>
+</ul>
+</li>
+<li><p>Notfall-Schließung (z. B. Unwetter, Sicherheit):</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Sperren</code> / <code>Closure</code></li>
+<li>Schritte: Große Sperre für betroffenes Gebäude anlegen, kommunizieren, laufende Veranstaltungen kontaktieren.</li>
+<li>Erwartet: Sofortige Blockierung, Hinweise im Dashboard, ggf. manuelle Nachbearbeitung genehmigter Buchungen.</li>
+</ul>
+</li>
+<li><p>Abrechnungsexport für Abrechnungsteam:</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Abrechnung</code> / <code>Berichte</code></li>
+<li>Schritte: Zeitraum wählen → Export (CSV/Excel) generieren → Datei für Buchhaltung bereitstellen.</li>
+<li>Erwartet: Vollständige Liste genehmigter Buchungen mit Preisen und Rechnungsreferenzen.
+ Hinweis: Die automatische Erstellung und der Versand von Rechnungen sind in Version 1 noch nicht implementiert; hier erfolgt lediglich die Export-Vorbereitung zur weiteren Verarbeitung extern.</li>
+</ul>
+</li>
+<li><p>Rollen-/Rechteüberprüfung (Quarterly):</p>
+<ul>
+<li>Menü: <code>Admin</code> → <code>Rollen/Rechte</code> / <code>Benutzer</code></li>
+<li>Schritte: Rollenliste prüfen, inaktive Nutzer deaktivieren, besondere Rechte dokumentieren.</li>
+<li>Erwartet: Minimale Berechtigungsvergabe, dokumentierte Ausnahmen.</li>
+</ul>
+</li>
+</ul>
+<h2>Weitere Standardabläufe — Verein (Portal)</h2>
+<ul>
+<li><p>Buchung stornieren (Antragsteller):</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Buchungsanträge</code></li>
+<li>Schritte: Eigene Buchung auswählen → <code>Stornieren</code> anklicken → Grund angeben.</li>
+<li>Erwartet: Status auf <code>CANCELLED</code>, Benachrichtigung an Verwaltung.</li>
+</ul>
+</li>
+<li><p>Buchung ändern (Antragsteller):</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Buchungsanträge</code></li>
+<li>Schritte: Änderungswunsch einreichen (Datum/Uhrzeit/Raum) → Änderungsantrag absenden.</li>
+<li>Erwartet: Änderungsantrag im Admin zur Prüfung, automatische Benachrichtigung bei Entscheidung.</li>
+</ul>
+</li>
+<li><p>Wartelistenplatz annehmen:</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Warteliste</code></li>
+<li>Schritte: Angebot annehmen innerhalb Frist (z. B. 48h) → Buchung finalisieren.</li>
+<li>Erwartet: Platz wird bestätigt; falls nicht angenommen, wird nächster Platz informiert.</li>
+</ul>
+</li>
+<li><p>Schadensmeldung (Verein meldet Schaden):</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Schadensmeldungen</code></li>
+<li>Schritte: Schaden beschreiben, Foto optional anhängen, Absenden.</li>
+<li>Erwartet: Schaden erscheint in Admin-Übersicht, Sachbearbeitung weist Maßnahmen zu.</li>
+</ul>
+</li>
+<li><p>Veranstaltungsunterlagen hochladen:</p>
+<ul>
+<li>Menü: <code>Portal</code> → <code>Dokumente</code></li>
+<li>Schritte: Verträge, Versicherungsnachweise hochladen → Dokumenttyp wählen → absenden.</li>
+<li>Erwartet: Admin prüft Dokumente vor Genehmigung, Upload wird als Metadaten gespeichert.</li>
+</ul>
+</li>
+</ul>
+<h2>Urheber / Ersteller</h2>
+<p>Diese Anwendung wurde entwickelt und erstellt von Andreas Hofreither.
+Alle Rechte vorbehalten. Für Fragen zur Anwendung oder zum Testbetrieb kontaktieren Sie bitte den/ die oben genannte(n) Ansprechpartner(innen).</p>
+<h2>Ausblick — Mögliche Erweiterungen</h2>
+<p>Im weiteren Projektverlauf sind mehrere größere Module denkbar, die den Funktionsumfang erweitern und den Betrieb vereinfachen. Nachfolgend ein kurzer Überblick (nicht abschließend):</p>
+<ul>
+<li><p>PSP-Integration (Payment Service Provider)</p>
+<ul>
+<li>Hinweis: Eine direkte PSP-Integration ist derzeit nicht erforderlich und wird vorerst nicht implementiert. Bei Bedarf kann diese später zur Zahlungsabwicklung ergänzt werden.</li>
+</ul>
+</li>
+<li><p>Benachrichtigungen / SMTP-Engine: E-Mail-Queue, Templates, Retry-Logik, Test-SMTP.</p>
+</li>
+<li><p>Background Jobs / Worker: Asynchrone Verarbeitung (E-Mails, Exporte, Fristen), Redis/Bull.</p>
+</li>
+<li><p>Abrechnung / Invoicing: Rechnungs-Engine, Nummernkreise, PDF-Rechnungen, Export.</p>
+</li>
+<li><p>Kalender / Resource Timeline mit Drag&amp;Drop: Raumspalten, 30-Min-Raster, Änderungsanträge.</p>
+</li>
+<li><p>Fortgeschrittene Buchungsregeln: Prioritäten, Blockbuchungen, Konfliktauflösung.</p>
+</li>
+<li><p>Wartelisten-Automatisierung: Angebote, Fristen, automatisches Befüllen.</p>
+</li>
+<li><p>Dokumenten-Storage (Objektstore): S3/MinIO-Integration, presigned URLs, storageKey-Handling.</p>
+</li>
+<li><p>Audit &amp; History: Append-only Auditlogs für Statuswechsel und administrative Aktionen.</p>
+</li>
+<li><p>Rollen &amp; Feingranulares RBAC: UI zur Verwaltung feiner Berechtigungen.</p>
+</li>
+<li><p>Benutzer-Self-Service: Registrierung, Passwort-Reset-Flow (abhängig von SMTP).</p>
+</li>
+<li><p>Reporting &amp; Scheduled Exports: Geplante Exporte, KPI-Dashboards.</p>
+</li>
+<li><p>Monitoring &amp; Healthchecks: Sentry, Metriken, Health-Endpunkte.</p>
+</li>
+</ul>
+<p>Wenn gewünscht, kann das Technikteam priorisieren, welche dieser Module als nächstes umgesetzt werden sollen. Die wichtigsten operativen Punkte sind SMTP/Notifications, Background-Jobs, Audit/History und Document-Storage.</p>
+</body></html>
