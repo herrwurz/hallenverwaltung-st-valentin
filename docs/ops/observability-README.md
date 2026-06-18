@@ -22,6 +22,11 @@ Hinweis: Das Projekt vermeidet die Pflichtinstallation von `nodemailer` auf dem 
 4) Webhook (`OBSERVABILITY_WEBHOOK_URL`)
 5) Fallback: Konsolenlog (keine Installation nötig)
 
+PDF‑Erzeugung:
+
+- Das Projekt verwendet `puppeteer-core` und versucht, ein lokal installiertes Chrome/Edge als `executablePath` zu nutzen. Es wird **kein** Chromium‑Download erzwungen, solange `puppeteer` nicht installiert.
+- Falls auf einem Server keine systemweite Browser‑Installation verfügbar ist, können Sie die HTML‑Variante erzeugen und manuell als PDF drucken.
+
 Kurzanleitung: Test‑Alert lokal
 
 1. Optional: `npm install nodemailer`
