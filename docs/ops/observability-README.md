@@ -64,3 +64,58 @@ E‑Mails sind kurze, strukturierte Nachrichten mit Betreff, Text und (wo sinnvo
 ---
 
 Bei Bedarf ergänze ich Beispiele für `curl`‑Aufrufe zum Testen der Healthcheck‑Route oder Vorlagen für `systemd`/Task‑Scheduler Einträge.
+
+## Beispiele zum Testen
+
+Curlexample: Healthcheck prüfen (kein Auth):
+
+```bash
+curl -v "http://localhost:3000/api/health"
+curl -v "http://localhost:3000/api/health?alert=true"
+```
+
+SendGrid Test (post):
+
+```bash
+curl -X POST "https://api.sendgrid.com/v3/mail/send" \
+	-H "Authorization: Bearer $SENDGRID_API_KEY" \
+	-H "Content-Type: application/json" \
+	-d '{"personalizations":[{"to":[{"email":"ops@example.org"}]}],"from":{"email":"noreply@example.org"},"subject":"Test Alert","content":[{"type":"text/plain","value":"Healthcheck Alert"}]}'
+```
+
+`systemd` (Linux) — einfacher Healthcheck‑Timer + Service (Beispiel):
+
+`/etc/systemd/system/hv-healthcheck.service`:
+
+```
+[Unit]
+Description=HV Healthcheck Runner
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -fsS "http://localhost:3000/api/health?alert=true"
+```
+
+`/etc/systemd/system/hv-healthcheck.timer`:
+
+```
+[Unit]
+Description=Run HV healthcheck every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+```
+
+Windows Task Scheduler (PowerShell) — geplante Prüfung alle 5 Minuten:
+
+```powershell
+$action = New-ScheduledTaskAction -Execute 'PowerShell.exe' -Argument '-NoProfile -WindowStyle Hidden -Command "try { Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:3000/api/health?alert=true\" -TimeoutSec 30 } catch { Write-Error \"Healthcheck failed\" }"'
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration ([TimeSpan]::MaxValue)
+Register-ScheduledTask -TaskName 'HV Healthcheck' -Action $action -Trigger $trigger -RunLevel Highest
+```
+
+Diese Beispiele sind bewusst minimal — passen Sie `host`, `ports` und `Empfänger` an Ihre Umgebung an.
