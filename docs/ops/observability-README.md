@@ -9,6 +9,8 @@ Wichtige Umgebungsvariablen (Testpilot / Staging):
 - `SENTRY_ENVIRONMENT` — optional, z.B. `staging`.
 - `OBSERVABILITY_ALERT_EMAILS` — Komma‑getrennte Liste an E‑Mail‑Adressen für Alerts.
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — SMTP Konfiguration für `lib/alerts.js`.
+ - `SENDGRID_API_KEY` — optional; wenn gesetzt, nutzt `lib/alerts.js` die SendGrid HTTP API (kein zusätzliches Paket nötig).
+ - `SENDGRID_FROM` — optional, Absenderadresse für SendGrid.
 
 Kurzanleitung: Test‑Alert lokal
 
