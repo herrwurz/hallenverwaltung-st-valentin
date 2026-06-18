@@ -176,7 +176,82 @@ Im Auslieferungszustand des Testpiloten ist SMTP nicht konfiguriert — das bede
 - Ohne konfigurierte SMTP-Einstellungen werden keine externen E-Mails an reale Adressen verschickt.
 - In Tests erscheint die Mailausgabe in Logs oder als Vorschau; zur echten Zustellung konfigurieren Sie die SMTP-Parameter in der Umgebungsdatei (`.env`) oder im Bereitstellungs-Setup (SMTP-Host, Port, Benutzer, Passwort, TLS).
 
-Empfehlung: Vor Live-Tests SMTP mit einem Testkonto oder SMTP-Dienst (z. B. Mailtrap, test.smtp) konfigurieren, um Mail-Flows realistisch zu prüfen, ohne Produktionsadressen zu nutzen.
+Alternativ zu SMTP unterstützt die Anwendung HTTP-basierte E-Mail-Provider (kein lokaler SMTP-Agent erforderlich):
+
+- SendGrid: `SENDGRID_API_KEY` setzen
+- Mailgun: `MAILGUN_API_KEY` + `MAILGUN_DOMAIN` setzen
+- Postmark: `POSTMARK_API_TOKEN` setzen
+- Webhook-Fallback: `OBSERVABILITY_WEBHOOK_URL` (z. B. Slack/Teams)
+
+Die Priorität ist: SendGrid → Mailgun → Postmark → Webhook → lokales Log. Empfehlung: Vor Live-Tests mindestens einen Provider konfigurieren, um Mail-Flows realistisch zu prüfen, ohne Produktionsadressen zu nutzen.
+
+Monitoring & Healthchecks
+--------------------------
+Die Anwendung verfügt über eine eingebaute Healthcheck-Route und optionale Sentry-Integration.
+
+**Healthcheck-Endpunkt:**
+
+```
+GET /api/health          → { status: 'ok', version, time }
+GET /api/health?alert=true  → sendet Probe-Benachrichtigung an konfigurierte Alert-Ziele
+```
+
+**Relevante Umgebungsvariablen:**
+
+- `SENTRY_DSN` — optional; Sentry wird nur aktiviert wenn gesetzt (empfohlen für Staging/QA)
+- `OBSERVABILITY_ALERT_EMAILS` — CSV der Ziel-E-Mail-Adressen für kritische Alerts
+- `HEALTHCHECK_URL` — externe Healthcheck-Probe (z. B. Healthchecks.io)
+
+**Kurztest per curl:**
+
+```bash
+curl -v "http://localhost:3000/api/health"
+curl -v "http://localhost:3000/api/health?alert=true"
+```
+
+**Automatisierter Healthcheck — Linux (systemd):**
+
+Datei `/etc/systemd/system/hv-healthcheck.service`:
+
+```
+[Unit]
+Description=HV Healthcheck Runner
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -fsS "http://localhost:3000/api/health?alert=true"
+```
+
+Datei `/etc/systemd/system/hv-healthcheck.timer`:
+
+```
+[Unit]
+Description=Run HV healthcheck every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+```
+
+**Automatisierter Healthcheck — Windows (Task Scheduler):**
+
+```powershell
+$action = New-ScheduledTaskAction -Execute 'PowerShell.exe' `
+  -Argument '-NoProfile -WindowStyle Hidden -Command "try { Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:3000/api/health?alert=true\" -TimeoutSec 30 } catch { Write-Error \"Healthcheck failed\" }"'
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
+  -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration ([TimeSpan]::MaxValue)
+Register-ScheduledTask -TaskName 'HV Healthcheck' -Action $action -Trigger $trigger -RunLevel Highest
+```
+
+**Runbook — Alarm P0:**
+
+1. Healthcheck-Alarm per E-Mail/Webhook empfangen.
+2. Sentry prüfen (sofern `SENTRY_DSN` gesetzt) auf Exception-Traces.
+3. Prozess/Service neu starten, erneuten Healthcheck durchführen.
+4. Bei wiederholten Alarmen: Eskalation an Technikteam (Kontakt siehe unten).
 
 
 Standardabläufe (Use Cases)
@@ -272,7 +347,10 @@ Kontakt
 Technikteam: Mag. Andreas Hofreither / +43 (664) 23 14 524 / andreas@hofreither.at
 Fachkontakt Buchungen: [Name/Email eintragen]
 
-Möchten Sie, dass ich diese Anleitung als PDF exportiere oder weitere Screenshots/Beispiele ergänze? Die Datei habe ich im Repo abgelegt unter: [docs/testbetrieb-bedienungsanleitung.md](docs/testbetrieb-bedienungsanleitung.md)
+Weitere Observability‑Hinweise and Beispiele finden Sie in `docs/ops/observability-README.md`.
+
+Diese Anwendung wurde entwickelt und erstellt von Andreas Hofreither
+
 
 Weitere Standardabläufe — Gemeinde (Verwaltung)
 ---------------------------------------------
@@ -352,7 +430,7 @@ Im weiteren Projektverlauf sind mehrere größere Module denkbar, die den Funkti
 - Rollen & Feingranulares RBAC: UI zur Verwaltung feiner Berechtigungen.
 - Benutzer-Self-Service: Registrierung, Passwort-Reset-Flow (abhängig von SMTP).
 - Reporting & Scheduled Exports: Geplante Exporte, KPI-Dashboards.
-- Monitoring & Healthchecks: Sentry, Metriken, Health-Endpunkte.
+- Metriken / Dashboards: KPI-Dashboards, strukturierte Metriken-Aggregation.
 
 Wenn gewünscht, kann das Technikteam priorisieren, welche dieser Module als nächstes umgesetzt werden sollen. Die wichtigsten operativen Punkte sind SMTP/Notifications, Background-Jobs, Audit/History und Document-Storage.
 
