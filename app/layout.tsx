@@ -12,7 +12,7 @@ try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
   const logger = require('../lib/logger');
   logger && logger.info && logger.info('Observability: init attempted from app/layout');
-} catch (err) {
+} catch (err: any) {
   // best-effort; do not fail app startup if observability wiring isn't available
   // eslint-disable-next-line no-console
   console.warn('Observability init skipped:', err && err.message ? err.message : err);
