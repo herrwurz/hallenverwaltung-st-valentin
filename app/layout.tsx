@@ -15,7 +15,7 @@ try {
 } catch (err: any) {
   // best-effort; do not fail app startup if observability wiring isn't available
   // eslint-disable-next-line no-console
-  console.warn('Observability init skipped:', err && err.message ? err.message : err);
+  console.warn('Observability init skipped:', String(err));
 }
 
 export const metadata: Metadata = {
