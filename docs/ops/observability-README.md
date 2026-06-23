@@ -1,83 +1,121 @@
-**Observability — Kurzreferenz**
+# Observability — Betriebsleitfaden (MVP)
 
-- **Healthcheck endpoint:** `/api/health` (GET) — liefert JSON `{ status: 'ok', version, time }`.
-- **Test alert:** `GET /api/health?alert=true` löst einen Test‑Alert über die interne Alerts‑Bridge aus.
+Kurzer Leitfaden für den Testbetrieb: Ausrichtung, "sparsamer" Betriebsmodus und empfohlene Einstellungen.
 
-Wichtige Umgebungsvariablen (Testpilot / Staging):
+## Ziel
 
-- `SENTRY_DSN` — optional, Sentry DSN.
-- `SENTRY_ENVIRONMENT` — optional, z.B. `staging`.
-- `OBSERVABILITY_ALERT_EMAILS` — Komma‑getrennte Liste an E‑Mail‑Adressen für Alerts.
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — SMTP Konfiguration für `lib/alerts.js`.
- - `SENDGRID_API_KEY` — optional; wenn gesetzt, nutzt `lib/alerts.js` die SendGrid HTTP API (kein zusätzliches Paket nötig).
- - `SENDGRID_FROM` — optional, Absenderadresse für SendGrid.
- - `MAILGUN_API_KEY` + `MAILGUN_DOMAIN` — optionale Mailgun HTTP API Konfiguration.
- - `POSTMARK_API_TOKEN` — optionale Postmark HTTP API Konfiguration.
- - `OBSERVABILITY_WEBHOOK_URL` — optional; Webhook für Alerts (Slack/Teams oder eigenes Receiver‑Endpoint).
+Dieses Dokument beschreibt die minimale Observability‑Ausstattung (MVP): strukturierte Logs, Healthcheck, Alerts und optionale Sentry‑Integration. Der Fokus liegt auf einem sparsamen Betriebsmodus für kommunale Testinstallationen — möglichst ohne Pflichtinstallation schwerer Binaries oder persistenter Agenten.
 
-Hinweis: Das Projekt vermeidet die Pflichtinstallation von `nodemailer` auf dem Gemeindeserver. Priorität der Versandwege:
-1) SendGrid (wenn `SENDGRID_API_KEY` gesetzt)
-2) Mailgun (wenn `MAILGUN_API_KEY` + `MAILGUN_DOMAIN` gesetzt)
-3) Postmark (wenn `POSTMARK_API_TOKEN` gesetzt)
-4) Webhook (`OBSERVABILITY_WEBHOOK_URL`)
-5) Fallback: Konsolenlog (keine Installation nötig)
+## Prinzipien (Sparsamkeit)
 
-PDF‑Erzeugung:
+- Vermeide große Binärinstallationen auf Gemeinde‑Servern (kein zwingendes `puppeteer`/Chromium, kein `nodemailer`‑SMTP‑Agent).\
+- Bevorzuge HTTP‑APIs für E‑Mail/Alerts: SendGrid, Mailgun, Postmark oder Webhooks.\
+- Healthchecks (z. B. Healthchecks.io) oder externes Uptime‑Monitoring statt eines selbst‑laufenden Watchers.\
+- Fallbacks: lokale Konsolen‑/Dateilogs plus strukturierte JSON‑Logs, damit externe Sammler (Fluentd, Filebeat) die Daten einsammeln können.
 
-- Das Projekt verwendet `puppeteer-core` und versucht, ein lokal installiertes Chrome/Edge als `executablePath` zu nutzen. Es wird **kein** Chromium‑Download erzwungen, solange `puppeteer` nicht installiert.
-- Falls auf einem Server keine systemweite Browser‑Installation verfügbar ist, können Sie die HTML‑Variante erzeugen und manuell als PDF drucken.
+## Empfohlene Umgebungsvariablen
 
-Kurzanleitung: Test‑Alert lokal
+- `SENTRY_DSN` — optional, Sentry nur aktivieren wenn gesetzt.\
+- `OBSERVABILITY_ALERT_EMAILS` — CSV der Ziel‑E‑Mail‑Adressen für kritische Alerts.\
+- `SENDGRID_API_KEY`, `MAILGUN_API_KEY`, `MAILGUN_DOMAIN`, `POSTMARK_API_TOKEN` — Priorisierte HTTP‑Provider für Mail/Alerts.\
+- `OBSERVABILITY_WEBHOOK_URL` — einfacher Webhook (z. B. Slack/Teams/Generic) als letzter Fallback.\
+- `HEALTHCHECK_URL` — falls Host eine externe Healthcheck‑Probe erhalten soll.
 
-1. Optional: `npm install nodemailer`
-2. Setze Umgebungsvariablen (z.B. in PowerShell):
+## Healthcheck / Liveness
+
+- Endpoint: `GET /api/health` — liefert `{ status: 'ok', version, time }`.\
+- Test‑Alert: `GET /api/health?alert=true` sendet eine Probe‑Benachrichtigung an die konfigurierten Alert‑Ziele.
+
+## Alerts — Prioritäten & Verhalten
+
+1. Wenn `SENDGRID_API_KEY` gesetzt → benutze SendGrid HTTP API.\
+2. Sonst `MAILGUN_API_KEY` + `MAILGUN_DOMAIN`.\
+3. Sonst `POSTMARK_API_TOKEN`.\
+4. Sonst `OBSERVABILITY_WEBHOOK_URL`.\
+5. Sonst: Logge lokal und schreibe eine Datei `/var/log/hv-observability-alerts.log` (oder Windows‑äquivalent).
+
+E‑Mails sind kurze, strukturierte Nachrichten mit Betreff, Text und (wo sinnvoll) Link zur Healthcheck/Statusseite.
+
+## PDF / Export Hinweise (sparsamer Modus)
+
+- Verwende `puppeteer-core` + systemweiten Chrome/Edge wenn vorhanden.\
+- Falls kein Systembrowser, erzeugt die Pipeline ein HTML‑Fallback und dokumentiert die fehlende PDF‑Erzeugung; keine automatische Chromium‑Installation.
+- Dateischreibende Aktionen atomar ausführen (tmp → rename), um Windows/OneDrive EBUSY‑Probleme zu vermeiden.
+
+## Betriebsempfehlungen für Gemeinden
+
+- Setze nur die benötigten HTTP‑Provider‑Keys. Keine weiteren systemweiten Agenten installieren.\
+- Nutze externe Healthchecks (Healthchecks.io) und verknüpfe diese mit den im Unternehmen vorhandenen Alarmwegen (Telefon, SMS, Pager, E‑Mail).\
+- Halte `SENTRY_DSN` in Staging/QA gesetzt, in der Pilot‑Installation optional. Sentry‑Alerts können nützliche Kontextdaten liefern, sind aber kein Ersatz für Liveness/uptime‑Monitoring.
+
+## Runbook – einfache Alarmbehandlung (P0)
+
+1. Healthcheck Alarm empfängt E‑Mail/Webhook.\
+2. Technik‑Team prüft `SENTRY` (sofern aktiviert) auf Exception‑Traces.\
+3. Falls Deployment/Server‑Fehler: Neustart von Prozess/Service, erneuter Healthcheck.\
+4. Falls wiederholte Alarme: Eskaliere an Betreiber (Technikteam: Mag. Andreas Hofreither / +43 (664) 23 14 524 / andreas@hofreither.at).
+
+## Hinweise & Designentscheidungen
+
+- SMTP ist im Testpiloten nicht vorauskonfiguriert; die App unterstützt HTTP‑Provider.\
+- Abrechnung (`Abrechnung`) ist noch nicht implementiert; Beobachtungs‑/Alerting‑Funktionen sind hiervon unabhängig.\
+- Ziel: minimale, auditierbare Beobachtbarkeit ohne invasive Server‑Änderungen.
+
+---
+
+Bei Bedarf ergänze ich Beispiele für `curl`‑Aufrufe zum Testen der Healthcheck‑Route oder Vorlagen für `systemd`/Task‑Scheduler Einträge.
+
+## Beispiele zum Testen
+
+Curlexample: Healthcheck prüfen (kein Auth):
+
+```bash
+curl -v "http://localhost:3000/api/health"
+curl -v "http://localhost:3000/api/health?alert=true"
+```
+
+SendGrid Test (post):
+
+```bash
+curl -X POST "https://api.sendgrid.com/v3/mail/send" \
+	-H "Authorization: Bearer $SENDGRID_API_KEY" \
+	-H "Content-Type: application/json" \
+	-d '{"personalizations":[{"to":[{"email":"ops@example.org"}]}],"from":{"email":"noreply@example.org"},"subject":"Test Alert","content":[{"type":"text/plain","value":"Healthcheck Alert"}]}'
+```
+
+`systemd` (Linux) — einfacher Healthcheck‑Timer + Service (Beispiel):
+
+`/etc/systemd/system/hv-healthcheck.service`:
+
+```
+[Unit]
+Description=HV Healthcheck Runner
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -fsS "http://localhost:3000/api/health?alert=true"
+```
+
+`/etc/systemd/system/hv-healthcheck.timer`:
+
+```
+[Unit]
+Description=Run HV healthcheck every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+```
+
+Windows Task Scheduler (PowerShell) — geplante Prüfung alle 5 Minuten:
 
 ```powershell
-$env:OBSERVABILITY_ALERT_EMAILS = 'you@example.com'
-$env:SENDGRID_API_KEY = '<your_sendgrid_api_key>'
-$env:SENDGRID_FROM = 'no-reply@example.com'
-## optional alternatives:
-$env:MAILGUN_API_KEY = '<your_mailgun_key>'
-$env:MAILGUN_DOMAIN = 'mg.example.com'
-$env:POSTMARK_API_TOKEN = '<your_postmark_token>'
+$action = New-ScheduledTaskAction -Execute 'PowerShell.exe' -Argument '-NoProfile -WindowStyle Hidden -Command "try { Invoke-WebRequest -UseBasicParsing -Uri \"http://localhost:3000/api/health?alert=true\" -TimeoutSec 30 } catch { Write-Error \"Healthcheck failed\" }"'
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration ([TimeSpan]::MaxValue)
+Register-ScheduledTask -TaskName 'HV Healthcheck' -Action $action -Trigger $trigger -RunLevel Highest
 ```
 
-3. Starte die App (`npm run dev`) und rufe auf:
-
-```bash
-curl "http://localhost:3000/api/health?alert=true"
-```
-
-Beispiel: SendGrid Test per curl (wenn `SENDGRID_API_KEY` gesetzt):
-
-```bash
-curl -i --request POST \
-  --url https://api.sendgrid.com/v3/mail/send \
-  --header 'Authorization: Bearer $SENDGRID_API_KEY' \
-  --header 'Content-Type: application/json' \
-  --data '{"personalizations":[{"to":[{"email":"you@example.com"}]}],"from":{"email":"no-reply@example.com"},"subject":"Test","content":[{"type":"text/plain","value":"Test email"}]}'
-```
-
-Healthcheck Runner
-
-- Skript: `scripts/health-check.js` — einfach per Cron/Service ausführen. Beispiel (Crontab):
-
-```cron
-# alle 5 Minuten
-*/5 * * * * cd /srv/hv && HEALTHCHECK_URL="http://localhost:3000/api/health" /usr/bin/node scripts/health-check.js >> logs/health.log 2>&1
-```
-
-Docker‑/Compose‑Snippet (Beispiel):
-
-```yaml
-services:
-  app:
-    environment:
-      - OBSERVABILITY_ALERT_EMAILS=ops@example.com
-      - SMTP_HOST=smtp.example.com
-      - SMTP_PORT=587
-      - SMTP_USER=user@example.com
-      - SMTP_PASS=${SMTP_PASS}
-```
-
-Hinweis: `lib/alerts.js` ist bewusst leichtgewichtig und setzt `nodemailer` optional voraus. Ohne SMTP konfiguriert die Bridge nur Konsolen‑Ausgaben.
+Diese Beispiele sind bewusst minimal — passen Sie `host`, `ports` und `Empfänger` an Ihre Umgebung an.
