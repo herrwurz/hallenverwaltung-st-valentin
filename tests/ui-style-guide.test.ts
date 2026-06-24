@@ -99,9 +99,7 @@ test("entry and authorization pages use the deployment-ready light shell", () =>
   const unauthorizedPage = readFileSync("app/unauthorized/page.tsx", "utf8");
 
   assert.match(homePage, /windows-shell/);
-  assert.match(homePage, /Öffentlicher Bereich/);
-  assert.match(homePage, /Vereinsportal/);
-  assert.match(homePage, /Verwaltung/);
+  assert.match(homePage, /LoginForm/);
   assert.doesNotMatch(homePage, /Phase 1/);
   assert.match(unauthorizedPage, /windows-shell/);
   assert.match(unauthorizedPage, /AppBackLink/);
