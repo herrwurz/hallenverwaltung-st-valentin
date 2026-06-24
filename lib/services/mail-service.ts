@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { getMailDeliveryMode } from "@/lib/config/environment";
 
-// nodemailer is an optional runtime dependency (not in package.json).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let nodemailerModule: any = null;
 function requireNodemailer() {
