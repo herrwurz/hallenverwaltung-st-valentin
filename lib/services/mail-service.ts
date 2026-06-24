@@ -1,21 +1,6 @@
 import { z } from "zod";
 import { getMailDeliveryMode } from "@/lib/config/environment";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let nodemailerModule: any = null;
-function requireNodemailer() {
-  if (!nodemailerModule) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      nodemailerModule = require("nodemailer");
-    } catch {
-      throw new MailDeliveryError(
-        "nodemailer ist nicht installiert. Bitte nodemailer als Abhängigkeit hinzufügen, um SMTP-Versand zu nutzen.",
-      );
-    }
-  }
-  return nodemailerModule;
-}
+import { smtpSend, SmtpError } from "@/lib/services/smtp-client";
 
 const booleanFromEnv = z
   .union([z.boolean(), z.string()])
@@ -39,10 +24,6 @@ export type MailPayload = {
   text: string;
   html: string;
 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let cachedTransporter: any | null = null;
-let cachedTransportKey: string | null = null;
 
 function getMailEnv() {
   return {
@@ -104,43 +85,24 @@ export function getSmtpConfig() {
   return smtpConfigSchema.parse(env);
 }
 
-function getTransporter() {
+export async function sendEmail(payload: MailPayload) {
   const config = getSmtpConfig();
-  const key = JSON.stringify(config);
 
-  if (!cachedTransporter || cachedTransportKey !== key) {
-    const nodemailer = requireNodemailer();
-    cachedTransporter = nodemailer.createTransport({
+  try {
+    await smtpSend({
       host: config.host,
       port: config.port,
       secure: config.secure,
-      auth: config.user && config.password ? { user: config.user, pass: config.password } : undefined,
-      connectionTimeout: 10_000,
-      greetingTimeout: 8_000,
-      socketTimeout: 15_000,
-    });
-    cachedTransportKey = key;
-  }
-
-  return {
-    transporter: cachedTransporter,
-    from: `${config.fromName} <${config.fromEmail}>`,
-  };
-}
-
-export async function sendEmail(payload: MailPayload) {
-  const { transporter, from } = getTransporter();
-
-  try {
-    return await transporter.sendMail({
-      from,
+      user: config.user,
+      password: config.password,
+      from: `${config.fromName} <${config.fromEmail}>`,
       to: payload.to,
       subject: payload.subject,
       text: payload.text,
       html: payload.html,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unbekannter SMTP-Fehler";
+    const message = error instanceof SmtpError || error instanceof Error ? error.message : "Unbekannter SMTP-Fehler";
     throw new MailDeliveryError(message);
   }
 }
