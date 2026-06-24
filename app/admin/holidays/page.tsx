@@ -4,6 +4,7 @@ import {
   importHolidayPresetAction,
 } from "@/app/admin/holidays/actions";
 import { AppFeedback } from "@/components/app-feedback";
+import { HolidayClosureTargetPicker } from "@/components/holiday-closure-target-picker";
 import { HolidaysDataTable, type HolidayTableRow } from "@/components/phase25-data-tables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -204,30 +205,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
                   ))}
                 </select>
               </label>
-              <label className="text-sm font-medium">
-                Gebäude
-                <select name="buildingId" defaultValue="" className={inputClass}>
-                  <option value="">Keine Gebäudesperre</option>
-                  {data.buildings.map((building) => (
-                    <option key={building.id} value={building.id}>
-                      {building.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-sm font-medium">
-                Raum
-                <select name="roomId" defaultValue="" className={inputClass}>
-                  <option value="">Keine Raumsperre</option>
-                  {data.buildings.flatMap((building) =>
-                    building.rooms.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {building.name} - {room.name}
-                      </option>
-                    )),
-                  )}
-                </select>
-              </label>
+              <HolidayClosureTargetPicker buildings={data.buildings} />
               <label className="text-sm font-medium">
                 Sperrstatus
                 <select name="status" required defaultValue="CLOSED" className={inputClass}>
