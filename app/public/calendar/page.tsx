@@ -92,8 +92,8 @@ export default async function PublicCalendarPage({ searchParams }: { searchParam
         calendar={calendar}
         freeSlots={freeSlots}
         detailHint={detailHint}
-        backHref="/public"
-        backLabel="Zurück zur Öffentlichkeit"
+        backHref="/login"
+        backLabel="Anmelden"
       />
     </AreaShell>
   );

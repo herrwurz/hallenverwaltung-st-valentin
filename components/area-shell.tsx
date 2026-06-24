@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 
 type AreaShellProps = {
@@ -32,7 +33,14 @@ export function AreaShell({
               {userName ? <span className="text-sm text-muted-foreground">{userName}</span> : null}
               <LogoutButton />
             </div>
-          ) : null}
+          ) : (
+            <Link
+              href="/login"
+              className="shrink-0 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium transition hover:border-primary/60 hover:text-primary"
+            >
+              Anmelden
+            </Link>
+          )}
         </header>
         {children}
       </div>

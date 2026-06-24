@@ -199,6 +199,18 @@ async function seedInitialAdmin() {
 }
 
 async function seedCatalogs() {
+  // Remove obsolete/test organization types (only deletes if no linked organizations)
+  await prisma.organizationType.deleteMany({
+    where: {
+      code: { in: ["EMERGENCY_SERVICE", "E2E_ASSOCIATION"] },
+      organizations: { none: {} },
+    },
+  });
+  // Remove test organizations created by E2E or manual testing
+  await prisma.organization.deleteMany({
+    where: { name: { in: ["E2E Verein", "Katastrophenschutz"] } },
+  });
+
   const organizationTypes = [
     ["MUNICIPALITY", "Gemeinde"],
     ["ASSOCIATION", "Verein"],

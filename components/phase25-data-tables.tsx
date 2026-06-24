@@ -110,10 +110,16 @@ const systemJobColumns: ColumnDef<SystemJobTableRow>[] = [
 
 const seriesColumns: ColumnDef<SeriesTableRow>[] = [
   { accessorKey: "title", header: "Titel" },
-  { accessorKey: "recurrence", header: "Serie" },
+  {
+    accessorKey: "recurrence",
+    header: "Serie",
+    cell: ({ row }) => (
+      <Badge variant={row.original.statusTone}>{row.original.recurrence}</Badge>
+    ),
+  },
   {
     accessorKey: "statusLabel",
-    header: "Serienstatus",
+    header: "Status",
     cell: ({ row }) => <Badge variant={row.original.statusTone}>{row.original.statusLabel}</Badge>,
   },
   { accessorKey: "organization", header: "Organisation" },

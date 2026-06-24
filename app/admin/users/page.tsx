@@ -51,7 +51,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
           <CardDescription>Rollen und Organisationen werden serverseitig validiert.</CardDescription>
         </CardHeader>
         <CardContent>
-          <UserForm roles={data.roles} organizations={data.organizations} />
+          <UserForm roles={data.roles} organizations={data.organizations} buildings={data.buildings} />
         </CardContent>
       </Card>
 
@@ -86,30 +86,66 @@ export default async function UsersPage({ searchParams }: PageProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <UserForm roles={data.roles} organizations={data.organizations} user={user} />
+              <UserForm roles={data.roles} organizations={data.organizations} buildings={data.buildings} user={user} />
             </CardContent>
           </Card>
         ))}
       </section>
+
+      {data.standaloneCaretakers.length > 0 ? (
+        <section className="mt-10 space-y-4">
+          <h3 className="text-xl font-semibold tracking-tight">Hallenwarte ohne Benutzerkonto</h3>
+          <p className="text-sm text-muted-foreground">
+            Diese Hallenwarte sind in der Datenbank erfasst, haben aber noch kein Benutzerkonto. Um ihnen Zugang zu
+            geben, legen Sie unter „Neuer Benutzer" ein Konto an und weisen Sie die Rolle „Hallenwart" zu.
+          </p>
+          {data.standaloneCaretakers.map((caretaker) => (
+            <Card key={caretaker.id}>
+              <CardHeader>
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <CardTitle>{caretaker.name}</CardTitle>
+                    <CardDescription>
+                      {caretaker.email ?? "Keine E-Mail"} |{" "}
+                      {caretaker.buildings.length > 0
+                        ? caretaker.buildings.map((bc) => bc.building.name).join(", ")
+                        : "Kein Gebäude zugeordnet"}
+                    </CardDescription>
+                  </div>
+                  <Badge variant={caretaker.isActive ? "outline" : "secondary"}>
+                    {caretaker.isActive ? "Kein Login" : "Inaktiv"}
+                  </Badge>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
+        </section>
+      ) : null}
     </>
   );
 }
 
 type UserData = Awaited<ReturnType<typeof getUserAdministrationData>>;
 
+const CARETAKER_ROLE_CODE = "CARETAKER";
+
 function UserForm({
   roles,
   organizations,
+  buildings,
   user,
 }: {
   roles: UserData["roles"];
   organizations: UserData["organizations"];
+  buildings: UserData["buildings"];
   user?: UserData["users"][number];
 }) {
   const roleIds = new Set(user?.roles.map(({ roleId }) => roleId));
   const memberships = new Map(user?.organizationMemberships.map((membership) => [membership.organizationId, membership]));
   const primaryOrganizationId = user?.organizationMemberships.find((membership) => membership.isPrimary)?.organizationId;
   const functionValue = user?.organizationMemberships[0]?.function ?? "Mitglied";
+  const isCaretaker = user?.roles.some(({ role }) => role.code === CARETAKER_ROLE_CODE) ?? false;
+  const caretakerBuildingIds = new Set(user?.caretaker?.buildings.map((bc) => bc.building.id) ?? []);
 
   return (
     <form action={saveUserAction} className="space-y-5">
@@ -121,11 +157,11 @@ function UserForm({
         </label>
         <label className="text-sm font-medium">
           E-Mail
-          <input name="email" type="email" required defaultValue={user?.email} className={inputClass} />
+          <input name="email" type="email" required autoComplete="off" defaultValue={user?.email} className={inputClass} />
         </label>
         <label className="text-sm font-medium">
           {user ? "Neues Passwort (optional)" : "Passwort"}
-          <input name="password" type="password" required={!user} minLength={12} className={inputClass} />
+          <input name="password" type="password" required={!user} minLength={12} autoComplete="new-password" className={inputClass} />
         </label>
         <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium">
           <input type="checkbox" name="isActive" defaultChecked={user?.isActive ?? true} />
@@ -143,6 +179,27 @@ function UserForm({
           ))}
         </div>
       </fieldset>
+      {(isCaretaker || buildings.length > 0) ? (
+        <fieldset className="rounded-xl border border-border p-4">
+          <legend className="px-2 text-sm font-medium">Gebäudezuordnung (Hallenwart)</legend>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Nur relevant, wenn die Rolle „Hallenwart" vergeben wird.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {buildings.map((building) => (
+              <label key={building.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="caretakerBuildingIds"
+                  value={building.id}
+                  defaultChecked={caretakerBuildingIds.has(building.id)}
+                />
+                {building.name}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
       <fieldset className="rounded-xl border border-border p-4">
         <legend className="px-2 text-sm font-medium">Organisationen</legend>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

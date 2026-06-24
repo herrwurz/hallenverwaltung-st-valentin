@@ -1,11 +1,13 @@
 import {
   createBuildingClosureAction,
+  deleteBuildingAction,
   deleteBuildingClosureAction,
   saveBuildingAction,
   updateBuildingClosureAction,
 } from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminClosurePanel } from "@/components/admin-closure-panel";
+import { AdminDeleteForm } from "@/components/admin-delete-form";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { BuildingsTable, type BuildingTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
@@ -88,6 +90,14 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
             </CardHeader>
             <CardContent>
               <BuildingForm caretakers={data.caretakers} building={building} />
+              {building.rooms.length === 0 && (
+                <AdminDeleteForm
+                  action={deleteBuildingAction}
+                  id={building.id}
+                  label="Gebäude löschen"
+                  confirmMessage={`Gebäude „${building.name}" wirklich löschen?`}
+                />
+              )}
               <AdminClosurePanel
                 action={createBuildingClosureAction}
                 updateAction={updateBuildingClosureAction}
@@ -130,7 +140,7 @@ function BuildingForm({ caretakers, building }: BuildingFormProps) {
           readOnly={Boolean(building)}
           defaultValue={building?.code}
           className={building ? `${inputClass} bg-muted text-muted-foreground` : inputClass}
-          placeholder="VS_HAUPTPLATZ"
+          placeholder="z.B. NMS_LANGENHART"
         />
         {building ? <span className="mt-1 block text-xs text-muted-foreground">Der Code bleibt nach dem Anlegen unverändert.</span> : null}
       </label>

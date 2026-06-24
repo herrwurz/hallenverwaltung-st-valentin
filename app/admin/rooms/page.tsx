@@ -1,11 +1,13 @@
 import {
   createRoomClosureAction,
+  deleteRoomAction,
   deleteRoomClosureAction,
   saveRoomAction,
   updateRoomClosureAction,
 } from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminClosurePanel } from "@/components/admin-closure-panel";
+import { AdminDeleteForm } from "@/components/admin-delete-form";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { RoomsTable, type RoomTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
@@ -87,6 +89,14 @@ export default async function RoomsPage({ searchParams }: PageProps) {
             </CardHeader>
             <CardContent>
               <RoomForm buildings={data.buildings} rooms={data.rooms} room={room} />
+              {room._count.bookings === 0 && room._count.series === 0 && (
+                <AdminDeleteForm
+                  action={deleteRoomAction}
+                  id={room.id}
+                  label="Raum löschen"
+                  confirmMessage={`Raum „${room.name}" wirklich löschen?`}
+                />
+              )}
               <AdminClosurePanel
                 action={createRoomClosureAction}
                 updateAction={updateRoomClosureAction}
@@ -136,7 +146,15 @@ function RoomForm({
       </label>
       <label className="text-sm font-medium">
         Code
-        <input name="code" required defaultValue={room?.code} className={inputClass} />
+        <input
+          name="code"
+          required
+          readOnly={Boolean(room)}
+          defaultValue={room?.code}
+          className={room ? `${inputClass} bg-muted text-muted-foreground` : inputClass}
+          placeholder="VS_HAUPTSAAL"
+        />
+        {room ? <span className="mt-1 block text-xs text-muted-foreground">Der Code bleibt nach dem Anlegen unverändert.</span> : null}
       </label>
       <label className="text-sm font-medium">
         Name

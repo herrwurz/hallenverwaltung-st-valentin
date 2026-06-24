@@ -75,6 +75,7 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/rooms", label: "Räume", icon: Warehouse, groupLabel: "Stammdaten" },
   { href: "/admin/organizations", label: "Organisationen", icon: Home, groupLabel: "Stammdaten" },
   { href: "/admin/users", label: "Benutzer", icon: Users, groupLabel: "Stammdaten" },
+  { href: "/admin/roles", label: "Rollen/Rechte", icon: ShieldCheck, groupLabel: "Stammdaten" },
   { href: "/admin/billing", label: "Abrechnung", icon: CreditCard, groupLabel: "Extras" },
   { href: "/admin/documents", label: "Dokumente", icon: FileText, groupLabel: "Extras" },
   { href: "/admin/access", label: "Zutritt", icon: KeyRound, groupLabel: "Extras" },
@@ -83,7 +84,6 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/settings/notifications", label: "Benachrichtigungsregeln", icon: Bell, groupLabel: "Einstellungen" },
   { href: "/admin/settings/calendar", label: "Öffentlicher Kalender", icon: Settings, groupLabel: "Einstellungen" },
   { href: "/admin/notifications", label: "Benachrichtigungs-Queue", icon: Bell, groupLabel: "Einstellungen" },
-  { href: "/admin/roles", label: "Rollen/Rechte", icon: ShieldCheck, groupLabel: "Einstellungen" },
 ] as const;
 
 type AdminNavigationProps = {

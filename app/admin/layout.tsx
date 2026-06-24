@@ -51,6 +51,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(canManageUsers
       ? [
           { href: "/admin/users", label: "Benutzer", groupLabel: "Stammdaten" },
+          { href: "/admin/roles", label: "Rollen/Rechte", groupLabel: "Stammdaten" },
           { href: "/admin/buildings", label: "Gebäude", groupLabel: "Stammdaten" },
           { href: "/admin/organizations", label: "Organisationen", groupLabel: "Stammdaten" },
           { href: "/admin/rooms", label: "Räume", groupLabel: "Stammdaten" },
@@ -71,7 +72,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     ...(canManageAccess ? [{ href: "/admin/access", label: "Zutritte", groupLabel: "Extras" }] : []),
     ...(canManageUsers
       ? [
-          { href: "/admin/roles", label: "Rollen/Rechte", groupLabel: "Einstellungen" },
           ...(canBlockRoom ? [{ href: "/admin/holidays", label: "Ferien", groupLabel: "Einstellungen" }] : []),
           { href: "/admin/settings", label: "Systemeinstellungen", groupLabel: "Einstellungen" },
           { href: "/admin/settings/mail", label: "Mail / SMTP", groupLabel: "Einstellungen" },
