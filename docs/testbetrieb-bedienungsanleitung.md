@@ -308,25 +308,37 @@ Kontenvergabe & Passwörter
 
 Standard-Logindaten (Testpilot-Auslieferungszustand)
 --------------------------------------------------
-Im Auslieferungszustand dieser Testumgebung werden üblicherweise einige vorbereitete Testkonten eingerichtet, damit Verwaltung und Vereine schnell loslegen können. Die tatsächlichen Zugangsdaten (insbesondere Passwörter) werden vom Technikteam sicher verteilt. Beispiele für die vorkonfigurierten Kontotypen:
+Die Testumgebung enthält folgende vorbereitete Testkonten. Alle Konten verwenden dasselbe Passwort. Passwörter nach dem Test ändern oder Konten deaktivieren.
+
+- Super-Admin (technisches Setup)
+   - Benutzer: superadmin@test.local
+   - Passwort: Test1234!Test
+   - Rolle: `SUPER_ADMIN`
+   - Zweck: Technische Einrichtung, Stammdaten, Notfallwiederherstellung. Nicht für Routine-Tests verwenden.
 
 - Gemeinde (Verwaltung / Admin)
-   - Benutzer (Beispiel): gemeinde.admin@beispiel.local
-   - Passwort (Beispiel): Test1234!Test
-   - Rolle: `ADMIN`
+   - Benutzer: gemeinde@test.local
+   - Passwort: Test1234!Test
+   - Rolle: `MUNICIPAL_ADMIN`
    - Zweck: Vollständige Verwaltungs- und Genehmigungsrechte (Buchungen prüfen, Sperren anlegen, Stammdaten pflegen).
 
 - Verein (Portal-Benutzer)
-   - Benutzer (Beispiel): verein.mustermann@verein.local
-   - Passwort (Beispiel): Test1234!Test
-   - Rolle: `PORTAL_USER`
+   - Benutzer: verein@test.local
+   - Passwort: Test1234!Test
+   - Rolle: `ORGANIZATION`
    - Zweck: Buchungen anlegen, eigene Anträge verwalten, Dokumente hochladen.
 
 - Hallenwart / Caretaker
-   - Benutzer (Beispiel): hallenwart.mustermann@beispiel.local
-   - Passwort (Beispiel): Test1234!Test
-   - Rolle: `CARETAKER` (oder entsprechendes internes Recht)
+   - Benutzer: hauswart@test.local
+   - Passwort: Test1234!Test
+   - Rolle: `CARETAKER`
    - Zweck: No-Show-Meldungen, lokale Handover-Schritte, Sicht auf zugewiesene Räume.
+
+- VHS
+   - Benutzer: vhs@test.local
+   - Passwort: Test1234!Test
+   - Rolle: `VHS`
+   - Zweck: Buchungen anlegen und verwalten.
 
 Wichtiger Hinweis: In dieser Testversion ist keine Self-Service-Funktion zum Ändern von Passwörtern über das UI implementiert. Zugangsdaten werden zentral gesetzt oder vom Technikteam zurückgesetzt. Bitte behandeln Sie die Zugangsdaten vertraulich und fordern Sie neue Testkonten beim Technikteam an, falls weitere Rollen benötigt werden.
 

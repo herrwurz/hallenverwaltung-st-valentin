@@ -233,7 +233,64 @@
 <li>Ohne konfigurierte SMTP-Einstellungen werden keine externen E-Mails an reale Adressen verschickt.</li>
 <li>In Tests erscheint die Mailausgabe in Logs oder als Vorschau; zur echten Zustellung konfigurieren Sie die SMTP-Parameter in der Umgebungsdatei (<code>.env</code>) oder im Bereitstellungs-Setup (SMTP-Host, Port, Benutzer, Passwort, TLS).</li>
 </ul>
-<p>Empfehlung: Vor Live-Tests SMTP mit einem Testkonto oder SMTP-Dienst (z. B. Mailtrap, test.smtp) konfigurieren, um Mail-Flows realistisch zu prüfen, ohne Produktionsadressen zu nutzen.</p>
+<p>Alternativ zu SMTP unterstützt die Anwendung HTTP-basierte E-Mail-Provider (kein lokaler SMTP-Agent erforderlich):</p>
+<ul>
+<li>SendGrid: <code>SENDGRID_API_KEY</code> setzen</li>
+<li>Mailgun: <code>MAILGUN_API_KEY</code> + <code>MAILGUN_DOMAIN</code> setzen</li>
+<li>Postmark: <code>POSTMARK_API_TOKEN</code> setzen</li>
+<li>Webhook-Fallback: <code>OBSERVABILITY_WEBHOOK_URL</code> (z. B. Slack/Teams)</li>
+</ul>
+<p>Die Priorität ist: SendGrid → Mailgun → Postmark → Webhook → lokales Log. Empfehlung: Vor Live-Tests mindestens einen Provider konfigurieren, um Mail-Flows realistisch zu prüfen, ohne Produktionsadressen zu nutzen.</p>
+<h2>Monitoring &amp; Healthchecks</h2>
+<p>Die Anwendung verfügt über eine eingebaute Healthcheck-Route und optionale Sentry-Integration.</p>
+<p><strong>Healthcheck-Endpunkt:</strong></p>
+<pre><code>GET /api/health          → { status: &#39;ok&#39;, version, time }
+GET /api/health?alert=true  → sendet Probe-Benachrichtigung an konfigurierte Alert-Ziele
+</code></pre>
+<p><strong>Relevante Umgebungsvariablen:</strong></p>
+<ul>
+<li><code>SENTRY_DSN</code> — optional; Sentry wird nur aktiviert wenn gesetzt (empfohlen für Staging/QA)</li>
+<li><code>OBSERVABILITY_ALERT_EMAILS</code> — CSV der Ziel-E-Mail-Adressen für kritische Alerts</li>
+<li><code>HEALTHCHECK_URL</code> — externe Healthcheck-Probe (z. B. Healthchecks.io)</li>
+</ul>
+<p><strong>Kurztest per curl:</strong></p>
+<pre><code class="language-bash">curl -v &quot;http://localhost:3000/api/health&quot;
+curl -v &quot;http://localhost:3000/api/health?alert=true&quot;
+</code></pre>
+<p><strong>Automatisierter Healthcheck — Linux (systemd):</strong></p>
+<p>Datei <code>/etc/systemd/system/hv-healthcheck.service</code>:</p>
+<pre><code>[Unit]
+Description=HV Healthcheck Runner
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -fsS &quot;http://localhost:3000/api/health?alert=true&quot;
+</code></pre>
+<p>Datei <code>/etc/systemd/system/hv-healthcheck.timer</code>:</p>
+<pre><code>[Unit]
+Description=Run HV healthcheck every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+<p><strong>Automatisierter Healthcheck — Windows (Task Scheduler):</strong></p>
+<pre><code class="language-powershell">$action = New-ScheduledTaskAction -Execute &#39;PowerShell.exe&#39; `
+  -Argument &#39;-NoProfile -WindowStyle Hidden -Command &quot;try { Invoke-WebRequest -UseBasicParsing -Uri \&quot;http://localhost:3000/api/health?alert=true\&quot; -TimeoutSec 30 } catch { Write-Error \&quot;Healthcheck failed\&quot; }&quot;&#39;
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
+  -RepetitionInterval (New-TimeSpan -Minutes 5) -RepetitionDuration ([TimeSpan]::MaxValue)
+Register-ScheduledTask -TaskName &#39;HV Healthcheck&#39; -Action $action -Trigger $trigger -RunLevel Highest
+</code></pre>
+<p><strong>Runbook — Alarm P0:</strong></p>
+<ol>
+<li>Healthcheck-Alarm per E-Mail/Webhook empfangen.</li>
+<li>Sentry prüfen (sofern <code>SENTRY_DSN</code> gesetzt) auf Exception-Traces.</li>
+<li>Prozess/Service neu starten, erneuten Healthcheck durchführen.</li>
+<li>Bei wiederholten Alarmen: Eskalation an Technikteam (Kontakt siehe unten).</li>
+</ol>
 <h2>Standardabläufe (Use Cases)</h2>
 <ol>
 <li><p>Buchung anlegen (Vereinsnutzer / Bürger)</p>
@@ -301,30 +358,46 @@
 <li>Nach Testende Passwörter ändern oder Konten deaktivieren.</li>
 </ul>
 <h2>Standard-Logindaten (Testpilot-Auslieferungszustand)</h2>
-<p>Im Auslieferungszustand dieser Testumgebung werden üblicherweise einige vorbereitete Testkonten eingerichtet, damit Verwaltung und Vereine schnell loslegen können. Die tatsächlichen Zugangsdaten (insbesondere Passwörter) werden vom Technikteam sicher verteilt. Beispiele für die vorkonfigurierten Kontotypen:</p>
+<p>Die Testumgebung enthält folgende vorbereitete Testkonten. Alle Konten verwenden dasselbe Passwort. Passwörter nach dem Test ändern oder Konten deaktivieren.</p>
 <ul>
+<li><p>Super-Admin (technisches Setup)</p>
+<ul>
+<li>Benutzer: <a href="mailto:superadmin@test.local">superadmin@test.local</a></li>
+<li>Passwort: Test1234!Test</li>
+<li>Rolle: <code>SUPER_ADMIN</code></li>
+<li>Zweck: Technische Einrichtung, Stammdaten, Notfallwiederherstellung. Nicht für Routine-Tests verwenden.</li>
+</ul>
+</li>
 <li><p>Gemeinde (Verwaltung / Admin)</p>
 <ul>
-<li>Benutzer (Beispiel): <a href="mailto:gemeinde.admin@beispiel.local">gemeinde.admin@beispiel.local</a></li>
-<li>Passwort (Beispiel): Test1234!Test</li>
-<li>Rolle: <code>ADMIN</code></li>
+<li>Benutzer: <a href="mailto:gemeinde@test.local">gemeinde@test.local</a></li>
+<li>Passwort: Test1234!Test</li>
+<li>Rolle: <code>MUNICIPAL_ADMIN</code></li>
 <li>Zweck: Vollständige Verwaltungs- und Genehmigungsrechte (Buchungen prüfen, Sperren anlegen, Stammdaten pflegen).</li>
 </ul>
 </li>
 <li><p>Verein (Portal-Benutzer)</p>
 <ul>
-<li>Benutzer (Beispiel): <a href="mailto:verein.mustermann@verein.local">verein.mustermann@verein.local</a></li>
-<li>Passwort (Beispiel): Test1234!Test</li>
-<li>Rolle: <code>PORTAL_USER</code></li>
+<li>Benutzer: <a href="mailto:verein@test.local">verein@test.local</a></li>
+<li>Passwort: Test1234!Test</li>
+<li>Rolle: <code>ORGANIZATION</code></li>
 <li>Zweck: Buchungen anlegen, eigene Anträge verwalten, Dokumente hochladen.</li>
 </ul>
 </li>
 <li><p>Hallenwart / Caretaker</p>
 <ul>
-<li>Benutzer (Beispiel): <a href="mailto:hallenwart.mustermann@beispiel.local">hallenwart.mustermann@beispiel.local</a></li>
-<li>Passwort (Beispiel): Test1234!Test</li>
-<li>Rolle: <code>CARETAKER</code> (oder entsprechendes internes Recht)</li>
+<li>Benutzer: <a href="mailto:hauswart@test.local">hauswart@test.local</a></li>
+<li>Passwort: Test1234!Test</li>
+<li>Rolle: <code>CARETAKER</code></li>
 <li>Zweck: No-Show-Meldungen, lokale Handover-Schritte, Sicht auf zugewiesene Räume.</li>
+</ul>
+</li>
+<li><p>VHS</p>
+<ul>
+<li>Benutzer: <a href="mailto:vhs@test.local">vhs@test.local</a></li>
+<li>Passwort: Test1234!Test</li>
+<li>Rolle: <code>VHS</code></li>
+<li>Zweck: Buchungen anlegen und verwalten.</li>
 </ul>
 </li>
 </ul>
@@ -344,7 +417,8 @@
 <h2>Kontakt</h2>
 <p>Technikteam: Mag. Andreas Hofreither / +43 (664) 23 14 524 / <a href="mailto:andreas@hofreither.at">andreas@hofreither.at</a>
 Fachkontakt Buchungen: [Name/Email eintragen]</p>
-<p>Möchten Sie, dass ich diese Anleitung als PDF exportiere oder weitere Screenshots/Beispiele ergänze? Die Datei habe ich im Repo abgelegt unter: <a href="docs/testbetrieb-bedienungsanleitung.md">docs/testbetrieb-bedienungsanleitung.md</a></p>
+<p>Weitere Observability‑Hinweise and Beispiele finden Sie in <code>docs/ops/observability-README.md</code>.</p>
+<p>Diese Anwendung wurde entwickelt und erstellt von Andreas Hofreither</p>
 <h2>Weitere Standardabläufe — Gemeinde (Verwaltung)</h2>
 <ul>
 <li><p>Stornierung einer bestätigten Buchung:</p>
@@ -455,7 +529,7 @@ Alle Rechte vorbehalten. Für Fragen zur Anwendung oder zum Testbetrieb kontakti
 </li>
 <li><p>Reporting &amp; Scheduled Exports: Geplante Exporte, KPI-Dashboards.</p>
 </li>
-<li><p>Monitoring &amp; Healthchecks: Sentry, Metriken, Health-Endpunkte.</p>
+<li><p>Metriken / Dashboards: KPI-Dashboards, strukturierte Metriken-Aggregation.</p>
 </li>
 </ul>
 <p>Wenn gewünscht, kann das Technikteam priorisieren, welche dieser Module als nächstes umgesetzt werden sollen. Die wichtigsten operativen Punkte sind SMTP/Notifications, Background-Jobs, Audit/History und Document-Storage.</p>
