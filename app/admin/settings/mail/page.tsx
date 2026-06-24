@@ -41,7 +41,7 @@ export default async function AdminMailSettingsPage({ searchParams }: { searchPa
 
       <AppFeedback
         messages={[
-          { tone: "success", text: params.testSent ? "Die Testmail wurde erzeugt und die Queue verarbeitet." : undefined },
+          { tone: "success", text: params.testSent ? "Testmail wurde vom SMTP-Server angenommen (250 OK). Bitte Posteingang und Spam-Ordner prüfen." : undefined },
           { tone: "error", text: params.error },
         ]}
       />
