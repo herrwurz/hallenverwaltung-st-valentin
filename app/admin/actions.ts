@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
 import { deleteBuilding, saveBuilding } from "@/lib/services/admin/building-service";
 import { createClosure, deleteClosure, updateClosure } from "@/lib/services/admin/closure-admin-service";
+import { createClosureFromHolidayPeriod } from "@/lib/services/holiday-service";
 import { saveOrganization } from "@/lib/services/admin/organization-service";
 import { deleteRoom, saveRoom } from "@/lib/services/admin/room-service";
 import { saveUser } from "@/lib/services/admin/user-service";
@@ -232,4 +233,34 @@ export async function deleteRoomAction(formData: FormData) {
   await executeAdminMutation("/admin/rooms", () =>
     deleteRoom(String(formData.get("id") ?? "")),
   );
+}
+
+export async function createBuildingClosureFromHolidayAction(formData: FormData) {
+  await executeClosureMutation("/admin/buildings", async (actorUserId) => {
+    await createClosureFromHolidayPeriod(
+      {
+        holidayId: formData.get("holidayId"),
+        buildingId: formData.get("buildingId"),
+        status: formData.get("status"),
+        reason: optionalValue(formData, "reason"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
+}
+
+export async function createRoomClosureFromHolidayAction(formData: FormData) {
+  await executeClosureMutation("/admin/rooms", async (actorUserId) => {
+    await createClosureFromHolidayPeriod(
+      {
+        holidayId: formData.get("holidayId"),
+        roomId: formData.get("roomId"),
+        status: formData.get("status"),
+        reason: optionalValue(formData, "reason"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
 }

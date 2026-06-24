@@ -1,5 +1,6 @@
 import {
   createRoomClosureAction,
+  createRoomClosureFromHolidayAction,
   deleteRoomAction,
   deleteRoomClosureAction,
   saveRoomAction,
@@ -16,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import { getRoomAdministrationData } from "@/lib/services/admin/room-service";
+import { getHolidayOptions } from "@/lib/services/holiday-service";
 
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
@@ -25,7 +27,7 @@ type PageProps = {
 
 export default async function RoomsPage({ searchParams }: PageProps) {
   await requirePermission("MANAGE_USERS");
-  const [params, data] = await Promise.all([searchParams, getRoomAdministrationData()]);
+  const [params, data, holidays] = await Promise.all([searchParams, getRoomAdministrationData(), getHolidayOptions()]);
   const tableRows: RoomTableRow[] = data.rooms.map((room) => ({
     id: room.id,
     code: room.code,
@@ -101,9 +103,11 @@ export default async function RoomsPage({ searchParams }: PageProps) {
                 action={createRoomClosureAction}
                 updateAction={updateRoomClosureAction}
                 deleteAction={deleteRoomClosureAction}
+                fromHolidayAction={createRoomClosureFromHolidayAction}
                 targetName="roomId"
                 targetId={room.id}
                 closures={room.closures}
+                holidays={holidays}
                 relatedClosures={room.building.closures.map((closure) => ({
                   ...closure,
                   sourceLabel: `Gebäude: ${room.building.name}`,

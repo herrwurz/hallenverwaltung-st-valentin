@@ -70,6 +70,13 @@ export function assertHolidayPeriodRange(startsOn: Date, endsOn: Date) {
   }
 }
 
+export async function getHolidayOptions() {
+  return prisma.holidayPeriod.findMany({
+    select: { id: true, name: true, startsOn: true, endsOn: true, reason: true },
+    orderBy: { startsOn: "asc" },
+  });
+}
+
 export async function getHolidayAdministrationData() {
   const [holidays, buildings] = await Promise.all([
     prisma.holidayPeriod.findMany({
@@ -363,7 +370,7 @@ export async function saveHolidayPeriod(input: unknown, actorUserId: string) {
 export async function createClosureFromHolidayPeriod(input: unknown, actorUserId: string) {
   const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
   if (!canBlockRoom) {
-    throw new BookingValidationError("FÃ¼r Ferien- und Sperrzeiten fehlt das Recht BLOCK_ROOM.");
+    throw new BookingValidationError("Für Ferien- und Sperrzeiten fehlt das Recht BLOCK_ROOM.");
   }
 
   const data = holidayClosureSchema.parse(input);

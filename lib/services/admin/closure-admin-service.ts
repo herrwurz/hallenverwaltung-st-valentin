@@ -113,14 +113,14 @@ export async function createClosure(input: unknown, actorUserId: string) {
 export async function updateClosure(input: unknown, actorUserId: string) {
   const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
   if (!canBlockRoom) {
-    throw new BookingValidationError("FÃ¼r GebÃ¤ude- und Raumsperren fehlt das Recht BLOCK_ROOM.");
+    throw new BookingValidationError("Für Gebäude- und Raumsperren fehlt das Recht BLOCK_ROOM.");
   }
 
   const data = closureUpdateSchema.parse(input);
   const { startsAt, endsAt } = resolveClosureRange(data);
 
   if (!(startsAt < endsAt)) {
-    throw new BookingValidationError("Die Sperre muss ein gÃ¼ltiges Beginn- und Enddatum haben.");
+    throw new BookingValidationError("Die Sperre muss ein gültiges Beginn- und Enddatum haben.");
   }
 
   return prisma.closure.update({
@@ -138,7 +138,7 @@ export async function updateClosure(input: unknown, actorUserId: string) {
 export async function deleteClosure(input: unknown, actorUserId: string) {
   const canBlockRoom = await hasPermission(actorUserId, "BLOCK_ROOM");
   if (!canBlockRoom) {
-    throw new BookingValidationError("FÃ¼r GebÃ¤ude- und Raumsperren fehlt das Recht BLOCK_ROOM.");
+    throw new BookingValidationError("Für Gebäude- und Raumsperren fehlt das Recht BLOCK_ROOM.");
   }
 
   const data = closureDeleteSchema.parse(input);

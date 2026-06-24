@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium", timeStyle: "short" });
+const dateOnlyFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium" });
 
 type ClosureRecord = {
   id: string;
@@ -15,14 +16,24 @@ type ClosureRecord = {
   sourceLabel?: string;
 };
 
+type HolidayOption = {
+  id: string;
+  name: string;
+  startsOn: Date;
+  endsOn: Date;
+  reason: string;
+};
+
 type AdminClosurePanelProps = {
   action: (formData: FormData) => void | Promise<void>;
   updateAction?: (formData: FormData) => void | Promise<void>;
   deleteAction?: (formData: FormData) => void | Promise<void>;
+  fromHolidayAction?: (formData: FormData) => void | Promise<void>;
   targetName: "buildingId" | "roomId";
   targetId: string;
   closures: ClosureRecord[];
   relatedClosures?: ClosureRecord[];
+  holidays?: HolidayOption[];
 };
 
 function toDateTimeLocalValue(date: Date) {
@@ -33,9 +44,9 @@ function toDateTimeLocalValue(date: Date) {
 function getClosureStatusLabel(status: ClosureStatus) {
   switch (status) {
     case "OPEN":
-      return "Geoeffnet";
+      return "Geöffnet";
     case "RESTRICTED":
-      return "Eingeschraenkt";
+      return "Eingeschränkt";
     case "CLOSED":
       return "Gesperrt";
     default:
@@ -97,8 +108,8 @@ function ClosureList({
                 Status
                 <select name="status" required defaultValue={closure.status} className={inputClass}>
                   <option value="CLOSED">Gesperrt</option>
-                  <option value="RESTRICTED">Eingeschraenkt</option>
-                  <option value="OPEN">Geoeffnet</option>
+                  <option value="RESTRICTED">Eingeschränkt</option>
+                  <option value="OPEN">Geöffnet</option>
                 </select>
               </label>
               <label className="text-xs font-medium">
@@ -119,7 +130,7 @@ function ClosureList({
               </label>
               <div className="flex items-center justify-end lg:col-span-4">
                 <Button type="submit" size="sm" variant="outline">
-                  Aenderung speichern
+                  Änderung speichern
                 </Button>
               </div>
             </form>
@@ -128,7 +139,7 @@ function ClosureList({
             <form action={deleteAction} className="mt-2 flex justify-end">
               <input type="hidden" name="id" value={closure.id} />
               <Button type="submit" size="sm" variant="destructive">
-                Sperre loeschen
+                Sperre löschen
               </Button>
             </form>
           ) : null}
@@ -142,16 +153,18 @@ export function AdminClosurePanel({
   action,
   updateAction,
   deleteAction,
+  fromHolidayAction,
   targetName,
   targetId,
   closures,
   relatedClosures = [],
+  holidays = [],
 }: AdminClosurePanelProps) {
   return (
     <div className="mt-6 rounded-xl border border-border bg-card p-4 shadow-sm">
       <h4 className="text-sm font-semibold tracking-tight">Sperre erfassen</h4>
       <p className="mt-1 text-xs text-muted-foreground">
-        Fuer Ferien, Reinigung, Wartung oder sonstige Einschraenkungen. Gesperrte Zeiten blockieren Buchungsantraege und
+        Für Ferien, Reinigung, Wartung oder sonstige Einschränkungen. Gesperrte Zeiten blockieren Buchungsanträge und
         Kalender.
       </p>
 
@@ -161,8 +174,8 @@ export function AdminClosurePanel({
           Status
           <select name="status" required defaultValue="CLOSED" className={inputClass}>
             <option value="CLOSED">Gesperrt</option>
-            <option value="RESTRICTED">Eingeschraenkt</option>
-            <option value="OPEN">Geoeffnet</option>
+            <option value="RESTRICTED">Eingeschränkt</option>
+            <option value="OPEN">Geöffnet</option>
           </select>
         </label>
         <label className="text-sm font-medium">
@@ -190,7 +203,7 @@ export function AdminClosurePanel({
           <input name="endsOn" type="date" className={inputClass} />
         </label>
         <p className="text-xs text-muted-foreground lg:col-span-4">
-          Bei ganztagigen Sperren genuegt das Datum. Intern wird bis 00:00 Uhr des Folgetags blockiert. Ohne ganztags
+          Bei ganztagigen Sperren genügt das Datum. Intern wird bis 00:00 Uhr des Folgetags blockiert. Ohne Ganztags
           sind Beginn und Ende mit Uhrzeit erforderlich.
         </p>
         <label className="text-sm font-medium lg:col-span-3">
@@ -201,6 +214,47 @@ export function AdminClosurePanel({
           <Button type="submit">Sperre speichern</Button>
         </div>
       </form>
+
+      {fromHolidayAction && holidays.length > 0 ? (
+        <div className="mt-5 border-t border-border pt-4">
+          <h5 className="text-sm font-semibold tracking-tight">Aus Ferienperiode anlegen</h5>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Zeitraum wird automatisch aus der gewählten Ferienperiode übernommen.
+          </p>
+          <form action={fromHolidayAction} className="mt-3 grid gap-3 lg:grid-cols-4">
+            <input type="hidden" name={targetName} value={targetId} />
+            <label className="text-sm font-medium lg:col-span-2">
+              Ferienperiode
+              <select name="holidayId" required className={inputClass}>
+                <option value="">Bitte wählen …</option>
+                {holidays.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.name} ({dateOnlyFormatter.format(h.startsOn)} – {dateOnlyFormatter.format(h.endsOn)})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm font-medium">
+              Status
+              <select name="status" required defaultValue="CLOSED" className={inputClass}>
+                <option value="CLOSED">Gesperrt</option>
+                <option value="RESTRICTED">Eingeschränkt</option>
+              </select>
+            </label>
+            <label className="flex items-end gap-2 pb-2 text-sm font-medium">
+              <input name="isPublic" type="checkbox" defaultChecked className="rounded border-input bg-background" />
+              Sichtbar
+            </label>
+            <label className="text-sm font-medium lg:col-span-3">
+              Grund (optional)
+              <input name="reason" maxLength={1000} className={inputClass} placeholder="Leer lassen, um Feriengrund zu übernehmen" />
+            </label>
+            <div className="flex items-end lg:justify-end">
+              <Button type="submit">Sperre anlegen</Button>
+            </div>
+          </form>
+        </div>
+      ) : null}
 
       <div className="mt-5 space-y-2">
         <h5 className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Letzte Sperren</h5>
