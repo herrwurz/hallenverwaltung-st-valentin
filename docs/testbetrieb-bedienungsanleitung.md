@@ -292,13 +292,20 @@ Standardabläufe (Use Cases)
 
 Fehler melden & Informationen sammeln
 -----------------------------------
-Wenn ein Fehler auftritt, notieren Sie:
-- Welche Aktion Sie ausgeführt haben (z. B. „Buchung anlegen“)
-- Welche Rolle Sie hatten (Portal-Benutzer / Admin)
-- Datum & Uhrzeit
-- Screenshots und die verwendete URL
+Wenn ein Fehler auftritt, bitte folgende Informationen per E-Mail an andreas@hofreither.at senden:
 
-Diese Informationen an das Technikteam senden (siehe Kontakt unten).
+**Betreff:** Testfeedback Hallenverwaltung — [Kurzbeschreibung]
+
+Inhalt der Meldung:
+- Welche Aktion Sie ausgeführt haben (z. B. „Buchung anlegen”)
+- Welche Rolle / welches Konto Sie verwendet haben
+- Datum & Uhrzeit
+- Was erwartet wurde und was stattdessen passiert ist
+- Screenshot(s) der Fehlermeldung oder des unerwarteten Verhaltens
+- Verwendete URL (aus der Adresszeile kopieren)
+
+Für dringende Probleme (kein Login möglich, kompletter Ausfall):
+Mag. Andreas Hofreither, +43 (664) 23 14 524 (auch SMS/WhatsApp)
 
 Kontenvergabe & Passwörter
 -------------------------
