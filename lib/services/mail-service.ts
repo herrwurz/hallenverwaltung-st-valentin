@@ -1,6 +1,22 @@
-import nodemailer from "nodemailer";
 import { z } from "zod";
 import { getMailDeliveryMode } from "@/lib/config/environment";
+
+// nodemailer is an optional runtime dependency (not in package.json).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let nodemailerModule: any = null;
+function requireNodemailer() {
+  if (!nodemailerModule) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      nodemailerModule = require("nodemailer");
+    } catch {
+      throw new MailDeliveryError(
+        "nodemailer ist nicht installiert. Bitte nodemailer als Abhängigkeit hinzufügen, um SMTP-Versand zu nutzen.",
+      );
+    }
+  }
+  return nodemailerModule;
+}
 
 const booleanFromEnv = z
   .union([z.boolean(), z.string()])
@@ -25,7 +41,8 @@ export type MailPayload = {
   html: string;
 };
 
-let cachedTransporter: nodemailer.Transporter | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedTransporter: any | null = null;
 let cachedTransportKey: string | null = null;
 
 function getMailEnv() {
@@ -93,6 +110,7 @@ function getTransporter() {
   const key = JSON.stringify(config);
 
   if (!cachedTransporter || cachedTransportKey !== key) {
+    const nodemailer = requireNodemailer();
     cachedTransporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
