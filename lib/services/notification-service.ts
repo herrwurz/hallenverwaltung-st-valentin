@@ -1184,15 +1184,15 @@ async function sendNotificationRecord(
     });
   }
 
-  const template = renderNotificationTemplate({
-    eventCode: notification.eventCode,
-    payload: notification.payload,
-  });
-
   const sendMail = dependencies.sendMail ?? sendEmail;
   const nextAttemptCount = notification.attemptCount + 1;
 
   try {
+    const template = renderNotificationTemplate({
+      eventCode: notification.eventCode,
+      payload: notification.payload,
+    });
+
     await sendMail({
       to: notification.recipient,
       subject: template.subject,
