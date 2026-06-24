@@ -115,6 +115,9 @@ function getTransporter() {
       port: config.port,
       secure: config.secure,
       auth: config.user && config.password ? { user: config.user, pass: config.password } : undefined,
+      connectionTimeout: 10_000,
+      greetingTimeout: 8_000,
+      socketTimeout: 15_000,
     });
     cachedTransportKey = key;
   }
