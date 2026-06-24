@@ -11,22 +11,31 @@ type Building = {
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
 export function HolidayClosureTargetPicker({ buildings }: { buildings: Building[] }) {
-  const [selectedBuildingId, setSelectedBuildingId] = useState("");
+  const [filterBuildingId, setFilterBuildingId] = useState("");
+  const [selectedRoomId, setSelectedRoomId] = useState("");
 
-  const selectedBuilding = buildings.find((b) => b.id === selectedBuildingId) ?? null;
+  // If a room is selected, building is only used for filtering — don't submit it.
+  const submitBuildingId = selectedRoomId ? "" : filterBuildingId;
+
+  const selectedBuilding = buildings.find((b) => b.id === filterBuildingId) ?? null;
   const roomOptions = selectedBuilding
     ? selectedBuilding.rooms.map((r) => ({ id: r.id, label: r.name }))
     : buildings.flatMap((b) => b.rooms.map((r) => ({ id: r.id, label: `${b.name} – ${r.name}` })));
 
   return (
     <>
+      <input type="hidden" name="buildingId" value={submitBuildingId} />
+      <input type="hidden" name="roomId" value={selectedRoomId} />
+
       <label className="text-sm font-medium">
         Gebäude
         <select
-          name="buildingId"
-          value={selectedBuildingId}
+          value={filterBuildingId}
           className={inputClass}
-          onChange={(e) => setSelectedBuildingId(e.target.value)}
+          onChange={(e) => {
+            setFilterBuildingId(e.target.value);
+            setSelectedRoomId("");
+          }}
         >
           <option value="">Keine Gebäudesperre</option>
           {buildings.map((building) => (
@@ -36,9 +45,14 @@ export function HolidayClosureTargetPicker({ buildings }: { buildings: Building[
           ))}
         </select>
       </label>
+
       <label className="text-sm font-medium">
         Raum
-        <select name="roomId" defaultValue="" className={inputClass}>
+        <select
+          value={selectedRoomId}
+          className={inputClass}
+          onChange={(e) => setSelectedRoomId(e.target.value)}
+        >
           <option value="">Keine Raumsperre</option>
           {roomOptions.map((room) => (
             <option key={room.id} value={room.id}>
