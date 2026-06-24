@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z, ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
-import { processPendingNotifications, queueAdminTestEmail } from "@/lib/services/notification-service";
+import { sendEmail } from "@/lib/services/mail-service";
 
 const testMailSchema = z.object({
   recipient: z.email("Bitte eine gültige E-Mail-Adresse eingeben."),
@@ -20,7 +20,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export async function sendSettingsTestMailAction(formData: FormData) {
-  const user = await requirePermission("MANAGE_USERS");
+  await requirePermission("MANAGE_USERS");
   let errorMessage: string | undefined;
 
   try {
@@ -28,12 +28,16 @@ export async function sendSettingsTestMailAction(formData: FormData) {
       recipient: formData.get("recipient"),
       note: String(formData.get("note") ?? "").trim() || undefined,
     });
-    await queueAdminTestEmail({
-      recipient: input.recipient,
-      actorUserId: user.id,
-      note: input.note,
+
+    const noteLine = input.note ? `\n\nHinweis: ${input.note}` : "";
+    const noteHtml = input.note ? `<p><strong>Hinweis:</strong> ${input.note}</p>` : "";
+
+    await sendEmail({
+      to: input.recipient,
+      subject: "Testmail – Hallenverwaltung St. Valentin",
+      text: `Dies ist eine Testmail der Hallenverwaltung St. Valentin.${noteLine}\n\nWenn Sie diese Nachricht erhalten haben, ist der SMTP-Versand korrekt konfiguriert.`,
+      html: `<p>Dies ist eine Testmail der <strong>Hallenverwaltung St. Valentin</strong>.</p>${noteHtml}<p>Wenn Sie diese Nachricht erhalten haben, ist der SMTP-Versand korrekt konfiguriert.</p>`,
     });
-    await processPendingNotifications();
   } catch (error) {
     errorMessage = getErrorMessage(error);
   }
