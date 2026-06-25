@@ -45,13 +45,28 @@ export function BookingRequestForm({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  function handleAllDayChange(checked: boolean) {
+    setAllDay(checked);
+    if (!checked) {
+      setStartDate("");
+      setEndDate("");
+    }
+  }
+
   function handleStartDateChange(value: string) {
     setStartDate(value);
     if (!endDate) setEndDate(value);
   }
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    if (allDay && (!startDate || !endDate)) {
+      e.preventDefault();
+      (e.currentTarget.querySelector('input[type="date"]') as HTMLInputElement | null)?.focus();
+    }
+  }
+
   return (
-    <form action={action} className="grid gap-4 lg:grid-cols-2">
+    <form action={action} onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-2">
       {allDay && (
         <>
           <input type="hidden" name="startsAt" value={startDate ? `${startDate}T00:00` : ""} />
@@ -84,7 +99,7 @@ export function BookingRequestForm({
         <input
           type="checkbox"
           checked={allDay}
-          onChange={(e) => setAllDay(e.target.checked)}
+          onChange={(e) => handleAllDayChange(e.target.checked)}
           className="h-4 w-4 rounded border-input"
         />
         Ganztägig

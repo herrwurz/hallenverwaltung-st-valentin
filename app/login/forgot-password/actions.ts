@@ -6,6 +6,10 @@ import { getPublicBaseUrl } from "@/lib/config/environment";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/services/mail-service";
 
+function escapeHtml(str: string) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export type ForgotPasswordResult = { ok: true } | { ok: false; error: string } | undefined;
 
 const schema = z.object({
@@ -44,10 +48,11 @@ export async function requestPasswordResetAction(_: ForgotPasswordResult, formDa
       to: parsed.data.email,
       subject: "Passwort zurücksetzen – Hallenverwaltung St. Valentin",
       text: `Hallo ${user.displayName},\n\nbitte klicken Sie auf folgenden Link, um Ihr Passwort zurückzusetzen:\n\n${resetUrl}\n\nDer Link ist 1 Stunde gültig. Falls Sie kein Passwort zurücksetzen möchten, können Sie diese E-Mail ignorieren.\n\nHallenverwaltung St. Valentin`,
-      html: `<p>Hallo ${user.displayName},</p><p>bitte klicken Sie auf folgenden Link, um Ihr Passwort zurückzusetzen:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Der Link ist 1 Stunde gültig. Falls Sie kein Passwort zurücksetzen möchten, können Sie diese E-Mail ignorieren.</p><p>Hallenverwaltung St. Valentin</p>`,
+      html: `<p>Hallo ${escapeHtml(user.displayName)},</p><p>bitte klicken Sie auf folgenden Link, um Ihr Passwort zurückzusetzen:</p><p><a href="${escapeHtml(resetUrl)}">${escapeHtml(resetUrl)}</a></p><p>Der Link ist 1 Stunde gültig. Falls Sie kein Passwort zurücksetzen möchten, können Sie diese E-Mail ignorieren.</p><p>Hallenverwaltung St. Valentin</p>`,
     });
   } catch {
     console.error("Passwort-Reset-Mail konnte nicht gesendet werden für:", parsed.data.email);
+    return { ok: false, error: "Die E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut." };
   }
 
   return { ok: true };
