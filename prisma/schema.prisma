@@ -362,6 +362,7 @@ model UsageType {
   priority                 Int
   requiresApproval         Boolean         @default(true)
   mayDisplaceLowerPriority Boolean         @default(false)
+  isActive                 Boolean         @default(true)
   bookings                 Booking[]
   series                   BookingSeries[]
   waitlistEntries          WaitlistEntry[]

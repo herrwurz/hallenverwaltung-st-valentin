@@ -39,6 +39,16 @@ export type OrganizationTableRow = {
   blockedReason: string;
 };
 
+export type UsageTypeTableRow = {
+  id: string;
+  code: string;
+  name: string;
+  priority: number;
+  requiresApproval: boolean;
+  mayDisplaceLowerPriority: boolean;
+  isActive: boolean;
+};
+
 const buildingColumns: ColumnDef<BuildingTableRow>[] = [
   {
     accessorKey: "name",
@@ -153,4 +163,45 @@ export function RoomsTable({ rows }: { rows: RoomTableRow[] }) {
 
 export function OrganizationsTable({ rows }: { rows: OrganizationTableRow[] }) {
   return <DataTable columns={organizationColumns} data={rows} searchPlaceholder="Organisationen filtern..." />;
+}
+
+const usageTypeColumns: ColumnDef<UsageTypeTableRow>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <Button variant="ghost" size="sm" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        Name
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>
+        <p className="font-medium">{row.original.name}</p>
+        <p className="text-xs text-muted-foreground">{row.original.code}</p>
+      </div>
+    ),
+  },
+  { accessorKey: "priority", header: "Priorität" },
+  {
+    accessorKey: "requiresApproval",
+    header: "Genehmigung",
+    cell: ({ row }) => (row.original.requiresApproval ? "Erforderlich" : "Automatisch"),
+  },
+  {
+    accessorKey: "mayDisplaceLowerPriority",
+    header: "Verdrängung",
+    cell: ({ row }) => (row.original.mayDisplaceLowerPriority ? "Ja" : "Nein"),
+  },
+  {
+    accessorKey: "isActive",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge variant={row.original.isActive ? "success" : "secondary"}>
+        {row.original.isActive ? "Aktiv" : "Inaktiv"}
+      </Badge>
+    ),
+  },
+];
+
+export function UsageTypesTable({ rows }: { rows: UsageTypeTableRow[] }) {
+  return <DataTable columns={usageTypeColumns} data={rows} searchPlaceholder="Nutzungstypen filtern..." />;
 }

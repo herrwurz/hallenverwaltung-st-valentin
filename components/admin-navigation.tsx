@@ -17,6 +17,7 @@ import {
   Mail,
   Settings,
   ShieldCheck,
+  Tag,
   Users,
   Warehouse,
 } from "lucide-react";
@@ -56,6 +57,7 @@ const defaultIconByHref: Record<string, LucideIcon> = {
   "/admin/organizations": Home,
   "/admin/users": Users,
   "/admin/roles": ShieldCheck,
+  "/admin/usage-types": Tag,
   "/admin/documents": FileText,
   "/admin/access": KeyRound,
   "/admin/damages": ListChecks,
@@ -76,6 +78,7 @@ export const adminNavigation: AdminNavigationItem[] = [
   { href: "/admin/organizations", label: "Organisationen", icon: Home, groupLabel: "Stammdaten" },
   { href: "/admin/users", label: "Benutzer", icon: Users, groupLabel: "Stammdaten" },
   { href: "/admin/roles", label: "Rollen/Rechte", icon: ShieldCheck, groupLabel: "Stammdaten" },
+  { href: "/admin/usage-types", label: "Nutzungstypen", icon: Tag, groupLabel: "Stammdaten" },
   { href: "/admin/billing", label: "Abrechnung", icon: CreditCard, groupLabel: "Extras" },
   { href: "/admin/documents", label: "Dokumente", icon: FileText, groupLabel: "Extras" },
   { href: "/admin/access", label: "Zutritt", icon: KeyRound, groupLabel: "Extras" },

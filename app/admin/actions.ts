@@ -9,6 +9,7 @@ import { createClosure, deleteClosure, updateClosure } from "@/lib/services/admi
 import { createClosureFromHolidayPeriod } from "@/lib/services/holiday-service";
 import { saveOrganization } from "@/lib/services/admin/organization-service";
 import { deleteRoom, saveRoom } from "@/lib/services/admin/room-service";
+import { saveUsageType } from "@/lib/services/admin/usage-type-service";
 import { saveUser } from "@/lib/services/admin/user-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
@@ -263,4 +264,18 @@ export async function createRoomClosureFromHolidayAction(formData: FormData) {
       actorUserId,
     );
   });
+}
+
+export async function saveUsageTypeAction(formData: FormData) {
+  await executeAdminMutation("/admin/usage-types", () =>
+    saveUsageType({
+      id: optionalValue(formData, "id"),
+      code: String(formData.get("code") ?? "").trim().toUpperCase(),
+      name: formData.get("name"),
+      priority: formData.get("priority"),
+      requiresApproval: formData.get("requiresApproval") === "on",
+      mayDisplaceLowerPriority: formData.get("mayDisplaceLowerPriority") === "on",
+      isActive: formData.get("isActive") === "on",
+    }),
+  );
 }
