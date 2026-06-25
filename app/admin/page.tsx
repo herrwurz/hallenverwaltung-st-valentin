@@ -47,15 +47,12 @@ export default async function AdminPage() {
             <Link
               key={card.href}
               href={card.href}
-              className="flex min-h-44 flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/60"
+              className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/60"
             >
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <span>
-                <span className="block text-xl font-semibold tracking-tight text-foreground">{card.title}</span>
-                <span className="mt-2 block text-sm text-muted-foreground">{card.description}</span>
-              </span>
+              <span className="text-center text-base text-muted-foreground">{card.description}</span>
             </Link>
           );
         })}

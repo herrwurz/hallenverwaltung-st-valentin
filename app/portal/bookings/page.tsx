@@ -1,10 +1,10 @@
 import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { AreaShell } from "@/components/area-shell";
+import { BookingRequestForm } from "@/components/booking-request-form";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
 import { PortalBookingsTable, type PortalBookingTableRow } from "@/components/portal-bookings-table";
-import { PortalOrganizationField } from "@/components/portal-organization-field";
 import { SeriesRequestForm } from "@/components/series-request-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,42 +93,13 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
             </p>
           ) : (
-            <form action={createBookingRequestAction} className="grid gap-4 lg:grid-cols-2">
-              <PortalOrganizationField organizations={options.organizations} inputClassName={inputClass} />
-              <BuildingRoomSelect buildings={options.buildings} inputClassName={inputClass} />
-              <label className="text-sm font-medium">
-                Titel
-                <input name="title" required maxLength={160} className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Nutzungstyp
-                <select name="usageTypeId" required defaultValue="" className={inputClass}>
-                  <option value="" disabled>
-                    Bitte wählen
-                  </option>
-                  {options.usageTypes.map((usageType) => (
-                    <option key={usageType.id} value={usageType.id}>
-                      {usageType.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-sm font-medium">
-                Beginn
-                <input name="startsAt" type="datetime-local" required className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Ende
-                <input name="endsAt" type="datetime-local" required className={inputClass} />
-              </label>
-              <label className="text-sm font-medium lg:col-span-2">
-                Beschreibung (optional)
-                <textarea name="description" rows={3} maxLength={1000} className={inputClass} />
-              </label>
-              <div className="lg:col-span-2">
-                <FormActions submitLabel="Antrag absenden" cancelHref="/portal" />
-              </div>
-            </form>
+            <BookingRequestForm
+              action={createBookingRequestAction}
+              organizations={options.organizations}
+              buildings={options.buildings}
+              usageTypes={options.usageTypes}
+              inputClassName={inputClass}
+            />
           )}
         </CardContent>
       </Card>

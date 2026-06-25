@@ -43,6 +43,7 @@ export async function getRoomAdministrationData() {
           orderBy: { startsAt: "desc" },
           take: 5,
         },
+        _count: { select: { bookings: true, series: true } },
       },
       orderBy: [{ building: { name: "asc" } }, { name: "asc" }],
     }),
@@ -72,7 +73,6 @@ export async function saveRoom(input: unknown) {
           where: { id: data.id },
           data: {
             buildingId: data.buildingId,
-            code: data.code,
             name: data.name,
             description: data.description || null,
             status: data.status,
@@ -126,4 +126,17 @@ export async function saveRoom(input: unknown) {
       });
     }
   });
+}
+
+export async function deleteRoom(id: string) {
+  const counts = await prisma.room.findUniqueOrThrow({
+    where: { id },
+    select: { _count: { select: { bookings: true, series: true } } },
+  });
+
+  if (counts._count.bookings > 0 || counts._count.series > 0) {
+    throw new Error("Der Raum kann nicht gelöscht werden, da noch Buchungen oder Serien vorhanden sind.");
+  }
+
+  await prisma.room.delete({ where: { id } });
 }

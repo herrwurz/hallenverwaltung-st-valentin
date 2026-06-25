@@ -499,6 +499,57 @@ Testserver einmalig ueber `/api/test-bootstrap?token=...` initialisiert werden.
 Der Endpunkt ist nur ausserhalb von Produktion, nur mit
 `TEST_DATA_TOOLS_ENABLED=true` und nur mit `TEST_BOOTSTRAP_TOKEN` aktiv.
 
+## Phase 43 - Passwort vergessen und Serientermin Gesamt genehmigen
+
+### Passwort vergessen / Reset-Flow
+
+Ein vollstaendiger Passwort-Reset-Prozess wurde implementiert:
+
+* `/login/forgot-password`: E-Mail-Eingabe, Link "Passwort vergessen?" im
+  Login-Formular.
+* Bei gueltiger E-Mail wird ein 32-Byte-Token (1 Stunde Ablaufzeit) generiert
+  und per E-Mail mit dem Reset-Link zugestellt.
+* Kein Enumeration-Leak: nicht gefundene und inaktive Benutzer erhalten
+  dieselbe Erfolgsantwort wie gefundene.
+* `/login/reset-password?token=...`: neues Passwort setzen, Token wird nach
+  Verwendung geloescht (Einmalverwendung).
+* Token-Ablaufpruefung serverseitig; bcrypt-Hash (Kostenfaktor 12) konsistent
+  mit dem restlichen System.
+* Datenbankschema: `passwordResetToken` (unique) und
+  `passwordResetTokenExpiry` als optionale Felder am `User`-Modell.
+* Beide Routen sind oeffentlich (kein Auth-Middleware-Schutz).
+* `useSearchParams()` auf der Reset-Seite ist mit `<Suspense>` umhuellt
+  (Next.js-Anforderung fuer App Router).
+
+### Serientermin Gesamt genehmigen
+
+Die Serienubersicht `/admin/series` wurde von einer reinen Leseansicht zu
+einer aktiven Bearbeitungsflaeche erweitert:
+
+* Serien mit mindestens einem offenen Termin (REQUESTED oder IN_REVIEW)
+  erscheinen in einem eigenen Abschnitt "Serien mit offenen Terminen".
+* Pro Serie: vollstaendige Terminliste mit Statusbadges, dann Abschnitt
+  "Gesamt bearbeiten" mit drei Formularen:
+  - "Serie in Pruefung" (alle REQUESTED-Termine auf IN_REVIEW setzen)
+  - "Gesamt genehmigen" (mit optionalem Sperr-Override und Kommentar)
+  - "Gesamt ablehnen" (Begruendung erforderlich, `required`)
+* Berechtigungspruefung: `APPROVE_BOOKING` und `REJECT_BOOKING` steuern die
+  Sichtbarkeit der jeweiligen Formulare.
+* Actions delegieren an die zentralen Services `approveSeriesForAdmin`,
+  `rejectSeriesForAdmin` und `markSeriesInReviewForAdmin`.
+* `redirect()` wird ausserhalb von `catch`-Bloecken aufgerufen
+  (Next.js-Anforderung).
+* Nach der Aktion Redirect zurueck auf `/admin/series?seriesApproved=...&seriesId=...`
+  mit Highlight der bearbeiteten Serie via `ring-2 ring-primary`.
+* `AppFeedback` zeigt Erfolgs-, Info- und Fehlermeldungen.
+
+### Hetzner Testserver
+
+Der eigene Testserver `hallenverwaltung.hofreither.at` ist vollstaendig
+eingerichtet (SSH, Docker, Repository, `.env.test`, TLS, Migration, Seed,
+HTTPS erreichbar). Naechster Schritt: Update auf den aktuellen Stand und
+Smoke-Test der neuen Features.
+
 ---
 
 # Wichtigste Architekturentscheidungen

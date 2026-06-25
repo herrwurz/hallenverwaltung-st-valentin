@@ -44,7 +44,9 @@ const columns: ColumnDef<NotificationTableRow>[] = [
     cell: ({ row }) => {
       const variant =
         row.original.status === "SENT" ? "success" : row.original.status === "FAILED" ? "destructive" : "warning";
-      return <Badge variant={variant}>{row.original.status}</Badge>;
+      const label =
+        row.original.status === "SENT" ? "Gesendet" : row.original.status === "FAILED" ? "Fehlgeschlagen" : "Wartend";
+      return <Badge variant={variant}>{label}</Badge>;
     },
   },
   { accessorKey: "lastError", header: "Fehler" },

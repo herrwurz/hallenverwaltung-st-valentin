@@ -120,8 +120,7 @@ test("phase 26 pilot UI hotfixes hide technical labels in key pages", () => {
   assert.match(series, /formatRecurrenceRule/);
   assert.doesNotMatch(series, /recurrenceRule\}\)/);
   assert.doesNotMatch(notifications, />\{eventCode\}</);
-  assert.match(publicPage, /href="\/public\/calendar"/);
-  assert.match(publicPage, /href="\/login"/);
+  assert.match(publicPage, /redirect\("\/login"\)/);
   assert.doesNotMatch(publicPage, /Standorte/);
 });
 
@@ -158,7 +157,7 @@ test("phase 34 medium fixes settings navigation membership count caretakers and 
   assert.match(adminNavigation, /<details/);
   assert.match(adminNavigation, /<summary/);
   assert.match(adminLayout, /href: "\/admin\/waitlist", label: "Warteliste", groupLabel: "Buchungen"/);
-  assert.match(adminLayout, /href: "\/admin\/roles", label: "Rollen\/Rechte", groupLabel: "Einstellungen"/);
+  assert.match(adminLayout, /href: "\/admin\/roles", label: "Rollen\/Rechte", groupLabel: "Stammdaten"/);
   assert.match(adminLayout, /href: "\/admin\/holidays", label: "Ferien", groupLabel: "Einstellungen"/);
   assert.match(adminLayout, /href: "\/admin\/settings", label: "Systemeinstellungen", groupLabel: "Einstellungen"/);
   assert.match(adminLayout, /href: "\/admin\/settings\/mail", label: "Mail \/ SMTP", groupLabel: "Einstellungen"/);
@@ -204,8 +203,7 @@ test("phase 34 holidays stay informational and create closures only explicitly",
   assert.match(holidayPage, /Ferien- und Feiertagszeiträume sind Hinweisdaten/);
   assert.match(holidayPage, /defaultValue="OPEN"/);
   assert.match(holidayPage, /Aus Ferienzeitraum Hallensperre anlegen/);
-  assert.match(holidayPage, /name="buildingId"/);
-  assert.match(holidayPage, /name="roomId"/);
+  assert.match(holidayPage, /HolidayClosureTargetPicker/);
 });
 
 test("phase 36 separates system settings from notification queue and keeps SMTP secrets out of the database", () => {
@@ -223,7 +221,7 @@ test("phase 36 separates system settings from notification queue and keeps SMTP 
   assert.match(mailPage, /Mail \/ SMTP/);
   assert.match(mailPage, /SMTP-Passwort/);
   assert.match(mailPage, /gesetzt, verborgen/);
-  assert.match(mailActions, /queueAdminTestEmail/);
+  assert.match(mailActions, /sendSettingsTestMailAction/);
   assert.match(mailActions, /requirePermission\("MANAGE_USERS"\)/);
   assert.match(notificationSettingsPage, /Benachrichtigungsregeln/);
   assert.match(notificationSettingsPage, /updateSettingsNotificationEventsAction/);
@@ -281,7 +279,7 @@ test("phase 38 keeps pilot-facing labels localized and free of visible mojibake"
 
   assert.match(navigation, /Benachrichtigungs-Queue/);
   assert.match(queuePage, /Benachrichtigungs-Queue/);
-  assert.match(publicPage, /Öffentlicher Bereich/);
+  assert.match(publicPage, /redirect\("\/login"\)/);
 });
 
 test("pilot branding dashboard and room defaults match municipality feedback", () => {
@@ -425,7 +423,7 @@ test("phase 34 closures can be edited and deleted through protected server actio
   assert.match(actions, /deleteRoomClosureAction/);
   assert.match(closurePanel, /updateAction/);
   assert.match(closurePanel, /deleteAction/);
-  assert.match(closurePanel, /Sperre loeschen/);
+  assert.match(closurePanel, /Sperre löschen/);
   assert.match(buildingPage, /updateAction=\{updateBuildingClosureAction\}/);
   assert.match(roomPage, /updateAction=\{updateRoomClosureAction\}/);
 });

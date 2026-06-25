@@ -4,10 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
-import { saveBuilding } from "@/lib/services/admin/building-service";
+import { deleteBuilding, saveBuilding } from "@/lib/services/admin/building-service";
 import { createClosure, deleteClosure, updateClosure } from "@/lib/services/admin/closure-admin-service";
+import { createClosureFromHolidayPeriod } from "@/lib/services/holiday-service";
 import { saveOrganization } from "@/lib/services/admin/organization-service";
-import { saveRoom } from "@/lib/services/admin/room-service";
+import { deleteRoom, saveRoom } from "@/lib/services/admin/room-service";
+import { saveUsageType } from "@/lib/services/admin/usage-type-service";
 import { saveUser } from "@/lib/services/admin/user-service";
 import { BookingValidationError } from "@/lib/services/booking-rules";
 
@@ -34,6 +36,8 @@ function getErrorMessage(error: unknown) {
     "Das Passwort muss mindestens 12 Zeichen enthalten.",
     "Die primäre Organisation muss dem Benutzer zugewiesen sein.",
     "Nur Super-Admins dürfen Super-Admin-Benutzer verwalten.",
+    "Das Gebäude kann nicht gelöscht werden, da noch Räume zugeordnet sind.",
+    "Der Raum kann nicht gelöscht werden, da noch Buchungen oder Serien vorhanden sind.",
   ]);
 
   if (error instanceof Error && expectedMessages.has(error.message)) {
@@ -215,6 +219,63 @@ export async function saveUserAction(formData: FormData) {
       organizationIds: formData.getAll("organizationIds").map(String),
       membershipFunction: optionalValue(formData, "membershipFunction") ?? "Mitglied",
       primaryOrganizationId: optionalValue(formData, "primaryOrganizationId"),
+      caretakerBuildingIds: formData.getAll("caretakerBuildingIds").map(String),
     }, actorUserId),
+  );
+}
+
+export async function deleteBuildingAction(formData: FormData) {
+  await executeAdminMutation("/admin/buildings", () =>
+    deleteBuilding(String(formData.get("id") ?? "")),
+  );
+}
+
+export async function deleteRoomAction(formData: FormData) {
+  await executeAdminMutation("/admin/rooms", () =>
+    deleteRoom(String(formData.get("id") ?? "")),
+  );
+}
+
+export async function createBuildingClosureFromHolidayAction(formData: FormData) {
+  await executeClosureMutation("/admin/buildings", async (actorUserId) => {
+    await createClosureFromHolidayPeriod(
+      {
+        holidayId: formData.get("holidayId"),
+        buildingId: formData.get("buildingId"),
+        status: formData.get("status"),
+        reason: optionalValue(formData, "reason"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
+}
+
+export async function createRoomClosureFromHolidayAction(formData: FormData) {
+  await executeClosureMutation("/admin/rooms", async (actorUserId) => {
+    await createClosureFromHolidayPeriod(
+      {
+        holidayId: formData.get("holidayId"),
+        roomId: formData.get("roomId"),
+        status: formData.get("status"),
+        reason: optionalValue(formData, "reason"),
+        isPublic: formData.get("isPublic") === "on",
+      },
+      actorUserId,
+    );
+  });
+}
+
+export async function saveUsageTypeAction(formData: FormData) {
+  await executeAdminMutation("/admin/usage-types", () =>
+    saveUsageType({
+      id: optionalValue(formData, "id"),
+      code: String(formData.get("code") ?? "").trim().toUpperCase(),
+      name: formData.get("name"),
+      priority: formData.get("priority"),
+      requiresApproval: formData.get("requiresApproval") === "on",
+      mayDisplaceLowerPriority: formData.get("mayDisplaceLowerPriority") === "on",
+      isActive: formData.get("isActive") === "on",
+    }),
   );
 }

@@ -36,8 +36,7 @@ export default async function PortalDocumentsPage({ searchParams }: PageProps) {
       <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">Portal</p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight">Dokumente</h2>
       <p className="mt-3 text-muted-foreground">
-        Dokumente werden in Phase 16 als sichere Metadaten erfasst. Ein echter Datei-Storage kann später angebunden
-        werden.
+        Hier können Sie Dokument-Metadaten für Ihre Organisationen erfassen und einsehen, z.&thinsp;B. Hallenordnungen, Versicherungsnachweise und Veranstaltungsgenehmigungen.
       </p>
       <div className="mt-8 flex items-center justify-between">
         <AppBackLink href="/portal" label="Zurück zum Portal" />

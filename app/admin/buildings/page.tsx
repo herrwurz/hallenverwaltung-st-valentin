@@ -1,11 +1,14 @@
 import {
   createBuildingClosureAction,
+  createBuildingClosureFromHolidayAction,
+  deleteBuildingAction,
   deleteBuildingClosureAction,
   saveBuildingAction,
   updateBuildingClosureAction,
 } from "@/app/admin/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
 import { AdminClosurePanel } from "@/components/admin-closure-panel";
+import { AdminDeleteForm } from "@/components/admin-delete-form";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { BuildingsTable, type BuildingTableRow } from "@/components/admin-master-data-tables";
 import { FormActions } from "@/components/form-actions";
@@ -13,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePermission } from "@/lib/permissions";
 import { getBuildingAdministrationData } from "@/lib/services/admin/building-service";
+import { getHolidayOptions } from "@/lib/services/holiday-service";
 
 const inputClass = "mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm";
 
@@ -22,7 +26,7 @@ type PageProps = {
 
 export default async function BuildingsPage({ searchParams }: PageProps) {
   await requirePermission("MANAGE_USERS");
-  const [params, data] = await Promise.all([searchParams, getBuildingAdministrationData()]);
+  const [params, data, holidays] = await Promise.all([searchParams, getBuildingAdministrationData(), getHolidayOptions()]);
   const tableRows: BuildingTableRow[] = data.buildings.map((building) => ({
     id: building.id,
     code: building.code,
@@ -88,13 +92,23 @@ export default async function BuildingsPage({ searchParams }: PageProps) {
             </CardHeader>
             <CardContent>
               <BuildingForm caretakers={data.caretakers} building={building} />
+              {building.rooms.length === 0 && (
+                <AdminDeleteForm
+                  action={deleteBuildingAction}
+                  id={building.id}
+                  label="Gebäude löschen"
+                  confirmMessage={`Gebäude „${building.name}" wirklich löschen?`}
+                />
+              )}
               <AdminClosurePanel
                 action={createBuildingClosureAction}
                 updateAction={updateBuildingClosureAction}
                 deleteAction={deleteBuildingClosureAction}
+                fromHolidayAction={createBuildingClosureFromHolidayAction}
                 targetName="buildingId"
                 targetId={building.id}
                 closures={building.closures}
+                holidays={holidays}
                 relatedClosures={building.rooms
                   .flatMap((room) =>
                     room.closures.map((closure) => ({
@@ -130,7 +144,7 @@ function BuildingForm({ caretakers, building }: BuildingFormProps) {
           readOnly={Boolean(building)}
           defaultValue={building?.code}
           className={building ? `${inputClass} bg-muted text-muted-foreground` : inputClass}
-          placeholder="VS_HAUPTPLATZ"
+          placeholder="z.B. NMS_LANGENHART"
         />
         {building ? <span className="mt-1 block text-xs text-muted-foreground">Der Code bleibt nach dem Anlegen unverändert.</span> : null}
       </label>

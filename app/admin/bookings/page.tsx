@@ -216,7 +216,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
         {bookings.map((booking) => (
           <Card key={`${booking.id}-details`}>
             <CardHeader>
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <CardTitle>{booking.title}</CardTitle>
                   <CardDescription>
@@ -224,7 +224,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                     {dateFormatter.format(booking.startsAt)} bis {dateFormatter.format(booking.endsAt)}
                   </CardDescription>
                 </div>
-                <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm leading-none ${getBookingStatusBadgeClass(booking.status)}`}>
+                <span className={`shrink-0 inline-flex items-center rounded-full px-3 py-1 text-sm leading-none ${getBookingStatusBadgeClass(booking.status)}`}>
                   {getBookingStatusLabel(booking.status)}
                 </span>
               </div>
@@ -307,7 +307,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                             <span>
                               <span className="block font-medium">Sperre bewusst als Ausnahme genehmigen</span>
                               <span className="mt-1 block text-xs text-muted-foreground">
-                                Nur fuer fachlich gewollte Ausnahmen verwenden. Ein Kommentar ist erforderlich.
+                                Nur für fachlich gewollte Ausnahmen verwenden. Ein Kommentar ist erforderlich.
                               </span>
                             </span>
                           </label>
@@ -378,9 +378,9 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
                           <label className="mb-3 flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm">
                             <input name="allowClosureOverride" type="checkbox" className="mt-1 rounded border-input bg-background" />
                             <span>
-                              <span className="block font-medium">Sperren fuer Serie bewusst als Ausnahme genehmigen</span>
+                              <span className="block font-medium">Sperren für Serie bewusst als Ausnahme genehmigen</span>
                               <span className="mt-1 block text-xs text-muted-foreground">
-                                Wird nur auf Serientermine angewendet, deren harter Konflikt ausschliesslich eine Sperre ist.
+                                Wird nur auf Serientermine angewendet, deren harter Konflikt ausschließlich eine Sperre ist.
                               </span>
                             </span>
                           </label>

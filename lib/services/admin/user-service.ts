@@ -16,10 +16,11 @@ const userSchema = z.object({
   organizationIds: z.array(z.string().trim()).default([]),
   membershipFunction: z.string().trim().min(2).max(100).default("Mitglied"),
   primaryOrganizationId: z.string().trim().optional(),
+  caretakerBuildingIds: z.array(z.string().trim()).default([]),
 });
 
 export async function getUserAdministrationData() {
-  const [users, roles, organizations] = await Promise.all([
+  const [users, roles, organizations, standaloneCaretakers, buildings, linkedCaretakers] = await Promise.all([
     prisma.user.findMany({
       include: {
         roles: { include: { role: true } },
@@ -35,9 +36,30 @@ export async function getUserAdministrationData() {
       where: { status: "ACTIVE" },
       orderBy: { name: "asc" },
     }),
+    prisma.caretaker.findMany({
+      where: { userId: null },
+      include: {
+        buildings: { where: { isPrimary: true }, include: { building: { select: { name: true } } } },
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.building.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.caretaker.findMany({
+      where: { userId: { not: null } },
+      include: {
+        buildings: { include: { building: { select: { id: true, name: true } } } },
+      },
+    }),
   ]);
 
-  return { users, roles, organizations };
+  const caretakerByUserId = new Map(linkedCaretakers.map((c) => [c.userId!, c]));
+  const usersWithCaretaker = users.map((user) => ({ ...user, caretaker: caretakerByUserId.get(user.id) ?? null }));
+
+  return { users: usersWithCaretaker, roles, organizations, standaloneCaretakers, buildings };
 }
 
 export async function saveUser(input: unknown, actorUserId: string) {
@@ -148,7 +170,7 @@ export async function saveUser(input: unknown, actorUserId: string) {
     const isCaretaker = assignedRoles.some((role) => role.code === "CARETAKER");
 
     if (isCaretaker) {
-      await transaction.caretaker.upsert({
+      const caretaker = await transaction.caretaker.upsert({
         where: { userId: user.id },
         update: {
           name: user.displayName,
@@ -163,6 +185,18 @@ export async function saveUser(input: unknown, actorUserId: string) {
           isActive: user.isActive,
         },
       });
+
+      await transaction.buildingCaretaker.deleteMany({ where: { caretakerId: caretaker.id } });
+      if (data.caretakerBuildingIds.length > 0) {
+        await transaction.buildingCaretaker.createMany({
+          data: data.caretakerBuildingIds.map((buildingId) => ({
+            caretakerId: caretaker.id,
+            buildingId,
+            isPrimary: true,
+          })),
+          skipDuplicates: true,
+        });
+      }
     }
 
     const currentMemberships = await transaction.organizationMember.findMany({

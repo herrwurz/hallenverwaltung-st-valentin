@@ -259,13 +259,13 @@ Danach Smoke-Test wiederholen.
 
 | Punkt | Status |
 | --- | --- |
-| SSH-Zugang eingerichtet | offen |
-| Docker installiert | offen |
-| Repository geklont | offen |
-| `.env.test` mit echten Test-Secrets erstellt | offen |
-| TLS-Zertifikate bereitgestellt | offen |
-| Compose-Konfiguration erfolgreich | offen |
-| Migration erfolgreich | offen |
-| Seed/Demo-Seed bewusst ausgefuehrt | offen |
-| HTTPS-Smoke-Test erfolgreich | offen |
+| SSH-Zugang eingerichtet | erledigt |
+| Docker installiert | erledigt |
+| Repository geklont | erledigt |
+| `.env.test` mit echten Test-Secrets erstellt | erledigt |
+| TLS-Zertifikate bereitgestellt | erledigt |
+| Compose-Konfiguration erfolgreich | erledigt |
+| Migration erfolgreich | erledigt |
+| Seed/Demo-Seed bewusst ausgefuehrt | erledigt |
+| HTTPS-Smoke-Test erfolgreich | erledigt |
 | Testzugang an Tester kommuniziert | offen |

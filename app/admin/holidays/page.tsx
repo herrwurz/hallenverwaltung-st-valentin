@@ -4,6 +4,7 @@ import {
   importHolidayPresetAction,
 } from "@/app/admin/holidays/actions";
 import { AppFeedback } from "@/components/app-feedback";
+import { HolidayClosureTargetPicker } from "@/components/holiday-closure-target-picker";
 import { HolidaysDataTable, type HolidayTableRow } from "@/components/phase25-data-tables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -100,14 +101,14 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
             <label className="text-sm font-medium">
               Serien-Hinweisstatus
               <select name="defaultStatus" required defaultValue="OPEN" className={inputClass}>
-                <option value="OPEN">Geoeffnet</option>
-                <option value="RESTRICTED">Eingeschraenkt</option>
-                <option value="CLOSED">Fuer Serien ueberspringen</option>
+                <option value="OPEN">Geöffnet</option>
+                <option value="RESTRICTED">Eingeschränkt</option>
+                <option value="CLOSED">Für Serien überspringen</option>
               </select>
             </label>
             <label className="inline-flex items-center gap-2 text-sm font-medium lg:col-span-3">
               <input name="isPublic" type="checkbox" defaultChecked className="rounded border-input bg-background" />
-              Fuer Benutzer sichtbar
+              Für Benutzer sichtbar
             </label>
             <div className="lg:text-right">
               <Button>Vorlage importieren</Button>
@@ -140,7 +141,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
             <label className="text-sm font-medium">
               Bundesland
               <select name="regionCode" defaultValue="" className={inputClass}>
-                <option value="">Bundesweit / nicht eingeschraenkt</option>
+                <option value="">Bundesweit / nicht eingeschränkt</option>
                 {holidayRegionOptions.map((region) => (
                   <option key={region.code} value={region.code}>
                     {region.label}
@@ -151,9 +152,9 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
             <label className="text-sm font-medium">
               Serien-Hinweisstatus
               <select name="defaultStatus" required defaultValue="OPEN" className={inputClass}>
-                <option value="OPEN">Geoeffnet</option>
-                <option value="RESTRICTED">Eingeschraenkt</option>
-                <option value="CLOSED">Fuer Serien ueberspringen</option>
+                <option value="OPEN">Geöffnet</option>
+                <option value="RESTRICTED">Eingeschränkt</option>
+                <option value="CLOSED">Für Serien überspringen</option>
               </select>
             </label>
             <label className="text-sm font-medium">
@@ -170,7 +171,7 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
             </label>
             <label className="inline-flex items-center gap-2 text-sm font-medium lg:col-span-2">
               <input name="isPublic" type="checkbox" defaultChecked className="rounded border-input bg-background" />
-              Fuer Benutzer sichtbar
+              Für Benutzer sichtbar
             </label>
             <div className="lg:col-span-2 lg:text-right">
               <Button>Zeitraum speichern</Button>
@@ -204,40 +205,17 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
                   ))}
                 </select>
               </label>
-              <label className="text-sm font-medium">
-                Gebäude
-                <select name="buildingId" defaultValue="" className={inputClass}>
-                  <option value="">Keine Gebäudesperre</option>
-                  {data.buildings.map((building) => (
-                    <option key={building.id} value={building.id}>
-                      {building.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-sm font-medium">
-                Raum
-                <select name="roomId" defaultValue="" className={inputClass}>
-                  <option value="">Keine Raumsperre</option>
-                  {data.buildings.flatMap((building) =>
-                    building.rooms.map((room) => (
-                      <option key={room.id} value={room.id}>
-                        {building.name} - {room.name}
-                      </option>
-                    )),
-                  )}
-                </select>
-              </label>
+              <HolidayClosureTargetPicker buildings={data.buildings} />
               <label className="text-sm font-medium">
                 Sperrstatus
                 <select name="status" required defaultValue="CLOSED" className={inputClass}>
                   <option value="CLOSED">Gesperrt</option>
-                  <option value="RESTRICTED">Eingeschraenkt</option>
+                  <option value="RESTRICTED">Eingeschränkt</option>
                 </select>
               </label>
               <label className="text-sm font-medium lg:col-span-2">
                 Sperrgrund optional
-                <input name="reason" maxLength={1000} className={inputClass} placeholder="Leer lassen, um Feriengrund zu uebernehmen" />
+                <input name="reason" maxLength={1000} className={inputClass} placeholder="Leer lassen, um Feriengrund zu übernehmen" />
               </label>
               <label className="inline-flex items-center gap-2 text-sm font-medium">
                 <input name="isPublic" type="checkbox" defaultChecked className="rounded border-input bg-background" />
@@ -253,13 +231,13 @@ export default async function AdminHolidaysPage({ searchParams }: PageProps) {
 
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Erfasste Zeitraeume</CardTitle>
-          <CardDescription>Ferien- und Feiertagslogik fuer Serienantraege.</CardDescription>
+          <CardTitle>Erfasste Zeiträume</CardTitle>
+          <CardDescription>Ferien- und Feiertagslogik für Serienanträge.</CardDescription>
         </CardHeader>
         <CardContent>
           {data.holidays.length === 0 ? (
             <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
-              Noch keine Ferien- oder Feiertagszeitraeume vorhanden.
+              Noch keine Ferien- oder Feiertagszeiträume vorhanden.
             </p>
           ) : (
             <HolidaysDataTable rows={holidayRows} />

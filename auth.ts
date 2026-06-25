@@ -25,6 +25,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const parsed = credentialsSchema.safeParse(credentials);
 
         if (!parsed.success) {
+          console.info("Authorize: credentials parsing failed", { hasEmail: typeof credentials?.email === "string" });
           return null;
         }
 
@@ -37,11 +38,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           },
         });
 
+        console.info("Authorize: user lookup", {
+          found: Boolean(user),
+          isActive: Boolean(user?.isActive),
+          hasPasswordHash: Boolean(user?.passwordHash),
+        });
+
         if (!user?.isActive || !user.passwordHash) {
           return null;
         }
 
         const passwordMatches = await compare(parsed.data.password, user.passwordHash);
+
+        console.info("Authorize: passwordMatches", { email: parsed.data.email, matches: passwordMatches });
 
         if (!passwordMatches) {
           return null;

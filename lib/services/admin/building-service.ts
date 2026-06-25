@@ -104,3 +104,13 @@ export async function saveBuilding(input: unknown) {
     }
   });
 }
+
+export async function deleteBuilding(id: string) {
+  const roomCount = await prisma.room.count({ where: { buildingId: id } });
+
+  if (roomCount > 0) {
+    throw new Error("Das Gebäude kann nicht gelöscht werden, da noch Räume zugeordnet sind.");
+  }
+
+  await prisma.building.delete({ where: { id } });
+}
