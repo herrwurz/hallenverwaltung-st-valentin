@@ -38,11 +38,16 @@ test("portal forms hide organization selection when there is only one organizati
   const portalDocuments = readFileSync("app/portal/documents/page.tsx", "utf8");
   const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
   const portalWaitlist = readFileSync("app/portal/waitlist/page.tsx", "utf8");
+  const bookingRequestForm = readFileSync("components/booking-request-form.tsx", "utf8");
+  const seriesRequestForm = readFileSync("components/series-request-form.tsx", "utf8");
 
   assert.match(organizationField, /organizations\.length === 1/);
   assert.match(organizationField, /type="hidden" name="organizationId"/);
   assert.match(organizationField, /select name="organizationId"/);
-  assert.match(portalBookings, /PortalOrganizationField/);
+  assert.match(portalBookings, /BookingRequestForm/);
+  assert.match(portalBookings, /SeriesRequestForm/);
+  assert.match(bookingRequestForm, /PortalOrganizationField/);
+  assert.match(seriesRequestForm, /PortalOrganizationField/);
   assert.match(portalWaitlist, /PortalOrganizationField/);
   assert.match(portalDocuments, /PortalOrganizationField/);
 });

@@ -19,8 +19,14 @@ function createNotificationHarness() {
   const booking = {
     id: "booking-1",
     title: "Abendtraining",
+    status: "REQUESTED",
     startsAt: new Date("2026-06-12T18:00:00Z"),
     endsAt: new Date("2026-06-12T20:00:00Z"),
+    decisionNote: null,
+    cancellationNote: null,
+    usageType: {
+      name: "Training",
+    },
     requestedBy: {
       id: "user-requester",
       email: "requester@example.test",
@@ -166,6 +172,23 @@ function createNotificationHarness() {
     booking: {
       async findUnique() {
         return booking;
+      },
+      async findMany() {
+        return [
+          {
+            id: booking.id,
+            title: booking.title,
+            status: booking.status,
+            startsAt: booking.startsAt,
+            endsAt: booking.endsAt,
+            usageType: { name: booking.usageType.name },
+            organization: { name: booking.organization.name },
+            room: {
+              name: booking.room.name,
+              building: { name: booking.room.building.name },
+            },
+          },
+        ];
       },
     },
     bookingSeries: {
