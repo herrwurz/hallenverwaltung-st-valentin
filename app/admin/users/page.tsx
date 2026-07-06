@@ -97,7 +97,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
           <h3 className="text-xl font-semibold tracking-tight">Hallenwarte ohne Benutzerkonto</h3>
           <p className="text-sm text-muted-foreground">
             Diese Hallenwarte sind in der Datenbank erfasst, haben aber noch kein Benutzerkonto. Um ihnen Zugang zu
-            geben, legen Sie unter „Neuer Benutzer" ein Konto an und weisen Sie die Rolle „Hallenwart" zu.
+            geben, legen Sie unter „Neuer Benutzer“ ein Konto an und weisen Sie die Rolle „Hallenwart“ zu.
           </p>
           {data.standaloneCaretakers.map((caretaker) => (
             <Card key={caretaker.id}>
@@ -183,7 +183,7 @@ function UserForm({
         <fieldset className="rounded-xl border border-border p-4">
           <legend className="px-2 text-sm font-medium">Gebäudezuordnung (Hallenwart)</legend>
           <p className="mb-3 text-xs text-muted-foreground">
-            Nur relevant, wenn die Rolle „Hallenwart" vergeben wird.
+            Nur relevant, wenn die Rolle „Hallenwart“ vergeben wird.
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {buildings.map((building) => (
