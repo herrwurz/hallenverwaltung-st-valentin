@@ -10,6 +10,10 @@ const organizationSchema = z.object({
   id: z.string().trim().optional(),
   name: z.string().trim().min(2, "Ein Name ist erforderlich.").max(160),
   organizationTypeId: z.string().trim().min(1, "Ein Organisationstyp ist erforderlich."),
+  tariffGroupId: z
+    .union([z.string(), z.null(), z.undefined()])
+    .transform((value) => String(value ?? "").trim() || null),
+  isBillingRelevant: z.boolean(),
   status: z.enum(["ACTIVE", "BLOCKED", "INACTIVE"]),
   blockedReason: z.string().trim().max(500).optional(),
 });
@@ -38,7 +42,12 @@ export async function getOrganizationAdministrationData() {
     }),
   ]);
 
-  return { organizations, organizationTypes };
+  const tariffGroups = await prisma.tariffGroup.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
+  return { organizations, organizationTypes, tariffGroups };
 }
 
 export async function saveOrganization(input: unknown) {
@@ -49,6 +58,8 @@ export async function saveOrganization(input: unknown) {
   const updateData = {
     name: data.name,
     organizationTypeId: data.organizationTypeId,
+    tariffGroupId: data.tariffGroupId,
+    isBillingRelevant: data.isBillingRelevant,
     status: data.status,
     blockedReason,
     canRequestBookings,

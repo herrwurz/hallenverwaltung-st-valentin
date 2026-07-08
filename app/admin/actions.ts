@@ -201,6 +201,8 @@ export async function saveOrganizationAction(formData: FormData) {
       id: optionalValue(formData, "id"),
       name: formData.get("name"),
       organizationTypeId: formData.get("organizationTypeId"),
+      tariffGroupId: optionalValue(formData, "tariffGroupId") ?? null,
+      isBillingRelevant: formData.get("isBillingRelevant") === "on",
       status: formData.get("status"),
       blockedReason: optionalValue(formData, "blockedReason"),
     }),

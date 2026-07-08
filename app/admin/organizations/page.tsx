@@ -44,7 +44,7 @@ export default async function OrganizationsPage({ searchParams }: PageProps) {
           <CardDescription>Organisationen können aktiv, inaktiv oder für Buchungsanträge gesperrt sein.</CardDescription>
         </CardHeader>
         <CardContent>
-          <OrganizationForm organizationTypes={data.organizationTypes} />
+          <OrganizationForm organizationTypes={data.organizationTypes} tariffGroups={data.tariffGroups} />
         </CardContent>
       </Card>
 
@@ -76,7 +76,7 @@ export default async function OrganizationsPage({ searchParams }: PageProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <OrganizationForm organizationTypes={data.organizationTypes} organization={organization} />
+              <OrganizationForm organizationTypes={data.organizationTypes} tariffGroups={data.tariffGroups} organization={organization} />
             </CardContent>
           </Card>
         ))}
@@ -89,9 +89,11 @@ type OrganizationData = Awaited<ReturnType<typeof getOrganizationAdministrationD
 
 function OrganizationForm({
   organizationTypes,
+  tariffGroups,
   organization,
 }: {
   organizationTypes: OrganizationData["organizationTypes"];
+  tariffGroups: OrganizationData["tariffGroups"];
   organization?: OrganizationData["organizations"][number];
 }) {
   return (
@@ -125,6 +127,24 @@ function OrganizationForm({
       <label className="text-sm font-medium">
         Sperr-/Stilllegungsgrund
         <input name="blockedReason" defaultValue={organization?.blockedReason ?? ""} className={inputClass} />
+      </label>
+      <label className="text-sm font-medium">
+        Tarifgruppe
+        <select name="tariffGroupId" defaultValue={organization?.tariffGroupId ?? ""} className={inputClass}>
+          <option value="">Keine Tarifgruppe</option>
+          {tariffGroups.map((group) => (
+            <option key={group.id} value={group.id}>
+              {group.name}
+            </option>
+          ))}
+        </select>
+        <span className="mt-1 block text-xs text-muted-foreground">
+          Bestimmt die Preise in der Abrechnung (Stammdaten → Tarife).
+        </span>
+      </label>
+      <label className="inline-flex items-center gap-2 pt-8 text-sm font-medium">
+        <input type="checkbox" name="isBillingRelevant" defaultChecked={organization?.isBillingRelevant ?? true} />
+        Abrechnungsrelevant
       </label>
       <div className="lg:col-span-4">
         <FormActions submitLabel={organization ? "Änderungen speichern" : "Organisation anlegen"} cancelHref="/admin/organizations" />
