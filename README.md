@@ -231,7 +231,7 @@ E2E_BASE_URL=https://hallenverwaltung.example.org npm run test:e2e
 
 Die Tests benoetigen eine erreichbare PostgreSQL-Datenbank ueber
 `DATABASE_URL`. Ohne gesetzte Variable wird die lokale Entwicklungs-URL
-`postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public`
+`postgresql://postgres@localhost:15432/hallenverwaltung_phase35?schema=public`
 verwendet.
 
 Falls der automatische Playwright-Webserver in einer Windows-/Codex-Session
@@ -239,7 +239,7 @@ beim Beenden haengen bleibt, kann der Server manuell gestartet und die Suite
 gegen die laufende Instanz ausgefuehrt werden:
 
 ```powershell
-$env:DATABASE_URL="postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public"
+$env:DATABASE_URL="postgresql://postgres@localhost:15432/hallenverwaltung_phase35?schema=public"
 $env:AUTH_SECRET="phase-14-e2e-local-secret-change-in-real-env"
 $env:AUTH_TRUST_HOST="true"
 npm run dev -- --hostname 127.0.0.1 --port 3000
@@ -249,7 +249,7 @@ In einem zweiten Terminal:
 
 ```powershell
 $env:E2E_BASE_URL="http://127.0.0.1:3000"
-$env:DATABASE_URL="postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public"
+$env:DATABASE_URL="postgresql://postgres@localhost:15432/hallenverwaltung_phase35?schema=public"
 $env:AUTH_SECRET="phase-14-e2e-local-secret-change-in-real-env"
 $env:AUTH_TRUST_HOST="true"
 npm run test:e2e

@@ -10,7 +10,7 @@ if exist "%NODE_DIR%\node.exe" (
 
 if "%PORT%"=="" set "PORT=3000"
 if "%HOSTNAME%"=="" set "HOSTNAME=localhost"
-if "%DATABASE_URL%"=="" set "DATABASE_URL=postgresql://hallenverwaltung:change-me@localhost:55435/hallenverwaltung?schema=public"
+if "%DATABASE_URL%"=="" set "DATABASE_URL=postgresql://hallenverwaltung:change-me@localhost:15432/hallenverwaltung?schema=public"
 if "%AUTH_SECRET%"=="" set "AUTH_SECRET=local-clicktest-secret-local-clicktest-secret"
 if "%AUTH_TRUST_HOST%"=="" set "AUTH_TRUST_HOST=true"
 

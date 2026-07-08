@@ -13,7 +13,9 @@ if exist "%NODE_DIR%\npm.cmd" (
   set "PATH=%NODE_DIR%;%PATH%"
 )
 
-set "POSTGRES_PORT=55435"
+rem Port 15432 statt 55435: der Bereich 55434-55533 ist unter Windows haeufig
+rem durch Hyper-V/WinNAT reserviert (netsh interface ipv4 show excludedportrange).
+set "POSTGRES_PORT=15432"
 set "POSTGRES_DB=hallenverwaltung"
 set "POSTGRES_USER=hallenverwaltung"
 set "POSTGRES_PASSWORD=change-me"
