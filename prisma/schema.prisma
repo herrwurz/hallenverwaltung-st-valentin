@@ -541,21 +541,22 @@ model TariffGroup {
 }
 
 model Tariff {
-  id                 String           @id @default(cuid())
+  id                 String            @id @default(cuid())
   tariffGroupId      String
   roomId             String
-  organizationTypeId String
-  usageTypeId        String
+  // null = Tarif gilt fuer alle Organisationsarten bzw. Nutzungstypen (Wildcard)
+  organizationTypeId String?
+  usageTypeId        String?
   name               String
-  hourlyRate         Decimal?         @db.Decimal(10, 2)
-  flatRate           Decimal?         @db.Decimal(10, 2)
-  dayType            TariffDayType    @default(ALL)
+  hourlyRate         Decimal?          @db.Decimal(10, 2)
+  flatRate           Decimal?          @db.Decimal(10, 2)
+  dayType            TariffDayType     @default(ALL)
   validFrom          DateTime
   validUntil         DateTime?
-  tariffGroup        TariffGroup      @relation(fields: [tariffGroupId], references: [id])
-  room               Room             @relation(fields: [roomId], references: [id])
-  organizationType   OrganizationType @relation(fields: [organizationTypeId], references: [id])
-  usageType          UsageType        @relation(fields: [usageTypeId], references: [id])
+  tariffGroup        TariffGroup       @relation(fields: [tariffGroupId], references: [id])
+  room               Room              @relation(fields: [roomId], references: [id])
+  organizationType   OrganizationType? @relation(fields: [organizationTypeId], references: [id])
+  usageType          UsageType?        @relation(fields: [usageTypeId], references: [id])
   billingEntries     BillingEntry[]
 
   @@index([roomId, tariffGroupId, usageTypeId, validFrom])

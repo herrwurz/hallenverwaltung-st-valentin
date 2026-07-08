@@ -150,6 +150,10 @@ function isWeekend(date: Date) {
   return day === 0 || day === 6;
 }
 
+// Einzelne Feiertage (max. 36h) zaehlen als HOLIDAY; laengere Zeitraeume sind
+// Ferien und aendern die Tagesart fuer die Tarifierung nicht.
+const PUBLIC_HOLIDAY_MAX_DURATION_MS = 36 * 60 * 60 * 1000;
+
 async function resolveTariffDayType(booking: Pick<BillableBooking, "startsAt">, client: BillingClient): Promise<TariffDayType> {
   const dayStart = new Date(Date.UTC(
     booking.startsAt.getUTCFullYear(),
@@ -159,31 +163,52 @@ async function resolveTariffDayType(booking: Pick<BillableBooking, "startsAt">, 
   const dayEnd = new Date(dayStart);
   dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
 
-  const holiday = await client.holidayPeriod.findFirst({
+  const holidays = await client.holidayPeriod.findMany({
     where: {
       startsOn: { lt: dayEnd },
       endsOn: { gte: dayStart },
     },
-    select: { id: true },
+    select: { startsOn: true, endsOn: true },
   });
 
-  if (holiday) {
+  const isPublicHoliday = holidays.some(
+    (holiday) => holiday.endsOn.getTime() - holiday.startsOn.getTime() <= PUBLIC_HOLIDAY_MAX_DURATION_MS,
+  );
+  if (isPublicHoliday) {
     return "HOLIDAY";
   }
 
   return isWeekend(booking.startsAt) ? "WEEKEND" : "WEEKDAY";
 }
 
-function tariffSpecificity(dayType: TariffDayType, targetDayType: TariffDayType) {
+type ResolvableTariff = {
+  dayType: TariffDayType;
+  usageTypeId: string | null;
+  organizationTypeId: string | null;
+};
+
+function tariffDayTypeSpecificity(dayType: TariffDayType, targetDayType: TariffDayType) {
   if (dayType === targetDayType) {
     return 0;
   }
 
-  if (dayType === "ALL") {
+  // Feiertage werden wie Wochenenden tarifiert, sofern kein eigener Feiertagstarif existiert.
+  if (targetDayType === "HOLIDAY" && dayType === "WEEKEND") {
     return 1;
   }
 
+  if (dayType === "ALL") {
+    return 2;
+  }
+
   return 99;
+}
+
+function tariffSpecificity(tariff: ResolvableTariff, targetDayType: TariffDayType) {
+  const dayScore = tariffDayTypeSpecificity(tariff.dayType, targetDayType);
+  const usageScore = tariff.usageTypeId ? 0 : 1;
+  const organizationScore = tariff.organizationTypeId ? 0 : 1;
+  return dayScore * 4 + usageScore * 2 + organizationScore;
 }
 
 function intervalsOverlap(
@@ -202,17 +227,22 @@ function assertNoConflictingTariffs(
     validFrom: Date;
     validUntil: Date | null;
     dayType: TariffDayType;
+    usageTypeId?: string | null;
+    organizationTypeId?: string | null;
   }>,
 ) {
-  const byDayType = new Map<TariffDayType, typeof tariffs>();
+  // Nur Tarife mit identischer Spezifitaet (Tagesart + Nutzungstyp + Organisationsart)
+  // koennen sich widersprechen; Wildcard und spezifischer Tarif duerfen koexistieren.
+  const byCombination = new Map<string, typeof tariffs>();
 
   for (const tariff of tariffs) {
-    const group = byDayType.get(tariff.dayType) ?? [];
+    const key = `${tariff.dayType}|${tariff.usageTypeId ?? "*"}|${tariff.organizationTypeId ?? "*"}`;
+    const group = byCombination.get(key) ?? [];
     group.push(tariff);
-    byDayType.set(tariff.dayType, group);
+    byCombination.set(key, group);
   }
 
-  for (const group of byDayType.values()) {
+  for (const group of byCombination.values()) {
     for (let index = 0; index < group.length; index += 1) {
       for (let nextIndex = index + 1; nextIndex < group.length; nextIndex += 1) {
         const left = group[index]!;
@@ -231,15 +261,20 @@ async function resolveTariff(booking: BillableBooking, client: BillingClient) {
   }
 
   const dayType = await resolveTariffDayType(booking, client);
+  // Feiertage fallen auf den Wochenendtarif zurueck, wenn kein eigener Feiertagstarif existiert.
+  const dayTypeCandidates: TariffDayType[] =
+    dayType === "HOLIDAY" ? ["HOLIDAY", "WEEKEND", "ALL"] : [dayType, "ALL"];
   const tariffs = await client.tariff.findMany({
     where: {
       roomId: booking.roomId,
       tariffGroupId: booking.organization.tariffGroupId,
-      organizationTypeId: booking.organization.organizationTypeId,
-      usageTypeId: booking.usageTypeId,
       validFrom: { lte: booking.startsAt },
-      OR: [{ validUntil: null }, { validUntil: { gte: booking.startsAt } }],
-      dayType: { in: [dayType, "ALL"] },
+      dayType: { in: dayTypeCandidates },
+      AND: [
+        { OR: [{ organizationTypeId: booking.organization.organizationTypeId }, { organizationTypeId: null }] },
+        { OR: [{ usageTypeId: booking.usageTypeId }, { usageTypeId: null }] },
+        { OR: [{ validUntil: null }, { validUntil: { gte: booking.startsAt } }] },
+      ],
     },
     orderBy: [{ validFrom: "desc" }],
   });
@@ -247,7 +282,7 @@ async function resolveTariff(booking: BillableBooking, client: BillingClient) {
   assertNoConflictingTariffs(tariffs);
 
   const tariff = tariffs
-    .sort((left, right) => tariffSpecificity(left.dayType, dayType) - tariffSpecificity(right.dayType, dayType))[0];
+    .sort((left, right) => tariffSpecificity(left, dayType) - tariffSpecificity(right, dayType))[0];
 
   if (!tariff) {
     throw new BillingValidationError("Für diese Buchung wurde kein passender Tarif gefunden.");
