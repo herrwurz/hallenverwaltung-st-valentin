@@ -17,7 +17,7 @@ test("portal user can create a booking request", async ({ page }) => {
   await page.locator('input[name="title"]').fill(title);
   await page.locator('select[name="usageTypeId"]').selectOption({ label: e2eCatalog.usageTypeName });
   await page.locator('input[name="startsAt"]').fill(nextWeekdayDateTime(18));
-  await page.locator('input[name="endsAt"]').fill(nextWeekdayDateTime(19, 30));
+  await page.locator('input[name="endsAtTime"]').fill("19:30");
   await page.locator('textarea[name="description"]').fill("E2E Smoke-Test fuer den Buchungsantrag.");
   await page.getByRole("button", { name: "Antrag absenden" }).click();
 

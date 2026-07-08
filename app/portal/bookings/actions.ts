@@ -9,8 +9,8 @@ import { cancelOwnBookingRequest, createBookingRequest } from "@/lib/services/bo
 import { BookingValidationError } from "@/lib/services/booking-rules";
 import { createBookingSeriesRequest } from "@/lib/services/booking-series-service";
 import {
-  processPendingNotifications,
   queueBookingSeriesNotifications,
+  sendPendingNotification,
 } from "@/lib/services/notification-service";
 
 function bookingErrorMessage(error: unknown) {
@@ -90,12 +90,14 @@ export async function createBookingSeriesRequestAction(formData: FormData) {
     );
 
     try {
-      await queueBookingSeriesNotifications(result.series.id, "BOOKING_SERIES_REQUESTED", {
+      const queuedNotificationIds = await queueBookingSeriesNotifications(result.series.id, "BOOKING_SERIES_REQUESTED", {
         createdCount: result.createdBookings.length,
         skippedCount: result.skipped.length,
         note: result.warnings.join(" "),
       });
-      await processPendingNotifications();
+      for (const notificationId of queuedNotificationIds) {
+        await sendPendingNotification(notificationId);
+      }
     } catch (notificationError) {
       console.error("Booking series notifications failed", notificationError);
     }

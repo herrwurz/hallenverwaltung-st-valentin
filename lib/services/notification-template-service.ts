@@ -1,5 +1,6 @@
 import {
   parseNotificationTemplateData,
+  type AffectedBookingItem,
   type BookingChangeNotificationPayload,
   type BookingNotificationPayload,
   type BookingSeriesNotificationPayload,
@@ -28,9 +29,12 @@ function renderBookingCommonText(template: { payload: BookingNotificationPayload
   return [
     `Titel: ${template.payload.title}`,
     `Organisation: ${template.payload.organizationName}`,
-    `Ort: ${template.payload.buildingName} - ${template.payload.roomName}`,
+    `Gebäude: ${template.payload.buildingName}`,
+    `Raum: ${template.payload.roomName}`,
+    template.payload.usageTypeName ? `Nutzungstyp: ${template.payload.usageTypeName}` : "",
+    template.payload.status ? `Status: ${template.payload.status}` : "",
     `Termin: ${formatDateRange(template.payload.startsAt, template.payload.endsAt)}`,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 function renderBookingCommonHtml(template: { payload: BookingNotificationPayload }) {
@@ -38,10 +42,53 @@ function renderBookingCommonHtml(template: { payload: BookingNotificationPayload
     <ul>
       <li><strong>Titel:</strong> ${escapeHtml(template.payload.title)}</li>
       <li><strong>Organisation:</strong> ${escapeHtml(template.payload.organizationName)}</li>
-      <li><strong>Ort:</strong> ${escapeHtml(template.payload.buildingName)} - ${escapeHtml(template.payload.roomName)}</li>
+      <li><strong>Gebäude:</strong> ${escapeHtml(template.payload.buildingName)}</li>
+      <li><strong>Raum:</strong> ${escapeHtml(template.payload.roomName)}</li>
+      ${template.payload.usageTypeName ? `<li><strong>Nutzungstyp:</strong> ${escapeHtml(template.payload.usageTypeName)}</li>` : ""}
+      ${template.payload.status ? `<li><strong>Status:</strong> ${escapeHtml(template.payload.status)}</li>` : ""}
       <li><strong>Termin:</strong> ${escapeHtml(formatDateRange(template.payload.startsAt, template.payload.endsAt))}</li>
     </ul>
   `;
+}
+
+function renderAffectedBookingsTable(bookings: AffectedBookingItem[]) {
+  if (bookings.length === 0) return "";
+  const rows = bookings.map(
+    (b) =>
+      `<tr>
+        <td style="padding:4px 8px;border:1px solid #e2e8f0">${escapeHtml(b.title)}</td>
+        <td style="padding:4px 8px;border:1px solid #e2e8f0">${escapeHtml(b.organizationName)}</td>
+        <td style="padding:4px 8px;border:1px solid #e2e8f0">${escapeHtml(b.buildingName)} – ${escapeHtml(b.roomName)}</td>
+        <td style="padding:4px 8px;border:1px solid #e2e8f0">${escapeHtml(b.usageTypeName)}</td>
+        <td style="padding:4px 8px;border:1px solid #e2e8f0">${escapeHtml(formatDateRange(b.startsAt, b.endsAt))}</td>
+        <td style="padding:4px 8px;border:1px solid #e2e8f0">${escapeHtml(b.status)}</td>
+      </tr>`,
+  ).join("");
+  return `
+    <p><strong>Betroffene Buchungen (${bookings.length}):</strong></p>
+    <table style="border-collapse:collapse;font-size:0.875rem;width:100%">
+      <thead>
+        <tr style="background:#f8fafc">
+          <th style="padding:4px 8px;border:1px solid #e2e8f0;text-align:left">Titel</th>
+          <th style="padding:4px 8px;border:1px solid #e2e8f0;text-align:left">Organisation</th>
+          <th style="padding:4px 8px;border:1px solid #e2e8f0;text-align:left">Ort</th>
+          <th style="padding:4px 8px;border:1px solid #e2e8f0;text-align:left">Nutzungstyp</th>
+          <th style="padding:4px 8px;border:1px solid #e2e8f0;text-align:left">Termin</th>
+          <th style="padding:4px 8px;border:1px solid #e2e8f0;text-align:left">Status</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderAffectedBookingsText(bookings: AffectedBookingItem[]) {
+  if (bookings.length === 0) return "";
+  const lines = bookings.map(
+    (b) =>
+      `  - ${b.title} | ${b.organizationName} | ${b.buildingName} – ${b.roomName} | ${b.usageTypeName} | ${formatDateRange(b.startsAt, b.endsAt)} | ${b.status}`,
+  );
+  return `\nBetroffene Buchungen (${bookings.length}):\n${lines.join("\n")}`;
 }
 
 function renderSeriesCommonText(template: { payload: BookingSeriesNotificationPayload }) {
@@ -348,7 +395,8 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           </ul>
         `,
       };
-    case "CLOSURE_CREATED":
+    case "CLOSURE_CREATED": {
+      const affected = template.payload.affectedBookings ?? [];
       return {
         subject: `Sperre angelegt: ${template.payload.targetName}`,
         text: [
@@ -360,7 +408,8 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
           `Zeitraum: ${formatDateRange(template.payload.startsAt, template.payload.endsAt)}`,
           `Öffentlich sichtbar: ${template.payload.isPublic ? "Ja" : "Nein"}`,
           `Grund: ${template.payload.reason}`,
-        ].join("\n"),
+          renderAffectedBookingsText(affected),
+        ].filter(Boolean).join("\n"),
         html: `
           <p>Eine Sperre wurde angelegt.</p>
           <ul>
@@ -371,8 +420,10 @@ export function renderNotificationTemplate(input: NotificationTemplateData | { e
             <li><strong>Öffentlich sichtbar:</strong> ${template.payload.isPublic ? "Ja" : "Nein"}</li>
             <li><strong>Grund:</strong> ${escapeHtml(template.payload.reason)}</li>
           </ul>
+          ${renderAffectedBookingsTable(affected)}
         `,
       };
+    }
     case "USER_ACCOUNT_CREATED":
       return {
         subject: "Benutzerkonto angelegt",

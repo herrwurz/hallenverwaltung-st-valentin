@@ -89,11 +89,13 @@ test("forgot-password action: sendet Token per E-Mail und gibt bei fehlendem Ben
 });
 
 test("forgot-password page: enthält E-Mail-Formular und Zurück-Link", () => {
-  const source = readFileSync("app/login/forgot-password/page.tsx", "utf8");
-  assert.match(source, /type="email"/, "Seite muss E-Mail-Input haben");
-  assert.match(source, /type="submit"/, "Seite muss Submit-Button haben");
-  assert.match(source, /Zurück zum Login/, "Seite muss Rücknavigation zum Login haben");
-  assert.match(source, /requestPasswordResetAction/, "Seite muss die Server Action einbinden");
+  const form = readFileSync("app/login/forgot-password/forgot-password-form.tsx", "utf8");
+  assert.match(form, /type="email"/, "Formular muss E-Mail-Input haben");
+  assert.match(form, /type="submit"/, "Formular muss Submit-Button haben");
+  assert.match(form, /Zurück zum Login/, "Formular muss Rücknavigation zum Login haben");
+  assert.match(form, /requestPasswordResetAction/, "Formular muss die Server Action einbinden");
+  const page = readFileSync("app/login/forgot-password/page.tsx", "utf8");
+  assert.match(page, /ForgotPasswordForm/, "Page muss die ForgotPasswordForm-Komponente einbinden");
 });
 
 test("reset-password page: wraps form in Suspense für useSearchParams()", () => {

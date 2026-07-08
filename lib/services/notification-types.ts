@@ -35,6 +35,8 @@ export const bookingNotificationPayloadSchema = z.object({
   organizationName: z.string().min(1),
   buildingName: z.string().min(1),
   roomName: z.string().min(1),
+  usageTypeName: z.string().min(1).optional(),
+  status: z.string().min(1).optional(),
   startsAt: isoDateString,
   endsAt: isoDateString,
   requestedByName: z.string().min(1).optional(),
@@ -97,6 +99,20 @@ export const waitlistNotificationPayloadSchema = z.object({
 
 export type WaitlistNotificationPayload = z.infer<typeof waitlistNotificationPayloadSchema>;
 
+const affectedBookingItemSchema = z.object({
+  bookingId: z.string().min(1),
+  title: z.string().min(1),
+  organizationName: z.string().min(1),
+  buildingName: z.string().min(1),
+  roomName: z.string().min(1),
+  usageTypeName: z.string().min(1),
+  status: z.string().min(1),
+  startsAt: isoDateString,
+  endsAt: isoDateString,
+});
+
+export type AffectedBookingItem = z.infer<typeof affectedBookingItemSchema>;
+
 export const closureNotificationPayloadSchema = z.object({
   closureId: z.string().min(1),
   targetName: z.string().min(1),
@@ -106,6 +122,7 @@ export const closureNotificationPayloadSchema = z.object({
   startsAt: isoDateString,
   endsAt: isoDateString,
   isPublic: z.boolean(),
+  affectedBookings: z.array(affectedBookingItemSchema).optional(),
 });
 
 export type ClosureNotificationPayload = z.infer<typeof closureNotificationPayloadSchema>;

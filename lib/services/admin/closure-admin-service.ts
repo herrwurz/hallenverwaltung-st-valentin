@@ -123,7 +123,7 @@ export async function updateClosure(input: unknown, actorUserId: string) {
     throw new BookingValidationError("Die Sperre muss ein gültiges Beginn- und Enddatum haben.");
   }
 
-  return prisma.closure.update({
+  const updatedClosure = await prisma.closure.update({
     where: { id: data.id },
     data: {
       status: data.status,
@@ -133,6 +133,15 @@ export async function updateClosure(input: unknown, actorUserId: string) {
       isPublic: data.isPublic,
     },
   });
+
+  try {
+    await queueClosureCreatedNotification(updatedClosure.id);
+    await processPendingNotifications();
+  } catch (error) {
+    console.error("Notification dispatch failed after closure update.", error);
+  }
+
+  return updatedClosure;
 }
 
 export async function deleteClosure(input: unknown, actorUserId: string) {

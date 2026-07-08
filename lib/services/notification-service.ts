@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { hasPermission } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
+import { getBookingStatusLabel } from "@/lib/booking-status";
 import { MailDeliveryError, sendEmail, type MailPayload } from "@/lib/services/mail-service";
 import { isNotificationEventEnabled } from "@/lib/services/notification-settings-service";
 import { renderNotificationTemplate } from "@/lib/services/notification-template-service";
@@ -232,10 +233,14 @@ export async function queueBookingNotifications(
     select: {
       id: true,
       title: true,
+      status: true,
       startsAt: true,
       endsAt: true,
       decisionNote: true,
       cancellationNote: true,
+      usageType: {
+        select: { name: true },
+      },
       requestedBy: {
         select: {
           id: true,
@@ -316,6 +321,8 @@ export async function queueBookingNotifications(
     organizationName: booking.organization.name,
     buildingName: booking.room.building.name,
     roomName: booking.room.name,
+    usageTypeName: booking.usageType.name,
+    status: getBookingStatusLabel(booking.status),
     startsAt: booking.startsAt.toISOString(),
     endsAt: booking.endsAt.toISOString(),
     requestedByName: booking.requestedBy?.displayName ?? undefined,
@@ -696,6 +703,29 @@ export async function queueClosureCreatedNotification(
   const targetName = closure.room
     ? `${closure.room.building.name} - ${closure.room.name}`
     : closure.building?.name ?? "Sperre";
+
+  const affectedBookingsRaw = await client.booking.findMany({
+    where: {
+      status: { in: ["REQUESTED", "IN_REVIEW", "APPROVED"] },
+      startsAt: { lt: closure.endsAt },
+      endsAt: { gt: closure.startsAt },
+      ...(closure.roomId
+        ? { roomId: closure.roomId }
+        : { room: { buildingId: closure.buildingId! } }),
+    },
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      startsAt: true,
+      endsAt: true,
+      usageType: { select: { name: true } },
+      organization: { select: { name: true } },
+      room: { select: { name: true, building: { select: { name: true } } } },
+    },
+    orderBy: { startsAt: "asc" },
+  });
+
   const payload: ClosureNotificationPayload = {
     closureId: closure.id,
     targetName,
@@ -705,6 +735,17 @@ export async function queueClosureCreatedNotification(
     startsAt: closure.startsAt.toISOString(),
     endsAt: closure.endsAt.toISOString(),
     isPublic: closure.isPublic,
+    affectedBookings: affectedBookingsRaw.map((b) => ({
+      bookingId: b.id,
+      title: b.title,
+      organizationName: b.organization.name,
+      buildingName: b.room.building.name,
+      roomName: b.room.name,
+      usageTypeName: b.usageType.name,
+      status: getBookingStatusLabel(b.status),
+      startsAt: b.startsAt.toISOString(),
+      endsAt: b.endsAt.toISOString(),
+    })),
   };
   const caretakerRecipients = dedupeRecipients(
     closure.room

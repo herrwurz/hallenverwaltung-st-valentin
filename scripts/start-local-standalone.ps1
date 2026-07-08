@@ -41,7 +41,7 @@ $env:Path = "$nodeDir;$env:Path"
 $env:PORT = "3000"
 $env:HOSTNAME = "localhost"
 if (-not $env:DATABASE_URL) {
-  $env:DATABASE_URL = "postgresql://hallenverwaltung:change-me@localhost:55435/hallenverwaltung?schema=public"
+  $env:DATABASE_URL = "postgresql://hallenverwaltung:change-me@localhost:15432/hallenverwaltung?schema=public"
 }
 $env:AUTH_SECRET = "local-clicktest-secret-local-clicktest-secret"
 $env:AUTH_TRUST_HOST = "true"

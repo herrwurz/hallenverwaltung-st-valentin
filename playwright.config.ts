@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000";
 const databaseUrl =
-  process.env.DATABASE_URL ?? "postgresql://postgres@localhost:55435/hallenverwaltung_phase35?schema=public";
+  process.env.DATABASE_URL ?? "postgresql://postgres@localhost:15432/hallenverwaltung_phase35?schema=public";
 
 process.env.DATABASE_URL ??= databaseUrl;
 process.env.AUTH_SECRET ??= "phase-14-e2e-local-secret-change-in-real-env";

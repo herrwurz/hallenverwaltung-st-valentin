@@ -55,6 +55,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           { href: "/admin/buildings", label: "Gebäude", groupLabel: "Stammdaten" },
           { href: "/admin/organizations", label: "Organisationen", groupLabel: "Stammdaten" },
           { href: "/admin/rooms", label: "Räume", groupLabel: "Stammdaten" },
+          { href: "/admin/usage-types", label: "Nutzungstypen", groupLabel: "Stammdaten" },
         ]
       : []),
     ...(canViewBookings || canApproveBookings || canRejectBookings

@@ -77,7 +77,7 @@ async function executeAction(
     redirect(`/admin/series?error=${encodeURIComponent(errorMessage)}`);
   }
 
-  redirect(`/admin/series?${successParam}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}&seriesId=${seriesId}`);
+  redirect(`/admin/series?${successParam}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}&seriesId=${encodeURIComponent(seriesId)}`);
 }
 
 export async function markSeriesInReviewFromSeriesPageAction(formData: FormData) {

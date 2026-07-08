@@ -11,4 +11,12 @@ export default defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // Standalone-Skripte laufen mit purem Node als CommonJS.
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", { caughtErrors: "none" }],
+    },
+  },
 ]);

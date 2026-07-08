@@ -6,6 +6,7 @@ import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
 import { PortalBookingsTable, type PortalBookingTableRow } from "@/components/portal-bookings-table";
 import { SeriesRequestForm } from "@/components/series-request-form";
+import { SingleDayTimeRangeFields } from "@/components/single-day-time-range-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBookingChangeStatusBadgeClass, getBookingChangeStatusLabel, getBookingChangeTypeLabel } from "@/lib/booking-change-status";
@@ -108,7 +109,8 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
         <CardHeader>
           <CardTitle>Neuer Serienantrag</CardTitle>
           <CardDescription>
-            Erzeugt wöchentliche Einzeltermine. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden übersprungen.
+            Erzeugt täglich, wöchentlich, monatlich oder jährlich wiederkehrende Einzeltermine — auch mehrtägig oder
+            ganztägig. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden übersprungen.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -183,14 +185,14 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
                   roomLabel="Neuer Raum"
                   inputClassName={inputClass}
                 />
-                <label className="text-sm font-medium">
-                  Neuer Beginn
-                  <input name="newStartAt" type="datetime-local" required className={inputClass} />
-                </label>
-                <label className="text-sm font-medium">
-                  Neues Ende
-                  <input name="newEndAt" type="datetime-local" required className={inputClass} />
-                </label>
+                <SingleDayTimeRangeFields
+                  startName="newStartAt"
+                  endName="newEndAt"
+                  startLabel="Neuer Beginn"
+                  endLabel="Neues Ende"
+                  hint="Verschobene Termine enden am selben Tag wie der neue Beginn."
+                  inputClassName={inputClass}
+                />
                 <label className="text-sm font-medium">
                   Grund
                   <input name="reason" required maxLength={1000} className={inputClass} />

@@ -38,11 +38,16 @@ test("portal forms hide organization selection when there is only one organizati
   const portalDocuments = readFileSync("app/portal/documents/page.tsx", "utf8");
   const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
   const portalWaitlist = readFileSync("app/portal/waitlist/page.tsx", "utf8");
+  const bookingRequestForm = readFileSync("components/booking-request-form.tsx", "utf8");
+  const seriesRequestForm = readFileSync("components/series-request-form.tsx", "utf8");
 
   assert.match(organizationField, /organizations\.length === 1/);
   assert.match(organizationField, /type="hidden" name="organizationId"/);
   assert.match(organizationField, /select name="organizationId"/);
-  assert.match(portalBookings, /PortalOrganizationField/);
+  assert.match(portalBookings, /BookingRequestForm/);
+  assert.match(portalBookings, /SeriesRequestForm/);
+  assert.match(bookingRequestForm, /PortalOrganizationField/);
+  assert.match(seriesRequestForm, /PortalOrganizationField/);
   assert.match(portalWaitlist, /PortalOrganizationField/);
   assert.match(portalDocuments, /PortalOrganizationField/);
 });
@@ -101,4 +106,32 @@ test("admin roles expose guarded role permission editing", () => {
   assert.match(roleService, /role\.code === "SUPER_ADMIN"/);
   assert.match(roleService, /SUPER_ADMIN muss alle Rechte behalten/);
   assert.match(roleService, /PERMISSIONS_UPDATED/);
+});
+
+test("single-day forms bind the end time to the start day", () => {
+  const rangeFields = readFileSync("components/single-day-time-range-fields.tsx", "utf8");
+  const bookingForm = readFileSync("components/booking-request-form.tsx", "utf8");
+  const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
+  const portalWaitlist = readFileSync("app/portal/waitlist/page.tsx", "utf8");
+
+  assert.match(rangeFields, /type="time"/);
+  assert.match(rangeFields, /type="hidden" name=\{endName\}/);
+  assert.match(rangeFields, /\$\{startDate\}T\$\{endTime\}/);
+  assert.match(rangeFields, /Die Endzeit muss nach der Beginnzeit liegen\./);
+  assert.match(rangeFields, /Serienantrag/);
+  assert.match(bookingForm, /SingleDayTimeRangeFields/);
+  assert.match(portalBookings, /startName="newStartAt"/);
+  assert.match(portalWaitlist, /SingleDayTimeRangeFields/);
+});
+
+test("series request form supports all-day series with synced end date", () => {
+  const seriesForm = readFileSync("components/series-request-form.tsx", "utf8");
+  const portalBookings = readFileSync("app/portal/bookings/page.tsx", "utf8");
+
+  assert.match(seriesForm, /Ganztägig/);
+  assert.match(seriesForm, /name="firstStartsAt" value=\{allDayStartDate \? `\$\{allDayStartDate\}T00:00` : ""\}/);
+  assert.match(seriesForm, /name="firstEndsAt" value=\{allDayEndDate \? `\$\{allDayEndDate\}T23:59` : ""\}/);
+  assert.match(seriesForm, /Das erste Ende muss nach dem Beginn liegen\./);
+  assert.match(seriesForm, /setFirstEndsAt\(\(current\) => `\$\{startDate\}T/);
+  assert.match(portalBookings, /täglich, wöchentlich, monatlich oder jährlich/);
 });

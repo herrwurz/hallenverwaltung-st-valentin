@@ -247,6 +247,10 @@ export function SeriesRequestForm({
   const [recurrenceType, setRecurrenceType] = useState("WEEKLY");
   const [interval, setInterval] = useState(1);
   const [firstStartsAt, setFirstStartsAt] = useState("");
+  const [firstEndsAt, setFirstEndsAt] = useState("");
+  const [allDay, setAllDay] = useState(false);
+  const [allDayStartDate, setAllDayStartDate] = useState("");
+  const [allDayEndDate, setAllDayEndDate] = useState("");
   const [repeatUntil, setRepeatUntil] = useState("");
   const [semesterPreset, setSemesterPreset] = useState("");
   const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>([]);
@@ -263,6 +267,10 @@ export function SeriesRequestForm({
       return;
     }
 
+    // Das Ende-Datum folgt immer dem Beginn-Datum; nur die Uhrzeit bleibt erhalten.
+    const startDate = value.slice(0, 10);
+    setFirstEndsAt((current) => `${startDate}T${current.slice(11, 16) || value.slice(11, 16)}`);
+
     setDayOfMonth(parsed.getDate());
     setWeekday(parsed.getDay());
     setMonth(parsed.getMonth() + 1);
@@ -270,6 +278,22 @@ export function SeriesRequestForm({
     const presetEndDate = getSemesterPresetEndDate(parsed, semesterPreset);
     if (presetEndDate) {
       setRepeatUntil(formatDateInput(presetEndDate));
+    }
+  };
+
+  const handleAllDayChange = (checked: boolean) => {
+    setAllDay(checked);
+    if (!checked) {
+      setAllDayStartDate("");
+      setAllDayEndDate("");
+    }
+  };
+
+  const handleAllDayStartChange = (value: string) => {
+    setAllDayStartDate(value);
+    setAllDayEndDate((current) => (!current || current < value ? value : current));
+    if (value) {
+      applyFirstStartDefaults(`${value}T00:00`);
     }
   };
 
@@ -445,21 +469,71 @@ export function SeriesRequestForm({
 
       <fieldset className="rounded-xl border border-border bg-card p-4">
         <legend className="px-2 text-sm font-semibold text-emerald-700">Seriendauer</legend>
+        <label className="mb-4 inline-flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={allDay}
+            onChange={(event) => handleAllDayChange(event.target.checked)}
+            className="h-4 w-4 rounded border-input"
+          />
+          Ganztägig
+        </label>
+        {allDay ? (
+          <>
+            <input type="hidden" name="firstStartsAt" value={allDayStartDate ? `${allDayStartDate}T00:00` : ""} />
+            <input type="hidden" name="firstEndsAt" value={allDayEndDate ? `${allDayEndDate}T23:59` : ""} />
+          </>
+        ) : null}
         <div className="grid gap-4 lg:grid-cols-4">
           <label className="text-sm font-medium">
             Beginn
-            <input
-              name="firstStartsAt"
-              type="datetime-local"
-              required
-              value={firstStartsAt}
-              onChange={(event) => applyFirstStartDefaults(event.target.value)}
-              className={inputClassName}
-            />
+            {allDay ? (
+              <input
+                type="date"
+                required
+                value={allDayStartDate}
+                onChange={(event) => handleAllDayStartChange(event.target.value)}
+                className={inputClassName}
+              />
+            ) : (
+              <input
+                name="firstStartsAt"
+                type="datetime-local"
+                required
+                value={firstStartsAt}
+                onChange={(event) => applyFirstStartDefaults(event.target.value)}
+                className={inputClassName}
+              />
+            )}
           </label>
           <label className="text-sm font-medium">
             Erstes Ende
-            <input name="firstEndsAt" type="datetime-local" required className={inputClassName} />
+            {allDay ? (
+              <input
+                type="date"
+                required
+                value={allDayEndDate}
+                min={allDayStartDate || undefined}
+                onChange={(event) => setAllDayEndDate(event.target.value)}
+                className={inputClassName}
+              />
+            ) : (
+              <input
+                name="firstEndsAt"
+                type="datetime-local"
+                required
+                value={firstEndsAt}
+                onChange={(event) => setFirstEndsAt(event.target.value)}
+                ref={(element) =>
+                  element?.setCustomValidity(
+                    firstStartsAt && firstEndsAt && firstEndsAt <= firstStartsAt
+                      ? "Das erste Ende muss nach dem Beginn liegen."
+                      : "",
+                  )
+                }
+                className={inputClassName}
+              />
+            )}
           </label>
           <label className="text-sm font-medium">
             Endet am
