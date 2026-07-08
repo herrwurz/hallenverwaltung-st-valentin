@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
+import { SingleDayTimeRangeFields } from "@/components/single-day-time-range-fields";
 
 type PortalOrganization = {
   id: string;
@@ -129,16 +130,7 @@ export function BookingRequestForm({
           </label>
         </>
       ) : (
-        <>
-          <label className="text-sm font-medium">
-            Beginn
-            <input name="startsAt" type="datetime-local" required className={inputClassName} />
-          </label>
-          <label className="text-sm font-medium">
-            Ende
-            <input name="endsAt" type="datetime-local" required className={inputClassName} />
-          </label>
-        </>
+        <SingleDayTimeRangeFields startName="startsAt" endName="endsAt" inputClassName={inputClassName} />
       )}
 
       <label className="text-sm font-medium lg:col-span-2">

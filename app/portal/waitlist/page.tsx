@@ -5,6 +5,7 @@ import { AreaShell } from "@/components/area-shell";
 import { BuildingRoomSelect } from "@/components/building-room-select";
 import { FormActions } from "@/components/form-actions";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
+import { SingleDayTimeRangeFields } from "@/components/single-day-time-range-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -85,14 +86,12 @@ export default async function PortalWaitlistPage({ searchParams }: PageProps) {
                   ))}
                 </select>
               </label>
-              <label className="text-sm font-medium">
-                Beginn
-                <input name="startsAt" type="datetime-local" required className={inputClass} />
-              </label>
-              <label className="text-sm font-medium">
-                Ende
-                <input name="endsAt" type="datetime-local" required className={inputClass} />
-              </label>
+              <SingleDayTimeRangeFields
+                startName="startsAt"
+                endName="endsAt"
+                hint="Wunschzeiträume enden am selben Tag. Für mehrtägige oder wiederkehrende Termine bitte einen Serienantrag stellen."
+                inputClassName={inputClass}
+              />
               <div className="lg:col-span-2">
                 <FormActions submitLabel="Wartelistenplatz anlegen" cancelHref="/portal" />
               </div>
