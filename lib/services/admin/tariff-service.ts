@@ -4,7 +4,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 export class TariffValidationError extends Error {}
 
-type TariffClient = Pick<PrismaClient, "tariff" | "tariffGroup">;
+type TariffClient = Pick<PrismaClient, "tariff" | "tariffGroup" | "billingEntry">;
 
 const tariffGroupSchema = z.object({
   id: z.string().trim().optional(),
@@ -82,6 +82,7 @@ export async function getTariffAdministrationData(client: TariffClient = prisma)
         tariffGroup: { select: { id: true, name: true } },
         usageType: { select: { id: true, name: true } },
         organizationType: { select: { id: true, name: true } },
+        _count: { select: { billingEntries: true } },
       },
     }),
     prisma.building.findMany({
@@ -217,4 +218,40 @@ export async function endTariff(input: unknown, client: TariffClient = prisma) {
     where: { id: data.id },
     data: { validUntil: data.validUntil },
   });
+}
+
+const tariffIdSchema = z.object({
+  id: z.string().trim().min(1, "Tarif-ID fehlt."),
+});
+
+export async function setTariffActive(input: unknown, isActive: boolean, client: TariffClient = prisma) {
+  const data = tariffIdSchema.parse(input);
+
+  const tariff = await client.tariff.findUnique({ where: { id: data.id }, select: { id: true } });
+  if (!tariff) {
+    throw new TariffValidationError("Der Tarif wurde nicht gefunden.");
+  }
+
+  await client.tariff.update({
+    where: { id: data.id },
+    data: { isActive },
+  });
+}
+
+export async function deleteTariff(input: unknown, client: TariffClient = prisma) {
+  const data = tariffIdSchema.parse(input);
+
+  const tariff = await client.tariff.findUnique({ where: { id: data.id }, select: { id: true } });
+  if (!tariff) {
+    throw new TariffValidationError("Der Tarif wurde nicht gefunden.");
+  }
+
+  const billingEntryCount = await client.billingEntry.count({ where: { tariffId: data.id } });
+  if (billingEntryCount > 0) {
+    throw new TariffValidationError(
+      `Der Tarif kann nicht gelöscht werden: ${billingEntryCount} Abrechnungsposition(en) verweisen darauf. Bitte stattdessen deaktivieren.`,
+    );
+  }
+
+  await client.tariff.delete({ where: { id: data.id } });
 }

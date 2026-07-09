@@ -1,5 +1,13 @@
-import { endTariffAction, saveTariffAction, saveTariffGroupAction } from "@/app/admin/tariffs/actions";
+import {
+  activateTariffAction,
+  deactivateTariffAction,
+  deleteTariffAction,
+  endTariffAction,
+  saveTariffAction,
+  saveTariffGroupAction,
+} from "@/app/admin/tariffs/actions";
 import { AdminBackLink } from "@/components/admin-back-link";
+import { AdminDeleteForm } from "@/components/admin-delete-form";
 import { AdminFeedback } from "@/components/admin-feedback";
 import { FormActions } from "@/components/form-actions";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +27,16 @@ const dayTypeLabels: Record<string, string> = {
 
 const currencyFormatter = new Intl.NumberFormat("de-AT", { style: "currency", currency: "EUR" });
 const dateFormatter = new Intl.DateTimeFormat("de-AT", { dateStyle: "medium" });
+
+function getTariffStatus(tariff: { isActive: boolean; validUntil: Date | null }, now: Date) {
+  if (!tariff.isActive) {
+    return { label: "Inaktiv", variant: "secondary" as const };
+  }
+  if (tariff.validUntil !== null && tariff.validUntil < now) {
+    return { label: "Beendet", variant: "secondary" as const };
+  }
+  return { label: "Aktiv", variant: "success" as const };
+}
 
 function toDateInputValue(date: Date | null) {
   if (!date) return "";
@@ -187,7 +205,7 @@ export default async function TariffsPage({ searchParams }: PageProps) {
               </TableHeader>
               <TableBody>
                 {filteredTariffs.map((tariff) => {
-                  const ended = tariff.validUntil !== null && tariff.validUntil < now;
+                  const status = getTariffStatus(tariff, now);
                   return (
                     <TableRow key={tariff.id}>
                       <TableCell className="font-medium">
@@ -208,7 +226,7 @@ export default async function TariffsPage({ searchParams }: PageProps) {
                         {tariff.validUntil ? dateFormatter.format(tariff.validUntil) : "unbefristet"}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={ended ? "secondary" : "success"}>{ended ? "Beendet" : "Aktiv"}</Badge>
+                        <Badge variant={status.variant}>{status.label}</Badge>
                       </TableCell>
                     </TableRow>
                   );
@@ -232,23 +250,48 @@ export default async function TariffsPage({ searchParams }: PageProps) {
                     {dayTypeLabels[tariff.dayType] ?? tariff.dayType}
                   </CardDescription>
                 </div>
-                <Badge variant={tariff.validUntil !== null && tariff.validUntil < now ? "secondary" : "success"}>
-                  {tariff.validUntil !== null && tariff.validUntil < now ? "Beendet" : "Aktiv"}
-                </Badge>
+                <Badge variant={getTariffStatus(tariff, now).variant}>{getTariffStatus(tariff, now).label}</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <TariffForm data={data} tariff={tariff} />
               <details className="rounded-xl border border-border p-4">
-                <summary className="cursor-pointer text-sm font-medium">Tarif beenden</summary>
-                <form action={endTariffAction} className="mt-4 flex flex-wrap items-end gap-4">
-                  <input type="hidden" name="id" value={tariff.id} />
-                  <label className="text-sm font-medium">
-                    Gültig bis
-                    <input name="validUntil" type="date" required className={inputClass} />
-                  </label>
-                  <FormActions submitLabel="Tarif beenden" cancelHref="/admin/tariffs" />
-                </form>
+                <summary className="cursor-pointer text-sm font-medium">Tarif beenden, deaktivieren oder löschen</summary>
+                <div className="mt-4 space-y-4">
+                  <form action={endTariffAction} className="flex flex-wrap items-end gap-4">
+                    <input type="hidden" name="id" value={tariff.id} />
+                    <label className="text-sm font-medium">
+                      Gültig bis
+                      <input name="validUntil" type="date" required className={inputClass} />
+                    </label>
+                    <FormActions submitLabel="Tarif beenden" cancelHref="/admin/tariffs" />
+                  </form>
+                  <form action={tariff.isActive ? deactivateTariffAction : activateTariffAction} className="border-t pt-4">
+                    <input type="hidden" name="id" value={tariff.id} />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium shadow-sm"
+                    >
+                      {tariff.isActive ? "Tarif deaktivieren" : "Tarif wieder aktivieren"}
+                    </button>
+                    <span className="ml-3 text-xs text-muted-foreground">
+                      Deaktivierte Tarife werden bei der Abrechnung nicht mehr berücksichtigt, bleiben aber erhalten.
+                    </span>
+                  </form>
+                  {tariff._count.billingEntries > 0 ? (
+                    <p className="border-t pt-4 text-sm text-muted-foreground">
+                      Löschen nicht möglich: {tariff._count.billingEntries} Abrechnungsposition(en) verweisen auf diesen
+                      Tarif. Bitte stattdessen deaktivieren.
+                    </p>
+                  ) : (
+                    <AdminDeleteForm
+                      action={deleteTariffAction}
+                      id={tariff.id}
+                      label="Tarif endgültig löschen"
+                      confirmMessage={`Tarif "${tariff.name}" wirklich endgültig löschen?`}
+                    />
+                  )}
+                </div>
               </details>
             </CardContent>
           </Card>

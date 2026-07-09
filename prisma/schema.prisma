@@ -551,6 +551,7 @@ model Tariff {
   hourlyRate         Decimal?          @db.Decimal(10, 2)
   flatRate           Decimal?          @db.Decimal(10, 2)
   dayType            TariffDayType     @default(ALL)
+  isActive           Boolean           @default(true)
   validFrom          DateTime
   validUntil         DateTime?
   tariffGroup        TariffGroup       @relation(fields: [tariffGroupId], references: [id])

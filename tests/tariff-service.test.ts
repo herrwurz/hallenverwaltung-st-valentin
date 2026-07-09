@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { endTariff, saveTariff, saveTariffGroup } from "../lib/services/admin/tariff-service";
+import { deleteTariff, endTariff, saveTariff, saveTariffGroup, setTariffActive } from "../lib/services/admin/tariff-service";
 
 function createTariffHarness({
   tariffs = [] as Array<Record<string, unknown>>,
   groups = [] as Array<Record<string, unknown>>,
+  billingEntryCount = 0,
 } = {}) {
   const createdTariffs: Array<Record<string, unknown>> = [];
   const updatedTariffs: Array<Record<string, unknown>> = [];
   const createdGroups: Array<Record<string, unknown>> = [];
+  const deletedTariffIds: string[] = [];
 
   const client = {
     tariff: {
@@ -36,6 +38,15 @@ function createTariffHarness({
         updatedTariffs.push({ id: args.where.id, ...args.data });
         return { id: args.where.id, ...args.data };
       },
+      async delete(args: { where: { id: string } }) {
+        deletedTariffIds.push(args.where.id);
+        return { id: args.where.id };
+      },
+    },
+    billingEntry: {
+      async count() {
+        return billingEntryCount;
+      },
     },
     tariffGroup: {
       async findUnique(args: { where: { code?: string; id?: string } }) {
@@ -56,7 +67,7 @@ function createTariffHarness({
     },
   };
 
-  return { client, createdTariffs, updatedTariffs, createdGroups };
+  return { client, createdTariffs, updatedTariffs, createdGroups, deletedTariffIds };
 }
 
 const baseTariffInput = {
@@ -150,6 +161,37 @@ test("endTariff sets the end date", async () => {
 
   assert.equal(harness.updatedTariffs.length, 1);
   assert.ok(harness.updatedTariffs[0]!.validUntil instanceof Date);
+});
+
+test("deleteTariff removes a tariff without billing references", async () => {
+  const harness = createTariffHarness({
+    tariffs: [{ id: "tariff-1", validFrom: new Date("2026-01-01T00:00:00Z") }],
+    billingEntryCount: 0,
+  });
+
+  await deleteTariff({ id: "tariff-1" }, harness.client as never);
+
+  assert.deepEqual(harness.deletedTariffIds, ["tariff-1"]);
+});
+
+test("deleteTariff is blocked when billing entries reference the tariff", async () => {
+  const harness = createTariffHarness({
+    tariffs: [{ id: "tariff-1", validFrom: new Date("2026-01-01T00:00:00Z") }],
+    billingEntryCount: 3,
+  });
+
+  await assert.rejects(deleteTariff({ id: "tariff-1" }, harness.client as never), /3 Abrechnungsposition/);
+  assert.equal(harness.deletedTariffIds.length, 0);
+});
+
+test("setTariffActive toggles the active flag", async () => {
+  const harness = createTariffHarness({
+    tariffs: [{ id: "tariff-1", validFrom: new Date("2026-01-01T00:00:00Z") }],
+  });
+
+  await setTariffActive({ id: "tariff-1" }, false, harness.client as never);
+
+  assert.deepEqual(harness.updatedTariffs, [{ id: "tariff-1", isActive: false }]);
 });
 
 test("saveTariffGroup rejects duplicate codes", async () => {

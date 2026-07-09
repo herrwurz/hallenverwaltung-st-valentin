@@ -71,6 +71,7 @@ function makeTariffBase() {
     hourlyRate: new Prisma.Decimal(20) as Prisma.Decimal | null,
     flatRate: null as Prisma.Decimal | null,
     dayType: "ALL" as TariffDayType,
+    isActive: true,
     validFrom: new Date("2026-01-01T00:00:00Z"),
     validUntil: null as Date | null,
   };
@@ -105,7 +106,10 @@ function createBillingHarness({
     tariff: {
       async findMany(args: { where: Record<string, unknown> }) {
         const dayTypes = ((args.where.dayType as { in?: string[] } | undefined)?.in) ?? [];
-        return tariffs.filter((tariff) => dayTypes.includes(tariff.dayType));
+        const requireActive = args.where.isActive === true;
+        return tariffs.filter(
+          (tariff) => dayTypes.includes(tariff.dayType) && (!requireActive || tariff.isActive !== false),
+        );
       },
     },
     holidayPeriod: {
@@ -256,6 +260,20 @@ test("wildcard and specific tariffs may overlap without conflict", async () => {
   });
 
   await assert.doesNotReject(calculateBillingEntry("booking-1", harness.client as never));
+});
+
+test("deactivated tariffs are ignored during tariff resolution", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-inactive", dayType: "WEEKDAY", isActive: false, hourlyRate: new Prisma.Decimal(15) }),
+      makeTariff({ id: "tariff-active", dayType: "ALL", hourlyRate: new Prisma.Decimal(10) }),
+    ],
+  });
+
+  const calculation = await calculateBillingEntry("booking-1", harness.client as never);
+
+  assert.equal(calculation.tariff?.id, "tariff-active");
+  assert.equal(calculation.amount.toString(), "20");
 });
 
 test("allows zero-euro tariffs", async () => {

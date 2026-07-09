@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requirePermission } from "@/lib/permissions";
-import { endTariff, saveTariff, saveTariffGroup, TariffValidationError } from "@/lib/services/admin/tariff-service";
+import {
+  deleteTariff,
+  endTariff,
+  saveTariff,
+  saveTariffGroup,
+  setTariffActive,
+  TariffValidationError,
+} from "@/lib/services/admin/tariff-service";
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ZodError) {
@@ -73,4 +80,16 @@ export async function endTariffAction(formData: FormData) {
       validUntil: formData.get("validUntil"),
     }),
   );
+}
+
+export async function deactivateTariffAction(formData: FormData) {
+  await executeTariffMutation(() => setTariffActive({ id: formData.get("id") }, false));
+}
+
+export async function activateTariffAction(formData: FormData) {
+  await executeTariffMutation(() => setTariffActive({ id: formData.get("id") }, true));
+}
+
+export async function deleteTariffAction(formData: FormData) {
+  await executeTariffMutation(() => deleteTariff({ id: formData.get("id") }));
 }

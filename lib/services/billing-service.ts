@@ -268,6 +268,7 @@ async function resolveTariff(booking: BillableBooking, client: BillingClient) {
     where: {
       roomId: booking.roomId,
       tariffGroupId: booking.organization.tariffGroupId,
+      isActive: true,
       validFrom: { lte: booking.startsAt },
       dayType: { in: dayTypeCandidates },
       AND: [
