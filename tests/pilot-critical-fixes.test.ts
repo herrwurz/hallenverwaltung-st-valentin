@@ -339,6 +339,7 @@ test("phase 26.8 and 27.3 organization blocking preserves reasons and respects m
   assert.match(adminActions, /Benutzer dürfen nur aktiven Organisationen zugeordnet werden/);
   assert.match(loginAction, /compare\(password, user\.passwordHash\)/);
   assert.match(loginAction, /Der Login ist gesperrt/);
+  assert.match(loginAction, /noch kein Passwort vergeben/);
   assert.match(organizationPage, /Stilllegungsgrund/);
   assert.match(usersPage, /gesperrt/);
   assert.match(usersPage, /Mindestens eine aktive Mitgliedschaft/);

@@ -145,8 +145,13 @@ function UserForm({
           <input name="email" type="email" required autoComplete="off" defaultValue={user?.email} className={inputClass} />
         </label>
         <label className="text-sm font-medium">
-          {user ? "Neues Passwort (optional)" : "Passwort"}
-          <input name="password" type="password" required={!user} minLength={12} autoComplete="new-password" className={inputClass} />
+          {user ? "Neues Passwort (optional)" : "Passwort (optional)"}
+          <input name="password" type="password" minLength={12} autoComplete="new-password" className={inputClass} />
+          {!user ? (
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Leer lassen: Die Person erhält eine E-Mail mit einem Link, um selbst ein Passwort zu vergeben.
+            </span>
+          ) : null}
         </label>
         <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium">
           <input type="checkbox" name="isActive" defaultChecked={user?.isActive ?? true} />

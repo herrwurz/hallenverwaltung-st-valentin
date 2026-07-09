@@ -32,7 +32,6 @@ function getErrorMessage(error: unknown) {
     "Ein Raum kann nicht sein eigener Teilbereich sein.",
     "Parent-Room und Teilbereich müssen demselben Gebäude zugeordnet sein.",
     "Die Parent-Room-Zuordnung darf keinen Zyklus bilden.",
-    "Neue Benutzer benötigen ein Passwort.",
     "Das Passwort muss mindestens 12 Zeichen enthalten.",
     "Die primäre Organisation muss dem Benutzer zugewiesen sein.",
     "Nur Super-Admins dürfen Super-Admin-Benutzer verwalten.",
