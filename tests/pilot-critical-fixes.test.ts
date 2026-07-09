@@ -323,8 +323,8 @@ test("phase 26.8 and 27.3 organization blocking preserves reasons and respects m
   const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
   const userService = readFileSync("lib/services/admin/user-service.ts", "utf8");
   const loginAction = readFileSync("app/login/actions.ts", "utf8");
-  const organizationPage = readFileSync("app/admin/organizations/page.tsx", "utf8");
-  const usersPage = readFileSync("app/admin/users/page.tsx", "utf8");
+  const organizationPage = readFileSync("components/organization-manager.tsx", "utf8");
+  const usersPage = readFileSync("components/user-manager.tsx", "utf8");
   const adminActions = readFileSync("app/admin/actions.ts", "utf8");
 
   assert.match(organizationService, /data\.status !== "ACTIVE"/);

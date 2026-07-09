@@ -53,15 +53,15 @@ test("portal forms hide organization selection when there is only one organizati
 });
 
 test("admin master data forms use shared form actions", () => {
-  const pages = ["app/admin/organizations/page.tsx", "app/admin/users/page.tsx"];
-
-  for (const page of pages) {
-    const source = readFileSync(page, "utf8");
-    assert.match(source, /FormActions/, `${page} should use FormActions`);
-    assert.doesNotMatch(source, /lg:text-right[\s\S]*bg-sky-500/, `${page} should not hand-roll primary form actions`);
-  }
-
-  const modalManagers = ["components/building-manager.tsx", "components/room-manager.tsx"];
+  const modalManagers = [
+    "components/building-manager.tsx",
+    "components/room-manager.tsx",
+    "components/organization-manager.tsx",
+    "components/usage-type-manager.tsx",
+    "components/user-manager.tsx",
+    "components/role-manager.tsx",
+    "components/tariff-manager.tsx",
+  ];
   for (const manager of modalManagers) {
     const source = readFileSync(manager, "utf8");
     assert.match(source, /ModalFormActions/, `${manager} should use ModalFormActions`);
@@ -95,7 +95,7 @@ test("damage forms use building filtered room selection", () => {
 });
 
 test("admin roles expose guarded role permission editing", () => {
-  const rolePage = readFileSync("app/admin/roles/page.tsx", "utf8");
+  const rolePage = readFileSync("components/role-manager.tsx", "utf8");
   const roleActions = readFileSync("app/admin/roles/actions.ts", "utf8");
   const roleService = readFileSync("lib/services/admin/role-service.ts", "utf8");
 
@@ -162,4 +162,44 @@ test("buildings and rooms admin pages use click-to-open modals instead of inline
     assert.match(manager, /<Tabs value=\{tab\}/);
     assert.match(manager, /value="closures"/);
   }
+});
+
+test("remaining Stammdaten admin pages use click-to-open modals", () => {
+  const pages = [
+    ["app/admin/organizations/page.tsx", "OrganizationManager"],
+    ["app/admin/usage-types/page.tsx", "UsageTypeManager"],
+    ["app/admin/users/page.tsx", "UserManager"],
+    ["app/admin/roles/page.tsx", "RoleManager"],
+    ["app/admin/tariffs/page.tsx", "TariffManager"],
+  ] as const;
+
+  for (const [page, componentName] of pages) {
+    const source = readFileSync(page, "utf8");
+    assert.match(source, new RegExp(`<${componentName}`), `${page} should render <${componentName}`);
+  }
+
+  const rowClickManagers = [
+    "components/organization-manager.tsx",
+    "components/usage-type-manager.tsx",
+    "components/user-manager.tsx",
+    "components/role-manager.tsx",
+  ];
+  for (const manager of rowClickManagers) {
+    const source = readFileSync(manager, "utf8");
+    assert.match(source, /"use client"/, `${manager} should be a client component`);
+    assert.match(source, /<Dialog open=\{open\} onOpenChange=\{setOpen\}>/, `${manager} should use a controlled Dialog`);
+    assert.match(source, /onRowClick=\{\(row\) => openEdit\(row\.id\)\}/, `${manager} should open the modal on row click`);
+    assert.match(source, /searchParams\.get\("saved"\)/, `${manager} should auto-close on save`);
+  }
+
+  const tariffManager = readFileSync("components/tariff-manager.tsx", "utf8");
+  assert.match(tariffManager, /"use client"/);
+  assert.match(tariffManager, /onClick=\{\(\) => openEdit\(group\.id\)\}/);
+  assert.match(tariffManager, /onClick=\{\(\) => openEdit\(tariff\.id\)\}/);
+  assert.match(tariffManager, /ModalFormActions/);
+
+  const usersPage = readFileSync("app/admin/users/page.tsx", "utf8");
+  assert.match(usersPage, /Hallenwarte ohne Benutzerkonto/);
+  const rolesPage = readFileSync("app/admin/roles/page.tsx", "utf8");
+  assert.match(rolesPage, /PermissionsTable/);
 });

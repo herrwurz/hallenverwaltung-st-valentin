@@ -160,6 +160,7 @@ const organizationColumns: ColumnDef<OrganizationTableRow>[] = [
     ),
   },
   { accessorKey: "blockedReason", header: "Sperrgrund" },
+  rowHintColumn,
 ];
 
 export function BuildingsTable({
@@ -178,8 +179,21 @@ export function RoomsTable({ rows, onRowClick }: { rows: RoomTableRow[]; onRowCl
   return <DataTable columns={roomColumns} data={rows} searchPlaceholder="Räume filtern..." onRowClick={onRowClick} />;
 }
 
-export function OrganizationsTable({ rows }: { rows: OrganizationTableRow[] }) {
-  return <DataTable columns={organizationColumns} data={rows} searchPlaceholder="Organisationen filtern..." />;
+export function OrganizationsTable({
+  rows,
+  onRowClick,
+}: {
+  rows: OrganizationTableRow[];
+  onRowClick?: (row: OrganizationTableRow) => void;
+}) {
+  return (
+    <DataTable
+      columns={organizationColumns}
+      data={rows}
+      searchPlaceholder="Organisationen filtern..."
+      onRowClick={onRowClick}
+    />
+  );
 }
 
 const usageTypeColumns: ColumnDef<UsageTypeTableRow>[] = [
@@ -217,8 +231,17 @@ const usageTypeColumns: ColumnDef<UsageTypeTableRow>[] = [
       </Badge>
     ),
   },
+  rowHintColumn,
 ];
 
-export function UsageTypesTable({ rows }: { rows: UsageTypeTableRow[] }) {
-  return <DataTable columns={usageTypeColumns} data={rows} searchPlaceholder="Nutzungstypen filtern..." />;
+export function UsageTypesTable({
+  rows,
+  onRowClick,
+}: {
+  rows: UsageTypeTableRow[];
+  onRowClick?: (row: UsageTypeTableRow) => void;
+}) {
+  return (
+    <DataTable columns={usageTypeColumns} data={rows} searchPlaceholder="Nutzungstypen filtern..." onRowClick={onRowClick} />
+  );
 }
