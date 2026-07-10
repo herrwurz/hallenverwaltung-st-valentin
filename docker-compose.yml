@@ -43,5 +43,29 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  worker:
+    build:
+      context: .
+      target: worker
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-test}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hallenverwaltung}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-hallenverwaltung}?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:-replace-with-a-long-random-secret}
+      WORKER_INTERVAL_SECONDS: ${WORKER_INTERVAL_SECONDS:-300}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      MAIL_DELIVERY_MODE: ${MAIL_DELIVERY_MODE:-disabled}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Hallenverwaltung St. Valentin}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["sh", "-c", "while true; do npm run worker:run; sleep $${WORKER_INTERVAL_SECONDS}; done"]
+
 volumes:
   postgres_data:
