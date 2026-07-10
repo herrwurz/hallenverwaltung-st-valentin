@@ -1,9 +1,16 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+
+const rowHintColumn = {
+  id: "row-hint",
+  header: "",
+  cell: () => <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />,
+} as const;
 
 export type UserTableRow = {
   id: string;
@@ -68,6 +75,7 @@ const userColumns: ColumnDef<UserTableRow>[] = [
       </Badge>
     ),
   },
+  rowHintColumn,
 ];
 
 const roleColumns: ColumnDef<RoleTableRow>[] = [
@@ -87,6 +95,7 @@ const roleColumns: ColumnDef<RoleTableRow>[] = [
   },
   { accessorKey: "userCount", header: "Benutzer" },
   { accessorKey: "permissionCount", header: "Rechte" },
+  rowHintColumn,
 ];
 
 const permissionColumns: ColumnDef<PermissionTableRow>[] = [
@@ -140,12 +149,12 @@ const waitlistColumns: ColumnDef<WaitlistTableRow>[] = [
   },
 ];
 
-export function UsersTable({ rows }: { rows: UserTableRow[] }) {
-  return <DataTable columns={userColumns} data={rows} searchPlaceholder="Benutzer filtern..." />;
+export function UsersTable({ rows, onRowClick }: { rows: UserTableRow[]; onRowClick?: (row: UserTableRow) => void }) {
+  return <DataTable columns={userColumns} data={rows} searchPlaceholder="Benutzer filtern..." onRowClick={onRowClick} />;
 }
 
-export function RolesTable({ rows }: { rows: RoleTableRow[] }) {
-  return <DataTable columns={roleColumns} data={rows} searchPlaceholder="Rollen filtern..." />;
+export function RolesTable({ rows, onRowClick }: { rows: RoleTableRow[]; onRowClick?: (row: RoleTableRow) => void }) {
+  return <DataTable columns={roleColumns} data={rows} searchPlaceholder="Rollen filtern..." onRowClick={onRowClick} />;
 }
 
 export function PermissionsTable({ rows }: { rows: PermissionTableRow[] }) {

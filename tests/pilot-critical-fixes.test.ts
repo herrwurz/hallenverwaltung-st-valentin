@@ -125,7 +125,7 @@ test("phase 26 pilot UI hotfixes hide technical labels in key pages", () => {
 });
 
 test("phase 26.4 pilot master data fixes protect codes and settings navigation", () => {
-  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const buildingPage = readFileSync("components/building-manager.tsx", "utf8");
   const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
   const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
   const adminLayout = readFileSync("app/admin/layout.tsx", "utf8");
@@ -285,7 +285,7 @@ test("phase 38 keeps pilot-facing labels localized and free of visible mojibake"
 test("pilot branding dashboard and room defaults match municipality feedback", () => {
   const adminShell = readFileSync("components/admin-shell.tsx", "utf8");
   const adminDashboard = readFileSync("app/admin/page.tsx", "utf8");
-  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const roomPage = readFileSync("components/room-manager.tsx", "utf8");
   const openingFields = readFileSync("components/room-opening-hours-fields.tsx", "utf8");
   const seed = readFileSync("prisma/seed.ts", "utf8");
   const calendarFilter = readFileSync("components/calendar-filter-form.tsx", "utf8");
@@ -323,8 +323,8 @@ test("phase 26.8 and 27.3 organization blocking preserves reasons and respects m
   const organizationService = readFileSync("lib/services/admin/organization-service.ts", "utf8");
   const userService = readFileSync("lib/services/admin/user-service.ts", "utf8");
   const loginAction = readFileSync("app/login/actions.ts", "utf8");
-  const organizationPage = readFileSync("app/admin/organizations/page.tsx", "utf8");
-  const usersPage = readFileSync("app/admin/users/page.tsx", "utf8");
+  const organizationPage = readFileSync("components/organization-manager.tsx", "utf8");
+  const usersPage = readFileSync("components/user-manager.tsx", "utf8");
   const adminActions = readFileSync("app/admin/actions.ts", "utf8");
 
   assert.match(organizationService, /data\.status !== "ACTIVE"/);
@@ -339,6 +339,7 @@ test("phase 26.8 and 27.3 organization blocking preserves reasons and respects m
   assert.match(adminActions, /Benutzer dürfen nur aktiven Organisationen zugeordnet werden/);
   assert.match(loginAction, /compare\(password, user\.passwordHash\)/);
   assert.match(loginAction, /Der Login ist gesperrt/);
+  assert.match(loginAction, /noch kein Passwort vergeben/);
   assert.match(organizationPage, /Stilllegungsgrund/);
   assert.match(usersPage, /gesperrt/);
   assert.match(usersPage, /Mindestens eine aktive Mitgliedschaft/);
@@ -349,7 +350,7 @@ test("phase 27 building contact fields are persisted and visible in admin", () =
   const migration = readFileSync("prisma/migrations/20260609180000_phase27_building_contact_fields/migration.sql", "utf8");
   const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
   const adminActions = readFileSync("app/admin/actions.ts", "utf8");
-  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
+  const buildingPage = readFileSync("components/building-manager.tsx", "utf8");
   const tables = readFileSync("components/admin-master-data-tables.tsx", "utf8");
 
   assert.match(schema, /postalCode\s+String\?/);
@@ -369,8 +370,8 @@ test("phase 27 building and room closures use the central closure model", () => 
   const closureService = readFileSync("lib/services/admin/closure-admin-service.ts", "utf8");
   const closurePanel = readFileSync("components/admin-closure-panel.tsx", "utf8");
   const actions = readFileSync("app/admin/actions.ts", "utf8");
-  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
-  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const buildingPage = readFileSync("components/building-manager.tsx", "utf8");
+  const roomPage = readFileSync("components/room-manager.tsx", "utf8");
   const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
   const roomService = readFileSync("lib/services/admin/room-service.ts", "utf8");
 
@@ -392,8 +393,8 @@ test("phase 27 building and room closures use the central closure model", () => 
 
 test("phase 34 closure visibility shows inherited building and room closures", () => {
   const closurePanel = readFileSync("components/admin-closure-panel.tsx", "utf8");
-  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
-  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const buildingPage = readFileSync("components/building-manager.tsx", "utf8");
+  const roomPage = readFileSync("components/room-manager.tsx", "utf8");
   const buildingService = readFileSync("lib/services/admin/building-service.ts", "utf8");
   const roomService = readFileSync("lib/services/admin/room-service.ts", "utf8");
 
@@ -411,8 +412,8 @@ test("phase 34 closures can be edited and deleted through protected server actio
   const closureService = readFileSync("lib/services/admin/closure-admin-service.ts", "utf8");
   const actions = readFileSync("app/admin/actions.ts", "utf8");
   const closurePanel = readFileSync("components/admin-closure-panel.tsx", "utf8");
-  const buildingPage = readFileSync("app/admin/buildings/page.tsx", "utf8");
-  const roomPage = readFileSync("app/admin/rooms/page.tsx", "utf8");
+  const buildingPage = readFileSync("components/building-manager.tsx", "utf8");
+  const roomPage = readFileSync("components/room-manager.tsx", "utf8");
 
   assert.match(closureService, /export async function updateClosure/);
   assert.match(closureService, /export async function deleteClosure/);

@@ -31,7 +31,7 @@ Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 | Produktiver Admin-Initialbenutzer angelegt | offen |  |  |  |
 | Demo-Zugaenge in Produktion ausgeschlossen | offen |  |  |  |
 | SMTP gegen echten Server getestet | offen | Admin-Testmail unter `/admin/settings/mail` ist vorhanden. Die Benachrichtigungs-Queue wird unter `/admin/notifications` kontrolliert. Der Nachweis muss gegen den spaeteren echten SMTP-Server erfolgen. |  |  |
-| Worker-Betrieb aktiv und protokolliert | offen |  |  |  |
+| Worker-Betrieb aktiv und protokolliert | erledigt (Testserver) | Ursache am 09.07.2026 gefunden: Coolify deployt `docker-compose.yml`, nicht `docker-compose.production.yml` - diese Datei hatte keinen `worker`-Service. `worker`-Dienst zu `docker-compose.yml` ergaenzt (300s-Schleife). Am 10.07.2026 auf hallenverwaltung.hofreither.at deployt und verifiziert: `worker`-Container laeuft, erster Durchlauf protokolliert SUCCESS. Fuer den spaeteren Gemeinde-Server muss derselbe Nachweis dort erneut erbracht werden. | Claude | 2026-07-10 |
 | Backup-Routine eingerichtet | offen |  |  |  |
 | Restore-Probe erfolgreich dokumentiert | offen |  |  |  |
 | Monitoring/Alerting mindestens organisatorisch geregelt | offen |  |  |  |
@@ -49,6 +49,9 @@ Sie sollten aber vor einem breiteren Vereins-Pilot bewusst entschieden werden.
 | Rollen/Rechte bearbeiten | Umgesetzt: Rolle-Rechte-Zuordnung kann serverseitig geschuetzt bearbeitet werden; SUPER_ADMIN bleibt besonders abgesichert. | erledigt | Codex | 2026-06-10 |
 | Semester-Vorauswahl fuer Serien | Umgesetzt fuer aktuelles Semester, Schuljahr/Saison bis 30. Juni und Kalenderjahr. | erledigt | Codex | 2026-06-10 |
 | Oesterreichische Ferien je Bundesland vordefinieren | Umgesetzt fuer gesetzliche Feiertage Oesterreich und Schulferien Niederoesterreich als importierbare Admin-Vorlagen. | erledigt | Codex | 2026-06-10 |
+| Tarife als eigenes Admin-Menue klaeren | Umgesetzt: eigenes Stammdaten-Menue /admin/tariffs mit Tarifgruppen, CRUD, Deaktivieren/Loeschen mit Abhaengigkeitspruefung und Rechtepruefung (MANAGE_TARIFFS). | erledigt | Claude | 2026-07-09 |
+| Abrechnungsmodul: Storno/Verschiebung nach Abrechnung | Ein bereits abgerechneter Termin behaelt bei spaeterer Stornierung/Verschiebung den alten Betrag/Zeitraum (kein Code aktualisiert `BillingEntry`). Fuehrt zu falschen Betraegen. Vor Echtbetrieb entscheiden. | offen |  |  |
+| Abrechnungsmodul: PDF-Export schneidet ab | Handgebauter PDF-Generator (`export-service.ts`) bricht bei 48 Zeilen ohne Warnung ab (~20-22 Buchungen). Datenverlustrisiko bei vollem Monat. | offen |  |  |
 
 ## Niedrige Punkte nach Version 1
 

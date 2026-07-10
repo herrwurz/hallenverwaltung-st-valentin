@@ -15,9 +15,10 @@ try {
 }
 
 async function build() {
-  const mdPath = path.join(__dirname, '..', 'docs', 'testbetrieb-bedienungsanleitung.md');
-  const outHtml = path.join(__dirname, '..', 'docs', 'testbetrieb-bedienungsanleitung.html');
-  const outPdf = path.join(__dirname, '..', 'docs', 'testbetrieb-bedienungsanleitung.pdf');
+  const baseName = process.argv[2] || 'testbetrieb-bedienungsanleitung';
+  const mdPath = path.join(__dirname, '..', 'docs', `${baseName}.md`);
+  const outHtml = path.join(__dirname, '..', 'docs', `${baseName}.html`);
+  const outPdf = path.join(__dirname, '..', 'docs', `${baseName}.pdf`);
 
   const md = fs.readFileSync(mdPath, 'utf8');
   const html = marked.parse(md);

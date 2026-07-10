@@ -34,7 +34,15 @@ async function getInactiveLoginMessage(emailInput: FormDataEntryValue | null, pa
     },
   });
 
-  if (!user || user.isActive || !user.passwordHash || !(await compare(password, user.passwordHash))) {
+  if (!user) {
+    return undefined;
+  }
+
+  if (user.isActive && !user.passwordHash) {
+    return 'Für dieses Konto wurde noch kein Passwort vergeben. Bitte nutzen Sie den Aktivierungslink aus Ihrer E-Mail oder fordern Sie über „Passwort vergessen" einen neuen Link an.';
+  }
+
+  if (user.isActive || !user.passwordHash || !(await compare(password, user.passwordHash))) {
     return undefined;
   }
 

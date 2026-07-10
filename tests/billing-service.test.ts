@@ -65,12 +65,13 @@ function makeTariffBase() {
     id: "tariff-1",
     tariffGroupId: "tariff-group-1",
     roomId: "room-1",
-    organizationTypeId: "organization-type-1",
-    usageTypeId: "usage-1",
+    organizationTypeId: "organization-type-1" as string | null,
+    usageTypeId: "usage-1" as string | null,
     name: "Standardtarif",
     hourlyRate: new Prisma.Decimal(20) as Prisma.Decimal | null,
     flatRate: null as Prisma.Decimal | null,
     dayType: "ALL" as TariffDayType,
+    isActive: true,
     validFrom: new Date("2026-01-01T00:00:00Z"),
     validUntil: null as Date | null,
   };
@@ -79,7 +80,7 @@ function makeTariffBase() {
 function createBillingHarness({
   bookings = [makeBooking()],
   tariffs = [makeTariff()],
-  holidays = [] as Array<{ id: string }>,
+  holidays = [] as Array<{ startsOn: Date; endsOn: Date }>,
 } = {}) {
   const entries: Array<Record<string, unknown>> = [];
 
@@ -105,12 +106,15 @@ function createBillingHarness({
     tariff: {
       async findMany(args: { where: Record<string, unknown> }) {
         const dayTypes = ((args.where.dayType as { in?: string[] } | undefined)?.in) ?? [];
-        return tariffs.filter((tariff) => dayTypes.includes(tariff.dayType));
+        const requireActive = args.where.isActive === true;
+        return tariffs.filter(
+          (tariff) => dayTypes.includes(tariff.dayType) && (!requireActive || tariff.isActive !== false),
+        );
       },
     },
     holidayPeriod: {
-      async findFirst() {
-        return holidays[0] ?? null;
+      async findMany() {
+        return holidays;
       },
     },
     billingEntry: {
@@ -185,6 +189,91 @@ test("resolves tariffs by room, tariff group and usage type", async () => {
   assert.equal(calculation.tariff?.id, "tariff-weekday");
   assert.equal(calculation.amount.toString(), "30");
   assert.equal(calculation.calculationType, "HOURLY");
+});
+
+test("public holidays fall back to the weekend tariff", async () => {
+  // 2026-06-10 ist ein Mittwoch; ein eintaegiger Feiertag deckt den Buchungstag ab.
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-weekday", dayType: "WEEKDAY", hourlyRate: new Prisma.Decimal(10) }),
+      makeTariff({ id: "tariff-weekend", dayType: "WEEKEND", hourlyRate: new Prisma.Decimal(30) }),
+    ],
+    holidays: [{ startsOn: new Date("2026-06-10T00:00:00Z"), endsOn: new Date("2026-06-11T00:00:00Z") }],
+  });
+
+  const calculation = await calculateBillingEntry("booking-1", harness.client as never);
+
+  assert.equal(calculation.tariff?.id, "tariff-weekend");
+  assert.equal(calculation.amount.toString(), "60");
+});
+
+test("an explicit holiday tariff beats the weekend fallback", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-weekend", dayType: "WEEKEND", hourlyRate: new Prisma.Decimal(30) }),
+      makeTariff({ id: "tariff-holiday", dayType: "HOLIDAY", hourlyRate: new Prisma.Decimal(40) }),
+    ],
+    holidays: [{ startsOn: new Date("2026-06-10T00:00:00Z"), endsOn: new Date("2026-06-11T00:00:00Z") }],
+  });
+
+  const calculation = await calculateBillingEntry("booking-1", harness.client as never);
+
+  assert.equal(calculation.tariff?.id, "tariff-holiday");
+  assert.equal(calculation.amount.toString(), "80");
+});
+
+test("multi-week school holidays keep the weekday tariff", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-weekday", dayType: "WEEKDAY", hourlyRate: new Prisma.Decimal(10) }),
+      makeTariff({ id: "tariff-weekend", dayType: "WEEKEND", hourlyRate: new Prisma.Decimal(30) }),
+    ],
+    holidays: [{ startsOn: new Date("2026-07-01T00:00:00Z"), endsOn: new Date("2026-09-01T00:00:00Z") }],
+  });
+
+  const calculation = await calculateBillingEntry("booking-1", harness.client as never);
+
+  assert.equal(calculation.tariff?.id, "tariff-weekday");
+  assert.equal(calculation.amount.toString(), "20");
+});
+
+test("specific tariffs beat wildcard tariffs for usage and organization type", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-wildcard", usageTypeId: null, organizationTypeId: null, hourlyRate: new Prisma.Decimal(12) }),
+      makeTariff({ id: "tariff-specific", hourlyRate: new Prisma.Decimal(15) }),
+    ],
+  });
+
+  const calculation = await calculateBillingEntry("booking-1", harness.client as never);
+
+  assert.equal(calculation.tariff?.id, "tariff-specific");
+  assert.equal(calculation.amount.toString(), "30");
+});
+
+test("wildcard and specific tariffs may overlap without conflict", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-wildcard", usageTypeId: null, organizationTypeId: null, dayType: "WEEKDAY", hourlyRate: new Prisma.Decimal(12) }),
+      makeTariff({ id: "tariff-specific", dayType: "WEEKDAY", hourlyRate: new Prisma.Decimal(15) }),
+    ],
+  });
+
+  await assert.doesNotReject(calculateBillingEntry("booking-1", harness.client as never));
+});
+
+test("deactivated tariffs are ignored during tariff resolution", async () => {
+  const harness = createBillingHarness({
+    tariffs: [
+      makeTariff({ id: "tariff-inactive", dayType: "WEEKDAY", isActive: false, hourlyRate: new Prisma.Decimal(15) }),
+      makeTariff({ id: "tariff-active", dayType: "ALL", hourlyRate: new Prisma.Decimal(10) }),
+    ],
+  });
+
+  const calculation = await calculateBillingEntry("booking-1", harness.client as never);
+
+  assert.equal(calculation.tariff?.id, "tariff-active");
+  assert.equal(calculation.amount.toString(), "20");
 });
 
 test("allows zero-euro tariffs", async () => {

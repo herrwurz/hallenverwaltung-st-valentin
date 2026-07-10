@@ -16,6 +16,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     "REPORT_NO_SHOW",
     "MANAGE_HANDOVERS",
     "MANAGE_ACCESS",
+    "MANAGE_TARIFFS",
   ]);
   const [
     canManageUsers,
@@ -30,6 +31,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     canReportNoShow,
     canManageHandovers,
     canManageAccess,
+    canManageTariffs,
   ] = await Promise.all([
     hasPermission(user.id, "MANAGE_USERS"),
     hasPermission(user.id, "VIEW_BOOKINGS"),
@@ -43,6 +45,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     hasPermission(user.id, "REPORT_NO_SHOW"),
     hasPermission(user.id, "MANAGE_HANDOVERS"),
     hasPermission(user.id, "MANAGE_ACCESS"),
+    hasPermission(user.id, "MANAGE_TARIFFS"),
   ]);
 
   const navigationItems = [
@@ -58,6 +61,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           { href: "/admin/usage-types", label: "Nutzungstypen", groupLabel: "Stammdaten" },
         ]
       : []),
+    ...(canManageTariffs ? [{ href: "/admin/tariffs", label: "Tarife", groupLabel: "Stammdaten" }] : []),
     ...(canViewBookings || canApproveBookings || canRejectBookings
       ? [
           { href: "/admin/bookings", label: "Buchungsanträge", groupLabel: "Buchungen" },

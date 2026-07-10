@@ -1,9 +1,16 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+
+const rowHintColumn = {
+  id: "row-hint",
+  header: "",
+  cell: () => <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />,
+} as const;
 
 export type BuildingTableRow = {
   id: string;
@@ -91,6 +98,7 @@ const buildingColumns: ColumnDef<BuildingTableRow>[] = [
       </Badge>
     ),
   },
+  rowHintColumn,
 ];
 
 const roomColumns: ColumnDef<RoomTableRow>[] = [
@@ -128,6 +136,7 @@ const roomColumns: ColumnDef<RoomTableRow>[] = [
     header: "Öffnungszeit",
     cell: ({ row }) => `${row.original.openingTime} bis ${row.original.closingTime}`,
   },
+  rowHintColumn,
 ];
 
 const organizationColumns: ColumnDef<OrganizationTableRow>[] = [
@@ -151,18 +160,40 @@ const organizationColumns: ColumnDef<OrganizationTableRow>[] = [
     ),
   },
   { accessorKey: "blockedReason", header: "Sperrgrund" },
+  rowHintColumn,
 ];
 
-export function BuildingsTable({ rows }: { rows: BuildingTableRow[] }) {
-  return <DataTable columns={buildingColumns} data={rows} searchPlaceholder="Gebäude filtern..." />;
+export function BuildingsTable({
+  rows,
+  onRowClick,
+}: {
+  rows: BuildingTableRow[];
+  onRowClick?: (row: BuildingTableRow) => void;
+}) {
+  return (
+    <DataTable columns={buildingColumns} data={rows} searchPlaceholder="Gebäude filtern..." onRowClick={onRowClick} />
+  );
 }
 
-export function RoomsTable({ rows }: { rows: RoomTableRow[] }) {
-  return <DataTable columns={roomColumns} data={rows} searchPlaceholder="Räume filtern..." />;
+export function RoomsTable({ rows, onRowClick }: { rows: RoomTableRow[]; onRowClick?: (row: RoomTableRow) => void }) {
+  return <DataTable columns={roomColumns} data={rows} searchPlaceholder="Räume filtern..." onRowClick={onRowClick} />;
 }
 
-export function OrganizationsTable({ rows }: { rows: OrganizationTableRow[] }) {
-  return <DataTable columns={organizationColumns} data={rows} searchPlaceholder="Organisationen filtern..." />;
+export function OrganizationsTable({
+  rows,
+  onRowClick,
+}: {
+  rows: OrganizationTableRow[];
+  onRowClick?: (row: OrganizationTableRow) => void;
+}) {
+  return (
+    <DataTable
+      columns={organizationColumns}
+      data={rows}
+      searchPlaceholder="Organisationen filtern..."
+      onRowClick={onRowClick}
+    />
+  );
 }
 
 const usageTypeColumns: ColumnDef<UsageTypeTableRow>[] = [
@@ -200,8 +231,17 @@ const usageTypeColumns: ColumnDef<UsageTypeTableRow>[] = [
       </Badge>
     ),
   },
+  rowHintColumn,
 ];
 
-export function UsageTypesTable({ rows }: { rows: UsageTypeTableRow[] }) {
-  return <DataTable columns={usageTypeColumns} data={rows} searchPlaceholder="Nutzungstypen filtern..." />;
+export function UsageTypesTable({
+  rows,
+  onRowClick,
+}: {
+  rows: UsageTypeTableRow[];
+  onRowClick?: (row: UsageTypeTableRow) => void;
+}) {
+  return (
+    <DataTable columns={usageTypeColumns} data={rows} searchPlaceholder="Nutzungstypen filtern..." onRowClick={onRowClick} />
+  );
 }

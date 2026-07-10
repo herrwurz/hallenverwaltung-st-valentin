@@ -1,6 +1,7 @@
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { sendAccountActivationEmail } from "@/lib/services/account-activation-service";
 import {
   processPendingNotifications,
   queueUserAccountNotification,
@@ -71,10 +72,6 @@ export async function saveUser(input: unknown, actorUserId: string) {
         select: { isActive: true },
       })
     : null;
-
-  if (!data.id && !password) {
-    throw new Error("Neue Benutzer benötigen ein Passwort.");
-  }
 
   if (password && password.length < 12) {
     throw new Error("Das Passwort muss mindestens 12 Zeichen enthalten.");
@@ -243,8 +240,12 @@ export async function saveUser(input: unknown, actorUserId: string) {
 
   try {
     if (!data.id) {
-      await queueUserAccountNotification(savedUser.id, "USER_ACCOUNT_CREATED", "Das Passwort wird aus Sicherheitsgründen nicht per E-Mail versendet.");
-      await processPendingNotifications();
+      if (password) {
+        await queueUserAccountNotification(savedUser.id, "USER_ACCOUNT_CREATED", "Das Passwort wird aus Sicherheitsgründen nicht per E-Mail versendet.");
+        await processPendingNotifications();
+      } else {
+        await sendAccountActivationEmail(savedUser.id, prisma);
+      }
     } else if (existingUser?.isActive && !data.isActive) {
       await queueUserAccountNotification(savedUser.id, "USER_ACCOUNT_DEACTIVATED", "Das Konto wurde durch die Verwaltung deaktiviert.");
       await processPendingNotifications();
