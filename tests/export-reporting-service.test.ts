@@ -209,6 +209,36 @@ test("export can mark open entries as exported", async () => {
   assert.equal(harness.audit.length, 1);
 });
 
+test("PDF export paginates instead of silently truncating large reports", async () => {
+  const manyRecords = Array.from({ length: 40 }, (_, index) =>
+    makeBillingRecord({
+      id: `billing-${index}`,
+      organization: { name: `Verein Nr ${index}` },
+      booking: {
+        ...makeBillingRecord().booking,
+        id: `booking-${index}`,
+        title: `Training ${index}`,
+      },
+    }),
+  );
+  const harness = createExportHarness(manyRecords);
+
+  const result = await exportBillingPdf(
+    { periodStart, periodEnd, actorUserId: "admin" },
+    harness.client as never,
+    { canExport: true },
+  );
+
+  const pdf = result.content.toString("utf8");
+  // 40 Buchungen x 2 Zeilen = 80 Inhaltszeilen > 45 Zeilen/Seite -> mindestens 2 Seiten.
+  assert.match(pdf, /Seite 1 von 2/);
+  assert.match(pdf, /Seite 2 von 2/);
+  assert.match(pdf, /Verein Nr 0/);
+  assert.match(pdf, /Verein Nr 39/);
+  assert.match(pdf, /Kids \[4 0 R 6 0 R\]/);
+  assert.match(pdf, /Count 2/);
+});
+
 test("zero-euro entries are present in exports", async () => {
   const harness = createExportHarness([
     makeBillingRecord({
