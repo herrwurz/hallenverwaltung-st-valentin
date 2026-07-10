@@ -31,7 +31,7 @@ Das auszufuellende Nachweisprotokoll liegt in `docs/go-live-evidence.md`.
 | Produktiver Admin-Initialbenutzer angelegt | offen |  |  |  |
 | Demo-Zugaenge in Produktion ausgeschlossen | offen |  |  |  |
 | SMTP gegen echten Server getestet | offen | Admin-Testmail unter `/admin/settings/mail` ist vorhanden. Die Benachrichtigungs-Queue wird unter `/admin/notifications` kontrolliert. Der Nachweis muss gegen den spaeteren echten SMTP-Server erfolgen. |  |  |
-| Worker-Betrieb aktiv und protokolliert | offen | Am 09.07.2026 verifiziert: Auf dem Testserver (Coolify) laeuft nur der `web`-Container, kein separater `worker`-Container aus `docker-compose.production.yml`. Dadurch werden PENDING/FAILED-Benachrichtigungen und ablaufende Wartelistenangebote nicht automatisch verarbeitet, nur was direkt synchron beim Anlegen (z.B. Portal-Buchung) oder manuell unter Admin -> Benachrichtigungs-Queue ausgeloest wird. |  |  |
+| Worker-Betrieb aktiv und protokolliert | erledigt (Testserver) | Ursache am 09.07.2026 gefunden: Coolify deployt `docker-compose.yml`, nicht `docker-compose.production.yml` - diese Datei hatte keinen `worker`-Service. `worker`-Dienst zu `docker-compose.yml` ergaenzt (300s-Schleife). Am 10.07.2026 auf hallenverwaltung.hofreither.at deployt und verifiziert: `worker`-Container laeuft, erster Durchlauf protokolliert SUCCESS. Fuer den spaeteren Gemeinde-Server muss derselbe Nachweis dort erneut erbracht werden. | Claude | 2026-07-10 |
 | Backup-Routine eingerichtet | offen |  |  |  |
 | Restore-Probe erfolgreich dokumentiert | offen |  |  |  |
 | Monitoring/Alerting mindestens organisatorisch geregelt | offen |  |  |  |
