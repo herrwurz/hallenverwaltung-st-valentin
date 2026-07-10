@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { BuildingRoomSelect } from "@/components/building-room-select";
+import { ModalFormActions } from "@/components/dialog-form-actions";
 import { FormActions } from "@/components/form-actions";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
 
@@ -32,6 +33,7 @@ type SeriesRequestFormProps = {
   buildings: BuildingOption[];
   usageTypes: UsageTypeOption[];
   inputClassName: string;
+  inModal?: boolean;
 };
 
 const weekdays = [
@@ -243,6 +245,7 @@ export function SeriesRequestForm({
   buildings,
   usageTypes,
   inputClassName,
+  inModal = false,
 }: SeriesRequestFormProps) {
   const [recurrenceType, setRecurrenceType] = useState("WEEKLY");
   const [interval, setInterval] = useState(1);
@@ -587,7 +590,11 @@ export function SeriesRequestForm({
         )}
       </section>
 
-      <FormActions submitLabel="Serienantrag absenden" cancelHref="/portal" />
+      {inModal ? (
+        <ModalFormActions submitLabel="Serienantrag absenden" />
+      ) : (
+        <FormActions submitLabel="Serienantrag absenden" cancelHref="/portal" />
+      )}
     </form>
   );
 }

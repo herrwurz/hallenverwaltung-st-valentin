@@ -52,11 +52,12 @@ export async function createBookingRequestAction(formData: FormData) {
   }
 
   revalidatePath("/portal/bookings");
+  // "ts" ist ein eindeutiger Erfolgsmarker, ueber den der Antrags-Dialog clientseitig schliesst.
   const feedback = errorMessage
     ? `error=${encodeURIComponent(errorMessage)}`
     : warningMessage
-      ? `saved=1&warning=${encodeURIComponent(warningMessage)}`
-      : "saved=1";
+      ? `saved=1&warning=${encodeURIComponent(warningMessage)}&ts=${Date.now()}`
+      : `saved=1&ts=${Date.now()}`;
   redirect(`/portal/bookings?${feedback}`);
 }
 
@@ -114,8 +115,8 @@ export async function createBookingSeriesRequestAction(formData: FormData) {
   const feedback = errorMessage
     ? `error=${encodeURIComponent(errorMessage)}`
     : warningMessage
-      ? `seriesSaved=1&warning=${encodeURIComponent(warningMessage)}`
-      : "seriesSaved=1";
+      ? `seriesSaved=1&warning=${encodeURIComponent(warningMessage)}&ts=${Date.now()}`
+      : `seriesSaved=1&ts=${Date.now()}`;
   redirect(`/portal/bookings?${feedback}`);
 }
 
@@ -131,7 +132,7 @@ export async function cancelOwnBookingRequestAction(formData: FormData) {
   }
 
   revalidatePath("/portal/bookings");
-  redirect(`/portal/bookings?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "cancelled=1"}`);
+  redirect(`/portal/bookings?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `cancelled=1&ts=${Date.now()}`}`);
 }
 
 export async function createMoveChangeRequestAction(formData: FormData) {
@@ -154,5 +155,5 @@ export async function createMoveChangeRequestAction(formData: FormData) {
   }
 
   revalidatePath("/portal/bookings");
-  redirect(`/portal/bookings?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : "changeRequested=1"}`);
+  redirect(`/portal/bookings?${errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `changeRequested=1&ts=${Date.now()}`}`);
 }

@@ -5,10 +5,11 @@ import test from "node:test";
 // ── Serienantragsseite ─────────────────────────────────────────────────────────
 
 test("series page: enthält Genehmigungsformulare für offene Serien", () => {
-  const source = readFileSync("app/admin/series/page.tsx", "utf8");
-  assert.match(source, /approveSeriesFromSeriesPageAction/, "Seite muss Genehmigungs-Action einbinden");
-  assert.match(source, /rejectSeriesFromSeriesPageAction/, "Seite muss Ablehnungs-Action einbinden");
-  assert.match(source, /markSeriesInReviewFromSeriesPageAction/, "Seite muss In-Prüfung-Action einbinden");
+  // Die Entscheidungs-UI lebt seit dem Modal-Umbau in components/series-manager.tsx.
+  const source = readFileSync("components/series-manager.tsx", "utf8");
+  assert.match(source, /approveSeriesFromSeriesPageAction/, "Manager muss Genehmigungs-Action einbinden");
+  assert.match(source, /rejectSeriesFromSeriesPageAction/, "Manager muss Ablehnungs-Action einbinden");
+  assert.match(source, /markSeriesInReviewFromSeriesPageAction/, "Manager muss In-Prüfung-Action einbinden");
 });
 
 test("series page: Genehmigung erfordert APPROVE_BOOKING-Berechtigung", () => {
@@ -20,17 +21,25 @@ test("series page: Genehmigung erfordert APPROVE_BOOKING-Berechtigung", () => {
 });
 
 test("series page: zeigt nur Serien mit offenen Terminen im Aktionsbereich", () => {
-  const source = readFileSync("app/admin/series/page.tsx", "utf8");
-  assert.match(source, /openSeries/, "Seite muss offene Serien filtern");
+  // Seite zaehlt REQUESTED/IN_REVIEW, der Manager blendet die Aktionen nur bei offenen Terminen ein.
+  const page = readFileSync("app/admin/series/page.tsx", "utf8");
+  const manager = readFileSync("components/series-manager.tsx", "utf8");
+  assert.match(manager, /openSeries/, "Manager muss offene Serien filtern");
   assert.match(
-    source,
-    /REQUESTED.*IN_REVIEW|IN_REVIEW.*REQUESTED/,
+    page,
+    /REQUESTED[\s\S]*IN_REVIEW|IN_REVIEW[\s\S]*REQUESTED/,
     "Filter muss REQUESTED und IN_REVIEW-Status berücksichtigen",
+  );
+  assert.match(
+    manager,
+    /requestedCount \+ (selectedItem|item)\.inReviewCount > 0|requestedCount \+ [\w.]*inReviewCount > 0/,
+    "Aktionen nur bei offenen Terminen",
   );
 });
 
 test("series page: Ablehnen-Formular hat required-Begründung", () => {
-  const source = readFileSync("app/admin/series/page.tsx", "utf8");
+  // Die Entscheidungs-UI lebt seit dem Modal-Umbau in components/series-manager.tsx.
+  const source = readFileSync("components/series-manager.tsx", "utf8");
   // Ablehnen-Textarea muss required sein
   assert.match(source, /rejectSeriesFromSeriesPageAction[\s\S]{0,500}required/, "Ablehnungsformular muss required-Begründung erzwingen");
 });

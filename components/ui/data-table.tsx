@@ -20,6 +20,7 @@ type DataTableProps<TData, TValue> = {
   data: TData[];
   searchPlaceholder?: string;
   onRowClick?: (row: TData) => void;
+  rowClassName?: (row: TData) => string | undefined;
 };
 
 export function DataTable<TData, TValue>({
@@ -27,6 +28,7 @@ export function DataTable<TData, TValue>({
   data,
   searchPlaceholder = "Suchen...",
   onRowClick,
+  rowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -73,7 +75,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-                  className={onRowClick ? "cursor-pointer" : undefined}
+                  className={[onRowClick ? "cursor-pointer" : undefined, rowClassName?.(row.original)].filter(Boolean).join(" ") || undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>

@@ -49,7 +49,8 @@ export type SeriesTableRow = {
   organization: string;
   room: string;
   period: string;
-  occurrences: string;
+  occurrenceCount: number;
+  openCount: number;
 };
 
 const documentColumns: ColumnDef<DocumentTableRow>[] = [
@@ -125,7 +126,16 @@ const seriesColumns: ColumnDef<SeriesTableRow>[] = [
   { accessorKey: "organization", header: "Organisation" },
   { accessorKey: "room", header: "Gebäude / Raum" },
   { accessorKey: "period", header: "Zeitraum" },
-  { accessorKey: "occurrences", header: "Einzeltermine" },
+  {
+    accessorKey: "occurrenceCount",
+    header: "Einzeltermine",
+    cell: ({ row }) => (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Badge variant="outline">{row.original.occurrenceCount} Termine</Badge>
+        {row.original.openCount > 0 ? <Badge variant="warning">{row.original.openCount} offen</Badge> : null}
+      </div>
+    ),
+  },
 ];
 
 export function DocumentsDataTable({ rows, portal = false }: { rows: DocumentTableRow[]; portal?: boolean }) {
@@ -147,6 +157,22 @@ export function SystemJobsDataTable({ rows }: { rows: SystemJobTableRow[] }) {
   return <DataTable columns={systemJobColumns} data={rows} searchPlaceholder="Jobläufe filtern..." />;
 }
 
-export function SeriesDataTable({ rows }: { rows: SeriesTableRow[] }) {
-  return <DataTable columns={seriesColumns} data={rows} searchPlaceholder="Serien filtern..." />;
+export function SeriesDataTable({
+  rows,
+  onRowClick,
+  rowClassName,
+}: {
+  rows: SeriesTableRow[];
+  onRowClick?: (row: SeriesTableRow) => void;
+  rowClassName?: (row: SeriesTableRow) => string | undefined;
+}) {
+  return (
+    <DataTable
+      columns={seriesColumns}
+      data={rows}
+      searchPlaceholder="Serien filtern..."
+      onRowClick={onRowClick}
+      rowClassName={rowClassName}
+    />
+  );
 }

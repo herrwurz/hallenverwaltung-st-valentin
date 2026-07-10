@@ -1,10 +1,12 @@
+import type { ReactNode } from "react";
 import { AppBackLink } from "@/components/app-back-link";
 import { AppFeedback } from "@/components/app-feedback";
 import { AreaShell } from "@/components/area-shell";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { BuildingRoomSelect } from "@/components/building-room-select";
-import { FormActions } from "@/components/form-actions";
-import { PortalBookingsTable, type PortalBookingTableRow } from "@/components/portal-bookings-table";
+import { ModalFormActions } from "@/components/dialog-form-actions";
+import { PortalBookingManager } from "@/components/portal-booking-manager";
+import type { PortalBookingTableRow } from "@/components/portal-bookings-table";
 import { SeriesRequestForm } from "@/components/series-request-form";
 import { SingleDayTimeRangeFields } from "@/components/single-day-time-range-fields";
 import { Button } from "@/components/ui/button";
@@ -59,13 +61,88 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
     endsAtLabel: dateFormatter.format(booking.endsAt),
     status: booking.status,
   }));
-  const approvedBookings = bookings.filter((booking) => booking.status === "APPROVED");
+
+  const noOrganizationHint = (
+    <p className="text-sm text-warning-foreground">
+      Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
+    </p>
+  );
+
+  // Detail-Inhalt je Buchung wird serverseitig gerendert und dem Client-Manager
+  // als React-Children uebergeben (Server Actions bleiben dadurch in der Page).
+  const detailContent: Record<string, ReactNode> = {};
+  for (const booking of bookings) {
+    const canCancel = booking.status === "REQUESTED" && booking.requestedByUserId === user.id;
+    const canMove = booking.status === "APPROVED";
+
+    detailContent[booking.id] = (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            {booking.organization.name} | {booking.room.building.name} - {booking.room.name} | {booking.usageType.name}
+          </p>
+          <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm leading-none ${getBookingStatusBadgeClass(booking.status)}`}>
+            {getBookingStatusLabel(booking.status)}
+          </span>
+        </div>
+        <p className="text-sm font-medium">
+          {dateFormatter.format(booking.startsAt)} bis {dateFormatter.format(booking.endsAt)}
+        </p>
+
+        {canCancel ? (
+          <form action={cancelOwnBookingRequestAction} className="rounded-xl border border-rose-500/20 bg-muted/40 p-4">
+            <input type="hidden" name="bookingId" value={booking.id} />
+            <p className="text-sm text-muted-foreground">Der eigene beantragte Termin kann storniert werden.</p>
+            <Button variant="destructive" size="sm" className="mt-3">
+              Antrag stornieren
+            </Button>
+          </form>
+        ) : null}
+
+        {canMove ? (
+          <form action={createMoveChangeRequestAction} className="grid gap-4 rounded-xl border border-border bg-muted/40 p-4 sm:grid-cols-2">
+            <input type="hidden" name="bookingId" value={booking.id} />
+            <p className="text-sm font-medium sm:col-span-2">Verschiebung beantragen</p>
+            <BuildingRoomSelect
+              buildings={options.buildings}
+              roomName="newRoomId"
+              defaultRoomId={booking.roomId}
+              roomLabel="Neuer Raum"
+              inputClassName={inputClass}
+            />
+            <SingleDayTimeRangeFields
+              startName="newStartAt"
+              endName="newEndAt"
+              startLabel="Neuer Beginn"
+              endLabel="Neues Ende"
+              hint="Verschobene Termine enden am selben Tag wie der neue Beginn."
+              inputClassName={inputClass}
+            />
+            <label className="text-sm font-medium">
+              Grund
+              <input name="reason" required maxLength={1000} className={inputClass} />
+            </label>
+            <div className="sm:col-span-2">
+              <ModalFormActions submitLabel="Verschiebung beantragen" />
+            </div>
+          </form>
+        ) : null}
+
+        {!canCancel && !canMove ? (
+          <p className="rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground">
+            Für diesen Antrag sind aktuell keine Aktionen möglich. Beantragte eigene Termine können storniert werden,
+            genehmigte Termine erhalten einen Verschiebungsantrag.
+          </p>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <AreaShell
       eyebrow="Portal"
       title="Buchungsanträge"
-      description="Neue Einzeltermine beantragen und Anträge Ihrer Organisationen einsehen."
+      description="Neue Einzeltermine oder Serien beantragen und Anträge Ihrer Organisationen einsehen. Ein Klick auf eine Zeile öffnet Details und Aktionen."
       userName={user.name}
     >
       <div className="mt-8 flex items-center justify-between">
@@ -83,16 +160,13 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Neuer Buchungsantrag</CardTitle>
-          <CardDescription>Einzeltermin mit Organisation, Raum, Nutzungstyp und Zeitraum beantragen.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {options.organizations.length === 0 ? (
-            <p className="text-sm text-warning-foreground">
-              Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
-            </p>
+      <PortalBookingManager
+        rows={bookingRows}
+        detailContent={detailContent}
+        errorText={params.error}
+        newBookingForm={
+          options.organizations.length === 0 ? (
+            noOrganizationHint
           ) : (
             <BookingRequestForm
               action={createBookingRequestAction}
@@ -100,111 +174,31 @@ export default async function PortalBookingsPage({ searchParams }: PageProps) {
               buildings={options.buildings}
               usageTypes={options.usageTypes}
               inputClassName={inputClass}
+              inModal
             />
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Neuer Serienantrag</CardTitle>
-          <CardDescription>
-            Erzeugt täglich, wöchentlich, monatlich oder jährlich wiederkehrende Einzeltermine — auch mehrtägig oder
-            ganztägig. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden übersprungen.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {options.organizations.length === 0 ? (
-            <p className="text-sm text-warning-foreground">
-              Keine aktive, buchungsberechtigte Organisation ist Ihrem Benutzer zugeordnet.
-            </p>
+          )
+        }
+        newSeriesForm={
+          options.organizations.length === 0 ? (
+            noOrganizationHint
           ) : (
-            <SeriesRequestForm
-              action={createBookingSeriesRequestAction}
-              organizations={options.organizations}
-              buildings={options.buildings}
-              usageTypes={options.usageTypes}
-              inputClassName={inputClass}
-            />
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Anträge Ihrer Organisationen</CardTitle>
-          <CardDescription>Filterbare Übersicht aller eigenen Buchungsanträge.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {bookings.length === 0 ? (
-            <p className="rounded-xl border border-border bg-muted p-5 text-sm text-muted-foreground">
-              Noch keine Buchungsanträge vorhanden.
-            </p>
-          ) : (
-            <PortalBookingsTable rows={bookingRows} />
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Stornieren und Verschieben</CardTitle>
-          <CardDescription>
-            Beantragte eigene Termine können storniert werden. Genehmigte Termine erhalten einen Verschiebungsantrag.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {bookings.filter((booking) => booking.status === "REQUESTED" && booking.requestedByUserId === user.id).map((booking) => (
-            <form key={booking.id} action={cancelOwnBookingRequestAction} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-4">
-              <input type="hidden" name="bookingId" value={booking.id} />
-              <div>
-                <p className="font-medium">{booking.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {booking.room.building.name} - {booking.room.name} | {dateFormatter.format(booking.startsAt)}
-                </p>
-              </div>
-              <Button variant="destructive" size="sm">Antrag stornieren</Button>
-            </form>
-          ))}
-          {approvedBookings.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Keine genehmigten Termine für Verschiebungsanträge vorhanden.</p>
-          ) : (
-            approvedBookings.map((booking) => (
-              <form key={booking.id} action={createMoveChangeRequestAction} className="grid gap-4 rounded-xl border border-border bg-card p-4 lg:grid-cols-2">
-                <input type="hidden" name="bookingId" value={booking.id} />
-                <p className="text-sm font-medium lg:col-span-2">
-                  Verschiebung beantragen: {booking.title}{" "}
-                  <span className={`ml-2 rounded-full px-2 py-1 text-xs ${getBookingStatusBadgeClass(booking.status)}`}>
-                    {getBookingStatusLabel(booking.status)}
-                  </span>
-                </p>
-                <BuildingRoomSelect
-                  buildings={options.buildings}
-                  roomName="newRoomId"
-                  defaultRoomId={booking.roomId}
-                  roomLabel="Neuer Raum"
-                  inputClassName={inputClass}
-                />
-                <SingleDayTimeRangeFields
-                  startName="newStartAt"
-                  endName="newEndAt"
-                  startLabel="Neuer Beginn"
-                  endLabel="Neues Ende"
-                  hint="Verschobene Termine enden am selben Tag wie der neue Beginn."
-                  inputClassName={inputClass}
-                />
-                <label className="text-sm font-medium">
-                  Grund
-                  <input name="reason" required maxLength={1000} className={inputClass} />
-                </label>
-                <div className="lg:col-span-2">
-                  <FormActions submitLabel="Verschiebung beantragen" cancelHref="/portal/bookings" />
-                </div>
-              </form>
-            ))
-          )}
-        </CardContent>
-      </Card>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Erzeugt täglich, wöchentlich, monatlich oder jährlich wiederkehrende Einzeltermine — auch mehrtägig
+                oder ganztägig. Geschlossene Ferienzeiten und angegebene Ausnahmedaten werden übersprungen.
+              </p>
+              <SeriesRequestForm
+                action={createBookingSeriesRequestAction}
+                organizations={options.organizations}
+                buildings={options.buildings}
+                usageTypes={options.usageTypes}
+                inputClassName={inputClass}
+                inModal
+              />
+            </div>
+          )
+        }
+      />
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
         <Card>

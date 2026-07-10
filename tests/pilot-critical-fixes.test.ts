@@ -61,14 +61,15 @@ test("phase 34 admin booking filters include all organizations buildings and roo
 });
 
 test("phase 34 approval can explicitly override closure conflicts with a required comment", () => {
-  const adminBookings = readFileSync("app/admin/bookings/page.tsx", "utf8");
+  // Die Entscheidungs-UI lebt seit dem Modal-Umbau in components/booking-manager.tsx.
+  const bookingManager = readFileSync("components/booking-manager.tsx", "utf8");
   const adminActions = readFileSync("app/admin/bookings/actions.ts", "utf8");
   const approvalService = readFileSync("lib/services/booking-approval-service.ts", "utf8");
   const transitionService = readFileSync("lib/services/booking-transition-service.ts", "utf8");
 
-  assert.match(adminBookings, /allowClosureOverride/);
-  assert.match(adminBookings, /Sperre bewusst als Ausnahme genehmigen/);
-  assert.match(adminBookings, /Kommentar ist erforderlich/);
+  assert.match(bookingManager, /allowClosureOverride/);
+  assert.match(bookingManager, /Sperre bewusst als Ausnahme genehmigen/);
+  assert.match(bookingManager, /Kommentar ist erforderlich/);
   assert.match(adminActions, /allowClosureOverride: z\.boolean\(\)\.default\(false\)/);
   assert.match(adminActions, /formData\.get\("allowClosureOverride"\) === "on"/);
   assert.match(approvalService, /allowClosureOverride/);
@@ -432,7 +433,8 @@ test("phase 34 closures can be edited and deleted through protected server actio
 test("phase 27.1 series approval actions use the central booking workflow", () => {
   const approvalService = readFileSync("lib/services/booking-approval-service.ts", "utf8");
   const actions = readFileSync("app/admin/bookings/actions.ts", "utf8");
-  const page = readFileSync("app/admin/bookings/page.tsx", "utf8");
+  // Die Serien-Entscheidungs-UI lebt seit dem Modal-Umbau in components/booking-manager.tsx.
+  const page = readFileSync("components/booking-manager.tsx", "utf8");
 
   assert.match(approvalService, /markSeriesInReviewForAdmin/);
   assert.match(approvalService, /approveSeriesForAdmin/);

@@ -77,7 +77,10 @@ async function executeAction(
     redirect(`/admin/series?error=${encodeURIComponent(errorMessage)}`);
   }
 
-  redirect(`/admin/series?${successParam}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}&seriesId=${encodeURIComponent(seriesId)}`);
+  // "ts" ist ein eindeutiger Erfolgsmarker, ueber den der Serien-Dialog clientseitig schliesst.
+  redirect(
+    `/admin/series?${successParam}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}&seriesId=${encodeURIComponent(seriesId)}&ts=${Date.now()}`,
+  );
 }
 
 export async function markSeriesInReviewFromSeriesPageAction(formData: FormData) {

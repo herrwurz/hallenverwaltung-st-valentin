@@ -66,6 +66,12 @@ const columns: ColumnDef<PortalBookingTableRow>[] = [
   },
 ];
 
-export function PortalBookingsTable({ rows }: { rows: PortalBookingTableRow[] }) {
-  return <DataTable columns={columns} data={rows} searchPlaceholder="Buchungsanträge filtern..." />;
+export function PortalBookingsTable({
+  rows,
+  onRowClick,
+}: {
+  rows: PortalBookingTableRow[];
+  onRowClick?: (row: PortalBookingTableRow) => void;
+}) {
+  return <DataTable columns={columns} data={rows} searchPlaceholder="Buchungsanträge filtern..." onRowClick={onRowClick} />;
 }

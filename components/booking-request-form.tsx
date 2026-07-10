@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BuildingRoomSelect } from "@/components/building-room-select";
+import { ModalFormActions } from "@/components/dialog-form-actions";
 import { FormActions } from "@/components/form-actions";
 import { PortalOrganizationField } from "@/components/portal-organization-field";
 import { SingleDayTimeRangeFields } from "@/components/single-day-time-range-fields";
@@ -33,6 +34,7 @@ type BookingRequestFormProps = {
   buildings: BuildingOption[];
   usageTypes: UsageTypeOption[];
   inputClassName: string;
+  inModal?: boolean;
 };
 
 export function BookingRequestForm({
@@ -41,6 +43,7 @@ export function BookingRequestForm({
   buildings,
   usageTypes,
   inputClassName,
+  inModal = false,
 }: BookingRequestFormProps) {
   const [allDay, setAllDay] = useState(false);
   const [startDate, setStartDate] = useState("");
@@ -138,7 +141,11 @@ export function BookingRequestForm({
         <textarea name="description" rows={3} maxLength={1000} className={inputClassName} />
       </label>
       <div className="lg:col-span-2">
-        <FormActions submitLabel="Antrag absenden" cancelHref="/portal" />
+        {inModal ? (
+          <ModalFormActions submitLabel="Antrag absenden" />
+        ) : (
+          <FormActions submitLabel="Antrag absenden" cancelHref="/portal" />
+        )}
       </div>
     </form>
   );

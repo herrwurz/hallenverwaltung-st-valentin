@@ -124,7 +124,8 @@ async function executeBookingWorkflowAction(
       buildingId: input.buildingId,
       roomId: input.roomId,
     },
-    errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=1`,
+    // "ts" ist ein eindeutiger Erfolgsmarker, ueber den der Buchungs-Dialog clientseitig schliesst.
+    errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=1&ts=${Date.now()}`,
   );
 }
 
@@ -184,7 +185,9 @@ async function executeSeriesWorkflowAction(
       buildingId: input.buildingId,
       roomId: input.roomId,
     },
-    errorMessage ? `error=${encodeURIComponent(errorMessage)}` : `${successFlag}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}`,
+    errorMessage
+      ? `error=${encodeURIComponent(errorMessage)}`
+      : `${successFlag}=${encodeURIComponent(resultMessage ?? "Serie wurde bearbeitet.")}&ts=${Date.now()}`,
   );
 }
 
