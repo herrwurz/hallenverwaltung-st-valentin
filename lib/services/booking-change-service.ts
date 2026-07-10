@@ -456,6 +456,16 @@ export async function approveChangeRequest(requestId: string, actorUserId: strin
       },
     });
 
+    // Ein noch nicht exportierter Abrechnungseintrag fuer den alten Termin ist nur ein
+    // internes Vorbereitungsartefakt und bezieht sich auf einen Termin, der es nicht mehr
+    // gibt - er wird geloescht. Der neue Ersatztermin bekommt bei der naechsten
+    // Abrechnungslaeufe automatisch einen eigenen Eintrag. Bereits exportierte/abgerechnete
+    // Eintraege bleiben bewusst unangetastet (gleiche Unveraenderlichkeit wie sonst im
+    // Abrechnungsmodul) und muessen im Ausnahmefall manuell durch die Verwaltung geklaert werden.
+    await transaction.billingEntry.deleteMany({
+      where: { bookingId: request.bookingId, status: "OPEN" },
+    });
+
     const replacement = await transaction.booking.create({
       data: {
         organizationId: request.booking.organizationId,

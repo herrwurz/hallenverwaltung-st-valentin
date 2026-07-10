@@ -259,21 +259,52 @@ function escapePdfText(value: string) {
   return value.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
 }
 
+// Zeilen pro Seite fuer den Inhalt (ohne die 3 Kopfzeilen Titel/Erstellt/Seite).
+// Ergibt sich aus der A4-Seitenhoehe (842pt), Startposition 790pt und 15pt Zeilenhoehe.
+const PDF_CONTENT_LINES_PER_PAGE = 45;
+
+function paginate<T>(items: T[], pageSize: number): T[][] {
+  if (items.length === 0) {
+    return [[]];
+  }
+
+  const pages: T[][] = [];
+  for (let offset = 0; offset < items.length; offset += pageSize) {
+    pages.push(items.slice(offset, offset + pageSize));
+  }
+  return pages;
+}
+
 function toPdfLines(title: string, sourceLines: string[]) {
-  const renderedLines = [
-    title,
-    `Erstellt: ${formatDateTime(new Date())}`,
-    "",
-    ...sourceLines,
-  ].slice(0, 48);
-  const text = renderedLines.map((line, index) => `BT /F1 10 Tf 50 ${790 - index * 15} Td (${escapePdfText(line)}) Tj ET`).join("\n");
-  const objects = [
+  const createdAt = `Erstellt: ${formatDateTime(new Date())}`;
+  const contentPages = paginate(sourceLines, PDF_CONTENT_LINES_PER_PAGE);
+  const pageCount = contentPages.length;
+
+  const objects: string[] = [
     "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj",
-    "2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj",
-    "3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj",
-    "4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj",
-    `5 0 obj << /Length ${Buffer.byteLength(text, "utf8")} >> stream\n${text}\nendstream endobj`,
+    "", // Platzhalter fuer die Pages-Wurzel, wird nach dem Aufbau der Kids-Liste ergaenzt.
+    "3 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj",
   ];
+  const pageObjectNumbers: number[] = [];
+
+  contentPages.forEach((linesOnPage, pageIndex) => {
+    const pageHeaderLines = pageCount > 1 ? [title, createdAt, `Seite ${pageIndex + 1} von ${pageCount}`] : [title, createdAt, ""];
+    const renderedLines = [...pageHeaderLines, ...linesOnPage];
+    const text = renderedLines
+      .map((line, index) => `BT /F1 10 Tf 50 ${790 - index * 15} Td (${escapePdfText(line)}) Tj ET`)
+      .join("\n");
+
+    const pageObjNum = 4 + pageIndex * 2;
+    const contentObjNum = pageObjNum + 1;
+    pageObjectNumbers.push(pageObjNum);
+
+    objects[pageObjNum - 1] =
+      `${pageObjNum} 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentObjNum} 0 R >> endobj`;
+    objects[contentObjNum - 1] = `${contentObjNum} 0 obj << /Length ${Buffer.byteLength(text, "utf8")} >> stream\n${text}\nendstream endobj`;
+  });
+
+  objects[1] = `2 0 obj << /Type /Pages /Kids [${pageObjectNumbers.map((num) => `${num} 0 R`).join(" ")}] /Count ${pageCount} >> endobj`;
+
   const header = "%PDF-1.4\n";
   let body = header;
   const offsets = [0];

@@ -50,8 +50,8 @@ Sie sollten aber vor einem breiteren Vereins-Pilot bewusst entschieden werden.
 | Semester-Vorauswahl fuer Serien | Umgesetzt fuer aktuelles Semester, Schuljahr/Saison bis 30. Juni und Kalenderjahr. | erledigt | Codex | 2026-06-10 |
 | Oesterreichische Ferien je Bundesland vordefinieren | Umgesetzt fuer gesetzliche Feiertage Oesterreich und Schulferien Niederoesterreich als importierbare Admin-Vorlagen. | erledigt | Codex | 2026-06-10 |
 | Tarife als eigenes Admin-Menue klaeren | Umgesetzt: eigenes Stammdaten-Menue /admin/tariffs mit Tarifgruppen, CRUD, Deaktivieren/Loeschen mit Abhaengigkeitspruefung und Rechtepruefung (MANAGE_TARIFFS). | erledigt | Claude | 2026-07-09 |
-| Abrechnungsmodul: Storno/Verschiebung nach Abrechnung | Ein bereits abgerechneter Termin behaelt bei spaeterer Stornierung/Verschiebung den alten Betrag/Zeitraum (kein Code aktualisiert `BillingEntry`). Fuehrt zu falschen Betraegen. Vor Echtbetrieb entscheiden. | offen |  |  |
-| Abrechnungsmodul: PDF-Export schneidet ab | Handgebauter PDF-Generator (`export-service.ts`) bricht bei 48 Zeilen ohne Warnung ab (~20-22 Buchungen). Datenverlustrisiko bei vollem Monat. | offen |  |  |
+| Abrechnungsmodul: Storno/Verschiebung nach Abrechnung | Behoben: `approveChangeRequest` loescht bei einer genehmigten Verschiebung einen noch offenen (nicht exportierten) `BillingEntry` der alten Buchung. Bereits exportierte/abgerechnete Eintraege bleiben bewusst unangetastet. End-to-end gegen echte lokale DB verifiziert. (Ein direktes Stornieren bereits genehmigter Buchungen existiert im Code ohnehin nicht - nur die Verschiebung war betroffen.) | erledigt | Claude | 2026-07-10 |
+| Abrechnungsmodul: PDF-Export schneidet ab | Behoben: `toPdfLines` in `export-service.ts` erzeugt jetzt echte Mehrseiten-PDFs (Pages-Objekt mit mehreren Kids statt nur einer Seite) und teilt die Inhaltszeilen in Bloecke zu 45 pro Seite auf, mit "Seite X von Y"-Kennzeichnung. Kein Datenverlust mehr bei vollem Monat. Test ergaenzt (40 Buchungen -> 2 Seiten, alle Datensaetze pruefbar enthalten). | erledigt | Claude | 2026-07-10 |
 
 ## Niedrige Punkte nach Version 1
 
